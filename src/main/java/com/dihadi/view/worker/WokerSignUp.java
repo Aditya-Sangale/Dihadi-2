@@ -12,7 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox; 
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -92,8 +92,9 @@ public class WokerSignUp {
         Label personalDetails = label("PERSONAL DETAILS",
                 "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:11px 16px;");
         Button skipTrial = new Button("SKIP FOR TRIAL");
-        skipTrial.setStyle("-fx-background-color:transparent;-fx-background-radius:12px;-fx-border-color:#735c00;-fx-border-radius:12px;"
-                + "-fx-text-fill:#735c00;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:10px 14px;-fx-cursor:hand;");
+        skipTrial.setStyle(
+                "-fx-background-color:transparent;-fx-background-radius:12px;-fx-border-color:#735c00;-fx-border-radius:12px;"
+                        + "-fx-text-fill:#735c00;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:10px 14px;-fx-cursor:hand;");
         skipTrial.setOnAction(event -> com.dihadi.view.AppNavigator.openFooterLink(
                 (javafx.stage.Stage) skipTrial.getScene().getWindow(), "Worker Categories"));
         Region headingSpacer = new Region();

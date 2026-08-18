@@ -1,12 +1,169 @@
 package com.dihadi.view.worker.Painter;
 
-import javafx.animation.*;import javafx.geometry.*;import javafx.scene.*;import javafx.scene.control.*;import javafx.scene.image.*;import javafx.scene.layout.*;import javafx.scene.shape.Rectangle;import javafx.util.Duration;
+import javafx.animation.*;
+import javafx.geometry.*;
+import javafx.scene.*;
+import javafx.scene.control.*;
+import javafx.scene.image.*;
+import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
-/** Painter jobs marketplace with a reference-style slider, filters, and Apply actions. */
+/**
+ * Painter jobs marketplace with a reference-style slider, filters, and Apply
+ * actions.
+ */
 public class PainterJobRole {
- private static final String[][] JOBS={{"Interior Painter","Pune, Maharashtra","₹950","01"},{"Wall Texture Painter","Mumbai, Maharashtra","₹1,100","02"},{"Industrial Painter","Nashik, Maharashtra","₹1,200","03"},{"Spray Painter","Bangalore, Karnataka","₹1,150","04"},{"Wood Polish Painter","New Delhi, Delhi","₹1,300","05"},{"Exterior Painter","Chennai, Tamil Nadu","₹1,000","06"}};private ImageView slide;private int index;
- public Scene getPainterJobRoleScene(Runnable back){Label eye=l("DIHADI WORK MARKETPLACE","-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#735c00;"),title=l("Painter Job Roles","-fx-font-family:'Georgia';-fx-font-size:40px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),quote=l("“Every finish tells a story. Find work that values your colour, care, and craftsmanship.”","-fx-font-family:'Georgia';-fx-font-size:19px;-fx-font-style:italic;-fx-text-fill:#4d4635;");quote.setWrapText(true);quote.setMaxWidth(390);VBox words=new VBox(14,eye,title,quote);words.setAlignment(Pos.CENTER);StackPane slider=slider();HBox heroRow=new HBox(34,slider,words);heroRow.setAlignment(Pos.CENTER);VBox hero=new VBox(heroRow);hero.setAlignment(Pos.CENTER);hero.setPadding(new Insets(28));hero.setStyle(card());ComboBox<String>state=c("Select state","Maharashtra","Karnataka","Tamil Nadu","Delhi"),city=c("Select city","Pune","Mumbai","Bangalore","New Delhi"),skill=c("Select painting skill","Interior","Exterior","Texture","Spray");HBox controls=new HBox(12,state,city,skill,o("Clear filters"),p("Find roles"));controls.setAlignment(Pos.CENTER);VBox filter=new VBox(14,l("Find a suitable job role for you","-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),controls);filter.setAlignment(Pos.CENTER);filter.setPadding(new Insets(22));filter.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;");FlowPane grid=new FlowPane(24,24);grid.setAlignment(Pos.CENTER);grid.setPrefWrapLength(1100);for(String[]j:JOBS)grid.getChildren().add(job(j));VBox content=new VBox(28,hero,filter,l("Available opportunities","-fx-font-family:'Georgia';-fx-font-size:29px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),grid);content.setAlignment(Pos.TOP_CENTER);content.setPadding(new Insets(30,36,42,36));StackPane canvas=new StackPane(content);canvas.setStyle("-fx-background-color:#f3e7ce;");ScrollPane scroll=new ScrollPane(canvas);scroll.setFitToWidth(true);scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");Button prev=o("← Back to skills");prev.setOnAction(e->{if(back!=null)back.run();});BorderPane page=new BorderPane(scroll);page.setBottom(prev);BorderPane.setMargin(prev,new Insets(14,60,14,60));page.setStyle("-fx-background-color:#f3e7ce;");return new Scene(page,1400,780);}
- private StackPane slider(){slide=img("/assets/images/worker/painter/skill-00.jpg",600,300);StackPane s=new StackPane(slide);s.setPrefSize(600,300);s.setStyle("-fx-background-color:#fff8f0;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;");Timeline t=new Timeline(new KeyFrame(Duration.seconds(3),e->{index=(index%6)+1;slide.setImage(load("/assets/images/worker/painter/skill-0"+index+".jpg"));}));t.setCycleCount(Timeline.INDEFINITE);t.play();return s;}
- private VBox job(String[]j){ImageView im=img("/assets/images/worker/painter/skill-"+j[3]+".jpg",316,178);Label n=l(j[0],"-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),loc=l("⌖  "+j[1],"-fx-font-size:13px;-fx-text-fill:#4d4635;"),w=l("Daily wage  "+j[2],"-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#735c00;");n.setAlignment(Pos.CENTER);n.setMaxWidth(Double.MAX_VALUE);Button a=p("Apply now");a.setMaxWidth(Double.MAX_VALUE);a.setOnAction(e->{a.setText("Applied ✓");a.setDisable(true);});VBox v=new VBox(13,im,n,loc,w,a);v.setAlignment(Pos.CENTER);v.setPadding(new Insets(14));v.setPrefSize(344,350);v.setStyle(card());return v;}
- private ImageView img(String path,double w,double h){ImageView v=new ImageView(load(path));v.setFitWidth(w);v.setFitHeight(h);v.setPreserveRatio(false);Rectangle r=new Rectangle(w,h);r.setArcWidth(24);r.setArcHeight(24);v.setClip(r);return v;}private Image load(String p){var r=getClass().getResource(p);return r==null?null:new Image(r.toExternalForm());}private ComboBox<String>c(String...x){ComboBox<String>b=new ComboBox<>();b.getItems().addAll(x);b.getSelectionModel().selectFirst();b.setPrefWidth(190);b.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#c6a15b;-fx-border-radius:12px;");return b;}private Label l(String t,String s){Label x=new Label(t);x.setStyle("-fx-font-family:'Segoe UI',sans-serif;"+s);return x;}private String card(){return "-fx-background-color:#fff8f0;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),18,0,0,6px);";}private Button p(String t){Button b=new Button(t);b.setStyle("-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:10px 20px;");return b;}private Button o(String t){Button b=new Button(t);b.setStyle("-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-padding:9px 18px;");return b;}
+    private static final String[][] JOBS = { { "Interior Painter", "Pune, Maharashtra", "₹950", "01" },
+            { "Wall Texture Painter", "Mumbai, Maharashtra", "₹1,100", "02" },
+            { "Industrial Painter", "Nashik, Maharashtra", "₹1,200", "03" },
+            { "Spray Painter", "Bangalore, Karnataka", "₹1,150", "04" },
+            { "Wood Polish Painter", "New Delhi, Delhi", "₹1,300", "05" },
+            { "Exterior Painter", "Chennai, Tamil Nadu", "₹1,000", "06" } };
+    private ImageView slide;
+    private int index;
+
+    public Scene getPainterJobRoleScene(Runnable back) {
+        Label eye = l("DIHADI WORK MARKETPLACE",
+                "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#735c00;"),
+                title = l("Painter Job Roles",
+                        "-fx-font-family:'Georgia';-fx-font-size:40px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
+                quote = l("“Every finish tells a story. Find work that values your colour, care, and craftsmanship.”",
+                        "-fx-font-family:'Georgia';-fx-font-size:19px;-fx-font-style:italic;-fx-text-fill:#4d4635;");
+        quote.setWrapText(true);
+        quote.setMaxWidth(390);
+        VBox words = new VBox(14, eye, title, quote);
+        words.setAlignment(Pos.CENTER);
+        StackPane slider = slider();
+        HBox heroRow = new HBox(34, slider, words);
+        heroRow.setAlignment(Pos.CENTER);
+        VBox hero = new VBox(heroRow);
+        hero.setAlignment(Pos.CENTER);
+        hero.setPadding(new Insets(28));
+        hero.setStyle(card());
+        ComboBox<String> state = c("Select state", "Maharashtra", "Karnataka", "Tamil Nadu", "Delhi"),
+                city = c("Select city", "Pune", "Mumbai", "Bangalore", "New Delhi"),
+                skill = c("Select painting skill", "Interior", "Exterior", "Texture", "Spray");
+        HBox controls = new HBox(12, state, city, skill, o("Clear filters"), p("Find roles"));
+        controls.setAlignment(Pos.CENTER);
+        VBox filter = new VBox(14,
+                l("Find a suitable job role for you", "-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
+                controls);
+        filter.setAlignment(Pos.CENTER);
+        filter.setPadding(new Insets(22));
+        filter.setStyle(
+                "-fx-background-color:#faf3e8;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;");
+        FlowPane grid = new FlowPane(24, 24);
+        grid.setAlignment(Pos.CENTER);
+        grid.setPrefWrapLength(1100);
+        for (String[] j : JOBS)
+            grid.getChildren().add(job(j));
+        VBox content = new VBox(28, hero, filter,
+                l("Available opportunities",
+                        "-fx-font-family:'Georgia';-fx-font-size:29px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
+                grid);
+        content.setAlignment(Pos.TOP_CENTER);
+        content.setPadding(new Insets(30, 36, 42, 36));
+        StackPane canvas = new StackPane(content);
+        canvas.setStyle("-fx-background-color:#f3e7ce;");
+        ScrollPane scroll = new ScrollPane(canvas);
+        scroll.setFitToWidth(true);
+        scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
+        Button prev = o("← Back to skills");
+        prev.setOnAction(e -> {
+            if (back != null)
+                back.run();
+        });
+        BorderPane page = new BorderPane(scroll);
+        page.setBottom(prev);
+        BorderPane.setMargin(prev, new Insets(14, 60, 14, 60));
+        page.setStyle("-fx-background-color:#f3e7ce;");
+        return new Scene(page, 1400, 780);
+    }
+
+    private StackPane slider() {
+        slide = img("/assets/images/worker/painter/skill-00.jpg", 600, 300);
+        StackPane s = new StackPane(slide);
+        s.setPrefSize(600, 300);
+        s.setStyle(
+                "-fx-background-color:#fff8f0;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;");
+        Timeline t = new Timeline(new KeyFrame(Duration.seconds(3), e -> {
+            index = (index % 6) + 1;
+            slide.setImage(load("/assets/images/worker/painter/skill-0" + index + ".jpg"));
+        }));
+        t.setCycleCount(Timeline.INDEFINITE);
+        t.play();
+        return s;
+    }
+
+    private VBox job(String[] j) {
+        ImageView im = img("/assets/images/worker/painter/skill-" + j[3] + ".jpg", 316, 178);
+        Label n = l(j[0], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
+                loc = l("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
+                w = l("Daily wage  " + j[2], "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        n.setAlignment(Pos.CENTER);
+        n.setMaxWidth(Double.MAX_VALUE);
+        Button a = p("Apply now");
+        a.setMaxWidth(Double.MAX_VALUE);
+        a.setOnAction(e -> {
+            a.setText("Applied ✓");
+            a.setDisable(true);
+        });
+        VBox v = new VBox(13, im, n, loc, w, a);
+        v.setAlignment(Pos.CENTER);
+        v.setPadding(new Insets(14));
+        v.setPrefSize(344, 350);
+        v.setStyle(card());
+        return v;
+    }
+
+    private ImageView img(String path, double w, double h) {
+        ImageView v = new ImageView(load(path));
+        v.setFitWidth(w);
+        v.setFitHeight(h);
+        v.setPreserveRatio(false);
+        Rectangle r = new Rectangle(w, h);
+        r.setArcWidth(24);
+        r.setArcHeight(24);
+        v.setClip(r);
+        return v;
+    }
+
+    private Image load(String p) {
+        var r = getClass().getResource(p);
+        return r == null ? null : new Image(r.toExternalForm());
+    }
+
+    private ComboBox<String> c(String... x) {
+        ComboBox<String> b = new ComboBox<>();
+        b.getItems().addAll(x);
+        b.getSelectionModel().selectFirst();
+        b.setPrefWidth(190);
+        b.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#c6a15b;-fx-border-radius:12px;");
+        return b;
+    }
+
+    private Label l(String t, String s) {
+        Label x = new Label(t);
+        x.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + s);
+        return x;
+    }
+
+    private String card() {
+        return "-fx-background-color:#fff8f0;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),18,0,0,6px);";
+    }
+
+    private Button p(String t) {
+        Button b = new Button(t);
+        b.setStyle(
+                "-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:10px 20px;");
+        return b;
+    }
+
+    private Button o(String t) {
+        Button b = new Button(t);
+        b.setStyle(
+                "-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-padding:9px 18px;");
+        return b;
+    }
 }
