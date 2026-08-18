@@ -75,7 +75,8 @@ public class PainterPage {
     }
 
     private BorderPane head(Runnable back) {
-        ImageView logo = new ImageView(new Image(getClass().getResource("/assets/logo/dihadi logo.jpeg").toExternalForm()));
+        ImageView logo = new ImageView(
+                new Image(getClass().getResource("/assets/logo/dihadi logo.jpeg").toExternalForm()));
         logo.setFitWidth(54);
         logo.setFitHeight(54);
         logo.setViewport(new Rectangle2D(380, 0, 840, 840));
@@ -86,15 +87,20 @@ public class PainterPage {
         brand.setAlignment(Pos.CENTER_LEFT);
 
         Button worker = nav("Worker", true);
-        worker.setOnAction(e -> { if (back != null) back.run(); });
+        worker.setOnAction(e -> {
+            if (back != null)
+                back.run();
+        });
         HBox navigation = new HBox(20, nav("Home", false), nav("Business", false), worker,
                 nav("Recruiter", false), nav("About Us", false), nav("Contact Us", false));
         navigation.setAlignment(Pos.CENTER);
         com.dihadi.view.AppNavigator.activateNavigation(navigation);
         Button login = outline("Login"), signUp = primary("Sign Up");
         login.setOnAction(e -> com.dihadi.view.AppNavigator.login());
-        signUp.setOnAction(e -> com.dihadi.view.AppNavigator.signUp((Stage) signUp.getScene().getWindow(), () -> com.dihadi.view.AppNavigator.open((Stage) signUp.getScene().getWindow(), "Worker")));
-        login.setMouseTransparent(true); signUp.setMouseTransparent(true);
+        signUp.setOnAction(e -> com.dihadi.view.AppNavigator.signUp((Stage) signUp.getScene().getWindow(),
+                () -> com.dihadi.view.AppNavigator.open((Stage) signUp.getScene().getWindow(), "Worker")));
+        login.setMouseTransparent(true);
+        signUp.setMouseTransparent(true);
         HBox account = new HBox(12, login, signUp);
         account.setAlignment(Pos.CENTER_RIGHT);
 
