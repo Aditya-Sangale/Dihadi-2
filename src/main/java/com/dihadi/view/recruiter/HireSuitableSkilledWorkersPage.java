@@ -165,6 +165,26 @@ public class HireSuitableSkilledWorkersPage {
                                 stage.setScene(new ElectricianResultsPage().getElectricianScene(
                                                 () -> stage.setScene(getHireWorkersScene(
                                                                 () -> AppNavigator.open(stage, "Home")))));
+                        } else if ("Carpenter".equals(name)) {
+                                stage.setScene(new CarpenterResultsPage().getCarpenterScene(
+                                                () -> stage.setScene(getHireWorkersScene(
+                                                                () -> AppNavigator.open(stage, "Home")))));
+                        } else if ("Mason".equals(name)) {
+                                stage.setScene(new MasonResultPage().getMasonScene(
+                                                () -> stage.setScene(getHireWorkersScene(
+                                                                () -> AppNavigator.open(stage, "Home")))));
+                        } else if ("ITI / Technician".equals(name)) {
+                                stage.setScene(new ITI_TechnicianResultPage().getITITechnicianScene(
+                                                () -> stage.setScene(getHireWorkersScene(
+                                                                () -> AppNavigator.open(stage, "Home")))));
+                        } else if ("Painter".equals(name)) {
+                                stage.setScene(new PainterResultPage().getPainterScene(
+                                                () -> stage.setScene(getHireWorkersScene(
+                                                                () -> AppNavigator.open(stage, "Home")))));
+                        } else if ("Plumber".equals(name)) {
+                                stage.setScene(new PlumberResultPage().getPlumberScene(
+                                                () -> stage.setScene(getHireWorkersScene(
+                                                                () -> AppNavigator.open(stage, "Home")))));
                         } else {
                                 AppNavigator.information(name, "Worker profiles for " + name + " will be shown here.");
                         }
