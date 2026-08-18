@@ -49,7 +49,8 @@ public class WorkerPage extends Application {
     private static final String[] DETAILS = { "Woodwork, framing, fitting,\nand finishing details.",
             "Electrical installation, maintenance, and repairs.", "Essential support for smooth, safe site operations.",
             "Fabrication, structural welding, and metalwork.", "Brickwork, stonework, and concrete finishing.",
-            "Interior and exterior surface preparation and painting.", "Piping, drainage, repair, and installation work.",
+            "Interior and exterior surface preparation and painting.",
+            "Piping, drainage, repair, and installation work.",
             "Site coordination, work quality, and team guidance." };
     private ImageView heroImage;
     private Timeline heroSlider;
@@ -83,7 +84,8 @@ public class WorkerPage extends Application {
         Label highlight = label("SKILLED HANDS. VERIFIED OPPORTUNITIES.",
                 "-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;"
                         + "-fx-background-color:#f1dfd2;-fx-background-radius:999px;-fx-padding:9px 13px;");
-        Label supportingText = label("Explore the trades that power every project, from essential site support to specialist craftsmanship.",
+        Label supportingText = label(
+                "Explore the trades that power every project, from essential site support to specialist craftsmanship.",
                 "-fx-font-size:14px;-fx-text-fill:#4d4635;-fx-line-spacing:3px;");
         supportingText.setWrapText(true);
         supportingText.setMaxWidth(360);

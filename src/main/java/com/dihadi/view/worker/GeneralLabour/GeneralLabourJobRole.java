@@ -9,24 +9,159 @@ import javafx.scene.shape.Rectangle;
 
 /** General Labour job marketplace opened by Save & Continue. */
 public class GeneralLabourJobRole {
-    private static final String[][] JOBS={{"Construction General Labour","Pune, Maharashtra","₹700","01"},{"Material Shifting Helper","Bhiwandi, Maharashtra","₹750","02"},{"Factory Worker Helper","Nashik, Maharashtra","₹800","03"},{"Road Construction Labour","Chennai, Tamil Nadu","₹850","06"},{"Loading & Unloading Helper","New Delhi, Delhi","₹750","10"},{"Concrete Mixer Labour","Bangalore South, Karnataka","₹900","08"},{"Shuttering Helper","Gurgaon, Haryana","₹950","15"},{"Mason Helper","Mumbai, Maharashtra","₹850","09"}};
-    public Scene getGeneralLabourJobRoleScene(Runnable back){
-        Label eye=label("DIHADI WORK MARKETPLACE","-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#735c00;"),title=label("General Labour Job Roles","-fx-font-family:'Georgia';-fx-font-size:40px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),intro=label("Explore verified daily-wage opportunities and apply directly through DIHADI.","-fx-font-size:16px;-fx-text-fill:#4d4635;");
-        VBox hero=new VBox(10,eye,title,intro);hero.setAlignment(Pos.CENTER);hero.setPadding(new Insets(28));hero.setMaxWidth(1140);hero.setStyle(cardStyle());
-        FlowPane grid=new FlowPane(24,24);grid.setAlignment(Pos.CENTER);grid.setPrefWrapLength(1100);for(String[] j:JOBS)grid.getChildren().add(card(j));
-        VBox content=new VBox(28,hero,suitableJobBox(),label("Available opportunities","-fx-font-family:'Georgia';-fx-font-size:29px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),grid);content.setAlignment(Pos.TOP_CENTER);content.setPadding(new Insets(30,36,42,36));content.setMaxWidth(1200);
-        StackPane canvas=new StackPane(content);canvas.setAlignment(Pos.TOP_CENTER);canvas.setStyle("-fx-background-color:#f3e7ce;");ScrollPane scroll=new ScrollPane(canvas);scroll.setFitToWidth(true);scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
-        Button previous=outline("← Back to skills");previous.setOnAction(e->{if(back!=null)back.run();});Region gap=new Region();HBox.setHgrow(gap,Priority.ALWAYS);HBox bottom=new HBox(previous,gap,label("Choose an opportunity to start your next job.","-fx-font-size:13px;-fx-text-fill:#4d4635;"));bottom.setAlignment(Pos.CENTER);bottom.setPadding(new Insets(14,60,14,60));bottom.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");BorderPane page=new BorderPane(scroll);page.setBottom(bottom);page.setStyle("-fx-background-color:#f3e7ce;");return new Scene(page,1400,780);
+    private static final String[][] JOBS = { { "Construction General Labour", "Pune, Maharashtra", "₹700", "01" },
+            { "Material Shifting Helper", "Bhiwandi, Maharashtra", "₹750", "02" },
+            { "Factory Worker Helper", "Nashik, Maharashtra", "₹800", "03" },
+            { "Road Construction Labour", "Chennai, Tamil Nadu", "₹850", "06" },
+            { "Loading & Unloading Helper", "New Delhi, Delhi", "₹750", "10" },
+            { "Concrete Mixer Labour", "Bangalore South, Karnataka", "₹900", "08" },
+            { "Shuttering Helper", "Gurgaon, Haryana", "₹950", "15" },
+            { "Mason Helper", "Mumbai, Maharashtra", "₹850", "09" } };
+
+    public Scene getGeneralLabourJobRoleScene(Runnable back) {
+        Label eye = label("DIHADI WORK MARKETPLACE",
+                "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#735c00;"),
+                title = label("General Labour Job Roles",
+                        "-fx-font-family:'Georgia';-fx-font-size:40px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
+                intro = label("Explore verified daily-wage opportunities and apply directly through DIHADI.",
+                        "-fx-font-size:16px;-fx-text-fill:#4d4635;");
+        VBox hero = new VBox(10, eye, title, intro);
+        hero.setAlignment(Pos.CENTER);
+        hero.setPadding(new Insets(28));
+        hero.setMaxWidth(1140);
+        hero.setStyle(cardStyle());
+        FlowPane grid = new FlowPane(24, 24);
+        grid.setAlignment(Pos.CENTER);
+        grid.setPrefWrapLength(1100);
+        for (String[] j : JOBS)
+            grid.getChildren().add(card(j));
+        VBox content = new VBox(28, hero, suitableJobBox(),
+                label("Available opportunities",
+                        "-fx-font-family:'Georgia';-fx-font-size:29px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
+                grid);
+        content.setAlignment(Pos.TOP_CENTER);
+        content.setPadding(new Insets(30, 36, 42, 36));
+        content.setMaxWidth(1200);
+        StackPane canvas = new StackPane(content);
+        canvas.setAlignment(Pos.TOP_CENTER);
+        canvas.setStyle("-fx-background-color:#f3e7ce;");
+        ScrollPane scroll = new ScrollPane(canvas);
+        scroll.setFitToWidth(true);
+        scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
+        Button previous = outline("← Back to skills");
+        previous.setOnAction(e -> {
+            if (back != null)
+                back.run();
+        });
+        Region gap = new Region();
+        HBox.setHgrow(gap, Priority.ALWAYS);
+        HBox bottom = new HBox(previous, gap,
+                label("Choose an opportunity to start your next job.", "-fx-font-size:13px;-fx-text-fill:#4d4635;"));
+        bottom.setAlignment(Pos.CENTER);
+        bottom.setPadding(new Insets(14, 60, 14, 60));
+        bottom.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
+        BorderPane page = new BorderPane(scroll);
+        page.setBottom(bottom);
+        page.setStyle("-fx-background-color:#f3e7ce;");
+        return new Scene(page, 1400, 780);
     }
-    /** Filter panel from the supplied Job Roles reference, styled to match the other JobRole pages. */
-    private VBox suitableJobBox(){
-        Label heading=label("Find a suitable job role for you","-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
-        ComboBox<String> state=choice("Select state","Maharashtra","Karnataka","Tamil Nadu","Delhi","Haryana"),city=choice("Select city","Pune","Bhiwandi","Nashik","Bangalore South","New Delhi"),skill=choice("Select labour skill","Construction","Material shifting","Factory work","Road work","Loading work");
-        Button clear=outline("Clear filters"),find=primary("Find roles");
-        clear.setOnAction(e->{state.getSelectionModel().selectFirst();city.getSelectionModel().selectFirst();skill.getSelectionModel().selectFirst();});
-        HBox controls=new HBox(12,state,city,skill,clear,find);controls.setAlignment(Pos.CENTER);
-        VBox box=new VBox(14,heading,controls);box.setAlignment(Pos.CENTER);box.setPadding(new Insets(22,24,22,24));box.setMaxWidth(1140);box.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),16,0,0,5px);");return box;
+
+    /**
+     * Filter panel from the supplied Job Roles reference, styled to match the other
+     * JobRole pages.
+     */
+    private VBox suitableJobBox() {
+        Label heading = label("Find a suitable job role for you",
+                "-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
+        ComboBox<String> state = choice("Select state", "Maharashtra", "Karnataka", "Tamil Nadu", "Delhi", "Haryana"),
+                city = choice("Select city", "Pune", "Bhiwandi", "Nashik", "Bangalore South", "New Delhi"),
+                skill = choice("Select labour skill", "Construction", "Material shifting", "Factory work", "Road work",
+                        "Loading work");
+        Button clear = outline("Clear filters"), find = primary("Find roles");
+        clear.setOnAction(e -> {
+            state.getSelectionModel().selectFirst();
+            city.getSelectionModel().selectFirst();
+            skill.getSelectionModel().selectFirst();
+        });
+        HBox controls = new HBox(12, state, city, skill, clear, find);
+        controls.setAlignment(Pos.CENTER);
+        VBox box = new VBox(14, heading, controls);
+        box.setAlignment(Pos.CENTER);
+        box.setPadding(new Insets(22, 24, 22, 24));
+        box.setMaxWidth(1140);
+        box.setStyle(
+                "-fx-background-color:#faf3e8;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),16,0,0,5px);");
+        return box;
     }
-    private VBox card(String[] j){ImageView pic=image("/assets/images/general-labour/skill-"+j[3]+".jpg",316,178);Label name=label(j[0],"-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),loc=label("⌖  "+j[1],"-fx-font-size:13px;-fx-text-fill:#4d4635;"),wage=label("Daily wage  "+j[2],"-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#735c00;");name.setWrapText(true);name.setAlignment(Pos.CENTER);name.setMaxWidth(Double.MAX_VALUE);loc.setAlignment(Pos.CENTER);loc.setMaxWidth(Double.MAX_VALUE);Button apply=primary("Apply now");apply.setMaxWidth(Double.MAX_VALUE);apply.setOnAction(e->{apply.setText("Applied ✓");apply.setDisable(true);});VBox box=new VBox(13,pic,name,loc,wage,apply);box.setAlignment(Pos.CENTER);box.setPrefSize(344,350);box.setPadding(new Insets(14));box.setStyle(cardStyle());return box;}
-    private ComboBox<String> choice(String...values){ComboBox<String> box=new ComboBox<>();box.getItems().addAll(values);box.getSelectionModel().selectFirst();box.setPrefWidth(190);box.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#c6a15b;-fx-border-radius:12px;-fx-background-radius:12px;-fx-font-size:13px;");return box;}private ImageView image(String p,double w,double h){var r=getClass().getResource(p);ImageView v=new ImageView(r==null?null:new Image(r.toExternalForm()));v.setFitWidth(w);v.setFitHeight(h);v.setPreserveRatio(false);Rectangle c=new Rectangle(w,h);c.setArcWidth(24);c.setArcHeight(24);v.setClip(c);return v;}private Label label(String t,String s){Label l=new Label(t);l.setStyle("-fx-font-family:'Segoe UI',sans-serif;"+s);return l;}private String cardStyle(){return "-fx-background-color:#fff8f0;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),18,0,0,6px);";}private Button primary(String t){Button b=new Button(t);b.setStyle("-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:10px 20px;-fx-cursor:hand;");return b;}private Button outline(String t){Button b=new Button(t);b.setStyle("-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:9px 18px;-fx-cursor:hand;");return b;}
+
+    private VBox card(String[] j) {
+        ImageView pic = image("/assets/images/general-labour/skill-" + j[3] + ".jpg", 316, 178);
+        Label name = label(j[0], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
+                loc = label("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
+                wage = label("Daily wage  " + j[2], "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        name.setWrapText(true);
+        name.setAlignment(Pos.CENTER);
+        name.setMaxWidth(Double.MAX_VALUE);
+        loc.setAlignment(Pos.CENTER);
+        loc.setMaxWidth(Double.MAX_VALUE);
+        Button apply = primary("Apply now");
+        apply.setMaxWidth(Double.MAX_VALUE);
+        apply.setOnAction(e -> {
+            apply.setText("Applied ✓");
+            apply.setDisable(true);
+        });
+        VBox box = new VBox(13, pic, name, loc, wage, apply);
+        box.setAlignment(Pos.CENTER);
+        box.setPrefSize(344, 350);
+        box.setPadding(new Insets(14));
+        box.setStyle(cardStyle());
+        return box;
+    }
+
+    private ComboBox<String> choice(String... values) {
+        ComboBox<String> box = new ComboBox<>();
+        box.getItems().addAll(values);
+        box.getSelectionModel().selectFirst();
+        box.setPrefWidth(190);
+        box.setStyle(
+                "-fx-background-color:#f3e7ce;-fx-border-color:#c6a15b;-fx-border-radius:12px;-fx-background-radius:12px;-fx-font-size:13px;");
+        return box;
+    }
+
+    private ImageView image(String p, double w, double h) {
+        var r = getClass().getResource(p);
+        ImageView v = new ImageView(r == null ? null : new Image(r.toExternalForm()));
+        v.setFitWidth(w);
+        v.setFitHeight(h);
+        v.setPreserveRatio(false);
+        Rectangle c = new Rectangle(w, h);
+        c.setArcWidth(24);
+        c.setArcHeight(24);
+        v.setClip(c);
+        return v;
+    }
+
+    private Label label(String t, String s) {
+        Label l = new Label(t);
+        l.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + s);
+        return l;
+    }
+
+    private String cardStyle() {
+        return "-fx-background-color:#fff8f0;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),18,0,0,6px);";
+    }
+
+    private Button primary(String t) {
+        Button b = new Button(t);
+        b.setStyle(
+                "-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:10px 20px;-fx-cursor:hand;");
+        return b;
+    }
+
+    private Button outline(String t) {
+        Button b = new Button(t);
+        b.setStyle(
+                "-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:9px 18px;-fx-cursor:hand;");
+        return b;
+    }
 }

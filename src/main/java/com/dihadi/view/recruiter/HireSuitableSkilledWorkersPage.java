@@ -26,300 +26,308 @@ import javafx.util.Duration;
 
 /** Recruiter landing page for finding and hiring skilled workers. */
 public class HireSuitableSkilledWorkersPage {
-    private static final String PAPER = "#fff8f0";
-    private static final String INK = "#1e1b15";
-    private static final String MUTED = "#4c4637";
-    private static final String GOLD = "#735c00";
-    private static final String BORDER = "#d0c5af";
-    private static final String[] HERO_IMAGES = {
-            "/assets/images/worker 5.jpeg", "/assets/images/sitesuperviser.jpeg",
-            "/assets/images/electrician.jpeg", "/assets/images/carpenter.jpeg",
-            "/assets/images/worker 2.jpeg"
-    };
+        private static final String PAPER = "#fff8f0";
+        private static final String INK = "#1e1b15";
+        private static final String MUTED = "#4c4637";
+        private static final String GOLD = "#735c00";
+        private static final String BORDER = "#d0c5af";
+        private static final String[] HERO_IMAGES = {
+                        "/assets/images/worker 5.jpeg", "/assets/images/sitesuperviser.jpeg",
+                        "/assets/images/electrician.jpeg", "/assets/images/carpenter.jpeg",
+                        "/assets/images/worker 2.jpeg"
+        };
 
-    private Timeline carousel;
-    private int slide;
-    private ImageView heroImage;
+        private Timeline carousel;
+        private int slide;
+        private ImageView heroImage;
 
-    public Scene getHireWorkersScene(Runnable homeAction) {
-        BorderPane page = new BorderPane();
-        page.setTop(header());
-        page.setCenter(content());
-        page.setStyle("-fx-background-color:" + PAPER + ";");
-        return new Scene(page, 1400, 780);
-    }
-
-    private ScrollPane content() {
-        Label title = label("Hire Suitable Skilled Workers",
-                "-fx-font-family:'Georgia';-fx-font-size:42px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
-        Label subtitle = label(
-                "Connect directly with verified, high-quality professionals across various industrial and construction trades.",
-                "-fx-font-size:16px;-fx-text-fill:" + MUTED + ";");
-        subtitle.setWrapText(true);
-        subtitle.setMaxWidth(760);
-
-        VBox body = new VBox(44, new VBox(9, title, subtitle), hero(), filters(), workerGrid(), footer());
-        body.setMaxWidth(1240);
-        body.setPadding(new Insets(28, 0, 0, 0));
-        body.setStyle("-fx-background-color:" + PAPER + ";");
-
-        StackPane wrapper = new StackPane(body);
-        wrapper.setAlignment(Pos.TOP_CENTER);
-        wrapper.setPadding(new Insets(0, 36, 0, 36));
-        wrapper.setStyle("-fx-background-color:" + PAPER + ";");
-        ScrollPane scroll = new ScrollPane(wrapper);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
-        return scroll;
-    }
-
-    private HBox hero() {
-        heroImage = image(HERO_IMAGES[0], 780, 400);
-        heroImage.setPreserveRatio(false);
-        StackPane photo = new StackPane(heroImage);
-        photo.setPrefSize(780, 400);
-        photo.setMinWidth(520);
-        photo.setStyle(cardStyle(15) + "-fx-background-color:#f4ede2;");
-        HBox.setHgrow(photo, Priority.ALWAYS);
-        startCarousel();
-
-        Label quote = label(
-                "\"True strength lies in\nhumility and honest labor.\nDiscover professionals who\nbuild the future with pride.\"",
-                "-fx-font-family:'Georgia';-fx-font-size:20px;-fx-font-style:italic;-fx-text-fill:" + INK
-                        + ";-fx-line-spacing:3px;");
-        Label verified = label("✧  DIHADI Verified Professionals",
-                "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:" + MUTED + ";");
-        VBox words = new VBox(29, quote, verified);
-        words.setAlignment(Pos.CENTER_LEFT);
-        words.setPadding(new Insets(30, 34, 30, 38));
-        words.setPrefWidth(370);
-        words.setMinWidth(300);
-        words.setStyle("-fx-background-color:#ffffff;-fx-background-radius:15px;-fx-border-color:" + BORDER
-                + ";-fx-border-width:1 1 1 7px;-fx-border-radius:15px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),10,0,0,2px);");
-        HBox hero = new HBox(24, photo, words);
-        hero.setAlignment(Pos.CENTER);
-        return hero;
-    }
-
-    private VBox filters() {
-        Label title = label("Find a Suitable Worker for you",
-                "-fx-font-size:17px;-fx-font-weight:700;-fx-text-fill:" + INK + ";");
-        ComboBox<String> profession = combo("Profession", "General Labour", "Mason", "Plumber", "Painter",
-                "Electrician", "Carpenter", "Engineer", "Foreman");
-        ComboBox<String> country = combo("Country", "India");
-        ComboBox<String> state = combo("State", "Maharashtra", "Madhya Pradesh", "Karnataka", "Delhi");
-        ComboBox<String> city = combo("City", "Pune", "Mumbai", "Indore", "Bengaluru");
-        TextField pincode = new TextField();
-        pincode.setPromptText("Pincode");
-        pincode.setPrefHeight(38);
-        pincode.setPrefWidth(150);
-        pincode.setStyle(fieldStyle());
-        FlowPane fields = new FlowPane(12, 10, profession, country, state, city, pincode);
-        VBox box = new VBox(12, title, fields);
-        box.setPadding(new Insets(21));
-        box.setStyle(cardStyle(12));
-        return box;
-    }
-
-    private VBox workerGrid() {
-        Label heading = label("Looking for",
-                "-fx-font-family:'Georgia';-fx-font-size:29px;-fx-font-weight:700;-fx-text-fill:" + INK + ";");
-        TilePane tiles = new TilePane();
-        tiles.setPrefColumns(4);
-        tiles.setHgap(20);
-        tiles.setVgap(20);
-        tiles.getChildren().addAll(
-                workerCard("Carpenter", "/assets/images/carpenter.jpeg"),
-                workerCard("Electrician", "/assets/images/electrician.jpeg"),
-                workerCard("General Labour", "/assets/images/generalLabour.jpeg"),
-                workerCard("ITI / Technician", "/assets/images/welder.jpeg"),
-                workerCard("Mason", "/assets/images/mason.jpeg"),
-                workerCard("Painter", "/assets/images/painter.jpeg"),
-                workerCard("Plumber", "/assets/images/plumber.jpeg"),
-                workerCard("Site Supervisor", "/assets/images/sitesuperviser.jpeg"));
-        return new VBox(22, heading, tiles);
-    }
-
-    private VBox workerCard(String name, String path) {
-        ImageView photo = image(path, 270, 176);
-        photo.setPreserveRatio(false);
-        StackPane imageArea = new StackPane(photo);
-        imageArea.setPrefSize(270, 176);
-        Label caption = label(name, "-fx-font-size:17px;-fx-font-weight:700;-fx-text-fill:" + INK + ";");
-        StackPane captionArea = new StackPane(caption);
-        captionArea.setPrefSize(270, 68);
-        VBox card = new VBox(imageArea, captionArea);
-        card.setPrefSize(270, 244);
-        card.setStyle(cardStyle(12));
-        card.setOnMouseClicked(e -> {
-            Stage stage = (Stage) card.getScene().getWindow();
-            if ("General Labour".equals(name)) {
-                stage.setScene(new GeneralLabourResultsPage().getGeneralLabourScene(
-                        () -> stage.setScene(getHireWorkersScene(() -> AppNavigator.open(stage, "Home")))));
-            } else if ("Electrician".equals(name)) {
-                stage.setScene(new ElectricianResultsPage().getElectricianScene(
-                        () -> stage.setScene(getHireWorkersScene(() -> AppNavigator.open(stage, "Home")))));
-            } else {
-                AppNavigator.information(name, "Worker profiles for " + name + " will be shown here.");
-            }
-        });
-        card.setOnMouseEntered(e -> card.setStyle(
-                "-fx-background-color:#ffffff;-fx-background-radius:12px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:12px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.14),14,0,0,4px);"));
-        card.setOnMouseExited(e -> card.setStyle(cardStyle(12)));
-        return card;
-    }
-
-    /**
-     * Uses the same footer structure and visual treatment as the other DIHADI
-     * pages.
-     */
-    private VBox footer() {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 58, 58);
-        logo.setPreserveRatio(true);
-        Label brand = label("DIHADI",
-                "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#e9c349;-fx-letter-spacing:1px;");
-        Label promise = label(
-                "Connecting skilled workers with verified opportunities, fair work, and a stronger future.",
-                "-fx-font-size:13px;-fx-text-fill:#f8f0e2;-fx-opacity:.82;");
-        promise.setWrapText(true);
-        promise.setMaxWidth(300);
-        VBox brandArea = new VBox(9, new HBox(12, logo, brand), promise);
-        brandArea.setPrefWidth(340);
-
-        HBox footerMain = new HBox(58, brandArea,
-                footerColumn("Company", "About Dihadi", "Contact Us"),
-                footerColumn("Opportunities", "Find Work", "Worker Categories"),
-                footerColumn("Support", "Help Centre", "Privacy & Terms"));
-        footerMain.setAlignment(Pos.TOP_LEFT);
-        Label copyright = label("© 2026 DIHADI  •  Mera Haq ~ Meri Dihadi. All rights reserved.",
-                "-fx-font-size:12px;-fx-text-fill:#f8f0e2;-fx-opacity:.65;");
-        VBox footer = new VBox(24, footerMain, copyright);
-        footer.setMaxWidth(1180);
-        footer.setPadding(new Insets(32, 42, 24, 42));
-        footer.setStyle(
-                "-fx-background-color:#343027;-fx-background-radius:20px;-fx-border-color:rgba(208,197,175,.32);-fx-border-radius:20px;-fx-border-width:1px 0 0 0;");
-        return footer;
-    }
-
-    private VBox footerColumn(String heading, String... links) {
-        VBox column = new VBox(8, label(heading, "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#e9c349;"));
-        column.setPrefWidth(150);
-        for (String link : links) {
-            Button button = new Button(link);
-            button.setStyle(
-                    "-fx-background-color:transparent;-fx-padding:2 0;-fx-text-fill:#f8f0e2;-fx-opacity:.80;-fx-font-size:13px;-fx-font-family:'Segoe UI';-fx-cursor:hand;");
-            button.setOnAction(e -> AppNavigator.openFooterLink(
-                    (Stage) button.getScene().getWindow(), link));
-            column.getChildren().add(button);
+        public Scene getHireWorkersScene(Runnable homeAction) {
+                BorderPane page = new BorderPane();
+                page.setTop(header());
+                page.setCenter(content());
+                page.setStyle("-fx-background-color:" + PAPER + ";");
+                return new Scene(page, 1400, 780);
         }
-        return column;
-    }
 
-    /**
-     * Uses the same branding, navigation spacing, and inactive account actions as
-     * WorkerPage.
-     */
-    private BorderPane header() {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 54, 54);
-        logo.setPreserveRatio(true);
-        Label title = label("DIHADI",
-                "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
-        HBox brand = new HBox(10, logo, title);
-        brand.setAlignment(Pos.CENTER_LEFT);
-        HBox navigation = new HBox(12, navButton("Home", false), navButton("Business", false),
-                navButton("Worker", false),
-                navButton("Recruiter", true), navButton("About Us", false), navButton("Contact Us", false));
-        navigation.setAlignment(Pos.CENTER);
-        Button login = outlineButton("Login"), signUp = primaryButton("Sign Up");
-        login.setOnAction(e -> AppNavigator.adminLoginInProgress());
-        signUp.setOnAction(e -> AppNavigator.adminLoginInProgress());
-        HBox accountActions = new HBox(10, login, signUp);
-        accountActions.setAlignment(Pos.CENTER_RIGHT);
-        BorderPane header = new BorderPane();
-        header.setLeft(brand);
-        header.setCenter(navigation);
-        header.setRight(accountActions);
-        header.setPadding(new Insets(16, 24, 14, 24));
-        header.setStyle(
-                "-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
-        return header;
-    }
+        private ScrollPane content() {
+                Label title = label("Hire Suitable Skilled Workers",
+                                "-fx-font-family:'Georgia';-fx-font-size:42px;-fx-font-weight:800;-fx-text-fill:" + INK
+                                                + ";");
+                Label subtitle = label(
+                                "Connect directly with verified, high-quality professionals across various industrial and construction trades.",
+                                "-fx-font-size:16px;-fx-text-fill:" + MUTED + ";");
+                subtitle.setWrapText(true);
+                subtitle.setMaxWidth(760);
 
-    private Button navButton(String text, boolean selected) {
-        Button button = new Button(text);
-        button.setStyle(
-                "-fx-background-color:transparent;-fx-background-radius:0;-fx-font-size:13px;-fx-font-weight:700;-fx-font-family:'Segoe UI';-fx-padding:8px 4px;-fx-cursor:hand;-fx-border-width:0 0 2px 0;-fx-text-fill:"
-                        + (selected ? "#735c00" : "#4d4635") + ";-fx-border-color:"
-                        + (selected ? "#735c00" : "transparent") + ";");
-        button.setOnAction(e -> AppNavigator.open((Stage) button.getScene().getWindow(), text));
-        return button;
-    }
+                VBox body = new VBox(44, new VBox(9, title, subtitle), hero(), filters(), workerGrid(), footer());
+                body.setMaxWidth(1240);
+                body.setPadding(new Insets(28, 0, 0, 0));
+                body.setStyle("-fx-background-color:" + PAPER + ";");
 
-    private Button primaryButton(String text) {
-        Button button = new Button(text);
-        button.setStyle(
-                "-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:10px 20px;-fx-cursor:hand;");
-        return button;
-    }
+                StackPane wrapper = new StackPane(body);
+                wrapper.setAlignment(Pos.TOP_CENTER);
+                wrapper.setPadding(new Insets(0, 36, 0, 36));
+                wrapper.setStyle("-fx-background-color:" + PAPER + ";");
+                ScrollPane scroll = new ScrollPane(wrapper);
+                scroll.setFitToWidth(true);
+                scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
+                return scroll;
+        }
 
-    private Button outlineButton(String text) {
-        Button button = new Button(text);
-        button.setStyle(
-                "-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:9px 18px;-fx-cursor:hand;");
-        return button;
-    }
+        private HBox hero() {
+                heroImage = image(HERO_IMAGES[0], 780, 400);
+                heroImage.setPreserveRatio(false);
+                StackPane photo = new StackPane(heroImage);
+                photo.setPrefSize(780, 400);
+                photo.setMinWidth(520);
+                photo.setStyle(cardStyle(15) + "-fx-background-color:#f4ede2;");
+                HBox.setHgrow(photo, Priority.ALWAYS);
+                startCarousel();
 
-    private ComboBox<String> combo(String prompt, String... values) {
-        ComboBox<String> box = new ComboBox<>();
-        box.setPromptText(prompt);
-        box.getItems().addAll(values);
-        box.setPrefWidth(154);
-        box.setPrefHeight(38);
-        box.setStyle(fieldStyle());
-        return box;
-    }
+                Label quote = label(
+                                "\"True strength lies in\nhumility and honest labor.\nDiscover professionals who\nbuild the future with pride.\"",
+                                "-fx-font-family:'Georgia';-fx-font-size:20px;-fx-font-style:italic;-fx-text-fill:"
+                                                + INK
+                                                + ";-fx-line-spacing:3px;");
+                Label verified = label("✧  DIHADI Verified Professionals",
+                                "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:" + MUTED + ";");
+                VBox words = new VBox(29, quote, verified);
+                words.setAlignment(Pos.CENTER_LEFT);
+                words.setPadding(new Insets(30, 34, 30, 38));
+                words.setPrefWidth(370);
+                words.setMinWidth(300);
+                words.setStyle("-fx-background-color:#ffffff;-fx-background-radius:15px;-fx-border-color:" + BORDER
+                                + ";-fx-border-width:1 1 1 7px;-fx-border-radius:15px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),10,0,0,2px);");
+                HBox hero = new HBox(24, photo, words);
+                hero.setAlignment(Pos.CENTER);
+                return hero;
+        }
 
-    private String fieldStyle() {
-        return "-fx-background-color:#f4ede2;-fx-background-radius:7px;-fx-font-size:13px;-fx-text-fill:" + INK
-                + ";-fx-prompt-text-fill:#685c52;";
-    }
+        private VBox filters() {
+                Label title = label("Find a Suitable Worker for you",
+                                "-fx-font-size:17px;-fx-font-weight:700;-fx-text-fill:" + INK + ";");
+                ComboBox<String> profession = combo("Profession", "General Labour", "Mason", "Plumber", "Painter",
+                                "Electrician", "Carpenter", "Engineer", "Foreman");
+                ComboBox<String> country = combo("Country", "India");
+                ComboBox<String> state = combo("State", "Maharashtra", "Madhya Pradesh", "Karnataka", "Delhi");
+                ComboBox<String> city = combo("City", "Pune", "Mumbai", "Indore", "Bengaluru");
+                TextField pincode = new TextField();
+                pincode.setPromptText("Pincode");
+                pincode.setPrefHeight(38);
+                pincode.setPrefWidth(150);
+                pincode.setStyle(fieldStyle());
+                FlowPane fields = new FlowPane(12, 10, profession, country, state, city, pincode);
+                VBox box = new VBox(12, title, fields);
+                box.setPadding(new Insets(21));
+                box.setStyle(cardStyle(12));
+                return box;
+        }
 
-    private String cardStyle(int radius) {
-        return "-fx-background-color:#ffffff;-fx-background-radius:" + radius + "px;-fx-border-color:" + BORDER
-                + ";-fx-border-radius:" + radius + "px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),8,0,0,2px);";
-    }
+        private VBox workerGrid() {
+                Label heading = label("Looking for",
+                                "-fx-font-family:'Georgia';-fx-font-size:29px;-fx-font-weight:700;-fx-text-fill:" + INK
+                                                + ";");
+                TilePane tiles = new TilePane();
+                tiles.setPrefColumns(4);
+                tiles.setHgap(20);
+                tiles.setVgap(20);
+                tiles.getChildren().addAll(
+                                workerCard("Carpenter", "/assets/images/carpenter.jpeg"),
+                                workerCard("Electrician", "/assets/images/electrician.jpeg"),
+                                workerCard("General Labour", "/assets/images/generalLabour.jpeg"),
+                                workerCard("ITI / Technician", "/assets/images/welder.jpeg"),
+                                workerCard("Mason", "/assets/images/mason.jpeg"),
+                                workerCard("Painter", "/assets/images/painter.jpeg"),
+                                workerCard("Plumber", "/assets/images/plumber.jpeg"),
+                                workerCard("Site Supervisor", "/assets/images/sitesuperviser.jpeg"));
+                return new VBox(22, heading, tiles);
+        }
 
-    private Label label(String value, String style) {
-        Label label = new Label(value);
-        label.setStyle("-fx-font-family:'Segoe UI';" + style);
-        return label;
-    }
+        private VBox workerCard(String name, String path) {
+                ImageView photo = image(path, 270, 176);
+                photo.setPreserveRatio(false);
+                StackPane imageArea = new StackPane(photo);
+                imageArea.setPrefSize(270, 176);
+                Label caption = label(name, "-fx-font-size:17px;-fx-font-weight:700;-fx-text-fill:" + INK + ";");
+                StackPane captionArea = new StackPane(caption);
+                captionArea.setPrefSize(270, 68);
+                VBox card = new VBox(imageArea, captionArea);
+                card.setPrefSize(270, 244);
+                card.setStyle(cardStyle(12));
+                card.setOnMouseClicked(e -> {
+                        Stage stage = (Stage) card.getScene().getWindow();
+                        if ("General Labour".equals(name)) {
+                                stage.setScene(new GeneralLabourResultsPage().getGeneralLabourScene(
+                                                () -> stage.setScene(getHireWorkersScene(
+                                                                () -> AppNavigator.open(stage, "Home")))));
+                        } else if ("Electrician".equals(name)) {
+                                stage.setScene(new ElectricianResultsPage().getElectricianScene(
+                                                () -> stage.setScene(getHireWorkersScene(
+                                                                () -> AppNavigator.open(stage, "Home")))));
+                        } else {
+                                AppNavigator.information(name, "Worker profiles for " + name + " will be shown here.");
+                        }
+                });
+                card.setOnMouseEntered(e -> card.setStyle(
+                                "-fx-background-color:#ffffff;-fx-background-radius:12px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:12px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.14),14,0,0,4px);"));
+                card.setOnMouseExited(e -> card.setStyle(cardStyle(12)));
+                return card;
+        }
 
-    private ImageView image(String path, double width, double height) {
-        ImageView view = new ImageView(load(path));
-        view.setFitWidth(width);
-        view.setFitHeight(height);
-        view.setSmooth(true);
-        return view;
-    }
+        /**
+         * Uses the same footer structure and visual treatment as the other DIHADI
+         * pages.
+         */
+        private VBox footer() {
+                ImageView logo = image("/assets/logo/dihadi logo.jpeg", 58, 58);
+                logo.setPreserveRatio(true);
+                Label brand = label("DIHADI",
+                                "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#e9c349;-fx-letter-spacing:1px;");
+                Label promise = label(
+                                "Connecting skilled workers with verified opportunities, fair work, and a stronger future.",
+                                "-fx-font-size:13px;-fx-text-fill:#f8f0e2;-fx-opacity:.82;");
+                promise.setWrapText(true);
+                promise.setMaxWidth(300);
+                VBox brandArea = new VBox(9, new HBox(12, logo, brand), promise);
+                brandArea.setPrefWidth(340);
 
-    private Image load(String path) {
-        var resource = getClass().getResource(path);
-        return resource == null ? null : new Image(resource.toExternalForm());
-    }
+                HBox footerMain = new HBox(58, brandArea,
+                                footerColumn("Company", "About Dihadi", "Contact Us"),
+                                footerColumn("Opportunities", "Find Work", "Worker Categories"),
+                                footerColumn("Support", "Help Centre", "Privacy & Terms"));
+                footerMain.setAlignment(Pos.TOP_LEFT);
+                Label copyright = label("© 2026 DIHADI  •  Mera Haq ~ Meri Dihadi. All rights reserved.",
+                                "-fx-font-size:12px;-fx-text-fill:#f8f0e2;-fx-opacity:.65;");
+                VBox footer = new VBox(24, footerMain, copyright);
+                footer.setMaxWidth(1180);
+                footer.setPadding(new Insets(32, 42, 24, 42));
+                footer.setStyle(
+                                "-fx-background-color:#343027;-fx-background-radius:20px;-fx-border-color:rgba(208,197,175,.32);-fx-border-radius:20px;-fx-border-width:1px 0 0 0;");
+                return footer;
+        }
 
-    private void startCarousel() {
-        carousel = new Timeline(new KeyFrame(Duration.seconds(5), e -> {
-            slide = (slide + 1) % HERO_IMAGES.length;
-            heroImage.setImage(load(HERO_IMAGES[slide]));
-        }));
-        carousel.setCycleCount(Timeline.INDEFINITE);
-        carousel.play();
-    }
+        private VBox footerColumn(String heading, String... links) {
+                VBox column = new VBox(8,
+                                label(heading, "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#e9c349;"));
+                column.setPrefWidth(150);
+                for (String link : links) {
+                        Button button = new Button(link);
+                        button.setStyle(
+                                        "-fx-background-color:transparent;-fx-padding:2 0;-fx-text-fill:#f8f0e2;-fx-opacity:.80;-fx-font-size:13px;-fx-font-family:'Segoe UI';-fx-cursor:hand;");
+                        button.setOnAction(e -> AppNavigator.openFooterLink(
+                                        (Stage) button.getScene().getWindow(), link));
+                        column.getChildren().add(button);
+                }
+                return column;
+        }
 
-    public void stopCarousel() {
-        if (carousel != null)
-            carousel.stop();
-    }
+        /**
+         * Uses the same branding, navigation spacing, and inactive account actions as
+         * WorkerPage.
+         */
+        private BorderPane header() {
+                ImageView logo = image("/assets/logo/dihadi logo.jpeg", 54, 54);
+                logo.setPreserveRatio(true);
+                Label title = label("DIHADI",
+                                "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
+                HBox brand = new HBox(10, logo, title);
+                brand.setAlignment(Pos.CENTER_LEFT);
+                HBox navigation = new HBox(12, navButton("Home", false), navButton("Business", false),
+                                navButton("Worker", false),
+                                navButton("Recruiter", true), navButton("About Us", false),
+                                navButton("Contact Us", false));
+                navigation.setAlignment(Pos.CENTER);
+                Button login = outlineButton("Login"), signUp = primaryButton("Sign Up");
+                login.setOnAction(e -> AppNavigator.adminLoginInProgress());
+                signUp.setOnAction(e -> AppNavigator.adminLoginInProgress());
+                HBox accountActions = new HBox(10, login, signUp);
+                accountActions.setAlignment(Pos.CENTER_RIGHT);
+                BorderPane header = new BorderPane();
+                header.setLeft(brand);
+                header.setCenter(navigation);
+                header.setRight(accountActions);
+                header.setPadding(new Insets(16, 24, 14, 24));
+                header.setStyle(
+                                "-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
+                return header;
+        }
+
+        private Button navButton(String text, boolean selected) {
+                Button button = new Button(text);
+                button.setStyle(
+                                "-fx-background-color:transparent;-fx-background-radius:0;-fx-font-size:13px;-fx-font-weight:700;-fx-font-family:'Segoe UI';-fx-padding:8px 4px;-fx-cursor:hand;-fx-border-width:0 0 2px 0;-fx-text-fill:"
+                                                + (selected ? "#735c00" : "#4d4635") + ";-fx-border-color:"
+                                                + (selected ? "#735c00" : "transparent") + ";");
+                button.setOnAction(e -> AppNavigator.open((Stage) button.getScene().getWindow(), text));
+                return button;
+        }
+
+        private Button primaryButton(String text) {
+                Button button = new Button(text);
+                button.setStyle(
+                                "-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:10px 20px;-fx-cursor:hand;");
+                return button;
+        }
+
+        private Button outlineButton(String text) {
+                Button button = new Button(text);
+                button.setStyle(
+                                "-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:9px 18px;-fx-cursor:hand;");
+                return button;
+        }
+
+        private ComboBox<String> combo(String prompt, String... values) {
+                ComboBox<String> box = new ComboBox<>();
+                box.setPromptText(prompt);
+                box.getItems().addAll(values);
+                box.setPrefWidth(154);
+                box.setPrefHeight(38);
+                box.setStyle(fieldStyle());
+                return box;
+        }
+
+        private String fieldStyle() {
+                return "-fx-background-color:#f4ede2;-fx-background-radius:7px;-fx-font-size:13px;-fx-text-fill:" + INK
+                                + ";-fx-prompt-text-fill:#685c52;";
+        }
+
+        private String cardStyle(int radius) {
+                return "-fx-background-color:#ffffff;-fx-background-radius:" + radius + "px;-fx-border-color:" + BORDER
+                                + ";-fx-border-radius:" + radius
+                                + "px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),8,0,0,2px);";
+        }
+
+        private Label label(String value, String style) {
+                Label label = new Label(value);
+                label.setStyle("-fx-font-family:'Segoe UI';" + style);
+                return label;
+        }
+
+        private ImageView image(String path, double width, double height) {
+                ImageView view = new ImageView(load(path));
+                view.setFitWidth(width);
+                view.setFitHeight(height);
+                view.setSmooth(true);
+                return view;
+        }
+
+        private Image load(String path) {
+                var resource = getClass().getResource(path);
+                return resource == null ? null : new Image(resource.toExternalForm());
+        }
+
+        private void startCarousel() {
+                carousel = new Timeline(new KeyFrame(Duration.seconds(5), e -> {
+                        slide = (slide + 1) % HERO_IMAGES.length;
+                        heroImage.setImage(load(HERO_IMAGES[slide]));
+                }));
+                carousel.setCycleCount(Timeline.INDEFINITE);
+                carousel.play();
+        }
+
+        public void stopCarousel() {
+                if (carousel != null)
+                        carousel.stop();
+        }
 }
