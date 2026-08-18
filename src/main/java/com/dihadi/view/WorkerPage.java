@@ -41,15 +41,15 @@ import javafx.util.Duration;
 
 /** Worker category page with the WelcomePage visual language. */
 public class WorkerPage extends Application {
-    private static final String[] NAMES = { "General Labour", "Mason", "Painter", "Plumber", "ITI/Technician",
-            "Carpenter", "Electrician", "Site Supervisor" };
-    private static final String[] IMAGES = { "/assets/images/generalLabour.jpeg", "/assets/images/mason.jpeg",
-            "/assets/images/worker/painter/skill-02.jpg", "/assets/images/plumber.jpeg", "/assets/images/welder.jpeg",
-            "/assets/images/carpenter.jpeg", "/assets/images/electrician.jpeg", "/assets/images/sitesuperviser.jpeg" };
-    private static final String[] DETAILS = { "Essential support for smooth, safe site operations.",
-            "Brickwork, stonework, and concrete finishing.", "Interior and exterior surface preparation and painting.",
-            "Piping, drainage, repair, and installation work.", "Fabrication, structural welding, and metalwork.",
-            "Woodwork, framing, fitting,\nand finishing details.", "Electrical installation, maintenance, and repairs.",
+    private static final String[] NAMES = { "Carpenter", "Electrician", "General Labour", "ITI / Technician",
+            "Mason", "Painter", "Plumber", "Site Supervisor" };
+    private static final String[] IMAGES = { "/assets/images/carpenter.jpeg", "/assets/images/electrician.jpeg",
+            "/assets/images/generalLabour.jpeg", "/assets/images/welder.jpeg", "/assets/images/mason.jpeg",
+            "/assets/images/painter.jpeg", "/assets/images/plumber.jpeg", "/assets/images/sitesuperviser.jpeg" };
+    private static final String[] DETAILS = { "Woodwork, framing, fitting,\nand finishing details.",
+            "Electrical installation, maintenance, and repairs.", "Essential support for smooth, safe site operations.",
+            "Fabrication, structural welding, and metalwork.", "Brickwork, stonework, and concrete finishing.",
+            "Interior and exterior surface preparation and painting.", "Piping, drainage, repair, and installation work.",
             "Site coordination, work quality, and team guidance." };
     private ImageView heroImage;
     private Timeline heroSlider;
@@ -197,24 +197,24 @@ public class WorkerPage extends Application {
         Button view = primaryButton("View Roles");
         view.setMaxWidth(Double.MAX_VALUE);
         view.setOnAction(e -> clicked(NAMES[i] + " View Roles"));
-        if (i == 0) {
+        if (i == 2) {
             view.setOnAction(e -> showGeneralLabour());
         }
         if (i == 7) {
             view.setOnAction(e -> showSiteSupervisor());
         }
-        if (i == 6) {
+        if (i == 1) {
             view.setOnAction(e -> showElectrician());
         }
-        if (i == 1)
-            view.setOnAction(e -> showMason());
-        if (i == 3)
-            view.setOnAction(e -> showPlumber());
-        if (i == 5)
-            view.setOnAction(e -> showCarpenter());
         if (i == 4)
+            view.setOnAction(e -> showMason());
+        if (i == 6)
+            view.setOnAction(e -> showPlumber());
+        if (i == 0)
+            view.setOnAction(e -> showCarpenter());
+        if (i == 3)
             view.setOnAction(e -> showItiTechnician());
-        if (i == 2)
+        if (i == 5)
             view.setOnAction(e -> showPainter());
         VBox card = new VBox(12, picture, name, detail, view);
         card.setAlignment(Pos.TOP_LEFT);
@@ -222,7 +222,7 @@ public class WorkerPage extends Application {
         card.setPadding(new Insets(16));
         card.setStyle(
                 "-fx-background-color: #fbf3e5; -fx-background-radius: 20px; -fx-border-color: rgba(115,92,0,0.20); -fx-border-radius: 20px; -fx-effect: dropshadow(gaussian, rgba(58,48,39,0.10), 16, 0, 0, 5px);");
-        if (i == 0) {
+        if (i == 2) {
             card.setCursor(javafx.scene.Cursor.HAND);
             card.setOnMouseClicked(e -> showGeneralLabour());
         }
@@ -230,27 +230,27 @@ public class WorkerPage extends Application {
             card.setCursor(javafx.scene.Cursor.HAND);
             card.setOnMouseClicked(e -> showSiteSupervisor());
         }
-        if (i == 6) {
+        if (i == 1) {
             card.setCursor(javafx.scene.Cursor.HAND);
             card.setOnMouseClicked(e -> showElectrician());
         }
-        if (i == 1) {
+        if (i == 4) {
             card.setCursor(javafx.scene.Cursor.HAND);
             card.setOnMouseClicked(e -> showMason());
         }
-        if (i == 3) {
+        if (i == 6) {
             card.setCursor(javafx.scene.Cursor.HAND);
             card.setOnMouseClicked(e -> showPlumber());
         }
-        if (i == 5) {
+        if (i == 0) {
             card.setCursor(javafx.scene.Cursor.HAND);
             card.setOnMouseClicked(e -> showCarpenter());
         }
-        if (i == 4) {
+        if (i == 3) {
             card.setCursor(javafx.scene.Cursor.HAND);
             card.setOnMouseClicked(e -> showItiTechnician());
         }
-        if (i == 2) {
+        if (i == 5) {
             card.setCursor(javafx.scene.Cursor.HAND);
             card.setOnMouseClicked(e -> showPainter());
         }

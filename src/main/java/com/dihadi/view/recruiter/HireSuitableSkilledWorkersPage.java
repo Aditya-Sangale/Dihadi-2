@@ -130,14 +130,14 @@ public class HireSuitableSkilledWorkersPage {
         tiles.setHgap(20);
         tiles.setVgap(20);
         tiles.getChildren().addAll(
-                workerCard("General Labour", "/assets/images/generalLabour.jpeg"),
-                workerCard("Mason", "/assets/images/mason.jpeg"),
-                workerCard("Plumber", "/assets/images/plumber.jpeg"),
-                workerCard("Painter", "/assets/images/painter.jpeg"),
-                workerCard("Electrician", "/assets/images/electrician.jpeg"),
                 workerCard("Carpenter", "/assets/images/carpenter.jpeg"),
-                workerCard("Engineer", "/assets/images/worker 2 (2).jpeg"),
-                workerCard("Foreman", "/assets/images/sitesuperviser.jpeg"));
+                workerCard("Electrician", "/assets/images/electrician.jpeg"),
+                workerCard("General Labour", "/assets/images/generalLabour.jpeg"),
+                workerCard("ITI / Technician", "/assets/images/welder.jpeg"),
+                workerCard("Mason", "/assets/images/mason.jpeg"),
+                workerCard("Painter", "/assets/images/painter.jpeg"),
+                workerCard("Plumber", "/assets/images/plumber.jpeg"),
+                workerCard("Site Supervisor", "/assets/images/sitesuperviser.jpeg"));
         return new VBox(22, heading, tiles);
     }
 
