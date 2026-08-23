@@ -32,7 +32,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-/** Selectable General Labour sub-skill page based on the supplied design reference. */
+/**
+ * Selectable General Labour sub-skill page based on the supplied design
+ * reference.
+ */
 public class GeneralLabourPage {
     private static final String[] SKILLS = {
             "General Labour", "Material Shifting Helper", "Factory Worker Helper", "Heavy Building Helper",
@@ -78,9 +81,12 @@ public class GeneralLabourPage {
         roundImage(photo, 465, 310, 24);
         StackPane photoFrame = new StackPane(photo);
         photoFrame.setPrefSize(465, 310);
-        photoFrame.setStyle("-fx-background-radius:24px;-fx-border-radius:24px;-fx-overflow:hidden;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),30,0,0,10px);");
+        photoFrame.setStyle(
+                "-fx-background-radius:24px;-fx-border-radius:24px;-fx-overflow:hidden;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),30,0,0,10px);");
 
-        Label quote = label("\"The foundation of every great nation is built by the\nhands of its dedicated workforce.\"", "-fx-font-family:'Georgia';-fx-font-size:21px;-fx-font-style:italic;-fx-text-fill:#4d4635;-fx-line-spacing:5px;");
+        Label quote = label(
+                "\"The foundation of every great nation is built by the\nhands of its dedicated workforce.\"",
+                "-fx-font-family:'Georgia';-fx-font-size:21px;-fx-font-style:italic;-fx-text-fill:#4d4635;-fx-line-spacing:5px;");
         VBox quoteBox = new VBox(quote);
         quoteBox.setAlignment(Pos.CENTER_LEFT);
         quoteBox.setPrefHeight(310);
@@ -95,8 +101,10 @@ public class GeneralLabourPage {
     }
 
     private VBox createSkills() {
-        Label title = label("General Labour Work-Skills", "-fx-font-family:'Georgia';-fx-font-size:42px;-fx-font-weight:800;-fx-text-fill:#1f1b13;");
-        Label subtitle = label("You can select more than one sub-skill based on your expertise.", "-fx-font-family:'Georgia';-fx-font-size:15px;-fx-text-fill:#4d4635;");
+        Label title = label("General Labour Work-Skills",
+                "-fx-font-family:'Georgia';-fx-font-size:42px;-fx-font-weight:800;-fx-text-fill:#1f1b13;");
+        Label subtitle = label("You can select more than one sub-skill based on your expertise.",
+                "-fx-font-family:'Georgia';-fx-font-size:15px;-fx-text-fill:#4d4635;");
         FlowPane grid = new FlowPane(20, 20);
         grid.setAlignment(Pos.CENTER_LEFT);
         grid.setPrefWrapLength(1260);
@@ -110,7 +118,8 @@ public class GeneralLabourPage {
 
     private Button skillCard(int index) {
         ImageView picture = image(String.format("/assets/images/general-labour/skill-%02d.jpg", index + 1), 280, 140);
-        Label title = label(SKILLS[index], "-fx-font-family:'Georgia';-fx-font-size:17px;-fx-font-weight:700;-fx-text-fill:#343027;");
+        Label title = label(SKILLS[index],
+                "-fx-font-family:'Georgia';-fx-font-size:17px;-fx-font-weight:700;-fx-text-fill:#343027;");
         title.setWrapText(true);
         Label hindi = label(HINDI_SKILLS[index], "-fx-font-size:14px;-fx-text-fill:#7f7663;");
         VBox text = new VBox(4, title, hindi);
@@ -141,12 +150,16 @@ public class GeneralLabourPage {
     private void setCardStyle(Button card, boolean selected) {
         card.setStyle("-fx-background-color:#fffdf9;-fx-background-radius:15px;-fx-border-radius:15px;"
                 + "-fx-border-width:2px;-fx-border-color:" + (selected ? "#d4af37" : "transparent") + ";"
-                + "-fx-effect:dropshadow(gaussian,rgba(58,48,39," + (selected ? ".18" : ".08") + "),30,0,0,10px);-fx-cursor:hand;");
+                + "-fx-effect:dropshadow(gaussian,rgba(58,48,39," + (selected ? ".18" : ".08")
+                + "),30,0,0,10px);-fx-cursor:hand;");
     }
 
     private HBox createActionBar(Runnable backAction) {
         Button back = outlineButton("←  BACK");
-        back.setOnAction(event -> { if (backAction != null) backAction.run(); });
+        back.setOnAction(event -> {
+            if (backAction != null)
+                backAction.run();
+        });
         Button save = primaryButton("SAVE & NEXT  →");
         save.setOnAction(event -> {
             Stage stage = (Stage) save.getScene().getWindow();
@@ -157,7 +170,8 @@ public class GeneralLabourPage {
         HBox bar = new HBox(back, spacer, save);
         bar.setAlignment(Pos.CENTER);
         bar.setPadding(new Insets(16, 70, 16, 70));
-        bar.setStyle("-fx-background-color:rgba(255,255,255,.94);-fx-border-color:rgba(208,197,175,.30);-fx-border-width:1px 0 0 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.05),30,0,0,-10px);");
+        bar.setStyle(
+                "-fx-background-color:rgba(255,255,255,.94);-fx-border-color:rgba(208,197,175,.30);-fx-border-width:1px 0 0 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.05),30,0,0,-10px);");
         return bar;
     }
 
@@ -168,7 +182,8 @@ public class GeneralLabourPage {
         if (selectedSkills.isEmpty()) {
             alert.setContentText("Select at least one sub-skill to continue.");
         } else {
-            alert.setContentText(selectedSkills.size() + " skill" + (selectedSkills.size() == 1 ? " has" : "s have") + " been selected.");
+            alert.setContentText(selectedSkills.size() + " skill" + (selectedSkills.size() == 1 ? " has" : "s have")
+                    + " been selected.");
         }
         alert.show();
     }
@@ -177,14 +192,27 @@ public class GeneralLabourPage {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 54, 54);
         logo.setViewport(new Rectangle2D(380, 0, 840, 840));
         logo.setPreserveRatio(true);
-        HBox brand = new HBox(10, logo, label("DIHADI", "-fx-font-family:'Georgia';-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;"));
+        HBox brand = new HBox(10, logo, label("DIHADI",
+                "-fx-font-family:'Georgia';-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;"));
         brand.setAlignment(Pos.CENTER_LEFT);
 
-        Button home = navButton("Home", false); home.setOnAction(e -> { if (homeAction != null) homeAction.run(); });
+        Button home = navButton("Home", false);
+        home.setOnAction(e -> {
+            if (homeAction != null)
+                homeAction.run();
+        });
         Button business = navButton("Business", false);
-        Button worker = navButton("Worker", true); worker.setOnAction(e -> { if (backAction != null) backAction.run(); });
+        Button worker = navButton("Worker", true);
+        worker.setOnAction(e -> {
+            if (backAction != null)
+                backAction.run();
+        });
         Button recruiter = navButton("Recruiter", false);
-        Button about = navButton("About Us", false); about.setOnAction(e -> { if (aboutAction != null) aboutAction.run(); });
+        Button about = navButton("About Us", false);
+        about.setOnAction(e -> {
+            if (aboutAction != null)
+                aboutAction.run();
+        });
         Button contact = navButton("Contact Us", false);
         HBox navigation = new HBox(20, home, business, worker, recruiter, about, contact);
         navigation.setAlignment(Pos.CENTER);
@@ -192,8 +220,10 @@ public class GeneralLabourPage {
 
         Button login = outlineButton("Login"), signUp = primaryButton("Sign Up");
         login.setOnAction(e -> com.dihadi.view.AppNavigator.login());
-        signUp.setOnAction(e -> com.dihadi.view.AppNavigator.signUp((Stage) signUp.getScene().getWindow(), () -> com.dihadi.view.AppNavigator.open((Stage) signUp.getScene().getWindow(), "Worker")));
-        login.setMouseTransparent(true); signUp.setMouseTransparent(true);
+        signUp.setOnAction(e -> com.dihadi.view.AppNavigator.signUp((Stage) signUp.getScene().getWindow(),
+                () -> com.dihadi.view.AppNavigator.open((Stage) signUp.getScene().getWindow(), "Worker")));
+        login.setMouseTransparent(true);
+        signUp.setMouseTransparent(true);
         HBox account = new HBox(14, login, signUp);
         account.setAlignment(Pos.CENTER_RIGHT);
         BorderPane header = new BorderPane();
@@ -207,21 +237,25 @@ public class GeneralLabourPage {
 
     private Button navButton(String text, boolean active) {
         Button button = new Button(text);
-        button.setStyle("-fx-background-color:transparent;-fx-background-radius:0;-fx-font-family:'Georgia';-fx-font-size:14px;-fx-text-fill:"
-                + (active ? "#735c00" : "#4d4635") + ";-fx-font-weight:" + (active ? "700" : "400")
-                + ";-fx-border-color:" + (active ? "#735c00" : "transparent") + ";-fx-border-width:0 0 2px 0;-fx-padding:8px 2px;-fx-cursor:hand;");
+        button.setStyle(
+                "-fx-background-color:transparent;-fx-background-radius:0;-fx-font-family:'Georgia';-fx-font-size:14px;-fx-text-fill:"
+                        + (active ? "#735c00" : "#4d4635") + ";-fx-font-weight:" + (active ? "700" : "400")
+                        + ";-fx-border-color:" + (active ? "#735c00" : "transparent")
+                        + ";-fx-border-width:0 0 2px 0;-fx-padding:8px 2px;-fx-cursor:hand;");
         return button;
     }
 
     private Button primaryButton(String text) {
         Button button = new Button(text);
-        button.setStyle("-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#343027;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:11px 24px;-fx-cursor:hand;");
+        button.setStyle(
+                "-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#343027;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:11px 24px;-fx-cursor:hand;");
         return button;
     }
 
     private Button outlineButton(String text) {
         Button button = new Button(text);
-        button.setStyle("-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#806c47;-fx-border-radius:18px;-fx-text-fill:#343027;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:10px 23px;-fx-cursor:hand;");
+        button.setStyle(
+                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#806c47;-fx-border-radius:18px;-fx-text-fill:#343027;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:10px 23px;-fx-cursor:hand;");
         return button;
     }
 
@@ -249,7 +283,8 @@ public class GeneralLabourPage {
     private void setWorkerBackground(StackPane root) {
         var resource = getClass().getResource("/assets/images/background image.jpeg");
         if (resource == null) {
-            root.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
+            root.setBackground(
+                    new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
             return;
         }
         Image background = new Image(resource.toExternalForm());
