@@ -156,8 +156,10 @@ public class ElectricianPage {
         com.dihadi.view.AppNavigator.activateNavigation(navigation);
         Button login = outline("Login"), signUp = primary("Sign Up");
         login.setOnAction(e -> com.dihadi.view.AppNavigator.login());
-        signUp.setOnAction(e -> com.dihadi.view.AppNavigator.signUp((Stage) signUp.getScene().getWindow(), () -> com.dihadi.view.AppNavigator.open((Stage) signUp.getScene().getWindow(), "Worker")));
-        login.setMouseTransparent(true); signUp.setMouseTransparent(true);
+        signUp.setOnAction(e -> com.dihadi.view.AppNavigator.signUp((Stage) signUp.getScene().getWindow(),
+                () -> com.dihadi.view.AppNavigator.open((Stage) signUp.getScene().getWindow(), "Worker")));
+        login.setMouseTransparent(true);
+        signUp.setMouseTransparent(true);
         HBox account = new HBox(12, login, signUp);
         account.setAlignment(Pos.CENTER_RIGHT);
         BorderPane bar = new BorderPane();

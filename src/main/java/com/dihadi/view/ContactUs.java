@@ -34,33 +34,53 @@ public class ContactUs {
         HBox brand = new HBox(10, logo, label("DIHADI",
                 "-fx-font-family:Georgia;-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;"));
         brand.setAlignment(Pos.CENTER_LEFT);
-        Button h = nav("Home", false), b = nav("Business", false), w = nav("Worker", false), recruiter = nav("Recruiter", false), a = nav("About Us", false), contact = nav("Contact Us", true);
-        h.setOnAction(e -> navigate(h, "Home")); b.setOnAction(e -> navigate(b, "Business")); w.setOnAction(e -> navigate(w, "Worker")); recruiter.setOnAction(e -> navigate(recruiter, "Recruiter")); a.setOnAction(e -> navigate(a, "About Us")); contact.setOnAction(e -> navigate(contact, "Contact Us"));
+        Button h = nav("Home", false), b = nav("Business", false), w = nav("Worker", false),
+                recruiter = nav("Recruiter", false), a = nav("About Us", false), contact = nav("Contact Us", true);
+        h.setOnAction(e -> navigate(h, "Home"));
+        b.setOnAction(e -> navigate(b, "Business"));
+        w.setOnAction(e -> navigate(w, "Worker"));
+        recruiter.setOnAction(e -> navigate(recruiter, "Recruiter"));
+        a.setOnAction(e -> navigate(a, "About Us"));
+        contact.setOnAction(e -> navigate(contact, "Contact Us"));
         HBox links = new HBox(12, h, b, w, recruiter, a, contact);
         links.setAlignment(Pos.CENTER);
         BorderPane bar = new BorderPane();
         bar.setLeft(brand);
         bar.setCenter(links);
         Button login = outline("Login"), signUp = primary("Sign Up");
-        login.setOnAction(e -> AppNavigator.adminLoginInProgress()); signUp.setOnAction(e -> AppNavigator.adminLoginInProgress());
+        login.setOnAction(e -> AppNavigator.adminLoginInProgress());
+        signUp.setOnAction(e -> AppNavigator.adminLoginInProgress());
         bar.setRight(new HBox(10, login, signUp));
         bar.setPadding(new Insets(16, 24, 14, 24));
         bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;"
                 + "-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
         return bar;
     }
+
     private void navigate(Button source, String destination) {
-        javafx.stage.Stage stage=(javafx.stage.Stage)source.getScene().getWindow();
-        switch(destination) {
+        javafx.stage.Stage stage = (javafx.stage.Stage) source.getScene().getWindow();
+        switch (destination) {
             case "Home" -> stage.setScene(new HomePage(stage).getHomeScene());
-            case "Business" -> stage.setScene(new BusinessPage().getBusinessScene(() -> stage.setScene(new HomePage(stage).getHomeScene()), () -> stage.setScene(new WorkerPage().getWorkerScene(() -> stage.setScene(new HomePage(stage).getHomeScene()), null))));
+            case "Business" -> stage.setScene(new BusinessPage().getBusinessScene(
+                    () -> stage.setScene(new HomePage(stage).getHomeScene()), () -> stage.setScene(new WorkerPage()
+                            .getWorkerScene(() -> stage.setScene(new HomePage(stage).getHomeScene()), null))));
             case "Worker" -> AppNavigator.signUp(stage, null);
-            case "Recruiter" -> stage.setScene(new com.dihadi.view.recruiter.SignUpRecruiter().getRecruiterSignUpScene(() -> stage.setScene(getContactScene(null, null, null, null))));
-            case "About Us" -> stage.setScene(new AboutUs().getAboutScene(() -> stage.setScene(new HomePage(stage).getHomeScene()), () -> stage.setScene(new WorkerPage().getWorkerScene(() -> stage.setScene(new HomePage(stage).getHomeScene()), null))));
-            default -> { }
+            case "Recruiter" -> stage.setScene(new com.dihadi.view.recruiter.SignUpRecruiter()
+                    .getRecruiterSignUpScene(() -> stage.setScene(getContactScene(null, null, null, null))));
+            case "About Us" ->
+                stage.setScene(new AboutUs().getAboutScene(() -> stage.setScene(new HomePage(stage).getHomeScene()),
+                        () -> stage.setScene(new WorkerPage()
+                                .getWorkerScene(() -> stage.setScene(new HomePage(stage).getHomeScene()), null))));
+            default -> {
+            }
         }
     }
-    private void openSignUp(Button source) { javafx.stage.Stage stage=(javafx.stage.Stage)source.getScene().getWindow(); javafx.scene.Scene previous=stage.getScene(); stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(() -> stage.setScene(previous))); }
+
+    private void openSignUp(Button source) {
+        javafx.stage.Stage stage = (javafx.stage.Stage) source.getScene().getWindow();
+        javafx.scene.Scene previous = stage.getScene();
+        stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(() -> stage.setScene(previous)));
+    }
 
     private StackPane contactHero() {
         StackPane hero = new StackPane();
@@ -71,8 +91,9 @@ public class ContactUs {
         panel.setMinHeight(350);
         panel.setMaxWidth(1050);
 
-        panel.setStyle("-fx-background-color:#f3e7ce;-fx-background-radius:25px;-fx-border-color:#d0c5af;-fx-border-radius:25px;"
-                + "-fx-effect:dropshadow(gaussian,rgba(58,48,39,.15),22,0,0,8px);");
+        panel.setStyle(
+                "-fx-background-color:#f3e7ce;-fx-background-radius:25px;-fx-border-color:#d0c5af;-fx-border-radius:25px;"
+                        + "-fx-effect:dropshadow(gaussian,rgba(58,48,39,.15),22,0,0,8px);");
         hero.getChildren().add(panel);
         StackPane.setAlignment(panel, Pos.CENTER);
         return hero;
@@ -171,7 +192,8 @@ public class ContactUs {
         Region gap = new Region();
         VBox.setVgrow(gap, Priority.ALWAYS);
         VBox box = new VBox(18,
-                label(title,"-fx-font-family:Georgia;-fx-font-size:32px;-fx-font-weight:700;-fx-text-fill:" + colour + ";"),
+                label(title,
+                        "-fx-font-family:Georgia;-fx-font-size:32px;-fx-font-weight:700;-fx-text-fill:" + colour + ";"),
                 label(copy, "-fx-font-family:Georgia;-fx-font-size:14px;-fx-text-fill:" + colour + ";"), gap, b);
         box.setAlignment(Pos.TOP_LEFT);
         box.setPadding(new Insets(40, 52, 36, 52));
