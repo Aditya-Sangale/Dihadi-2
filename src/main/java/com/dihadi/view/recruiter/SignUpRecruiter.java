@@ -130,11 +130,15 @@ public class SignUpRecruiter {
                 back.run();
         });
         Button submit = button("CREATE RECRUITER ACCOUNT", true);
+        Button loginLink = new Button("Already having account? Login");
+        loginLink.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:700;-fx-cursor:hand;");
+        loginLink.setOnAction(e -> ((javafx.stage.Stage) loginLink.getScene().getWindow()).setScene(new RecruiterLoginPage(back).getLoginScene()));
+        VBox actionArea = new VBox(10, loginLink); actionArea.setAlignment(Pos.CENTER_RIGHT);
         HBox actions = new HBox(14, backButton, submit);
         actions.setAlignment(Pos.CENTER_RIGHT);
         VBox card = new VBox(22,
                 text("Personal Details", "-fx-font-size:25px;-fx-font-weight:700;-fx-text-fill:#1f1b13;"), divider(),
-                fields, actions);
+                fields, actionArea, actions);
         card.setMaxWidth(600);
         card.setPadding(new Insets(32, 42, 34, 42));
         card.setStyle(
