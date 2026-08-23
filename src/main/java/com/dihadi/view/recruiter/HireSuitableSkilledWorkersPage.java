@@ -165,7 +165,10 @@ public class HireSuitableSkilledWorkersPage {
                                 stage.setScene(new ElectricianResultsPage().getElectricianScene(
                                                 () -> stage.setScene(getHireWorkersScene(
                                                                 () -> AppNavigator.open(stage, "Home")))));
-                        } else if ("Carpenter".equals(name)) {
+                        } else if ("Site Supervisor".equals(name)) {
+                stage.setScene(new SiteSupervisorResultsPage().getSiteSupervisorScene(
+                        () -> stage.setScene(getHireWorkersScene(() -> AppNavigator.open(stage, "Home")))));
+            } else if ("Carpenter".equals(name)) {
                                 stage.setScene(new CarpenterResultsPage().getCarpenterScene(
                                                 () -> stage.setScene(getHireWorkersScene(
                                                                 () -> AppNavigator.open(stage, "Home")))));

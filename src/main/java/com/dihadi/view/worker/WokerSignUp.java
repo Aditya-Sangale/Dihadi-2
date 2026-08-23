@@ -183,9 +183,9 @@ public class WokerSignUp {
         submit.setStyle(
                 "-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#231b00;-fx-font-size:18px;-fx-font-weight:700;-fx-padding:13px;-fx-cursor:hand;");
         submit.setOnAction(event -> submit(consent.isSelected()));
-        Button login = new Button("Already have an account? Login");
+        Button login = new Button("Already having account? Login");
         login.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
-        login.setOnAction(event -> com.dihadi.view.AppNavigator.login());
+        login.setOnAction(event -> ((javafx.stage.Stage) login.getScene().getWindow()).setScene(new WorkerLoginPage(backAction).getLoginScene()));
         VBox actions = new VBox(18, consent, submit, login);
         actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(22, 0, 0, 0));
