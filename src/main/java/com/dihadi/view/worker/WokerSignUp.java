@@ -3,6 +3,7 @@ package com.dihadi.view.worker;
 import java.io.File;
 
 import com.dihadi.controller.WorkerController;
+import com.dihadi.view.AppNavigator;
 
 import javafx.beans.binding.Bindings;
 import javafx.animation.KeyFrame;
@@ -88,21 +89,10 @@ public class WokerSignUp {
         back.setText("<");
         back.setStyle(
                 "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:18px;-fx-font-weight:800;-fx-padding:7px 14px;-fx-cursor:hand;");
-        back.setOnAction(event -> {
-            if (backAction != null)
-                backAction.run();
-        });
+        back.setOnAction(event -> AppNavigator.open((Stage) back.getScene().getWindow(), "Home"));
         Label personalDetails = label("PERSONAL DETAILS",
                 "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:11px 16px;");
-        Button skipTrial = new Button("SKIP FOR TRIAL");
-        skipTrial.setStyle(
-                "-fx-background-color:transparent;-fx-background-radius:12px;-fx-border-color:#735c00;-fx-border-radius:12px;"
-                        + "-fx-text-fill:#735c00;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:10px 14px;-fx-cursor:hand;");
-        skipTrial.setOnAction(event -> com.dihadi.view.AppNavigator.openFooterLink(
-                (javafx.stage.Stage) skipTrial.getScene().getWindow(), "Worker Categories"));
-        Region headingSpacer = new Region();
-        HBox.setHgrow(headingSpacer, Priority.ALWAYS);
-        HBox formHeading = new HBox(10, back, personalDetails, headingSpacer, skipTrial);
+        HBox formHeading = new HBox(10, back, personalDetails);
         formHeading.setAlignment(Pos.CENTER_LEFT);
         VBox card = new VBox(22, formHeading, createPhotoPicker(), createFields(), createActions());
         card.setMaxWidth(560);
@@ -188,8 +178,10 @@ public class WokerSignUp {
         submit.setOnAction(event -> submit(consent.isSelected()));
         Button login = new Button("Already having account? Login");
         login.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
-        login.setOnAction(event -> ((javafx.stage.Stage) login.getScene().getWindow())
-                .setScene(new WorkerLoginPage(backAction).getLoginScene()));
+        login.setOnAction(event -> {
+            Stage stage = (Stage) login.getScene().getWindow();
+            stage.setScene(new WorkerLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
+        });
         VBox actions = new VBox(18, consent, submit, login);
         actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(22, 0, 0, 0));
@@ -281,7 +273,7 @@ public class WokerSignUp {
                     wageValue());
 
             Stage stage = (Stage) firstName.getScene().getWindow();
-            stage.setScene(new WorkerLoginPage(backAction).getLoginScene());
+            stage.setScene(new WorkerLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
         } catch (Exception e) {
             e.printStackTrace();
             message(Alert.AlertType.ERROR, "Error",
