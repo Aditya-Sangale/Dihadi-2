@@ -13,5 +13,6 @@
         "d:\\MY PROJECTS\\Java Project\\javafx-sdk-21.0.12\\lib\\javafx-swt.jar"
     ],
     "java.configuration.updateBuildConfiguration": "interactive",
-    "java.debug.settings.onBuildFailureProceed": true
+    "java.debug.settings.onBuildFailureProceed": true,
+    "java.compile.nullAnalysis.mode": "automatic"
 }
