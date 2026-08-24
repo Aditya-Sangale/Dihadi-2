@@ -1,4 +1,5 @@
 package com.dihadi;
+
 import com.dihadi.view.HomePage;
 import javafx.application.Application;
 

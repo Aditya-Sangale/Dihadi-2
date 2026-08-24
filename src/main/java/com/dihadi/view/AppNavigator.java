@@ -38,7 +38,7 @@ public final class AppNavigator {
     public static void login() {
         for (Window window : Window.getWindows()) {
             if (window.isFocused() && window instanceof Stage stage) {
-                signUp(stage, null);
+                stage.setScene(new com.dihadi.view.worker.WorkerLoginPage(() -> open(stage, "Home")).getLoginScene());
                 return;
             }
         }
