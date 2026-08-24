@@ -2,6 +2,7 @@ package com.dihadi.view;
 
 import com.dihadi.view.worker.WokerSignUp;
 import com.dihadi.view.recruiter.SignUpRecruiter;
+import com.dihadi.view.recruiter.RecruiterPage;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
@@ -10,7 +11,8 @@ import javafx.stage.Stage;
 
 /** Shared navigation and account actions for every DIHADI page. */
 public final class AppNavigator {
-    private AppNavigator() { }
+    private AppNavigator() {
+    }
 
     public static void open(Stage stage, String destination) {
         switch (destination) {
@@ -23,7 +25,7 @@ public final class AppNavigator {
             case "Contact Us" -> stage.setScene(new ContactUs().getContactScene(
                     () -> open(stage, "Home"), () -> open(stage, "Business"),
                     () -> open(stage, "Worker"), () -> open(stage, "About Us")));
-            case "Recruiter" -> stage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(
+            case "Recruiter" -> stage.setScene(new RecruiterPage().getRecruiterScene(
                     () -> open(stage, "Home")));
             default -> throw new IllegalArgumentException("Unknown destination: " + destination);
         }
@@ -43,7 +45,10 @@ public final class AppNavigator {
         }
     }
 
-    /** Wires a page-specific header to the same destination map used by the main pages. */
+    /**
+     * Wires a page-specific header to the same destination map used by the main
+     * pages.
+     */
     public static void activateNavigation(HBox navigation) {
         for (javafx.scene.Node node : navigation.getChildren()) {
             if (node instanceof Button button) {
@@ -54,7 +59,10 @@ public final class AppNavigator {
 
     public static void information(String title, String text) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(text); alert.show();
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(text);
+        alert.show();
     }
 
     /** Header account controls are reserved for the upcoming admin portal. */

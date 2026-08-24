@@ -35,17 +35,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-public class WelcomePage extends Application{
+public class WelcomePage extends Application {
     private static final double SCENE_WIDTH = 1400;
     private static final double SCENE_HEIGHT = 780;
     private MediaPlayer welcomePlayer;
     private boolean transitioning;
 
     @Override
-    public void start(Stage Homestage){
+    public void start(Stage Homestage) {
 
         Label header = new Label("Welcome to Dihadi");
-        header.setStyle("-fx-font-size: 32px; -fx-font-weight: 800; -fx-text-fill: #111111; -fx-letter-spacing: 1.0px; -fx-font-family: 'Segoe UI', sans-serif;");
+        header.setStyle(
+                "-fx-font-size: 32px; -fx-font-weight: 800; -fx-text-fill: #111111; -fx-letter-spacing: 1.0px; -fx-font-family: 'Segoe UI', sans-serif;");
 
         Label leftLine = new Label("┃");
         leftLine.setStyle("-fx-text-fill: #111111; -fx-font-size: 18px; -fx-font-weight: 700;");
@@ -78,7 +79,8 @@ public class WelcomePage extends Application{
         headerPane.setCenter(titleWrap);
         headerPane.setPadding(new Insets(16, 24, 14, 24));
         headerPane.setPrefWidth(Double.MAX_VALUE);
-        headerPane.setStyle("-fx-background-color: #f3e7ce; -fx-border-color: #d0c5af; -fx-border-width: 0 0 1px 0; -fx-effect: dropshadow(gaussian, rgba(58,48,39,0.08), 10, 0.28, 0, 1.5px);");
+        headerPane.setStyle(
+                "-fx-background-color: #f3e7ce; -fx-border-color: #d0c5af; -fx-border-width: 0 0 1px 0; -fx-effect: dropshadow(gaussian, rgba(58,48,39,0.08), 10, 0.28, 0, 1.5px);");
 
         VBox topBar = new VBox(headerPane);
         topBar.setPadding(new Insets(0, 0, 0, 0));
@@ -106,14 +108,17 @@ public class WelcomePage extends Application{
 
         StackPane videoContainer = new StackPane(mediaView);
         videoContainer.setPadding(new Insets(30, 0, 0, 0));
-        videoContainer.setStyle("-fx-background-color: #fff8f0; -fx-background-radius: 24px; -fx-border-color:#d0c5af; -fx-border-radius:24px; -fx-effect: dropshadow(gaussian, rgba(58,48,39,0.12), 24, 0, 0, 8);");
+        videoContainer.setStyle(
+                "-fx-background-color: #fff8f0; -fx-background-radius: 24px; -fx-border-color:#d0c5af; -fx-border-radius:24px; -fx-effect: dropshadow(gaussian, rgba(58,48,39,0.12), 24, 0, 0, 8);");
 
         // Short project introduction shown beside the welcome video.
         Label sideTitle = new Label("WORK MADE SIMPLE");
-        sideTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #111111; -fx-font-family: 'Segoe UI', sans-serif;");
+        sideTitle.setStyle(
+                "-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #111111; -fx-font-family: 'Segoe UI', sans-serif;");
 
         Label lineOne = new Label("Find skilled workers for every job.");
-        lineOne.setStyle("-fx-font-size: 17px; -fx-font-weight: 700; -fx-text-fill: #735c00; -fx-font-family: 'Segoe UI Semibold', sans-serif;");
+        lineOne.setStyle(
+                "-fx-font-size: 17px; -fx-font-weight: 700; -fx-text-fill: #735c00; -fx-font-family: 'Segoe UI Semibold', sans-serif;");
 
         Label lineTwo = new Label("Connect with trusted teams in your area.");
         lineTwo.setStyle("-fx-font-size: 15px; -fx-text-fill: #333333; -fx-font-family: 'Verdana', sans-serif;");
@@ -126,7 +131,8 @@ public class WelcomePage extends Application{
         Label lineFour = new Label("Dihadi keeps workers and projects moving forward.");
         lineFour.setWrapText(true);
         lineFour.setMaxWidth(360);
-        lineFour.setStyle("-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #111111; -fx-font-family: 'Trebuchet MS', sans-serif;");
+        lineFour.setStyle(
+                "-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #111111; -fx-font-family: 'Trebuchet MS', sans-serif;");
 
         Label lineFive = new Label("Post requirements and reach dependable local talent.");
         lineFive.setWrapText(true);
@@ -136,7 +142,8 @@ public class WelcomePage extends Application{
         Label lineSix = new Label("Build every day with confidence, clarity, and trust.");
         lineSix.setWrapText(true);
         lineSix.setMaxWidth(360);
-        lineSix.setStyle("-fx-font-size: 15px; -fx-font-style: italic; -fx-text-fill: #735c00; -fx-font-family: 'Georgia', serif;");
+        lineSix.setStyle(
+                "-fx-font-size: 15px; -fx-font-style: italic; -fx-text-fill: #735c00; -fx-font-family: 'Georgia', serif;");
 
         Label bullet1 = new Label("• Professional workforce coordination for every site");
         bullet1.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-font-family: 'Lucida Sans', sans-serif;");
@@ -146,24 +153,30 @@ public class WelcomePage extends Application{
         bullet3.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333; -fx-font-family: 'Lucida Sans', sans-serif;");
 
         Label highlightTitle = new Label("Core strengths");
-        highlightTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 800; -fx-text-fill: #735c00; -fx-font-family: 'Georgia', serif;");
+        highlightTitle.setStyle(
+                "-fx-font-size: 18px; -fx-font-weight: 800; -fx-text-fill: #735c00; -fx-font-family: 'Georgia', serif;");
 
         Label highlight1 = new Label("Skilled personnel ready for every job phase.");
         highlight1.setWrapText(true);
-        highlight1.setStyle("-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #2d2d2d; -fx-font-family: 'Arial', sans-serif;");
+        highlight1.setStyle(
+                "-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #2d2d2d; -fx-font-family: 'Arial', sans-serif;");
 
         Label highlight2 = new Label("Responsive support that keeps projects moving.");
         highlight2.setWrapText(true);
-        highlight2.setStyle("-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #2d2d2d; -fx-font-family: 'Arial', sans-serif;");
+        highlight2.setStyle(
+                "-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #2d2d2d; -fx-font-family: 'Arial', sans-serif;");
 
         Button actionButton = new Button("Get Started");
-        actionButton.setStyle("-fx-font-size: 15px; -fx-font-weight: 700; -fx-text-fill: #342f28; -fx-background-color: #d4af37; -fx-background-radius: 999px; -fx-padding: 12 26 12 26; -fx-font-family: 'Arial', sans-serif;");
+        actionButton.setStyle(
+                "-fx-font-size: 15px; -fx-font-weight: 700; -fx-text-fill: #342f28; -fx-background-color: #d4af37; -fx-background-radius: 999px; -fx-padding: 12 26 12 26; -fx-font-family: 'Arial', sans-serif;");
 
-        VBox sidePanel = new VBox(14, sideTitle, lineOne, lineTwo, lineThree, lineFour, lineFive, lineSix, actionButton);
+        VBox sidePanel = new VBox(14, sideTitle, lineOne, lineTwo, lineThree, lineFour, lineFive, lineSix,
+                actionButton);
         sidePanel.setAlignment(Pos.CENTER_LEFT);
         sidePanel.setPadding(new Insets(30, 30, 30, 30));
         sidePanel.setPrefWidth(420);
-        sidePanel.setStyle("-fx-background-color: #fff8f0; -fx-border-color: #d0c5af; -fx-border-width: 1px; -fx-background-radius: 24px; -fx-border-radius: 24px;");
+        sidePanel.setStyle(
+                "-fx-background-color: #fff8f0; -fx-border-color: #d0c5af; -fx-border-width: 1px; -fx-background-radius: 24px; -fx-border-radius: 24px;");
 
         HBox mainContent = new HBox(24, videoContainer, sidePanel);
         mainContent.setAlignment(Pos.CENTER);
@@ -188,26 +201,27 @@ public class WelcomePage extends Application{
                         false,
                         false,
                         true,
-                        true
-                );
+                        true);
                 BackgroundImage bgImage = new BackgroundImage(
                         backgroundImage,
                         BackgroundRepeat.NO_REPEAT,
                         BackgroundRepeat.NO_REPEAT,
                         BackgroundPosition.CENTER,
-                        bgSize
-                );
+                        bgSize);
                 BackgroundFill overlay = new BackgroundFill(Color.web("#00000022"), CornerRadii.EMPTY, Insets.EMPTY);
-                root.setBackground(new Background(new BackgroundFill[]{overlay}, new BackgroundImage[]{bgImage}));
+                root.setBackground(new Background(new BackgroundFill[] { overlay }, new BackgroundImage[] { bgImage }));
             } else {
-                root.setBackground(new Background(new BackgroundFill(Color.web("#e9e6da"), CornerRadii.EMPTY, Insets.EMPTY)));
+                root.setBackground(
+                        new Background(new BackgroundFill(Color.web("#e9e6da"), CornerRadii.EMPTY, Insets.EMPTY)));
             }
         } catch (Exception e) {
-            root.setBackground(new Background(new BackgroundFill(Color.web("#e9e6da"), CornerRadii.EMPTY, Insets.EMPTY)));
+            root.setBackground(
+                    new Background(new BackgroundFill(Color.web("#e9e6da"), CornerRadii.EMPTY, Insets.EMPTY)));
         }
 
         Scene scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
-        // Capture clicks anywhere on the welcome UI, including the video and text panel.
+        // Capture clicks anywhere on the welcome UI, including the video and text
+        // panel.
         root.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> showNextPage(Homestage));
         Homestage.setScene(scene);
         Homestage.setFullScreen(false);
@@ -229,7 +243,8 @@ public class WelcomePage extends Application{
         stage.setWidth(SCENE_WIDTH);
         stage.setHeight(SCENE_HEIGHT);
         stage.setScene(new HomePage(stage).getHomeScene());
-        // Apply the shared size after the new scene has been attached. JavaFX can otherwise restore
+        // Apply the shared size after the new scene has been attached. JavaFX can
+        // otherwise restore
         // the previous window bounds while leaving full-screen mode.
         Platform.runLater(() -> {
             stage.setWidth(SCENE_WIDTH);
@@ -246,6 +261,7 @@ public class WelcomePage extends Application{
             welcomePlayer = null;
         }
     }
+
     private Path resolveResourceToFile(String resourcePath, String suffix) throws IOException, URISyntaxException {
         var resource = getClass().getResource(resourcePath);
         if (resource == null) {
