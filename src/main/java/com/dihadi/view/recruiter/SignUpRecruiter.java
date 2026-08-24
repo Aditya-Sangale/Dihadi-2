@@ -1,5 +1,7 @@
 package com.dihadi.view.recruiter;
 
+import com.dihadi.controller.RecruiterController;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
@@ -21,6 +23,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /** Recruiter registration form, matching the supplied sign-up design. */
@@ -30,7 +33,21 @@ public class SignUpRecruiter {
             "/assets/images/recruiter/slide-04.jpeg", "/assets/images/recruiter/slide-05.jpeg" };
     private Timeline rotation;
 
+    // Form field references for Firestore submission
+    private TextField firstNameField;
+    private TextField middleNameField;
+    private TextField lastNameField;
+    private ComboBox<String> genderField;
+    private TextField mobileField;
+    private TextField alternateMobileField;
+    private TextField emailField;
+    private TextField alternateEmailField;
+    private TextField companyNameField;
+    private ComboBox<String> businessTypeField;
+    private Runnable backAction;
+
     public Scene getRecruiterSignUpScene(Runnable back) {
+        this.backAction = back;
         VBox formColumn = new VBox(28, identity(), introduction(), registrationCard(back));
         formColumn.setAlignment(Pos.TOP_CENTER);
         formColumn.setPrefWidth(700);
@@ -112,17 +129,60 @@ public class SignUpRecruiter {
         right.setPercentWidth(50);
         right.setHgrow(Priority.ALWAYS);
         fields.getColumnConstraints().addAll(left, right);
-        fields.add(field("First Name *required", "e.g. Ram"), 0, 0, 2, 1);
-        fields.add(field("Middle Name", ""), 0, 1);
-        fields.add(field("Last Name", ""), 1, 1);
-        fields.add(choice("Gender", "Select Gender", "Male", "Female", "Other"), 0, 2, 2, 1);
-        fields.add(field("Mobile Number\n*required", "+91     00000 0000"), 0, 3);
-        fields.add(field("Alternate Mobile", "+91     00000 0000"), 1, 3);
-        fields.add(field("Email Address *required", "name@example.com"), 0, 4);
-        fields.add(field("Alternate Email", "Optional"), 1, 4);
-        fields.add(field("Company / Organisation Name *", "Your company name"), 0, 5, 2, 1);
-        fields.add(choice("Business Type *", "Select business type", "Builder", "Developer", "General Contractor",
-                "Sub-contractor"), 0, 6, 2, 1);
+
+        firstNameField = new TextField();
+        firstNameField.setPromptText("e.g. Ram");
+        firstNameField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("First Name *required", labelStyle()), firstNameField), 0, 0, 2, 1);
+
+        middleNameField = new TextField();
+        middleNameField.setPromptText("");
+        middleNameField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("Middle Name", labelStyle()), middleNameField), 0, 1);
+
+        lastNameField = new TextField();
+        lastNameField.setPromptText("");
+        lastNameField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("Last Name", labelStyle()), lastNameField), 1, 1);
+
+        genderField = new ComboBox<>();
+        genderField.getItems().addAll("Male", "Female", "Other");
+        genderField.setPromptText("Select Gender");
+        genderField.setMaxWidth(Double.MAX_VALUE);
+        genderField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("Gender", labelStyle()), genderField), 0, 2, 2, 1);
+
+        mobileField = new TextField();
+        mobileField.setPromptText("+91     00000 0000");
+        mobileField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("Mobile Number\n*required", labelStyle()), mobileField), 0, 3);
+
+        alternateMobileField = new TextField();
+        alternateMobileField.setPromptText("+91     00000 0000");
+        alternateMobileField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("Alternate Mobile", labelStyle()), alternateMobileField), 1, 3);
+
+        emailField = new TextField();
+        emailField.setPromptText("name@example.com");
+        emailField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("Email Address *required", labelStyle()), emailField), 0, 4);
+
+        alternateEmailField = new TextField();
+        alternateEmailField.setPromptText("Optional");
+        alternateEmailField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("Alternate Email", labelStyle()), alternateEmailField), 1, 4);
+
+        companyNameField = new TextField();
+        companyNameField.setPromptText("Your company name");
+        companyNameField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("Company / Organisation Name *", labelStyle()), companyNameField), 0, 5, 2, 1);
+
+        businessTypeField = new ComboBox<>();
+        businessTypeField.getItems().addAll("Builder", "Developer", "General Contractor", "Sub-contractor");
+        businessTypeField.setPromptText("Select business type");
+        businessTypeField.setMaxWidth(Double.MAX_VALUE);
+        businessTypeField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("Business Type *", labelStyle()), businessTypeField), 0, 6, 2, 1);
 
         Button backButton = button("←  BACK", false);
         backButton.setOnAction(e -> {
@@ -137,10 +197,14 @@ public class SignUpRecruiter {
         skipForNow.setOnAction(e -> ((javafx.stage.Stage) skipForNow.getScene().getWindow()).setScene(
                 new RecruiterPage().getRecruiterScene(() -> { if (back != null) back.run(); })));
         Button submit = button("CREATE RECRUITER ACCOUNT", true);
+        submit.setOnAction(e -> submitRecruiter());
         Button loginLink = new Button("Already having account? Login");
-        loginLink.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:700;-fx-cursor:hand;");
-        loginLink.setOnAction(e -> ((javafx.stage.Stage) loginLink.getScene().getWindow()).setScene(new RecruiterLoginPage(back).getLoginScene()));
-        VBox actionArea = new VBox(10, loginLink); actionArea.setAlignment(Pos.CENTER_RIGHT);
+        loginLink.setStyle(
+                "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:700;-fx-cursor:hand;");
+        loginLink.setOnAction(e -> ((javafx.stage.Stage) loginLink.getScene().getWindow())
+                .setScene(new RecruiterLoginPage(back).getLoginScene()));
+        VBox actionArea = new VBox(10, loginLink);
+        actionArea.setAlignment(Pos.CENTER_RIGHT);
         Region headingSpacer = new Region();
         HBox.setHgrow(headingSpacer, Priority.ALWAYS);
         HBox formHeading = new HBox(10, sectionBack, personalDetails, headingSpacer, skipForNow);
@@ -155,6 +219,45 @@ public class SignUpRecruiter {
         card.setStyle(
                 "-fx-background-color:#fffdf9;-fx-background-radius:18px;-fx-border-color:#ddd4c6;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),16,0,0,5px);");
         return card;
+    }
+
+    private void submitRecruiter() {
+        if (firstNameField.getText().isBlank() || mobileField.getText().isBlank()
+                || emailField.getText().isBlank() || companyNameField.getText().isBlank()) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.WARNING);
+            alert.setTitle("Complete your details");
+            alert.setHeaderText(null);
+            alert.setContentText("Please fill in all required fields (First Name, Mobile, Email, Company Name).");
+            alert.show();
+            return;
+        }
+
+        try {
+            RecruiterController controller = new RecruiterController();
+            controller.addRecruiter(
+                    firstNameField.getText().trim(),
+                    middleNameField.getText().trim(),
+                    lastNameField.getText().trim(),
+                    genderField.getValue() != null ? genderField.getValue() : "",
+                    mobileField.getText().trim(),
+                    alternateMobileField.getText().trim(),
+                    emailField.getText().trim(),
+                    alternateEmailField.getText().trim(),
+                    companyNameField.getText().trim(),
+                    businessTypeField.getValue() != null ? businessTypeField.getValue() : "");
+
+            Stage stage = (Stage) firstNameField.getScene().getWindow();
+            stage.setScene(new RecruiterLoginPage(backAction).getLoginScene());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to create account. Please check your internet connection and try again.");
+            alert.show();
+        }
     }
 
     private VBox field(String label, String prompt) {

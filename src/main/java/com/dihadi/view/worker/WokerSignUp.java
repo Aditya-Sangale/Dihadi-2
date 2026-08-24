@@ -2,6 +2,8 @@ package com.dihadi.view.worker;
 
 import java.io.File;
 
+import com.dihadi.controller.WorkerController;
+
 import javafx.beans.binding.Bindings;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -32,6 +34,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /** Worker personal-details form opened from the Worker page. */
@@ -185,7 +188,8 @@ public class WokerSignUp {
         submit.setOnAction(event -> submit(consent.isSelected()));
         Button login = new Button("Already having account? Login");
         login.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
-        login.setOnAction(event -> ((javafx.stage.Stage) login.getScene().getWindow()).setScene(new WorkerLoginPage(backAction).getLoginScene()));
+        login.setOnAction(event -> ((javafx.stage.Stage) login.getScene().getWindow())
+                .setScene(new WorkerLoginPage(backAction).getLoginScene()));
         VBox actions = new VBox(18, consent, submit, login);
         actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(22, 0, 0, 0));
@@ -260,8 +264,29 @@ public class WokerSignUp {
             message(Alert.AlertType.WARNING, "Consent required", "Please authorise notifications to continue.");
             return;
         }
-        message(Alert.AlertType.INFORMATION, "Profile created",
-                "Thanks, " + firstName.getText().trim() + ". Your worker profile is ready for the next step.");
+
+        try {
+            WorkerController controller = new WorkerController();
+            controller.addWorker(
+                    firstName.getText().trim(),
+                    middleName.getText().trim(),
+                    lastName.getText().trim(),
+                    mobile.getText().trim(),
+                    alternateMobile.getText().trim(),
+                    email.getText().trim(),
+                    gender.getValue(),
+                    dateOfBirth.getValue().toString(),
+                    education.getValue(),
+                    experience.getValue(),
+                    wageValue());
+
+            Stage stage = (Stage) firstName.getScene().getWindow();
+            stage.setScene(new WorkerLoginPage(backAction).getLoginScene());
+        } catch (Exception e) {
+            e.printStackTrace();
+            message(Alert.AlertType.ERROR, "Error",
+                    "Failed to save profile. Please check your internet connection and try again.");
+        }
     }
 
     private int wageValue() {
