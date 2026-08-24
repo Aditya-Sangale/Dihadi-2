@@ -49,13 +49,15 @@ public class SignUpRecruiter {
         photo.setPrefSize(540, 455);
         photo.setMaxSize(540, 455);
         photo.setPadding(new Insets(12));
-        photo.setStyle("-fx-background-color:#fff8f0;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-radius:18px;"
-                + "-fx-effect:dropshadow(gaussian,rgba(58,48,39,.16),18,0,0,7px);");
+        photo.setStyle(
+                "-fx-background-color:#fff8f0;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-radius:18px;"
+                        + "-fx-effect:dropshadow(gaussian,rgba(58,48,39,.16),18,0,0,7px);");
         Label eyebrow = text("DIHADI RECRUITER COMMUNITY",
                 "-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:#d4af37;-fx-letter-spacing:1.5px;");
         Label headline = text("Build a team\nthat delivers.",
                 "-fx-font-size:32px;-fx-font-weight:800;-fx-text-fill:#fff8f0;-fx-line-spacing:4px;");
-        Label copy = text("Your business details help DIHADI connect you with verified, skilled professionals for every project.",
+        Label copy = text(
+                "Your business details help DIHADI connect you with verified, skilled professionals for every project.",
                 "-fx-font-size:15px;-fx-text-fill:#f8f0e2;-fx-opacity:.86;");
         copy.setWrapText(true);
         copy.setMaxWidth(500);
@@ -127,12 +129,27 @@ public class SignUpRecruiter {
             if (back != null)
                 back.run();
         });
+        Button sectionBack = new Button("<");
+        sectionBack.setStyle("-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:18px;-fx-font-weight:800;-fx-padding:7px 14px;-fx-cursor:hand;");
+        sectionBack.setOnAction(e -> { if (back != null) back.run(); });
+        Label personalDetails = text("PERSONAL DETAILS", "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:11px 16px;");
+        Button skipForNow = button("SKIP FOR NOW", false);
+        skipForNow.setOnAction(e -> ((javafx.stage.Stage) skipForNow.getScene().getWindow()).setScene(
+                new RecruiterPage().getRecruiterScene(() -> { if (back != null) back.run(); })));
         Button submit = button("CREATE RECRUITER ACCOUNT", true);
-        HBox actions = new HBox(14, backButton, submit);
+        Button loginLink = new Button("Already having account? Login");
+        loginLink.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:700;-fx-cursor:hand;");
+        loginLink.setOnAction(e -> ((javafx.stage.Stage) loginLink.getScene().getWindow()).setScene(new RecruiterLoginPage(back).getLoginScene()));
+        VBox actionArea = new VBox(10, loginLink); actionArea.setAlignment(Pos.CENTER_RIGHT);
+        Region headingSpacer = new Region();
+        HBox.setHgrow(headingSpacer, Priority.ALWAYS);
+        HBox formHeading = new HBox(10, sectionBack, personalDetails, headingSpacer, skipForNow);
+        formHeading.setAlignment(Pos.CENTER_LEFT);
+        HBox actions = new HBox(14, submit);
         actions.setAlignment(Pos.CENTER_RIGHT);
         VBox card = new VBox(22,
-                text("Personal Details", "-fx-font-size:25px;-fx-font-weight:700;-fx-text-fill:#1f1b13;"), divider(),
-                fields, actions);
+                formHeading, divider(),
+                fields, actionArea, actions);
         card.setMaxWidth(600);
         card.setPadding(new Insets(32, 42, 34, 42));
         card.setStyle(

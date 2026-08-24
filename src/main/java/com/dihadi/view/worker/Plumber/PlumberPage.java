@@ -125,7 +125,8 @@ public class PlumberPage {
                 home.run();
         });
         Button w = b("Worker");
-        w.setStyle("-fx-background-color:transparent;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#735c00;-fx-border-color:#735c00;-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;");
+        w.setStyle(
+                "-fx-background-color:transparent;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#735c00;-fx-border-color:#735c00;-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;");
         w.setOnAction(e -> {
             if (back != null)
                 back.run();
@@ -140,8 +141,10 @@ public class PlumberPage {
         com.dihadi.view.AppNavigator.activateNavigation(navigation);
         Button login = o("Login"), signUp = pr("Sign Up");
         login.setOnAction(e -> com.dihadi.view.AppNavigator.login());
-        signUp.setOnAction(e -> com.dihadi.view.AppNavigator.signUp((Stage) signUp.getScene().getWindow(), () -> com.dihadi.view.AppNavigator.open((Stage) signUp.getScene().getWindow(), "Worker")));
-        login.setMouseTransparent(true); signUp.setMouseTransparent(true);
+        signUp.setOnAction(e -> com.dihadi.view.AppNavigator.signUp((Stage) signUp.getScene().getWindow(),
+                () -> com.dihadi.view.AppNavigator.open((Stage) signUp.getScene().getWindow(), "Worker")));
+        login.setMouseTransparent(true);
+        signUp.setMouseTransparent(true);
         HBox account = new HBox(12, login, signUp);
         account.setAlignment(Pos.CENTER_RIGHT);
         BorderPane p = new BorderPane();
@@ -175,13 +178,15 @@ public class PlumberPage {
 
     private Button b(String t) {
         Button x = new Button(t);
-        x.setStyle("-fx-background-color:transparent;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#4d4635;-fx-border-color:transparent;-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;");
+        x.setStyle(
+                "-fx-background-color:transparent;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#4d4635;-fx-border-color:transparent;-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;");
         return x;
     }
 
     private Button pr(String t) {
         Button x = new Button(t);
-        x.setStyle("-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#342f28;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:11px 24px;-fx-cursor:hand;");
+        x.setStyle(
+                "-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#342f28;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:11px 24px;-fx-cursor:hand;");
         return x;
     }
 
