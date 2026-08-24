@@ -228,27 +228,12 @@ public class LoginPage {
                                 return;
                             }
 
-                            // Look up user in Firestore
-                            String mobile10 = finalPhone.startsWith("+91")
-                                    ? finalPhone.substring(3)
-                                    : finalPhone;
                             Stage stage = (Stage) continueButton.getScene().getWindow();
+                            Runnable homeNav = (back != null) ? back : () -> AppNavigator.open(stage, "Home");
                             if (recruiter) {
-                                RecruiterDao recruiterDao = new RecruiterDao();
-                                Recruiter rec = recruiterDao.getRecruiter(mobile10);
-                                if (rec != null) {
-                                    stage.setScene(new com.dihadi.view.recruiter.HireSuitableSkilledWorkersPage().getHireWorkersScene(back));
-                                } else {
-                                    stage.setScene(new com.dihadi.view.recruiter.SignUpRecruiter().getRecruiterSignUpScene(back));
-                                }
+                                stage.setScene(new com.dihadi.view.recruiter.RecruiterPage().getRecruiterScene(homeNav));
                             } else {
-                                WorkerDao workerDao = new WorkerDao();
-                                Worker worker = workerDao.getWorker(mobile10);
-                                if (worker != null) {
-                                    stage.setScene(new com.dihadi.view.WorkerPage().getWorkerScene(back));
-                                } else {
-                                    stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(back));
-                                }
+                                stage.setScene(new com.dihadi.view.WorkerPage().getWorkerScene(homeNav));
                             }
                         });
                     }).start();

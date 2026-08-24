@@ -1,6 +1,7 @@
 package com.dihadi.view.recruiter;
 
 import com.dihadi.controller.RecruiterController;
+import com.dihadi.view.AppNavigator;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -185,29 +186,23 @@ public class SignUpRecruiter {
         fields.add(new VBox(8, text("Business Type *", labelStyle()), businessTypeField), 0, 6, 2, 1);
 
         Button backButton = button("←  BACK", false);
-        backButton.setOnAction(e -> {
-            if (back != null)
-                back.run();
-        });
+        backButton.setOnAction(e -> AppNavigator.open((Stage) backButton.getScene().getWindow(), "Home"));
         Button sectionBack = new Button("<");
         sectionBack.setStyle("-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:18px;-fx-font-weight:800;-fx-padding:7px 14px;-fx-cursor:hand;");
-        sectionBack.setOnAction(e -> { if (back != null) back.run(); });
+        sectionBack.setOnAction(e -> AppNavigator.open((Stage) sectionBack.getScene().getWindow(), "Home"));
         Label personalDetails = text("PERSONAL DETAILS", "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:11px 16px;");
-        Button skipForNow = button("SKIP FOR NOW", false);
-        skipForNow.setOnAction(e -> ((javafx.stage.Stage) skipForNow.getScene().getWindow()).setScene(
-                new RecruiterPage().getRecruiterScene(() -> { if (back != null) back.run(); })));
         Button submit = button("CREATE RECRUITER ACCOUNT", true);
         submit.setOnAction(e -> submitRecruiter());
         Button loginLink = new Button("Already having account? Login");
         loginLink.setStyle(
                 "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:700;-fx-cursor:hand;");
-        loginLink.setOnAction(e -> ((javafx.stage.Stage) loginLink.getScene().getWindow())
-                .setScene(new RecruiterLoginPage(back).getLoginScene()));
+        loginLink.setOnAction(e -> {
+            Stage stage = (Stage) loginLink.getScene().getWindow();
+            stage.setScene(new RecruiterLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
+        });
         VBox actionArea = new VBox(10, loginLink);
         actionArea.setAlignment(Pos.CENTER_RIGHT);
-        Region headingSpacer = new Region();
-        HBox.setHgrow(headingSpacer, Priority.ALWAYS);
-        HBox formHeading = new HBox(10, sectionBack, personalDetails, headingSpacer, skipForNow);
+        HBox formHeading = new HBox(10, sectionBack, personalDetails);
         formHeading.setAlignment(Pos.CENTER_LEFT);
         HBox actions = new HBox(14, submit);
         actions.setAlignment(Pos.CENTER_RIGHT);
@@ -248,7 +243,7 @@ public class SignUpRecruiter {
                     businessTypeField.getValue() != null ? businessTypeField.getValue() : "");
 
             Stage stage = (Stage) firstNameField.getScene().getWindow();
-            stage.setScene(new RecruiterLoginPage(backAction).getLoginScene());
+            stage.setScene(new RecruiterLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
         } catch (Exception ex) {
             ex.printStackTrace();
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
