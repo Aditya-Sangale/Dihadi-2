@@ -17,7 +17,7 @@ public class WorkerDao {
         try {
             db.collection("Workers")
                     .document(worker.getMobileNumber())
-                    .create(worker);
+                    .set(worker);
 
             System.out.println("Worker Data Inserted");
         } catch (Exception e) {
