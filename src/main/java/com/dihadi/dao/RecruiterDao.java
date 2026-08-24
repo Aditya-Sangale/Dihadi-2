@@ -17,7 +17,7 @@ public class RecruiterDao {
         try {
             db.collection("Recruiters")
                     .document(recruiter.getMobileNumber())
-                    .create(recruiter);
+                    .set(recruiter);
 
             System.out.println("Recruiter Data Inserted");
         } catch (Exception e) {
