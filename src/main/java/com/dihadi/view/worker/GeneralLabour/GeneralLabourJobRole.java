@@ -1,11 +1,13 @@
 package com.dihadi.view.worker.GeneralLabour;
 
+import com.dihadi.view.AppNavigator;
 import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 
 /** General Labour job marketplace opened by Save & Continue. */
 public class GeneralLabourJobRole {
@@ -25,9 +27,9 @@ public class GeneralLabourJobRole {
                         "-fx-font-family:'Georgia';-fx-font-size:40px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
                 intro = label("Explore verified daily-wage opportunities and apply directly through DIHADI.",
                         "-fx-font-size:16px;-fx-text-fill:#4d4635;");
-        VBox hero = new VBox(10, eye, title, intro);
+        VBox hero = new VBox(12, eye, title, intro);
         hero.setAlignment(Pos.CENTER);
-        hero.setPadding(new Insets(28));
+        hero.setPadding(new Insets(32, 36, 30, 36));
         hero.setMaxWidth(1140);
         hero.setStyle(cardStyle());
         FlowPane grid = new FlowPane(24, 24);
@@ -58,12 +60,50 @@ public class GeneralLabourJobRole {
         HBox bottom = new HBox(previous, gap,
                 label("Choose an opportunity to start your next job.", "-fx-font-size:13px;-fx-text-fill:#4d4635;"));
         bottom.setAlignment(Pos.CENTER);
-        bottom.setPadding(new Insets(14, 60, 14, 60));
+        bottom.setPadding(new Insets(16, 60, 16, 60));
         bottom.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
         BorderPane page = new BorderPane(scroll);
+        page.setTop(createHeader(back));
         page.setBottom(bottom);
         page.setStyle("-fx-background-color:#f3e7ce;");
         return new Scene(page, 1400, 780);
+    }
+
+    /** Standard DIHADI desktop header used by the main application pages. */
+    private BorderPane createHeader(Runnable back) {
+        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
+        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
+        logo.setPreserveRatio(true);
+        Label brandName = label("DIHADI",
+                "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
+        HBox brand = new HBox(10, logo, brandName); brand.setAlignment(Pos.CENTER_LEFT);
+
+        Button home = headerNav("Home", false);
+        Button business = headerNav("Business", false);
+        Button worker = headerNav("Worker", true);
+        Button recruiter = headerNav("Recruiter", false);
+        Button about = headerNav("About Us", false);
+        Button contact = headerNav("Contact Us", false);
+        home.setOnAction(e -> AppNavigator.open(stageOf(home), "Home"));
+        business.setOnAction(e -> AppNavigator.open(stageOf(business), "Business"));
+        worker.setOnAction(e -> { if (back != null) back.run(); });
+        recruiter.setOnAction(e -> AppNavigator.open(stageOf(recruiter), "Recruiter"));
+        about.setOnAction(e -> AppNavigator.open(stageOf(about), "About Us"));
+        contact.setOnAction(e -> AppNavigator.open(stageOf(contact), "Contact Us"));
+        HBox navigation = new HBox(12, home, business, worker, recruiter, about, contact);
+        navigation.setAlignment(Pos.CENTER);
+
+        Button login = headerOutline("Login"); login.setOnAction(e -> AppNavigator.adminLoginInProgress());
+        Button signUp = headerPrimary("Sign Up");
+        signUp.setOnAction(e -> AppNavigator.signUp(stageOf(signUp), back));
+        HBox account = new HBox(10, login, signUp); account.setAlignment(Pos.CENTER_RIGHT);
+
+        BorderPane header = new BorderPane();
+        header.setLeft(brand); header.setCenter(navigation); header.setRight(account);
+        header.setPadding(new Insets(16, 24, 14, 24));
+        header.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;"
+                + "-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
+        return header;
     }
 
     /**
@@ -124,7 +164,8 @@ public class GeneralLabourJobRole {
         box.getSelectionModel().selectFirst();
         box.setPrefWidth(190);
         box.setStyle(
-                "-fx-background-color:#f3e7ce;-fx-border-color:#c6a15b;-fx-border-radius:12px;-fx-background-radius:12px;-fx-font-size:13px;");
+                "-fx-background-color:#fff8f0;-fx-border-color:#806c47;-fx-border-radius:18px;-fx-background-radius:18px;"
+                        + "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:14px;-fx-text-fill:#3a3027;-fx-padding:3px 8px;");
         return box;
     }
 
@@ -151,17 +192,46 @@ public class GeneralLabourJobRole {
         return "-fx-background-color:#fff8f0;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),18,0,0,6px);";
     }
 
+    private Button headerNav(String text, boolean active) {
+        Button button = new Button(text);
+        button.setStyle("-fx-background-color:transparent;-fx-background-radius:0;-fx-padding:8px 4px;"
+                + "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-cursor:hand;"
+                + "-fx-text-fill:" + (active ? "#735c00" : "#4d4635") + ";-fx-border-color:"
+                + (active ? "#735c00" : "transparent") + ";-fx-border-width:0 0 2px 0;");
+        return button;
+    }
+
+    private Button headerPrimary(String text) {
+        Button button = new Button(text);
+        button.setStyle("-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#3a3027;"
+                + "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:14px;-fx-font-weight:700;"
+                + "-fx-padding:10px 20px;-fx-cursor:hand;");
+        return button;
+    }
+
+    private Button headerOutline(String text) {
+        Button button = new Button(text);
+        button.setStyle("-fx-background-color:#fbf3e5;-fx-background-radius:999px;-fx-border-color:#735c00;"
+                + "-fx-border-radius:999px;-fx-text-fill:#735c00;-fx-font-family:'Segoe UI',sans-serif;"
+                + "-fx-font-size:14px;-fx-font-weight:700;-fx-padding:9px 18px;-fx-cursor:hand;");
+        return button;
+    }
+
+    private Stage stageOf(Button button) { return (Stage) button.getScene().getWindow(); }
+
     private Button primary(String t) {
         Button b = new Button(t);
         b.setStyle(
-                "-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:10px 20px;-fx-cursor:hand;");
+                "-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#343027;-fx-font-size:13px;"
+                        + "-fx-font-weight:700;-fx-padding:11px 24px;-fx-cursor:hand;");
         return b;
     }
 
     private Button outline(String t) {
         Button b = new Button(t);
         b.setStyle(
-                "-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:9px 18px;-fx-cursor:hand;");
+                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#806c47;-fx-border-radius:18px;"
+                        + "-fx-text-fill:#343027;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:10px 23px;-fx-cursor:hand;");
         return b;
     }
 }
