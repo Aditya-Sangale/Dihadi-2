@@ -2,6 +2,7 @@ package com.dihadi.view;
 
 import com.dihadi.view.recruiter.HireSuitableSkilledWorkersPage;
 import com.dihadi.view.recruiter.SignUpRecruiter;
+import com.dihadi.view.recruiter.RecruiterPage;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -279,12 +280,12 @@ public class HomePage extends Application {
 
     private void showRecruiter() {
         stopSlider();
-        primaryStage.setScene(new HireSuitableSkilledWorkersPage().getHireWorkersScene(this::showHome));
+        primaryStage.setScene(new RecruiterPage().getRecruiterScene(this::showHome));
     }
 
     private void showRecruiterSignUp() {
         stopSlider();
-        primaryStage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(this::showHome));
+        primaryStage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(this::showRecruiter));
     }
 
     private void showAbout() {
