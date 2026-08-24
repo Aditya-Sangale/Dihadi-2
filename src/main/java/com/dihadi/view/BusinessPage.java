@@ -351,7 +351,7 @@ public class BusinessPage {
 
         private Button nav(String text, boolean active) {
                 Button button = new Button(text);
-                button.setStyle("-fx-background-color:transparent;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:"
+                button.setStyle("-fx-background-color:transparent;-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:"
                                 + (active ? "#735c00" : "#4d4635") + ";-fx-border-color:"
                                 + (active ? "#735c00" : "transparent")
                                 + ";-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;");

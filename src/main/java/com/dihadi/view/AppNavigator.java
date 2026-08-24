@@ -2,6 +2,7 @@ package com.dihadi.view;
 
 import com.dihadi.view.worker.WokerSignUp;
 import com.dihadi.view.recruiter.SignUpRecruiter;
+import com.dihadi.view.recruiter.RecruiterPage;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
@@ -24,7 +25,7 @@ public final class AppNavigator {
             case "Contact Us" -> stage.setScene(new ContactUs().getContactScene(
                     () -> open(stage, "Home"), () -> open(stage, "Business"),
                     () -> open(stage, "Worker"), () -> open(stage, "About Us")));
-            case "Recruiter" -> stage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(
+            case "Recruiter" -> stage.setScene(new RecruiterPage().getRecruiterScene(
                     () -> open(stage, "Home")));
             default -> throw new IllegalArgumentException("Unknown destination: " + destination);
         }
