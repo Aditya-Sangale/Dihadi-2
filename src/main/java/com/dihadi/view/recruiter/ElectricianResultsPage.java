@@ -55,17 +55,17 @@ public class ElectricianResultsPage {
                         { "Meera D.", "30 Years, Female", "West Bengal", "1550" } };
 
         public Scene getElectricianScene(Runnable back) {
-                BorderPane page = new BorderPane();
-                page.setTop(header());
-                page.setCenter(content());
-                page.setStyle("-fx-background-color:#fff8f0;");
-                return new Scene(page, 1400, 780);
-        }
+        BorderPane page = new BorderPane();
+        page.setTop(header());
+        page.setCenter(content(back));
+        page.setStyle("-fx-background-color:#fff8f0;");
+        return new Scene(page, 1400, 780);
+    }
 
-        private ScrollPane content() {
-                Label title = label("Looking for Skilled Electrician",
-                                "-fx-font-family:'Georgia';-fx-font-size:35px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
-                VBox page = new VBox(29, title, hero(), filterBar(), cards(), moreButton(), footer());
+    private ScrollPane content(Runnable back) {
+        Label title = label("Looking for Skilled Electrician",
+                "-fx-font-family:'Georgia';-fx-font-size:35px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+        VBox page = new VBox(29, title, hero(), filterBar(), cards(), bottomActions(back), footer());
                 page.setMaxWidth(1190);
                 page.setPadding(new Insets(35, 0, 46, 0));
                 StackPane canvas = new StackPane(page);
@@ -158,18 +158,27 @@ public class ElectricianResultsPage {
                 return card;
         }
 
-        private Button moreButton() {
-                Button button = new Button("View More Electricians");
-                button.setStyle(
-                                "-fx-background-color:#ffffff;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-radius:18px;-fx-font-size:11px;-fx-padding:7px 34px;-fx-cursor:hand;");
-                button.setOnAction(
-                                e -> AppNavigator.information("Electricians",
-                                                "More electrician profiles will be loaded here."));
-                StackPane.setAlignment(button, Pos.CENTER);
-                VBox holder = new VBox(button);
-                holder.setAlignment(Pos.CENTER);
-                return button;
+    private HBox bottomActions(Runnable backAction) {
+        Button back = new Button("← Back");
+        back.setStyle("-fx-background-color:transparent;-fx-font-size:14px;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+        if (backAction != null) {
+            back.setOnAction(e -> backAction.run());
         }
+
+        Button more = new Button("View More Electricians");
+        more.setStyle(
+                "-fx-background-color:#ffffff;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-radius:18px;-fx-font-size:11px;-fx-padding:7px 34px;-fx-cursor:hand;");
+        more.setOnAction(e -> AppNavigator.information("Electricians", "More electrician profiles will be loaded here."));
+
+        HBox centerBox = new HBox(more);
+        centerBox.setAlignment(Pos.CENTER);
+        HBox.setHgrow(centerBox, Priority.ALWAYS);
+
+        HBox row = new HBox(back, centerBox);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(0, 70, 0, 0)); // To visually balance the center if needed
+        return row;
+    }
 
         private BorderPane header() {
                 ImageView logo = image("/assets/logo/dihadi logo.jpeg", 54, 54);

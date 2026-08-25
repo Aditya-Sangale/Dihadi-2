@@ -46,18 +46,18 @@ public class ITI_TechnicianResultPage {
     public Scene getITITechnicianScene(Runnable back) {
         BorderPane page = new BorderPane();
         page.setTop(header());
-        page.setCenter(content());
+        page.setCenter(content(back));
         page.setStyle("-fx-background-color:" + PAPER + ";");
         return new Scene(page, 1400, 780);
     }
 
-    private ScrollPane content() {
+    private ScrollPane content(Runnable back) {
         Label title = label("Looking for Skilled ITI / Technician",
                 "-fx-font-family:'Georgia';-fx-font-size:37px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
         Label subTitle = label("Connect with certified professionals for safe, precise, and reliable technical work.",
                 "-fx-font-size:14px;-fx-text-fill:" + MUTED + ";");
         VBox heading = new VBox(6, title, subTitle);
-        VBox body = new VBox(28, heading, hero(), filters(), resultHeader(), cards(), loadMore(), footer());
+        VBox body = new VBox(28, heading, hero(), filters(), resultHeader(), cards(), bottomActions(back), footer());
         body.setMaxWidth(1190);
         body.setPadding(new Insets(40, 0, 48, 0));
         StackPane canvas = new StackPane(body);
@@ -203,16 +203,28 @@ public class ITI_TechnicianResultPage {
                 + (active ? ".13" : ".06") + ")," + (active ? "18" : "9") + ",0,0," + (active ? "4" : "2") + "px);";
     }
 
-    private VBox loadMore() {
+    private HBox bottomActions(Runnable backAction) {
+        Button back = new Button("← Back");
+        back.setStyle("-fx-background-color:transparent;-fx-font-size:14px;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+        if (backAction != null) {
+            back.setOnAction(e -> backAction.run());
+        }
+
         Button b = new Button("Load More Profiles  ▾");
         b.setStyle(
                 "-fx-background-color:transparent;-fx-background-radius:19px;-fx-border-color:#7e7665;-fx-border-radius:19px;-fx-text-fill:"
                         + GOLD + ";-fx-font-size:12px;-fx-font-weight:800;-fx-padding:10px 23px;-fx-cursor:hand;");
         b.setOnAction(e -> AppNavigator.information("ITI Technicians",
                 "More verified technician profiles will be loaded here."));
-        VBox box = new VBox(b);
-        box.setAlignment(Pos.CENTER);
-        return box;
+
+        HBox centerBox = new HBox(b);
+        centerBox.setAlignment(Pos.CENTER);
+        HBox.setHgrow(centerBox, Priority.ALWAYS);
+
+        HBox row = new HBox(back, centerBox);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(0, 70, 0, 0)); // To visually balance the center if needed
+        return row;
     }
 
     private BorderPane header() {
