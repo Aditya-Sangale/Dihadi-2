@@ -47,10 +47,9 @@ public class ContactUs {
         BorderPane bar = new BorderPane();
         bar.setLeft(brand);
         bar.setCenter(links);
-        Button login = outline("Login"), signUp = primary("Sign Up");
-        login.setOnAction(e -> AppNavigator.adminLoginInProgress());
-        signUp.setOnAction(e -> AppNavigator.adminLoginInProgress());
-        bar.setRight(new HBox(10, login, signUp));
+        Button admin = primary("Admin");
+        admin.setOnAction(e -> AppNavigator.adminLoginInProgress());
+        bar.setRight(new HBox(10, admin));
         bar.setPadding(new Insets(16, 24, 14, 24));
         bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;"
                 + "-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");

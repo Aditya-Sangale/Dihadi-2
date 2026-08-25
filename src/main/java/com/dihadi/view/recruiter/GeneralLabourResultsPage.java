@@ -56,15 +56,15 @@ public class GeneralLabourResultsPage {
         public Scene getGeneralLabourScene(Runnable back) {
                 BorderPane page = new BorderPane();
                 page.setTop(standardHeader());
-                page.setCenter(body());
+                page.setCenter(body(back));
                 page.setStyle("-fx-background-color:" + PAPER + ";");
                 return new Scene(page, 1400, 780);
         }
 
-        private ScrollPane body() {
+        private ScrollPane body(Runnable back) {
                 Label title = label("Looking for Skilled General Labour",
                                 "-fx-font-family:'Georgia';-fx-font-size:35px;-fx-font-weight:800;-fx-text-fill:#574500;");
-                VBox content = new VBox(31, title, hero(), filters(), results(), footer());
+                VBox content = new VBox(31, title, hero(), filters(), results(), bottomActions(back), footer());
                 content.setMaxWidth(1190);
                 content.setPadding(new Insets(45, 0, 46, 0));
                 StackPane canvas = new StackPane(content);
@@ -262,6 +262,17 @@ public class GeneralLabourResultsPage {
         }
 
         /** Shared DIHADI footer, matching the other desktop pages. */
+        private HBox bottomActions(Runnable backAction) {
+                Button back = new Button("← Back");
+                back.setStyle("-fx-background-color:transparent;-fx-font-size:14px;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+                if (backAction != null) {
+                        back.setOnAction(e -> backAction.run());
+                }
+                HBox row = new HBox(back);
+                row.setAlignment(Pos.CENTER_LEFT);
+                return row;
+        }
+
         private VBox footer() {
                 ImageView logo = image("/assets/logo/dihadi logo.jpeg", 58, 58);
                 logo.setPreserveRatio(true);

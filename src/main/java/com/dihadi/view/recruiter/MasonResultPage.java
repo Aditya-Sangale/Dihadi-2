@@ -53,17 +53,17 @@ public class MasonResultPage {
     public Scene getMasonScene(Runnable back) {
         BorderPane page = new BorderPane();
         page.setTop(header());
-        page.setCenter(content());
+        page.setCenter(content(back));
         page.setStyle("-fx-background-color:" + PAPER + ";");
         return new Scene(page, 1400, 780);
     }
 
-    private ScrollPane content() {
+    private ScrollPane content(Runnable back) {
         Label title = label("Looking for Skilled Mason",
                 "-fx-font-family:'Georgia';-fx-font-size:38px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
         Label count = label("12 verified masons available near you", "-fx-font-size:13px;-fx-text-fill:" + MUTED + ";");
         VBox heading = new VBox(5, title, count);
-        VBox body = new VBox(28, heading, hero(), filterBar(), resultsHeader(), cards(), viewMore(), footer());
+        VBox body = new VBox(28, heading, hero(), filterBar(), resultsHeader(), cards(), bottomActions(back), footer());
         body.setMaxWidth(1190);
         body.setPadding(new Insets(40, 0, 48, 0));
         StackPane canvas = new StackPane(body);
@@ -195,16 +195,28 @@ public class MasonResultPage {
                 + (active ? "15" : "8") + ",0,0," + (active ? "5" : "2") + "px);";
     }
 
-    private VBox viewMore() {
+    private HBox bottomActions(Runnable backAction) {
+        Button back = new Button("← Back");
+        back.setStyle("-fx-background-color:transparent;-fx-font-size:14px;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+        if (backAction != null) {
+            back.setOnAction(e -> backAction.run());
+        }
+
         Button button = new Button("View More Masons");
         button.setStyle("-fx-background-color:#ffffff;-fx-background-radius:18px;-fx-border-color:" + BORDER
                 + ";-fx-border-radius:18px;-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:" + GOLD
                 + ";-fx-padding:9px 31px;-fx-cursor:hand;");
         button.setOnAction(
                 e -> AppNavigator.information("Masons", "More verified mason profiles will be available here soon."));
-        VBox box = new VBox(button);
-        box.setAlignment(Pos.CENTER);
-        return box;
+        
+        HBox centerBox = new HBox(button);
+        centerBox.setAlignment(Pos.CENTER);
+        HBox.setHgrow(centerBox, Priority.ALWAYS);
+
+        HBox row = new HBox(back, centerBox);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(0, 70, 0, 0)); // To visually balance the center if needed
+        return row;
     }
 
     private BorderPane header() {

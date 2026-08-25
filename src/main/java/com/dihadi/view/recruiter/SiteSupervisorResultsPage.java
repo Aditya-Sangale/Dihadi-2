@@ -34,15 +34,15 @@ public class SiteSupervisorResultsPage {
     public Scene getSiteSupervisorScene(Runnable back) {
         BorderPane page = new BorderPane();
         page.setTop(header());
-        page.setCenter(content());
+        page.setCenter(content(back));
         page.setStyle("-fx-background-color:#fff8f0;");
         return new Scene(page, 1400, 780);
     }
 
-    private ScrollPane content() {
+    private ScrollPane content(Runnable back) {
         Label heading = label("Looking for Skilled Supervisors",
                 "-fx-font-family:'Georgia';-fx-font-size:36px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
-        VBox body = new VBox(28, heading, hero(), filters(), grid(), footer());
+        VBox body = new VBox(28, heading, hero(), filters(), grid(), bottomActions(back), footer());
         body.setMaxWidth(1190);
         body.setPadding(new Insets(35, 0, 45, 0));
         StackPane canvas = new StackPane(body);
@@ -164,6 +164,17 @@ public class SiteSupervisorResultsPage {
                         + ";-fx-cursor:hand;");
         b.setOnAction(e -> AppNavigator.open((Stage) b.getScene().getWindow(), t));
         return b;
+    }
+
+    private HBox bottomActions(Runnable backAction) {
+        Button back = new Button("← Back");
+        back.setStyle("-fx-background-color:transparent;-fx-font-size:14px;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+        if (backAction != null) {
+            back.setOnAction(e -> backAction.run());
+        }
+        HBox row = new HBox(back);
+        row.setAlignment(Pos.CENTER_LEFT);
+        return row;
     }
 
     private VBox footer() {
