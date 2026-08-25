@@ -106,7 +106,7 @@ public class RecruiterPage {
         text.setMaxWidth(545);
         Button create = heroButton("CREATE PROJECT");
         create.setOnAction(e -> scene(create,
-                new SignUpRecruiter().getRecruiterSignUpScene(() -> scene(create, getRecruiterScene(home)))));
+                new CreateProjectPage().getCreateProjectScene(() -> scene(create, getRecruiterScene(home)))));
         Button hire = heroButton("HIRE WORKERS");
         hire.setOnAction(e -> scene(hire,
                 new HireSuitableSkilledWorkersPage().getHireWorkersScene(() -> scene(hire, getRecruiterScene(home)))));

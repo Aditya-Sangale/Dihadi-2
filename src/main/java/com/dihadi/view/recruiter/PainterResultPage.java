@@ -44,17 +44,17 @@ public class PainterResultPage {
     public Scene getPainterScene(Runnable back) {
         BorderPane page = new BorderPane();
         page.setTop(header());
-        page.setCenter(content());
+        page.setCenter(content(back));
         page.setStyle("-fx-background-color:" + PAPER + ";");
         return new Scene(page, 1400, 780);
     }
 
-    private ScrollPane content() {
+    private ScrollPane content(Runnable back) {
         Label title = label("Looking for Skilled Painters",
                 "-fx-font-family:'Georgia';-fx-font-size:38px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
         Label intro = label("Find trusted professionals who bring color, detail, and lasting finish to every space.",
                 "-fx-font-size:14px;-fx-text-fill:" + MUTED + ";");
-        VBox body = new VBox(30, new VBox(6, title, intro), hero(), filters(), resultsHeader(), cards(), more(),
+        VBox body = new VBox(30, new VBox(6, title, intro), hero(), filters(), resultsHeader(), cards(), bottomActions(back),
                 footer());
         body.setMaxWidth(1190);
         body.setPadding(new Insets(40, 0, 48, 0));
@@ -195,16 +195,28 @@ public class PainterResultPage {
                 + (active ? ".14" : ".06") + ")," + (active ? "17" : "8") + ",0,0," + (active ? "4" : "2") + "px);";
     }
 
-    private VBox more() {
+    private HBox bottomActions(Runnable backAction) {
+        Button back = new Button("← Back");
+        back.setStyle("-fx-background-color:transparent;-fx-font-size:14px;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+        if (backAction != null) {
+            back.setOnAction(e -> backAction.run());
+        }
+
         Button button = new Button("View More Painters");
         button.setStyle("-fx-background-color:#ffffff;-fx-background-radius:19px;-fx-border-color:" + BORDER
                 + ";-fx-border-radius:19px;-fx-text-fill:" + GOLD
                 + ";-fx-font-size:12px;-fx-font-weight:800;-fx-padding:10px 25px;-fx-cursor:hand;");
         button.setOnAction(
                 e -> AppNavigator.information("Painters", "More verified painter profiles will be loaded here."));
-        VBox box = new VBox(button);
-        box.setAlignment(Pos.CENTER);
-        return box;
+        
+        HBox centerBox = new HBox(button);
+        centerBox.setAlignment(Pos.CENTER);
+        HBox.setHgrow(centerBox, Priority.ALWAYS);
+
+        HBox row = new HBox(back, centerBox);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(0, 70, 0, 0)); // To visually balance the center if needed
+        return row;
     }
 
     private BorderPane header() {
