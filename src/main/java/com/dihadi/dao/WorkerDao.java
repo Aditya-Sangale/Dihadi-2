@@ -53,7 +53,8 @@ public class WorkerDao {
                             "dateOfBirth", worker.getDateOfBirth(),
                             "education", worker.getEducation(),
                             "experience", worker.getExperience(),
-                            "dailyWage", worker.getDailyWage());
+                            "dailyWage", worker.getDailyWage(),
+                            "profilePhotoUrl", worker.getProfilePhotoUrl());
 
             System.out.println("Worker Data Updated");
         } catch (Exception e) {
