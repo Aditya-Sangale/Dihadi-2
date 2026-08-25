@@ -13,6 +13,7 @@ public class Worker {
     private String experience;
     private int dailyWage;
     private String uid;
+    private String profilePhotoUrl;
 
     public Worker() {
     }
@@ -21,6 +22,14 @@ public class Worker {
                   String mobileNumber, String alternateMobile, String email,
                   String gender, String dateOfBirth, String education,
                   String experience, int dailyWage) {
+        this(firstName, middleName, lastName, mobileNumber, alternateMobile, email,
+             gender, dateOfBirth, education, experience, dailyWage, null);
+    }
+
+    public Worker(String firstName, String middleName, String lastName,
+                  String mobileNumber, String alternateMobile, String email,
+                  String gender, String dateOfBirth, String education,
+                  String experience, int dailyWage, String profilePhotoUrl) {
         this.firstName = firstName;
         this.middleName = middleName;
         this.lastName = lastName;
@@ -32,6 +41,7 @@ public class Worker {
         this.education = education;
         this.experience = experience;
         this.dailyWage = dailyWage;
+        this.profilePhotoUrl = profilePhotoUrl;
     }
 
     public String getFirstName() {
@@ -128,5 +138,13 @@ public class Worker {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public String getProfilePhotoUrl() {
+        return profilePhotoUrl;
+    }
+
+    public void setProfilePhotoUrl(String profilePhotoUrl) {
+        this.profilePhotoUrl = profilePhotoUrl;
     }
 }

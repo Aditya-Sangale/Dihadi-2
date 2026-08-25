@@ -365,7 +365,12 @@ public class RecruiterPage {
     }
 
     private void scene(Button button, Scene scene) {
-        ((Stage) button.getScene().getWindow()).setScene(scene);
+        javafx.stage.Window window = button.getScene().getWindow();
+        if (window instanceof Stage stage) {
+            stage.setScene(scene);
+        } else {
+            sceneFromFocused(scene);
+        }
     }
 
     private void sceneFromFocused(Scene scene) {

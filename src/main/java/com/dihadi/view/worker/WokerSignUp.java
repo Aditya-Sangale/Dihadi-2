@@ -2,6 +2,7 @@ package com.dihadi.view.worker;
 
 import java.io.File;
 
+import com.dihadi.controller.ImageUploadController;
 import com.dihadi.controller.WorkerController;
 import com.dihadi.view.AppNavigator;
 
@@ -54,6 +55,8 @@ public class WokerSignUp {
             "5+ Years");
     private final DatePicker dateOfBirth = new DatePicker();
     private final ImageView profileImage = new ImageView();
+    private String profilePhotoUrl;
+    private File selectedPhotoFile;
     private final String[] showcaseImages = { "/assets/images/worker 5.jpeg", "/assets/images/worker 2.jpeg",
             "/assets/images/sitesuperviser.jpeg", "/assets/images/welder.jpeg" };
     private Runnable backAction;
@@ -240,8 +243,17 @@ public class WokerSignUp {
         chooser.setTitle("Choose profile photo");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image files", "*.png", "*.jpg", "*.jpeg"));
         File file = chooser.showOpenDialog(profileImage.getScene().getWindow());
-        if (file != null)
+        if (file != null) {
+            selectedPhotoFile = file;
             profileImage.setImage(new Image(file.toURI().toString()));
+            new Thread(() -> {
+                ImageUploadController uploadController = new ImageUploadController();
+                String url = uploadController.imageUpload(file);
+                if (url != null) {
+                    profilePhotoUrl = url;
+                }
+            }).start();
+        }
     }
 
     private void submit(boolean consent) {
@@ -258,6 +270,11 @@ public class WokerSignUp {
         }
 
         try {
+            if (selectedPhotoFile != null && profilePhotoUrl == null) {
+                ImageUploadController uploadController = new ImageUploadController();
+                profilePhotoUrl = uploadController.imageUpload(selectedPhotoFile);
+            }
+
             WorkerController controller = new WorkerController();
             controller.addWorker(
                     firstName.getText().trim(),
@@ -270,7 +287,8 @@ public class WokerSignUp {
                     dateOfBirth.getValue().toString(),
                     education.getValue(),
                     experience.getValue(),
-                    wageValue());
+                    wageValue(),
+                    profilePhotoUrl);
 
             Stage stage = (Stage) firstName.getScene().getWindow();
             stage.setScene(new WorkerLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
