@@ -1,7 +1,12 @@
 package com.dihadi.view.recruiter;
+
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import com.dihadi.controller.ImageUploadController;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -20,6 +25,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -31,6 +37,10 @@ public class CreateProjectPage {
     private Timeline slideshow;
     private int visualIndex;
     private TextField projectName, contactName, mobile, email, pincode, addressLine, landmark;
+    private final List<String> uploadedImageUrls = new ArrayList<>();
+    private final List<File> selectedFiles = new ArrayList<>();
+    private HBox previewsContainer;
+    private Label uploadStatusLabel;
 
     public Scene getCreateProjectScene(Runnable closeAction) {
         VBox form = new VBox(28, identity(), welcome(), projectCard(closeAction));
@@ -63,58 +73,116 @@ public class CreateProjectPage {
         logo.setPreserveRatio(true);
         VBox identity = new VBox(4, logo,
                 text("DIHADI", "-fx-font-family:Georgia;-fx-font-size:31px;-fx-font-weight:800;-fx-text-fill:#27438a;"),
-                text("Mera Haq ~ Meri Dihadi", "-fx-font-family:Georgia;-fx-font-size:17px;-fx-font-style:italic;-fx-text-fill:#4c4637;"));
+                text("Mera Haq ~ Meri Dihadi",
+                        "-fx-font-family:Georgia;-fx-font-size:17px;-fx-font-style:italic;-fx-text-fill:#4c4637;"));
         identity.setAlignment(Pos.CENTER);
         return identity;
     }
 
     private VBox welcome() {
         VBox copy = new VBox(7,
-                text("Welcome to DIHADI", "-fx-font-family:Georgia;-fx-font-size:32px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
-                text("Go ahead. Enter your project details to proceed ahead.", "-fx-font-size:14px;-fx-text-fill:#4d4635;"));
+                text("Welcome to DIHADI",
+                        "-fx-font-family:Georgia;-fx-font-size:32px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
+                text("Go ahead. Enter your project details to proceed ahead.",
+                        "-fx-font-size:14px;-fx-text-fill:#4d4635;"));
         copy.setAlignment(Pos.CENTER);
         return copy;
     }
 
     private VBox projectCard(Runnable closeAction) {
         Button back = new Button("<");
-        back.setStyle("-fx-background-color:transparent;-fx-padding:0 2px 0 0;-fx-font-size:22px;-fx-font-weight:700;-fx-text-fill:#1e1b15;-fx-cursor:hand;");
-        back.setOnAction(e -> { if (closeAction != null) closeAction.run(); });
-        Label heading = text("ADD NEW PROJECT", "-fx-font-size:13px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#1e1b15;");
+        back.setStyle(
+                "-fx-background-color:transparent;-fx-padding:0 2px 0 0;-fx-font-size:22px;-fx-font-weight:700;-fx-text-fill:#1e1b15;-fx-cursor:hand;");
+        back.setOnAction(e -> {
+            if (closeAction != null)
+                closeAction.run();
+        });
+        Label heading = text("ADD NEW PROJECT",
+                "-fx-font-size:13px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#1e1b15;");
         HBox title = new HBox(8, back, heading);
         title.setAlignment(Pos.CENTER_LEFT);
 
-        VBox details = new VBox(15,
-                field("Project name *required", "Enter project name"),
-                field("Project contact person name *required", "Enter contact name"),
-                field("Mobile number *required", "Enter mobile number"),
-                field("Alternate mobile number", "Enter alternate mobile"),
-                field("Email address *required", "Enter email"), uploadArea());
+        projectName = input("Enter project name");
+        contactName = input("Enter contact name");
+        mobile = input("Enter mobile number");
+        TextField alternateMobile = input("Enter alternate mobile");
+        email = input("Enter email");
 
-        Label addressHeading = text("ADDRESS DETAILS", "-fx-font-size:13px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#1e1b15;");
+        VBox details = new VBox(15,
+                fieldBox("Project name *required", projectName),
+                fieldBox("Project contact person name *required", contactName),
+                fieldBox("Mobile number *required", mobile),
+                fieldBox("Alternate mobile number", alternateMobile),
+                fieldBox("Email address *required", email), uploadArea());
+
+        Label addressHeading = text("ADDRESS DETAILS",
+                "-fx-font-size:13px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#1e1b15;");
         pincode = input("Enter pincode");
-        HBox pinRow = new HBox(16, fieldBox("Pincode *required", pincode), selectField("Post office", "Select post office"));
+        HBox pinRow = new HBox(16, fieldBox("Pincode *required", pincode),
+                selectField("Post office", "Select post office"));
         equalWidth(pinRow);
-        TextField city = disabledField("Enter city");
-        TextField state = disabledField("Enter state");
+        TextField city = input("Enter city");
+        TextField state = input("Enter state");
         HBox locationRow = new HBox(16, fieldBox("City", city), fieldBox("State", state));
         equalWidth(locationRow);
+
+        addressLine = input("Street address");
+        TextField addressLine2 = input("Apartment, suite, etc.");
+        landmark = input("Near by landmark");
+
         VBox address = new VBox(15, addressHeading, pinRow, locationRow,
-                field("Address line 1 *required", "Street address"),
-                field("Address line 2", "Apartment, suite, etc."),
-                field("Landmark *required", "Near by landmark"));
+                fieldBox("Address line 1 *required", addressLine),
+                fieldBox("Address line 2", addressLine2),
+                fieldBox("Landmark *required", landmark));
 
         Button save = new Button("SAVE PROJECT");
         save.setMaxWidth(Double.MAX_VALUE);
-        save.setStyle("-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#ffffff;-fx-font-size:17px;-fx-font-weight:700;-fx-padding:14px 22px;-fx-cursor:hand;");
+        save.setStyle(
+                "-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#ffffff;-fx-font-size:17px;-fx-font-weight:700;-fx-padding:14px 22px;-fx-cursor:hand;");
         save.setOnAction(e -> {
-            if (!validProject()) return;
+            if (!validProject())
+                return;
+
+            // Ensure any pending selected files get uploaded before saving
+            for (File file : selectedFiles) {
+                if (uploadedImageUrls.isEmpty() && selectedFiles.size() > 0) {
+                    ImageUploadController uploadController = new ImageUploadController();
+                    String url = uploadController.imageUpload(file);
+                    if (url != null && !uploadedImageUrls.contains(url)) {
+                        uploadedImageUrls.add(url);
+                    }
+                }
+            }
+
+            String projectId = java.util.UUID.randomUUID().toString();
+            com.dihadi.model.Project project = new com.dihadi.model.Project(
+                projectId,
+                projectName.getText().trim(),
+                contactName.getText().trim(),
+                mobile.getText().trim(),
+                alternateMobile.getText().trim(),
+                email.getText().trim(),
+                pincode.getText().trim(),
+                city.getText().trim(),
+                state.getText().trim(),
+                addressLine.getText().trim(),
+                addressLine2.getText().trim(),
+                landmark.getText().trim(),
+                new ArrayList<>(uploadedImageUrls)
+            );
+            new com.dihadi.controller.ProjectController().addProject(project);
+
             Stage stage = (Stage) save.getScene().getWindow();
-            stage.setScene(new AddWorkersPage().getAddWorkersScene(() -> stage.setScene(getCreateProjectScene(closeAction))));
+            stage.setScene(
+                    new AddWorkersPage(projectId).getAddWorkersScene(() -> stage.setScene(getCreateProjectScene(closeAction))));
         });
         Button close = new Button("Close");
-        close.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:16px;-fx-font-weight:700;-fx-cursor:hand;");
-        close.setOnAction(e -> { if (closeAction != null) closeAction.run(); });
+        close.setStyle(
+                "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:16px;-fx-font-weight:700;-fx-cursor:hand;");
+        close.setOnAction(e -> {
+            if (closeAction != null)
+                closeAction.run();
+        });
         VBox actions = new VBox(12, save, close);
         actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(23, 0, 0, 0));
@@ -123,7 +191,8 @@ public class CreateProjectPage {
         VBox card = new VBox(24, title, details, divider(), address, actions);
         card.setMaxWidth(560);
         card.setPadding(new Insets(30));
-        card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:#e9e2d7;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),20,0,0,5px);");
+        card.setStyle(
+                "-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:#e9e2d7;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),20,0,0,5px);");
         return card;
     }
 
@@ -146,15 +215,64 @@ public class CreateProjectPage {
         Label prompt = text("Add 2 to 3 Recent Pictures of Project/Construction Site", labelStyle());
         Label camera = text("[+]", "-fx-font-size:23px;-fx-font-weight:700;-fx-text-fill:#735c00;");
         Label line = text("Click or drag to upload pictures", "-fx-font-size:14px;-fx-text-fill:#4c4637;");
-        Label hint = text("Max 3 images  |  Total capacity: 30MB", "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#7e7665;");
-        VBox dropZone = new VBox(4, camera, line, hint);
+        Label hint = text("Max 3 images  |  Total capacity: 30MB",
+                "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#7e7665;");
+        uploadStatusLabel = text("", "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#735c00;");
+
+        previewsContainer = new HBox(8);
+        previewsContainer.setAlignment(Pos.CENTER);
+
+        VBox dropZone = new VBox(4, camera, line, hint, previewsContainer, uploadStatusLabel);
         dropZone.setAlignment(Pos.CENTER);
-        dropZone.setPrefHeight(126);
-        dropZone.setStyle("-fx-background-color:#f4ece1;-fx-background-radius:8px;-fx-border-color:#d0c5af;-fx-border-radius:8px;-fx-border-style:segments(5,5);-fx-border-width:2px;-fx-cursor:hand;");
+        dropZone.setPadding(new Insets(10));
+        dropZone.setMinHeight(126);
+        dropZone.setStyle(
+                "-fx-background-color:#f4ece1;-fx-background-radius:8px;-fx-border-color:#d0c5af;-fx-border-radius:8px;-fx-border-style:segments(5,5);-fx-border-width:2px;-fx-cursor:hand;");
+
+        dropZone.setOnMouseClicked(event -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Select Project / Construction Site Pictures");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image files", "*.png", "*.jpg", "*.jpeg"));
+            List<File> files = fileChooser.showOpenMultipleDialog(dropZone.getScene().getWindow());
+            if (files != null && !files.isEmpty()) {
+                for (File file : files) {
+                    if (selectedFiles.size() >= 3) {
+                        break;
+                    }
+                    selectedFiles.add(file);
+
+                    ImageView thumbnail = new ImageView(new Image(file.toURI().toString()));
+                    thumbnail.setFitWidth(60);
+                    thumbnail.setFitHeight(60);
+                    thumbnail.setPreserveRatio(false);
+                    StackPane thumbPane = new StackPane(thumbnail);
+                    thumbPane.setStyle("-fx-border-color:#735c00;-fx-border-radius:6px;-fx-border-width:1px;");
+                    previewsContainer.getChildren().add(thumbPane);
+
+                    uploadStatusLabel.setText("Uploading " + selectedFiles.size() + " image(s)...");
+
+                    new Thread(() -> {
+                        ImageUploadController uploadController = new ImageUploadController();
+                        String url = uploadController.imageUpload(file);
+                        if (url != null) {
+                            synchronized (uploadedImageUrls) {
+                                uploadedImageUrls.add(url);
+                            }
+                            Platform.runLater(() -> {
+                                uploadStatusLabel.setText(uploadedImageUrls.size() + " image(s) uploaded successfully.");
+                            });
+                        }
+                    }).start();
+                }
+            }
+        });
+
         return new VBox(8, prompt, dropZone);
     }
 
-    private VBox field(String label, String prompt) { return fieldBox(label, input(prompt)); }
+    private VBox field(String label, String prompt) {
+        return fieldBox(label, input(prompt));
+    }
 
     private VBox selectField(String label, String prompt) {
         ComboBox<String> box = new ComboBox<>();
@@ -187,7 +305,8 @@ public class CreateProjectPage {
     }
 
     private void equalWidth(HBox row) {
-        for (javafx.scene.Node node : row.getChildren()) HBox.setHgrow(node, Priority.ALWAYS);
+        for (javafx.scene.Node node : row.getChildren())
+            HBox.setHgrow(node, Priority.ALWAYS);
     }
 
     private Region divider() {
@@ -210,7 +329,8 @@ public class CreateProjectPage {
         clip.setArcWidth(58);
         clip.setArcHeight(58);
         frame.setClip(clip);
-        frame.setStyle("-fx-background-color:#e0d9ce;-fx-background-radius:30px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.16),18,0,0,5px);");
+        frame.setStyle(
+                "-fx-background-color:#e0d9ce;-fx-background-radius:30px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.16),18,0,0,5px);");
 
         StackPane panel = new StackPane(frame);
         panel.setPrefWidth(700);
@@ -222,7 +342,8 @@ public class CreateProjectPage {
     }
 
     private void startSlideshow(ImageView image) {
-        if (slideshow != null) slideshow.stop();
+        if (slideshow != null)
+            slideshow.stop();
         slideshow = new Timeline(new KeyFrame(Duration.seconds(7), event -> {
             visualIndex = (visualIndex + 1) % VISUALS.size();
             image.setImage(load(VISUALS.get(visualIndex)));
