@@ -44,17 +44,17 @@ public class PlumberResultPage {
     public Scene getPlumberScene(Runnable back) {
         BorderPane page = new BorderPane();
         page.setTop(header());
-        page.setCenter(content());
+        page.setCenter(content(back));
         page.setStyle("-fx-background-color:" + PAPER + ";");
         return new Scene(page, 1400, 780);
     }
 
-    private ScrollPane content() {
+    private ScrollPane content(Runnable back) {
         Label title = l("Looking for Skilled Plumbers",
                 "-fx-font-family:'Georgia';-fx-font-size:38px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
         Label sub = l("Hire dependable plumbing specialists for clean, reliable, and lasting infrastructure.",
                 "-fx-font-size:14px;-fx-text-fill:" + MUTED + ";");
-        VBox body = new VBox(30, new VBox(6, title, sub), hero(), filters(), resultTitle(), cards(), more(), footer());
+        VBox body = new VBox(30, new VBox(6, title, sub), hero(), filters(), resultTitle(), cards(), bottomActions(back), footer());
         body.setMaxWidth(1190);
         body.setPadding(new Insets(40, 0, 48, 0));
         StackPane canvas = new StackPane(body);
@@ -184,15 +184,27 @@ public class PlumberResultPage {
                 + (active ? ".13" : ".08") + ")," + (active ? "18" : "11") + ",0,0," + (active ? "4" : "2") + "px);";
     }
 
-    private VBox more() {
+    private HBox bottomActions(Runnable backAction) {
+        Button back = new Button("← Back");
+        back.setStyle("-fx-background-color:transparent;-fx-font-size:14px;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+        if (backAction != null) {
+            back.setOnAction(e -> backAction.run());
+        }
+
         Button b = new Button("View More Plumbers");
         b.setStyle("-fx-background-color:#ffffff;-fx-background-radius:19px;-fx-border-color:" + BORDER
                 + ";-fx-border-radius:19px;-fx-text-fill:" + GOLD
                 + ";-fx-font-size:12px;-fx-font-weight:800;-fx-padding:10px 26px;-fx-cursor:hand;");
         b.setOnAction(e -> AppNavigator.information("Plumbers", "More verified plumber profiles will be loaded here."));
-        VBox box = new VBox(b);
-        box.setAlignment(Pos.CENTER);
-        return box;
+        
+        HBox centerBox = new HBox(b);
+        centerBox.setAlignment(Pos.CENTER);
+        HBox.setHgrow(centerBox, Priority.ALWAYS);
+
+        HBox row = new HBox(back, centerBox);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(0, 70, 0, 0)); // To visually balance the center if needed
+        return row;
     }
 
     private BorderPane header() {

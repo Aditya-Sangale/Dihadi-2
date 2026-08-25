@@ -112,14 +112,12 @@ public class HomePage extends Application {
                 navButton("Contact Us", false, this::showContact));
         navigation.setAlignment(Pos.CENTER);
 
-        Button login = outlineButton("Login");
-        login.setOnAction(event -> AppNavigator.adminLoginInProgress());
-        Button join = primaryButton("Sign Up");
-        join.setOnAction(event -> AppNavigator.adminLoginInProgress());
+        Button admin = primaryButton("Admin");
+        admin.setOnAction(event -> AppNavigator.adminLoginInProgress());
         BorderPane header = new BorderPane();
         header.setLeft(brand);
         header.setCenter(navigation);
-        header.setRight(new HBox(10, login, join));
+        header.setRight(new HBox(10, admin));
         header.setPadding(new Insets(16, 24, 14, 24));
         header.setStyle(
                 "-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
@@ -148,7 +146,7 @@ public class HomePage extends Application {
         Button findJob = primaryButton("Find a Job");
         findJob.setOnAction(event -> showWorker());
         Button hireWorkers = outlineButton("Hire Workers");
-        hireWorkers.setOnAction(event -> showRecruiter());
+        hireWorkers.setOnAction(event -> showRecruiterSignUp());
 
         VBox textPanel = new VBox(15, eyebrow, title, intro, new HBox(12, findJob, hireWorkers));
         textPanel.setAlignment(Pos.CENTER_LEFT);
@@ -171,7 +169,7 @@ public class HomePage extends Application {
                 actionCard("WORK", "Find Jobs", "Discover dignified work opportunities that match your skills.",
                         "Explore work", this::showWorker),
                 actionCard("TEAM", "Hire Workers", "Connect with a verified, skilled, and reliable workforce.",
-                        "Start hiring", this::showRecruiter),
+                        "Start hiring", this::showRecruiterSignUp),
                 actionCard("BUILD", "Find Projects", "Explore contracting opportunities and build stronger teams.",
                         "Explore projects",
                         () -> comingSoon("Find Projects", "Business project listings are coming soon.")));
