@@ -7,8 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -35,14 +33,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-public class WelcomePage extends Application {
+/** Builds the welcome scene on the stage owned by {@link HomePage}. */
+public class WelcomePage {
     private static final double SCENE_WIDTH = 1400;
     private static final double SCENE_HEIGHT = 780;
     private MediaPlayer welcomePlayer;
     private boolean transitioning;
 
-    @Override
-    public void start(Stage Homestage) {
+    public void show(Stage homeStage, Runnable showHome) {
 
         Label header = new Label("Welcome to Dihadi");
         header.setStyle(
@@ -222,35 +220,23 @@ public class WelcomePage extends Application {
         Scene scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
         // Capture clicks anywhere on the welcome UI, including the video and text
         // panel.
-        root.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> showNextPage(Homestage));
-        Homestage.setScene(scene);
-        Homestage.setFullScreen(false);
-        Homestage.setWidth(SCENE_WIDTH);
-        Homestage.setHeight(SCENE_HEIGHT);
-        Homestage.setMaximized(true);
-        Homestage.show();
+        root.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> showNextPage(showHome));
+        homeStage.setScene(scene);
+        homeStage.setFullScreen(false);
+        homeStage.setWidth(SCENE_WIDTH);
+        homeStage.setHeight(SCENE_HEIGHT);
+        homeStage.setMaximized(true);
+        homeStage.show();
     }
 
     /** Opens HomePage and its navigation after the welcome interaction. */
-    private void showNextPage(Stage stage) {
+    private void showNextPage(Runnable showHome) {
         if (transitioning) {
             return;
         }
         transitioning = true;
         stopWelcomeVideo();
-        stage.setFullScreen(false);
-        stage.setMaximized(false);
-        stage.setWidth(SCENE_WIDTH);
-        stage.setHeight(SCENE_HEIGHT);
-        stage.setScene(new HomePage(stage).getHomeScene());
-        // Apply the shared size after the new scene has been attached. JavaFX can
-        // otherwise restore
-        // the previous window bounds while leaving full-screen mode.
-        Platform.runLater(() -> {
-            stage.setWidth(SCENE_WIDTH);
-            stage.setHeight(SCENE_HEIGHT);
-            stage.setMaximized(true);
-        });
+        showHome.run();
     }
 
     /** Releases the welcome media resources before the scene is replaced. */
