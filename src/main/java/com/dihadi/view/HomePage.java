@@ -63,7 +63,7 @@ public class HomePage extends Application {
     /** Opens the existing WelcomePage with the Stage owned by HomePage. */
     private void showWelcome() {
         stopSlider();
-        new WelcomePage().start(primaryStage);
+        new WelcomePage().show(primaryStage, this::showHome);
     }
 
     /** Used by WelcomePage after its welcome interaction. */
