@@ -40,6 +40,45 @@ public class WorkerDao {
         return null;
     }
 
+    public Worker getWorkerByEmailOrMobile(String identifier) {
+        try {
+            // First try by mobile number (document id)
+            String cleaned = identifier.replaceAll("[\\s\\-\\(\\)]", "");
+            String phoneNumber = null;
+            if (cleaned.startsWith("+91") && cleaned.length() == 13 && cleaned.substring(3).matches("\\d{10}")) {
+                phoneNumber = cleaned;
+            } else if (cleaned.startsWith("91") && cleaned.length() == 12 && cleaned.matches("\\d{12}")) {
+                phoneNumber = "+" + cleaned;
+            } else if (cleaned.length() == 10 && cleaned.matches("\\d{10}")) {
+                phoneNumber = "+91" + cleaned;
+            } else if (cleaned.startsWith("+") && cleaned.length() >= 8 && cleaned.substring(1).matches("\\d+")) {
+                phoneNumber = cleaned;
+            }
+
+            if (phoneNumber != null) {
+                Worker w = getWorker(phoneNumber);
+                if (w != null) return w;
+                
+                // fallback to try original string just in case
+                w = getWorker(identifier);
+                if (w != null) return w;
+            } else {
+                Worker w = getWorker(identifier);
+                if (w != null) return w;
+            }
+
+            // Then try by email
+            ApiFuture<QuerySnapshot> future = db.collection("Workers").whereEqualTo("email", identifier).get();
+            QuerySnapshot snapshot = future.get();
+            if (!snapshot.isEmpty()) {
+                return snapshot.getDocuments().get(0).toObject(Worker.class);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public void updateWorker(Worker worker) {
         try {
             db.collection("Workers")

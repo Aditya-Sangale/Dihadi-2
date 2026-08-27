@@ -14,6 +14,11 @@ public class Worker {
     private int dailyWage;
     private String uid;
     private String profilePhotoUrl;
+    private String workerType;
+    private String subSkill;
+    private String city;
+    private String state;
+    private String password;
 
     public Worker() {
     }
@@ -23,13 +28,22 @@ public class Worker {
                   String gender, String dateOfBirth, String education,
                   String experience, int dailyWage) {
         this(firstName, middleName, lastName, mobileNumber, alternateMobile, email,
-             gender, dateOfBirth, education, experience, dailyWage, null);
+             gender, dateOfBirth, education, experience, dailyWage, null, null, null, null, null);
     }
 
     public Worker(String firstName, String middleName, String lastName,
                   String mobileNumber, String alternateMobile, String email,
                   String gender, String dateOfBirth, String education,
                   String experience, int dailyWage, String profilePhotoUrl) {
+        this(firstName, middleName, lastName, mobileNumber, alternateMobile, email,
+             gender, dateOfBirth, education, experience, dailyWage, profilePhotoUrl, null, null, null, null);
+    }
+
+    public Worker(String firstName, String middleName, String lastName,
+                  String mobileNumber, String alternateMobile, String email,
+                  String gender, String dateOfBirth, String education,
+                  String experience, int dailyWage, String profilePhotoUrl,
+                  String workerType, String subSkill, String city, String state) {
         this.firstName = firstName;
         this.middleName = middleName;
         this.lastName = lastName;
@@ -42,6 +56,18 @@ public class Worker {
         this.experience = experience;
         this.dailyWage = dailyWage;
         this.profilePhotoUrl = profilePhotoUrl;
+        this.workerType = workerType;
+        this.subSkill = subSkill;
+        this.city = city;
+        this.state = state;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getFirstName() {
@@ -146,5 +172,37 @@ public class Worker {
 
     public void setProfilePhotoUrl(String profilePhotoUrl) {
         this.profilePhotoUrl = profilePhotoUrl;
+    }
+
+    public String getWorkerType() {
+        return workerType;
+    }
+
+    public void setWorkerType(String workerType) {
+        this.workerType = workerType;
+    }
+
+    public String getSubSkill() {
+        return subSkill;
+    }
+
+    public void setSubSkill(String subSkill) {
+        this.subSkill = subSkill;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }

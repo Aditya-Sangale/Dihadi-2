@@ -65,16 +65,30 @@ public class LoginPage {
         VBox introBox = new VBox(8, welcome, intro);
         introBox.setAlignment(Pos.CENTER);
         TextField account = new TextField();
-        account.setPromptText("e.g. 9876543210");
+        account.setPromptText(recruiter ? "e.g. 9876543210" : "Mobile Number or Email");
         account.setStyle(inputStyle());
-        VBox credentials = new VBox(12,
-                label("Enter your Mobile Number", "-fx-font-size:19px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
-                account);
-        Button continueButton = new Button("Continue with OTP");
+        
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Enter Password");
+        passwordField.setStyle(inputStyle());
+        
+        VBox credentials;
+        if (recruiter) {
+            credentials = new VBox(12,
+                    label("Enter your Mobile Number", "-fx-font-size:19px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
+                    account);
+        } else {
+            credentials = new VBox(12,
+                    label("Enter Mobile Number or Email", "-fx-font-size:19px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
+                    account,
+                    passwordField);
+        }
+        
+        Button continueButton = new Button(recruiter ? "Continue with OTP" : "Login");
         continueButton.setMaxWidth(Double.MAX_VALUE);
         continueButton.setStyle(
                 "-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#231b00;-fx-font-size:18px;-fx-font-weight:700;-fx-padding:13px;-fx-cursor:hand;");
-        continueButton.setOnAction(e -> handleLogin(account, continueButton));
+        continueButton.setOnAction(e -> handleLogin(account, passwordField, continueButton));
         Button create = link(recruiter ? "New recruiter? Create an account" : "New worker? Create an account");
         create.setOnAction(e -> {
             Stage stage = (Stage) create.getScene().getWindow();
@@ -163,15 +177,48 @@ public class LoginPage {
         return r == null ? null : new Image(r.toExternalForm());
     }
 
-    private void handleLogin(TextField account, Button continueButton) {
-        String mobileInput = account.getText().trim();
-        if (mobileInput.isEmpty()) {
-            AppNavigator.information("Login", "Please enter your mobile number.");
+    private void handleLogin(TextField account, PasswordField passwordField, Button continueButton) {
+        String identifierInput = account.getText().trim();
+        if (identifierInput.isEmpty()) {
+            AppNavigator.information("Login", "Please enter your details.");
             return;
         }
 
+        if (!recruiter) {
+            String password = passwordField.getText();
+            if (password == null || password.trim().isEmpty()) {
+                AppNavigator.information("Login", "Please enter your password.");
+                return;
+            }
+            
+            continueButton.setDisable(true);
+            continueButton.setText("Verifying...");
+            
+            new Thread(() -> {
+                com.dihadi.controller.WorkerController workerController = new com.dihadi.controller.WorkerController();
+                Worker worker = workerController.getWorkerByEmailOrMobile(identifierInput);
+                
+                javafx.application.Platform.runLater(() -> {
+                    continueButton.setDisable(false);
+                    continueButton.setText("Login");
+                    
+                    if (worker == null || worker.getPassword() == null || !worker.getPassword().equals(password)) {
+                        AppNavigator.information("Login Failed", "Invalid credentials. Please try again.");
+                    } else {
+                        com.dihadi.view.SessionManager.currentWorker = worker;
+                        Stage stage = (Stage) continueButton.getScene().getWindow();
+                        Runnable homeNav = (back != null) ? back : () -> AppNavigator.open(stage, "Home");
+                        stage.setScene(new com.dihadi.view.WorkerPage(worker).getWorkerScene(homeNav));
+                    }
+                });
+            }).start();
+            
+            return;
+        }
+
+        // Recruiter OTP Flow
         // Clean input: remove spaces, hyphens, parentheses
-        String cleaned = mobileInput.replaceAll("[\\s\\-\\(\\)]", "");
+        String cleaned = identifierInput.replaceAll("[\\s\\-\\(\\)]", "");
 
         String phoneNumber;
         if (cleaned.startsWith("+91") && cleaned.length() == 13 && cleaned.substring(3).matches("\\d{10}")) {

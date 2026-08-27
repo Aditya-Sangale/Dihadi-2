@@ -104,18 +104,65 @@ public class CarpenterResultsPage {
                 return row;
         }
 
+        private static class WorkerCardData {
+                String name;
+                String demographic;
+                String location;
+                String wage;
+                String photo;
+
+                WorkerCardData(String name, String demographic, String location, String wage, String photo) {
+                        this.name = name;
+                        this.demographic = demographic;
+                        this.location = location;
+                        this.wage = wage;
+                        this.photo = photo;
+                }
+        }
+
+        private java.util.List<WorkerCardData> getAllCarpenterWorkers() {
+                java.util.List<WorkerCardData> list = new java.util.ArrayList<>();
+                try {
+                        java.util.List<com.dihadi.model.Worker> realWorkers = new com.dihadi.controller.WorkerController().getAllWorkers();
+                        if (realWorkers != null) {
+                                int pIdx = 0;
+                                for (com.dihadi.model.Worker w : realWorkers) {
+                                        if (w.getWorkerType() != null && w.getWorkerType().toLowerCase().contains("carpenter")) {
+                                                String fullName = ((w.getFirstName() != null ? w.getFirstName() : "") + " " +
+                                                                  (w.getLastName() != null ? w.getLastName() : "")).trim();
+                                                if (fullName.isBlank()) fullName = "Verified Carpenter";
+                                                String demo = (w.getExperience() != null && !w.getExperience().equals("Select") ? w.getExperience() : "Experienced")
+                                                              + ", " + (w.getGender() != null && !w.getGender().equals("Select") ? w.getGender() : "Male");
+                                                String loc = (w.getState() != null && !w.getState().isBlank() ? w.getState() : "Maharashtra");
+                                                String wage = w.getDailyWage() > 0 ? String.format("%,d", (long)w.getDailyWage()) : "2200";
+                                                String photo = w.getProfilePhotoUrl() != null && !w.getProfilePhotoUrl().isBlank() 
+                                                               ? w.getProfilePhotoUrl() : PHOTOS[pIdx % PHOTOS.length];
+                                                pIdx++;
+                                                list.add(new WorkerCardData(fullName, demo, loc, wage, photo));
+                                        }
+                                }
+                        }
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+                for (int i = 0; i < WORKERS.length; i++) {
+                        list.add(new WorkerCardData(WORKERS[i][0], WORKERS[i][1], WORKERS[i][2], WORKERS[i][3], PHOTOS[i % PHOTOS.length]));
+                }
+                return list;
+        }
+
         private TilePane cards() {
                 TilePane grid = new TilePane();
                 grid.setPrefColumns(3);
                 grid.setHgap(26);
                 grid.setVgap(24);
-                for (int i = 0; i < WORKERS.length; i++)
-                        grid.getChildren().add(card(WORKERS[i], PHOTOS[i % PHOTOS.length]));
+                for (WorkerCardData w : getAllCarpenterWorkers())
+                        grid.getChildren().add(card(w));
                 return grid;
         }
 
-        private VBox card(String[] w, String photoPath) {
-                ImageView portrait = image(photoPath, 54, 54);
+        private VBox card(WorkerCardData w) {
+                ImageView portrait = image(w.photo, 54, 54);
                 portrait.setPreserveRatio(false);
                 portrait.setClip(new Circle(27, 27, 27));
                 StackPane portraitBox = new StackPane(portrait);
@@ -123,27 +170,27 @@ public class CarpenterResultsPage {
                 portraitBox.setStyle(
                                 "-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-background-radius:999px;");
                 VBox identity = new VBox(3,
-                                label(w[0], "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
-                                label(w[1], "-fx-font-size:12px;-fx-text-fill:#4c4637;"));
+                                label(w.name, "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
+                                label(w.demographic, "-fx-font-size:12px;-fx-text-fill:#4c4637;"));
                 HBox profile = new HBox(13, portraitBox, identity);
                 profile.setAlignment(Pos.CENTER_LEFT);
                 Label skill = label("Carpenter",
                                 "-fx-font-size:10px;-fx-text-fill:#574500;-fx-border-color:#d4af37;-fx-border-radius:10px;-fx-padding:3px 7px;");
-                Label location = label("⌾  " + w[2], "-fx-font-size:12px;-fx-text-fill:#4c4637;");
+                Label location = label("⌾  " + w.location, "-fx-font-size:12px;-fx-text-fill:#4c4637;");
                 Region line = new Region();
                 line.setMinHeight(1);
                 line.setPrefHeight(1);
                 line.setMaxWidth(Double.MAX_VALUE);
                 line.setStyle("-fx-background-color:#d0c5af;");
                 VBox pay = new VBox(1, label("Wage", "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#4c4637;"),
-                                new HBox(label("₹" + w[3],
+                                new HBox(label("₹" + w.wage,
                                                 "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#d4a300;"),
                                                 label(" / day", "-fx-font-size:10px;-fx-text-fill:#4c4637;")));
                 Button hire = new Button("HIRE NOW");
                 hire.setStyle(
                                 "-fx-background-color:#735c00;-fx-background-radius:18px;-fx-text-fill:#f6d676;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:7px 14px;-fx-cursor:hand;");
-                hire.setOnAction(e -> AppNavigator.information("Hire " + w[0],
-                                "Your hiring request for " + w[0] + " has been initiated. We'll connect you soon!"));
+                hire.setOnAction(e -> AppNavigator.information("Hire " + w.name,
+                                "Your hiring request for " + w.name + " has been initiated. We'll connect you soon!"));
                 HBox bottom = new HBox(pay, hire);
                 bottom.setAlignment(Pos.CENTER_LEFT);
                 HBox.setHgrow(pay, Priority.ALWAYS);
@@ -152,6 +199,7 @@ public class CarpenterResultsPage {
                 card.setPadding(new Insets(17));
                 card.setStyle(
                                 "-fx-background-color:#ffffff;-fx-background-radius:12px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),7,0,0,2px);");
+                card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); stage.setScene(new RecruiterWorkerProfilePage(w.name, "Carpenter", w.demographic, w.location, w.wage, w.photo).getProfileScene(() -> com.dihadi.view.AppNavigator.open(stage, "Recruiter"))); });
                 return card;
         }
 
@@ -292,6 +340,11 @@ public class CarpenterResultsPage {
         }
 
         private ImageView image(String path, double w, double h) {
-                return new ImageView(new Image(getClass().getResource(path).toExternalForm(), w, h, false, true));
+                if (path == null || path.isBlank()) return new ImageView();
+                if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("file:")) {
+                        return new ImageView(new Image(path, w, h, false, true));
+                }
+                var res = getClass().getResource(path);
+                return res == null ? new ImageView() : new ImageView(new Image(res.toExternalForm(), w, h, false, true));
         }
 }

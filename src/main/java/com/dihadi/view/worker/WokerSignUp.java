@@ -53,6 +53,11 @@ public class WokerSignUp {
             "12th Pass", "ITI", "Graduate");
     private final ComboBox<String> experience = combo("Select", "Fresher", "0-1 Years", "1-3 Years", "3-5 Years",
             "5+ Years");
+    private final ComboBox<String> workerType = combo("Labour (General Labour)", "Mason", "Carpenter", "Electrician",
+            "Plumber", "Painter", "ITI / Technician", "Site Supervisor");
+    private final TextField city = field("e.g. Pune");
+    private final ComboBox<String> state = combo("Maharashtra", "Delhi", "Gujarat", "Karnataka", "Uttar Pradesh", "Rajasthan", "Tamil Nadu", "Other");
+    private final javafx.scene.control.PasswordField password = new javafx.scene.control.PasswordField();
     private final DatePicker dateOfBirth = new DatePicker();
     private final ImageView profileImage = new ImageView();
     private String profilePhotoUrl;
@@ -153,8 +158,14 @@ public class WokerSignUp {
         add(grid, 0, 3, "Mobile number *", phone, 2);
         add(grid, 0, 4, "Alternate mobile number", alternateMobile, 2);
         add(grid, 0, 5, "Email", email, 2);
-        add(grid, 0, 6, "Education / Qualification *", education, 1);
-        add(grid, 1, 6, "Experience *", experience, 1);
+        add(grid, 0, 6, "Worker Type / Trade *", workerType, 2);
+        add(grid, 0, 7, "State *", state, 1);
+        add(grid, 1, 7, "City / Town", city, 1);
+        add(grid, 0, 8, "Education / Qualification *", education, 1);
+        add(grid, 1, 8, "Experience *", experience, 1);
+        password.setPromptText("Create Dihadi Password");
+        password.setStyle(inputStyle());
+        add(grid, 0, 9, "Create Dihadi Password *", password, 2);
         Label expectedDay = label("", "-fx-font-size:14px;-fx-text-fill:#685c52;");
         Label expectedMonth = label("", "-fx-font-size:14px;-fx-text-fill:#685c52;");
         expectedDay.textProperty().bind(Bindings.createStringBinding(() -> "Your expected daily wages: ₹" + wageValue(),
@@ -165,7 +176,7 @@ public class WokerSignUp {
         wages.setPadding(new Insets(18));
         wages.setStyle(
                 "-fx-background-color:#f4ede2;-fx-background-radius:12px;-fx-border-color:#e9e2d7;-fx-border-radius:12px;");
-        grid.add(wages, 0, 7, 2, 1);
+        grid.add(wages, 0, 10, 2, 1);
         return grid;
     }
 
@@ -259,9 +270,9 @@ public class WokerSignUp {
     private void submit(boolean consent) {
         if (firstName.getText().isBlank() || gender.getValue().equals("Select") || dateOfBirth.getValue() == null
                 || !mobile.getText().matches("\\d{10}") || education.getValue().equals("Select")
-                || experience.getValue().equals("Select") || wageValue() <= 0) {
+                || experience.getValue().equals("Select") || wageValue() <= 0 || password.getText().isBlank()) {
             message(Alert.AlertType.WARNING, "Complete your profile",
-                    "Enter all required fields, a valid 10-digit mobile number, and a daily wage.");
+                    "Enter all required fields, a valid 10-digit mobile number, a daily wage, and a password.");
             return;
         }
         if (!consent) {
@@ -276,7 +287,7 @@ public class WokerSignUp {
             }
 
             WorkerController controller = new WorkerController();
-            controller.addWorker(
+            com.dihadi.model.Worker newWorker = new com.dihadi.model.Worker(
                     firstName.getText().trim(),
                     middleName.getText().trim(),
                     lastName.getText().trim(),
@@ -288,7 +299,13 @@ public class WokerSignUp {
                     education.getValue(),
                     experience.getValue(),
                     wageValue(),
-                    profilePhotoUrl);
+                    profilePhotoUrl,
+                    workerType.getValue(),
+                    workerType.getValue(),
+                    city.getText().trim().isEmpty() ? "Pune" : city.getText().trim(),
+                    state.getValue());
+            newWorker.setPassword(password.getText().trim());
+            controller.addWorker(newWorker);
 
             Stage stage = (Stage) firstName.getScene().getWindow();
             stage.setScene(new WorkerLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
