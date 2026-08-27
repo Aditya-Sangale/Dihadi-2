@@ -23,4 +23,12 @@ public class JobApplicationController {
     public List<JobApplication> getApplicationsByWorker(String workerMobile) {
         return dao.getApplicationsByWorker(workerMobile);
     }
+
+    public List<JobApplication> getApplicationsByRecruiter(String recruiterMobile) {
+        return dao.getApplicationsByRecruiter(recruiterMobile);
+    }
+
+    public List<JobApplication> getAllApplications() {
+        return dao.getAllApplications();
+    }
 }

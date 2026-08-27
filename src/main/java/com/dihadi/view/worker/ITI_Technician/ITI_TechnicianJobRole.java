@@ -9,45 +9,44 @@ import javafx.scene.shape.Rectangle;
 
 /** ITI/Technician job marketplace opened after Save & Continue. */
 public class ITI_TechnicianJobRole {
-        private static final String[][] J = { { "Pump Operator", "Pune, Maharashtra", "₹1,100", "01" },
-                        { "Fitter Technician", "Nashik, Maharashtra", "₹1,250", "03" },
-                        { "Belt Jointer", "Bangalore South, Karnataka", "₹1,300", "05" },
-                        { "Lift & Escalator Mechanic", "New Delhi, Delhi", "₹1,500", "06" },
-                        { "Electrical ITI Technician", "Mumbai, Maharashtra", "₹1,400", "08" },
-                        { "Woodwork Technician", "Chennai, Tamil Nadu", "₹1,200", "04" } };
+        private static final String[][] JOBS = { { "Fitter", "Pune, Maharashtra", "₹1,200", "01", null, null, null },
+            { "Machinist", "Mumbai, Maharashtra", "₹1,300", "02", null, null, null },
+            { "Turner", "Nashik, Maharashtra", "₹1,150", "03", null, null, null },
+            { "Welder", "Bangalore, Karnataka", "₹1,250", "04", null, null, null },
+            { "Mechanic Motor Vehicle", "New Delhi, Delhi", "₹1,400", "05", null, null, null },
+            { "Electrician (ITI)", "Chennai, Tamil Nadu", "₹1,350", "06", null, null, null } };
 
         private java.util.List<String[]> getAllJobs() {
                 java.util.List<String[]> all = new java.util.ArrayList<>();
                 try {
                         java.util.List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
                         java.util.List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
-                        java.util.Map<String, String> projectLocations = new java.util.HashMap<>();
+                        java.util.Map<String, com.dihadi.model.Project> projectMap = new java.util.HashMap<>();
                         if (projects != null) {
                                 for (com.dihadi.model.Project p : projects) {
-                                        String loc = (p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
-                                                     (p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
-                                        if (p.getProjectId() != null) projectLocations.put(p.getProjectId(), loc);
-                                        if (p.getMobile() != null) projectLocations.put(p.getMobile(), loc);
+                                        if (p.getProjectId() != null) projectMap.put(p.getProjectId(), p);
                                 }
                         }
                         if (reqs != null) {
                                 int imgIdx = 1;
                                 for (com.dihadi.model.WorkforceRequirement req : reqs) {
-                                        if (req.getWorkerType() != null && (req.getWorkerType().toLowerCase().contains("iti") || req.getWorkerType().toLowerCase().contains("technician"))) {
+                                        if (req.getWorkerType() != null && req.getWorkerType().toLowerCase().contains("iti")) {
                                                 String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "ITI Technician";
-                                                String loc = req.getProjectId() != null && projectLocations.containsKey(req.getProjectId()) 
-                                                            ? projectLocations.get(req.getProjectId()) : "Pune, Maharashtra";
+                                                com.dihadi.model.Project p = req.getProjectId() != null ? projectMap.get(req.getProjectId()) : null;
+                                                String loc = (p != null && p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
+                                                             (p != null && p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
                                                 String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
-                                                String imgNum = String.format("%02d", (imgIdx % 8) + 1);
+                                                String imgNum = String.format("%02d", (imgIdx % 12) + 1);
                                                 imgIdx++;
-                                                all.add(new String[]{ title, loc, wage, imgNum });
+                                                String recruiterMobile = p != null ? p.getMobile() : null;
+                                                all.add(new String[]{ title, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId() });
                                         }
                                 }
                         }
                 } catch (Exception e) {
                         e.printStackTrace();
                 }
-                for (String[] x : J) {
+                for (String[] x : JOBS) {
                         all.add(x);
                 }
                 return all;
@@ -125,7 +124,7 @@ public class ITI_TechnicianJobRole {
                 ScrollPane scroll = new ScrollPane(canvas);
                 scroll.setFitToWidth(true);
                 scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
-                Button prev = o("← Back to skills");
+                Button prev = o("« Back to skills");
                 prev.setOnAction(x -> {
                         if (back != null)
                                 back.run();
@@ -137,8 +136,8 @@ public class ITI_TechnicianJobRole {
                 return new Scene(page, 1400, 780);
         }
 
-        private VBox card(String[] x) {
-                var r = getClass().getResource("/assets/images/worker/iti/skill-" + x[3] + ".jpg");
+        private VBox card(String[] j) {
+                var r = getClass().getResource("/assets/images/worker/iti/skill-" + j[3] + ".jpg");
                 ImageView im = new ImageView(r == null ? null : new Image(r.toExternalForm()));
                 im.setFitWidth(316);
                 im.setFitHeight(178);
@@ -147,9 +146,9 @@ public class ITI_TechnicianJobRole {
                 clip.setArcWidth(24);
                 clip.setArcHeight(24);
                 im.setClip(clip);
-                Label n = l(x[0], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
-                                loc = l("⌖  " + x[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
-                                w = l("Daily wage  " + x[2],
+                Label n = l(j[0], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
+                                loc = l("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
+                                w = l("Daily wage  " + j[2],
                                                 "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#735c00;");
                 n.setAlignment(Pos.CENTER);
                 n.setMaxWidth(Double.MAX_VALUE);
@@ -158,7 +157,7 @@ public class ITI_TechnicianJobRole {
                 a.setOnAction(e -> { 
                     javafx.stage.Stage stage = (javafx.stage.Stage) a.getScene().getWindow(); 
                     javafx.scene.Scene currentScene = a.getScene();
-                    stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(x[0], x[1], x[2], "/assets/images/worker/iti_technician/skill-01.jpg").getScene(() -> stage.setScene(currentScene))); 
+                    stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(j[0], j[1], j[2], "/assets/images/worker/iti/skill-01.jpg", j[4], j[5], j[6]).getScene(() -> stage.setScene(currentScene), currentScene)); 
                 });
                 VBox v = new VBox(13, im, n, loc, w, a);
                 v.setAlignment(Pos.CENTER);

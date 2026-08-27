@@ -45,6 +45,7 @@ public class SignUpRecruiter {
     private TextField alternateEmailField;
     private TextField companyNameField;
     private ComboBox<String> businessTypeField;
+    private javafx.scene.control.PasswordField passwordField;
     private Runnable backAction;
 
     public Scene getRecruiterSignUpScene(Runnable back) {
@@ -185,6 +186,11 @@ public class SignUpRecruiter {
         businessTypeField.setStyle(inputStyle());
         fields.add(new VBox(8, text("Business Type *", labelStyle()), businessTypeField), 0, 6, 2, 1);
 
+        passwordField = new javafx.scene.control.PasswordField();
+        passwordField.setPromptText("Enter your password");
+        passwordField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("Create Dihadi Password *required", labelStyle()), passwordField), 0, 7, 2, 1);
+
         Button backButton = button("←  BACK", false);
         backButton.setOnAction(e -> AppNavigator.open((Stage) backButton.getScene().getWindow(), "Home"));
         Button sectionBack = new Button("<");
@@ -218,7 +224,7 @@ public class SignUpRecruiter {
 
     private void submitRecruiter() {
         if (firstNameField.getText().isBlank() || mobileField.getText().isBlank()
-                || emailField.getText().isBlank() || companyNameField.getText().isBlank()) {
+                || emailField.getText().isBlank() || companyNameField.getText().isBlank() || passwordField.getText().isBlank()) {
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
                     javafx.scene.control.Alert.AlertType.WARNING);
             alert.setTitle("Complete your details");
@@ -240,7 +246,8 @@ public class SignUpRecruiter {
                     emailField.getText().trim(),
                     alternateEmailField.getText().trim(),
                     companyNameField.getText().trim(),
-                    businessTypeField.getValue() != null ? businessTypeField.getValue() : "");
+                    businessTypeField.getValue() != null ? businessTypeField.getValue() : "",
+                    passwordField.getText().trim());
 
             Stage stage = (Stage) firstNameField.getScene().getWindow();
             stage.setScene(new RecruiterLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
