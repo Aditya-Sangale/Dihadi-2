@@ -57,6 +57,14 @@ public class WorkerPage extends Application {
     private int heroImageIndex;
     private Runnable homeAction;
     private Runnable aboutPageAction;
+    private com.dihadi.model.Worker loggedInWorker;
+
+    public WorkerPage() {
+    }
+
+    public WorkerPage(com.dihadi.model.Worker worker) {
+        this.loggedInWorker = worker;
+    }
 
     public Scene getWorkerScene(Runnable backAction) {
         return getWorkerScene(backAction, null);
@@ -161,13 +169,18 @@ public class WorkerPage extends Application {
         HBox navigation = new HBox(12, home, business, worker, recruiter, about, contact);
         navigation.setAlignment(Pos.CENTER);
 
-        // Account actions are intentionally inactive on this landing page.
-        // "Create Worker Profile" is the single entry point to worker signup here.
-        Button login = outlineButton("Login");
-        Button signUp = primaryButton("Sign Up");
-        login.setOnAction(e -> AppNavigator.adminLoginInProgress());
-        signUp.setOnAction(e -> AppNavigator.adminLoginInProgress());
-        HBox accountActions = new HBox(10, login, signUp);
+        Button dashboard = primaryButton("Dashboard");
+        if (loggedInWorker != null) {
+            dashboard.setOnAction(e -> {
+                Stage stage = (Stage) dashboard.getScene().getWindow();
+                stage.setScene(new com.dihadi.view.worker.WorkerDashboard(loggedInWorker).getScene(() -> {
+                    stage.setScene(new WorkerPage(loggedInWorker).getWorkerScene(backAction, aboutAction));
+                }));
+            });
+        } else {
+            dashboard.setOnAction(e -> AppNavigator.information("Worker Dashboard", "Please login as a worker to open your personalized dashboard."));
+        }
+        HBox accountActions = new HBox(10, dashboard);
         accountActions.setAlignment(Pos.CENTER_RIGHT);
 
         BorderPane header = new BorderPane();

@@ -20,10 +20,20 @@ public class WorkerController {
                           String mobileNumber, String alternateMobile, String email,
                           String gender, String dateOfBirth, String education,
                           String experience, int dailyWage, String profilePhotoUrl) {
+        addWorker(firstName, middleName, lastName, mobileNumber, alternateMobile, email,
+                gender, dateOfBirth, education, experience, dailyWage, profilePhotoUrl, null, null, null, null);
+    }
+
+    public void addWorker(String firstName, String middleName, String lastName,
+                          String mobileNumber, String alternateMobile, String email,
+                          String gender, String dateOfBirth, String education,
+                          String experience, int dailyWage, String profilePhotoUrl,
+                          String workerType, String subSkill, String city, String state) {
         Worker worker = new Worker(firstName, middleName, lastName,
                 mobileNumber, alternateMobile, email,
                 gender, dateOfBirth, education,
-                experience, dailyWage, profilePhotoUrl);
+                experience, dailyWage, profilePhotoUrl,
+                workerType, subSkill, city, state);
         dao.saveWorker(worker);
     }
 
@@ -33,6 +43,10 @@ public class WorkerController {
 
     public Worker getWorker(String mobileNumber) {
         return dao.getWorker(mobileNumber);
+    }
+
+    public Worker getWorkerByEmailOrMobile(String identifier) {
+        return dao.getWorkerByEmailOrMobile(identifier);
     }
 
     public void updateWorker(String firstName, String middleName, String lastName,

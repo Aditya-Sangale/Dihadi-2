@@ -88,42 +88,92 @@ public class SiteSupervisorResultsPage {
         return box;
     }
 
+    private static class WorkerCardData {
+        String name;
+        String demo;
+        String role;
+        String location;
+        String wage;
+        String photo;
+
+        WorkerCardData(String name, String demo, String role, String location, String wage, String photo) {
+            this.name = name;
+            this.demo = demo;
+            this.role = role;
+            this.location = location;
+            this.wage = wage;
+            this.photo = photo;
+        }
+    }
+
+    private java.util.List<WorkerCardData> getAllSupervisorWorkers() {
+        java.util.List<WorkerCardData> list = new java.util.ArrayList<>();
+        try {
+            java.util.List<com.dihadi.model.Worker> realWorkers = new com.dihadi.controller.WorkerController().getAllWorkers();
+            if (realWorkers != null) {
+                int pIdx = 0;
+                for (com.dihadi.model.Worker w : realWorkers) {
+                    if (w.getWorkerType() != null && (w.getWorkerType().toLowerCase().contains("supervisor") || w.getWorkerType().toLowerCase().contains("foreman") || w.getWorkerType().toLowerCase().contains("site"))) {
+                        String fullName = ((w.getFirstName() != null ? w.getFirstName() : "") + " " +
+                                          (w.getLastName() != null ? w.getLastName() : "")).trim();
+                        if (fullName.isBlank()) fullName = "Verified Supervisor";
+                        String demo = (w.getExperience() != null && !w.getExperience().equals("Select") ? w.getExperience() : "Experienced")
+                                      + " | " + (w.getGender() != null && !w.getGender().equals("Select") ? w.getGender() : "Male");
+                        String skillTag = w.getSubSkill() != null && !w.getSubSkill().isBlank() ? w.getSubSkill() : "Site Supervisor";
+                        String loc = (w.getCity() != null && !w.getCity().isBlank() ? w.getCity() : "Pune");
+                        String wage = w.getDailyWage() > 0 ? String.format("%,d", (long)w.getDailyWage()) : "1500";
+                        String photo = w.getProfilePhotoUrl() != null && !w.getProfilePhotoUrl().isBlank() 
+                                       ? w.getProfilePhotoUrl() : PHOTOS[pIdx % PHOTOS.length];
+                        pIdx++;
+                        list.add(new WorkerCardData(fullName, demo, skillTag, loc, wage, photo));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < PEOPLE.length; i++) {
+            list.add(new WorkerCardData(PEOPLE[i][0], PEOPLE[i][1], PEOPLE[i][2], PEOPLE[i][3], PEOPLE[i][4], PHOTOS[i % PHOTOS.length]));
+        }
+        return list;
+    }
+
     private TilePane grid() {
         TilePane grid = new TilePane();
         grid.setPrefColumns(3);
         grid.setHgap(24);
         grid.setVgap(24);
-        for (int i = 0; i < PEOPLE.length; i++)
-            grid.getChildren().add(card(PEOPLE[i], PHOTOS[i % PHOTOS.length]));
+        for (WorkerCardData w : getAllSupervisorWorkers())
+            grid.getChildren().add(card(w));
         return grid;
     }
 
-    private VBox card(String[] p, String imagePath) {
-        ImageView avatar = image(imagePath, 72, 72);
+    private VBox card(WorkerCardData p) {
+        ImageView avatar = image(p.photo, 72, 72);
         avatar.setPreserveRatio(false);
         avatar.setClip(new Circle(36, 36, 36));
         StackPane picture = new StackPane(avatar);
         picture.setPrefSize(72, 72);
         picture.setStyle("-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;");
-        VBox identity = new VBox(4, label(p[0], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#1e1b15;"),
-                label(p[1], "-fx-font-size:13px;-fx-text-fill:#4c4637;"));
+        VBox identity = new VBox(4, label(p.name, "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#1e1b15;"),
+                label(p.demo, "-fx-font-size:13px;-fx-text-fill:#4c4637;"));
         HBox top = new HBox(14, picture, identity);
         top.setAlignment(Pos.CENTER_LEFT);
-        Label role = label("▣  " + p[2],
+        Label role = label("▣  " + p.role,
                 "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#735c00;-fx-background-color:#fff8f0;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-radius:18px;-fx-padding:7px 10px;");
-        Label location = label("⌾  " + p[3], "-fx-font-size:13px;-fx-text-fill:#4c4637;");
+        Label location = label("⌾  " + p.location, "-fx-font-size:13px;-fx-text-fill:#4c4637;");
         Region line = new Region();
         line.setMinHeight(1);
         line.setPrefHeight(1);
         line.setMaxWidth(Double.MAX_VALUE);
         line.setStyle("-fx-background-color:#e9e2d7;");
-        Label wage = label("₹" + p[4], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#d4a300;");
+        Label wage = label("₹" + p.wage, "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#d4a300;");
         VBox pay = new VBox(2, label("Wage:", "-fx-font-size:12px;-fx-text-fill:#4c4637;"),
                 new HBox(wage, label(" / day", "-fx-font-size:11px;-fx-text-fill:#4c4637;")));
         Button hire = new Button("HIRE NOW");
         hire.setStyle(
                 "-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#231b00;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:9px 17px;-fx-cursor:hand;");
-        hire.setOnAction(e -> AppNavigator.information("Hire " + p[0], "Your hiring request has been started."));
+        hire.setOnAction(e -> AppNavigator.information("Hire " + p.name, "Your hiring request has been started."));
         HBox bottom = new HBox(pay, hire);
         bottom.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(pay, Priority.ALWAYS);
@@ -132,6 +182,7 @@ public class SiteSupervisorResultsPage {
         card.setPadding(new Insets(18));
         card.setStyle(
                 "-fx-background-color:#ffffff;-fx-background-radius:15px;-fx-border-color:#cfc6b2;-fx-border-radius:15px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),8,0,0,2px);");
+        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); stage.setScene(new RecruiterWorkerProfilePage(p.name, "Site Supervisor", p.demo, p.location, p.wage, p.photo).getProfileScene(() -> com.dihadi.view.AppNavigator.open(stage, "Recruiter"))); });
         return card;
     }
 
@@ -258,6 +309,10 @@ public class SiteSupervisorResultsPage {
     }
 
     private Image load(String p) {
+        if (p == null || p.isBlank()) return null;
+        if (p.startsWith("http://") || p.startsWith("https://") || p.startsWith("file:")) {
+            return new Image(p, true);
+        }
         var r = getClass().getResource(p);
         return r == null ? null : new Image(r.toExternalForm());
     }

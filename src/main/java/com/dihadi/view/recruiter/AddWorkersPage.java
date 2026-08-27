@@ -49,18 +49,27 @@ public class AddWorkersPage {
             "Plumber Helper", "GI Pipe Installation", "Gas Meter & Valve", "Copper Pipe Install", "LPG To PNG Conv" };
     private static final String[] PAINTER_SKILLS = { "Enamel Painting", "Roller Painting", "POP Work", "Wall Putty",
             "Stencil Work", "Texture Painting", "Waterproofing", "Wood Polish" };
+    private static final String[] ITI_SKILLS = { "Pump Operator", "Fitter Technician", "Belt Jointer",
+            "Lift & Escalator Mechanic", "Electrical ITI Technician", "Woodwork Technician", "Fabricator", "Welder", "Machinist" };
+    private static final String[] SUPERVISOR_SKILLS = { "Site Supervisor", "Construction Foreman",
+            "Electrical Supervisor", "Painting Supervisor", "Masonry Supervisor", "Safety Supervisor", "Plumbing Supervisor",
+            "Carpenter Supervisor", "General Labour Supervisor", "Quality Supervisor", "Tiles Mason Supervisor" };
     private Timeline slideshow;
     private int visualIndex;
     private ComboBox<String> priorityField, workerTypeField, skillField, quantityField;
     private TextField wageField;
-    private String projectId;
+    private String projectId, projectName, contactName, mobile, email, projectAddress, projectImage;
     private CheckBox waterBox, electricityBox, accommodationBox, transportationBox;
 
     public AddWorkersPage() {
     }
 
     public AddWorkersPage(String projectId) {
-        this.projectId = projectId;
+        this.projectId = projectId; this.projectName = "Project"; this.contactName = ""; this.mobile = ""; this.email = ""; this.projectAddress = ""; this.projectImage = "/assets/images/recruiter/slide-03.jpeg";
+    }
+
+    public AddWorkersPage(String projectId, String projectName, String contactName, String mobile, String email, String projectAddress, String projectImage) {
+        this.projectId = projectId; this.projectName = projectName; this.contactName = contactName; this.mobile = mobile; this.email = email; this.projectAddress = projectAddress; this.projectImage = projectImage;
     }
 
     public Scene getAddWorkersScene(Runnable backAction) {
@@ -78,17 +87,18 @@ public class AddWorkersPage {
         StackPane imagePanel = imagePanel();
         HBox page = new HBox(scroll, imagePanel);
         page.setStyle("-fx-background-color:#fff8f0;");
-        return new Scene(page, 1400, 780);
+        Scene scene = new Scene(page, 1400, 780);
+        return scene;
     }
 
     private VBox identity() {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 90, 90);
+        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 86, 86);
         logo.setViewport(new Rectangle2D(380, 0, 840, 840));
         logo.setPreserveRatio(true);
-        VBox identity = new VBox(5, logo,
-                text("DIHADI", "-fx-font-family:Georgia;-fx-font-size:32px;-fx-font-weight:800;-fx-text-fill:#574500;"),
+        VBox identity = new VBox(4, logo,
+                text("DIHADI", "-fx-font-family:Georgia;-fx-font-size:31px;-fx-font-weight:800;-fx-text-fill:#735c00;"),
                 text("Mera Haq ~ Meri Dihadi",
-                        "-fx-font-family:Georgia;-fx-font-size:18px;-fx-font-style:italic;-fx-text-fill:#4c4637;"));
+                        "-fx-font-family:Georgia;-fx-font-size:17px;-fx-font-style:italic;-fx-text-fill:#4c4637;"));
         identity.setAlignment(Pos.CENTER);
         return identity;
     }
@@ -116,7 +126,7 @@ public class AddWorkersPage {
 
         ComboBox<String> priority = priorityField = combo("Very Urgent", "Urgent", "Not Urgent");
         ComboBox<String> workerType = workerTypeField = combo("Labour (General Labour)", "Mason", "Carpenter",
-                "Electrician", "Plumber", "Painter");
+                "Electrician", "Plumber", "Painter", "ITI / Technician", "Site Supervisor");
         ComboBox<String> skill = skillField = new ComboBox<>();
         skill.setMaxWidth(Double.MAX_VALUE);
         skill.setStyle(inputStyle());
@@ -135,6 +145,8 @@ public class AddWorkersPage {
                 case "Electrician" -> skill.getItems().addAll(ELECTRICIAN_SKILLS);
                 case "Plumber" -> skill.getItems().addAll(PLUMBER_SKILLS);
                 case "Painter" -> skill.getItems().addAll(PAINTER_SKILLS);
+                case "ITI / Technician" -> skill.getItems().addAll(ITI_SKILLS);
+                case "Site Supervisor" -> skill.getItems().addAll(SUPERVISOR_SKILLS);
             }
             if (!skill.getItems().isEmpty()) {
                 skill.setValue(skill.getItems().get(0));
@@ -221,7 +233,8 @@ public class AddWorkersPage {
                     transportationBox.isSelected());
             new com.dihadi.controller.WorkforceRequirementController().addRequirement(req);
 
-            button.setText("Worker requirement added");
+            javafx.stage.Stage stage = (javafx.stage.Stage) button.getScene().getWindow();
+            stage.setScene(new ProjectDetailsPage(projectName, contactName, mobile, email, projectAddress, priorityField.getValue(), workerTypeField.getValue(), skillField.getValue(), quantityField.getValue(), wageField.getText(), projectImage, facilitiesText()).getScene(() -> com.dihadi.view.AppNavigator.open(stage, "Recruiter")));
         });
         Button close = new Button("Close");
         close.setStyle(
@@ -245,6 +258,10 @@ public class AddWorkersPage {
         HBox row = new HBox(12, label, spacer, check);
         row.setAlignment(Pos.CENTER_LEFT);
         return row;
+    }
+
+    private String facilitiesText() {
+        return "Water: " + (waterBox.isSelected() ? "Provided" : "Not provided") + " | Electricity: " + (electricityBox.isSelected() ? "Provided" : "Not provided") + " | Accommodation: " + (accommodationBox.isSelected() ? "Provided" : "Not provided") + " | Transportation: " + (transportationBox.isSelected() ? "Provided" : "Not provided");
     }
 
     private VBox wageField(String label, TextField input) {
