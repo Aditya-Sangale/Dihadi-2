@@ -202,52 +202,44 @@ public class ITI_TechnicianResultPage {
     }
 
     private VBox card(WorkerCardData technician) {
-        Label watermark = label("DIHADI", "-fx-font-size:15px;-fx-font-weight:800;-fx-letter-spacing:2px;-fx-text-fill:"
-                + GOLD + ";-fx-opacity:.10;");
-        ImageView image = image(technician.photo, 66, 66);
-        image.setPreserveRatio(false);
-        image.setClip(new Circle(33, 33, 33));
-        StackPane avatar = new StackPane(image);
-        avatar.setPrefSize(66, 66);
+        ImageView portrait = image(technician.photo, 64, 64);
+        portrait.setPreserveRatio(false);
+        portrait.setClip(new Circle(32, 32, 32));
+        StackPane avatar = new StackPane(portrait);
+        avatar.setPrefSize(64, 64);
         avatar.setStyle(
                 "-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-background-radius:999px;");
-        Label name = label(technician.name, "-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
+        Label name = label(technician.name, "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
         Label age = label(technician.age, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
-        Label trade = label(technician.trade, "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:" + INK
-                + ";-fx-background-color:#e9e2d7;-fx-background-radius:6px;-fx-border-color:#cfc6b2;-fx-border-radius:6px;-fx-padding:4px 7px;");
+        Label skill = label(technician.trade,
+                "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#b48700;-fx-background-color:#f4ede2;-fx-background-radius:5px;-fx-padding:4px 7px;");
         Label location = label("⌖  " + technician.location, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
-        VBox details = new VBox(4, name, age, trade, location);
+        VBox details = new VBox(4, name, age, skill, location);
         HBox top = new HBox(14, avatar, details);
         top.setAlignment(Pos.TOP_LEFT);
-        Region line = new Region();
-        line.setMinHeight(1);
-        line.setPrefHeight(1);
-        line.setMaxWidth(Double.MAX_VALUE);
-        line.setStyle("-fx-background-color:#cfc6b2;");
-        Label wage = label("₹" + technician.wage, "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#d4af37;");
-        Label per = label(" / day", "-fx-font-size:11px;-fx-text-fill:" + MUTED + ";");
-        HBox pay = new HBox(wage, per);
-        pay.setAlignment(Pos.BASELINE_LEFT);
+        Region divider = new Region();
+        divider.setMinHeight(1);
+        divider.setPrefHeight(1);
+        divider.setMaxWidth(Double.MAX_VALUE);
+        divider.setStyle("-fx-background-color:#e9e2d7;");
+        Label wage = label("Wage:  ₹" + technician.wage + " / day",
+                "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#d4a300;");
         Button hire = new Button("HIRE NOW");
         hire.setStyle(
-                "-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#ffffff;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 16px;-fx-cursor:hand;");
+                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-radius:18px;-fx-text-fill:#b48700;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;");
         hire.setOnAction(e -> AppNavigator.information("Hire " + technician.name,
                 "Your hiring request for " + technician.name + " has been initiated. We will connect you shortly."));
         Region gap = new Region();
         HBox.setHgrow(gap, Priority.ALWAYS);
-        HBox bottom = new HBox(pay, gap, hire);
+        HBox bottom = new HBox(wage, gap, hire);
         bottom.setAlignment(Pos.CENTER_LEFT);
-        VBox content = new VBox(15, top, line, bottom);
-        content.setPadding(new Insets(20));
-        StackPane root = new StackPane(content, watermark);
-        StackPane.setAlignment(watermark, Pos.TOP_RIGHT);
-        StackPane.setMargin(watermark, new Insets(13, 17, 0, 0));
-        root.setPrefSize(360, 210);
-        root.setStyle(cardStyle(false));
-        root.setOnMouseEntered(e -> root.setStyle(cardStyle(true)));
-        root.setOnMouseExited(e -> root.setStyle(cardStyle(false)));
-        VBox card = new VBox(root);
-        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); stage.setScene(new RecruiterWorkerProfilePage(technician.name, "ITI / Technician", technician.age, technician.location, technician.wage, technician.photo).getProfileScene(() -> com.dihadi.view.AppNavigator.open(stage, "Recruiter"))); });
+        VBox card = new VBox(16, top, divider, bottom);
+        card.setPrefSize(360, 194);
+        card.setPadding(new Insets(20));
+        card.setStyle(cardStyle(false));
+        card.setOnMouseEntered(e -> card.setStyle(cardStyle(true)));
+        card.setOnMouseExited(e -> card.setStyle(cardStyle(false)));
+        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); javafx.scene.Scene currentScene = card.getScene(); stage.setScene(new RecruiterWorkerProfilePage(technician.name, "ITI / Technician", technician.age, technician.location, technician.wage, technician.photo).getProfileScene(() -> stage.setScene(currentScene), currentScene)); });
         return card;
     }
 

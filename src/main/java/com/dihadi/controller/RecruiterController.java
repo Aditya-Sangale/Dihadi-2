@@ -11,26 +11,30 @@ public class RecruiterController {
     public void addRecruiter(String firstName, String middleName, String lastName,
                              String gender, String mobileNumber, String alternateMobile,
                              String email, String alternateEmail, String companyName,
-                             String businessType) {
+                             String businessType, String password) {
         Recruiter recruiter = new Recruiter(firstName, middleName, lastName,
                 gender, mobileNumber, alternateMobile,
                 email, alternateEmail, companyName,
-                businessType);
+                businessType, password);
         dao.saveRecruiter(recruiter);
     }
 
     public Recruiter getRecruiter(String mobileNumber) {
         return dao.getRecruiter(mobileNumber);
     }
+    
+    public Recruiter getRecruiterByEmailOrMobile(String identifier) {
+        return dao.getRecruiterByEmailOrMobile(identifier);
+    }
 
     public void updateRecruiter(String firstName, String middleName, String lastName,
                                 String gender, String mobileNumber, String alternateMobile,
                                 String email, String alternateEmail, String companyName,
-                                String businessType) {
+                                String businessType, String password) {
         Recruiter recruiter = new Recruiter(firstName, middleName, lastName,
                 gender, mobileNumber, alternateMobile,
                 email, alternateEmail, companyName,
-                businessType);
+                businessType, password);
         dao.updateRecruiter(recruiter);
     }
 
