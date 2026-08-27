@@ -1,6 +1,7 @@
 package com.dihadi.view.worker.GeneralLabour;
 
 import com.dihadi.view.AppNavigator;
+import java.util.List;
 import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -20,6 +21,60 @@ public class GeneralLabourJobRole {
             { "Shuttering Helper", "Gurgaon, Haryana", "₹950", "15" },
             { "Mason Helper", "Mumbai, Maharashtra", "₹850", "09" } };
 
+    private List<String[]> getAllJobs() {
+        List<String[]> all = new java.util.ArrayList<>();
+        try {
+            List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
+            List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
+            java.util.Map<String, String> projectLocations = new java.util.HashMap<>();
+            if (projects != null) {
+                for (com.dihadi.model.Project p : projects) {
+                    String loc = (p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
+                                 (p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
+                    if (p.getProjectId() != null) projectLocations.put(p.getProjectId(), loc);
+                    if (p.getMobile() != null) projectLocations.put(p.getMobile(), loc);
+                }
+            }
+            if (reqs != null) {
+                int imgIdx = 1;
+                for (com.dihadi.model.WorkforceRequirement req : reqs) {
+                    if (req.getWorkerType() != null && (req.getWorkerType().toLowerCase().contains("labour") || req.getWorkerType().toLowerCase().contains("labor"))) {
+                        String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "General Labour";
+                        String loc = req.getProjectId() != null && projectLocations.containsKey(req.getProjectId()) 
+                                    ? projectLocations.get(req.getProjectId()) : "Pune, Maharashtra";
+                        String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
+                        String imgNum = String.format("%02d", (imgIdx % 15) + 1);
+                        imgIdx++;
+                        all.add(new String[]{ title, loc, wage, imgNum });
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (String[] j : JOBS) {
+            all.add(j);
+        }
+        return all;
+    }
+
+    private void renderJobs(FlowPane grid, List<String[]> jobsList, String state, String city, String skill) {
+        grid.getChildren().clear();
+        for (String[] j : jobsList) {
+            String searchable = (j[0] + " " + j[1]).toLowerCase();
+            boolean stateMatches = state == null || state.startsWith("All") || searchable.contains(state.toLowerCase());
+            boolean cityMatches = city == null || city.startsWith("All") || searchable.contains(city.toLowerCase());
+            boolean skillMatches = skill == null || skill.startsWith("All") || searchable.contains(skill.toLowerCase());
+            if (stateMatches && cityMatches && skillMatches) {
+                grid.getChildren().add(card(j));
+            }
+        }
+        if (grid.getChildren().isEmpty()) {
+            grid.getChildren().add(label("No exact roles found matching your filter. Clear filters to view all roles.",
+                    "-fx-font-size:15px;-fx-text-fill:#4d4635;"));
+        }
+    }
+
     public Scene getGeneralLabourJobRoleScene(Runnable back) {
         Label eye = label("DIHADI WORK MARKETPLACE",
                 "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#735c00;"),
@@ -35,9 +90,13 @@ public class GeneralLabourJobRole {
         FlowPane grid = new FlowPane(24, 24);
         grid.setAlignment(Pos.CENTER);
         grid.setPrefWrapLength(1100);
-        for (String[] j : JOBS)
-            grid.getChildren().add(card(j));
-        VBox content = new VBox(28, hero, suitableJobBox(),
+
+        List<String[]> allJobs = getAllJobs();
+        renderJobs(grid, allJobs, null, null, null);
+
+        VBox filterBox = suitableJobBox(grid, allJobs);
+
+        VBox content = new VBox(28, hero, filterBox,
                 label("Available opportunities",
                         "-fx-font-family:'Georgia';-fx-font-size:29px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
                 grid);
@@ -110,18 +169,20 @@ public class GeneralLabourJobRole {
      * Filter panel from the supplied Job Roles reference, styled to match the other
      * JobRole pages.
      */
-    private VBox suitableJobBox() {
+    private VBox suitableJobBox(FlowPane grid, List<String[]> allJobs) {
         Label heading = label("Find a suitable job role for you",
                 "-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
-        ComboBox<String> state = choice("Select state", "Maharashtra", "Karnataka", "Tamil Nadu", "Delhi", "Haryana"),
-                city = choice("Select city", "Pune", "Bhiwandi", "Nashik", "Bangalore South", "New Delhi"),
-                skill = choice("Select labour skill", "Construction", "Material shifting", "Factory work", "Road work",
-                        "Loading work");
+        ComboBox<String> state = choice("Select state", "All States", "Maharashtra", "Karnataka", "Tamil Nadu", "Delhi", "Haryana"),
+                city = choice("Select city", "All Cities", "Pune", "Bhiwandi", "Nashik", "Bangalore South", "New Delhi"),
+                skill = choice("Select labour skill", "All Skills", "Construction", "Material shifting", "Factory work", "Road work",
+                        "Loading work", "Labour");
         Button clear = outline("Clear filters"), find = primary("Find roles");
+        find.setOnAction(e -> renderJobs(grid, allJobs, state.getValue(), city.getValue(), skill.getValue()));
         clear.setOnAction(e -> {
             state.getSelectionModel().selectFirst();
             city.getSelectionModel().selectFirst();
             skill.getSelectionModel().selectFirst();
+            renderJobs(grid, allJobs, null, null, null);
         });
         HBox controls = new HBox(12, state, city, skill, clear, find);
         controls.setAlignment(Pos.CENTER);
@@ -146,9 +207,10 @@ public class GeneralLabourJobRole {
         loc.setMaxWidth(Double.MAX_VALUE);
         Button apply = primary("Apply now");
         apply.setMaxWidth(Double.MAX_VALUE);
-        apply.setOnAction(e -> {
-            apply.setText("Applied ✓");
-            apply.setDisable(true);
+        apply.setOnAction(e -> { 
+            javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow(); 
+            javafx.scene.Scene currentScene = apply.getScene();
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(j[0], j[1], j[2], "/assets/images/worker/general_labour/skill-01.jpg").getScene(() -> stage.setScene(currentScene))); 
         });
         VBox box = new VBox(13, pic, name, loc, wage, apply);
         box.setAlignment(Pos.CENTER);

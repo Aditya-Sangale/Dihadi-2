@@ -20,6 +20,8 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.Priority;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
@@ -49,6 +51,50 @@ public class SiteSupervisorJobRolesPage {
             { "Factory Worker Supervisor", "कारखाना मजदूर सुपरवाइज़र", "Indore", "Madhya Pradesh", "1200", "01" },
             { "Tiles Mason Supervisor", "टाइल्स राजमिस्त्री सुपरवाइज़र", "Noida", "Uttar Pradesh", "1350", "02" }
     };
+
+    private java.util.List<String[]> getAllJobs() {
+        java.util.List<String[]> all = new java.util.ArrayList<>();
+        try {
+            java.util.List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
+            java.util.List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
+            java.util.Map<String, String> projectCities = new java.util.HashMap<>();
+            java.util.Map<String, String> projectStates = new java.util.HashMap<>();
+            if (projects != null) {
+                for (com.dihadi.model.Project p : projects) {
+                    String c = p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune";
+                    String s = p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra";
+                    if (p.getProjectId() != null) {
+                        projectCities.put(p.getProjectId(), c);
+                        projectStates.put(p.getProjectId(), s);
+                    }
+                    if (p.getMobile() != null) {
+                        projectCities.put(p.getMobile(), c);
+                        projectStates.put(p.getMobile(), s);
+                    }
+                }
+            }
+            if (reqs != null) {
+                int imgIdx = 1;
+                for (com.dihadi.model.WorkforceRequirement req : reqs) {
+                    if (req.getWorkerType() != null && (req.getWorkerType().toLowerCase().contains("supervisor") || req.getWorkerType().toLowerCase().contains("foreman") || req.getWorkerType().toLowerCase().contains("site"))) {
+                        String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "Site Supervisor";
+                        String c = req.getProjectId() != null && projectCities.containsKey(req.getProjectId()) ? projectCities.get(req.getProjectId()) : "Pune";
+                        String s = req.getProjectId() != null && projectStates.containsKey(req.getProjectId()) ? projectStates.get(req.getProjectId()) : "Maharashtra";
+                        String wage = String.valueOf((long)req.getDailyWages());
+                        String imgNum = String.format("%02d", (imgIdx % 6) + 1);
+                        imgIdx++;
+                        all.add(new String[]{ title, "साइट सुपरवाइज़र", c, s, wage, imgNum });
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (String[] j : JOBS) {
+            all.add(j);
+        }
+        return all;
+    }
 
     private final FlowPane cards = new FlowPane(24, 24);
     private final Label resultText = new Label();
@@ -185,7 +231,7 @@ public class SiteSupervisorJobRolesPage {
             return;
         cards.getChildren().clear();
         int count = 0;
-        for (String[] job : JOBS)
+        for (String[] job : getAllJobs())
             if (matches(job)) {
                 cards.getChildren().add(card(job));
                 count++;
@@ -202,32 +248,39 @@ public class SiteSupervisorJobRolesPage {
     }
 
     private Node card(String[] job) {
-        ImageView photo = image(String.format("/assets/images/worker/foreman/skill-%s.jpg", job[5]), 336, 185);
-        photo.setClip(roundClip(336, 185));
-        Label name = label(job[0], "-fx-font-size:19px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
-        Label hindi = label(job[1], "-fx-font-size:15px;-fx-text-fill:#4d4635;");
-        Label verified = label("VERIFIED OPPORTUNITY",
-                "-fx-background-color:#f6e7ae;-fx-background-radius:10px;-fx-text-fill:#574500;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:4px 8px;");
-        Label place = label("Location: " + job[2] + ", " + job[3].toUpperCase(Locale.ROOT),
-                "-fx-font-size:13px;-fx-text-fill:#4d4635;");
-        Label wage = label("Daily wage: ₹" + job[4], "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#574500;");
-        Button apply = primary("APPLY");
+        ImageView photo = image(String.format("/assets/images/worker/foreman/skill-%s.jpg", job[5]), 316, 178);
+        photo.setClip(roundClip(316, 178));
+        Label name = label(job[0], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
+                location = label("⌖  " + job[2] + ", " + job[3], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
+                wageLabel = label("Daily wage", "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
+                wage = label("₹" + job[4], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        name.setWrapText(true);
+        name.setAlignment(Pos.CENTER);
+        name.setMaxWidth(Double.MAX_VALUE);
+        location.setAlignment(Pos.CENTER);
+        location.setMaxWidth(Double.MAX_VALUE);
+        Region space = new Region();
+        VBox.setVgrow(space, Priority.ALWAYS);
+        Button apply = primary("Apply now");
         apply.setMaxWidth(Double.MAX_VALUE);
-        apply.setOnAction(e -> applyForRole(job, apply));
         apply.setOnAction(e -> {
-            apply.setText("APPLIED ✓");
-            apply.setDisable(true);
-            apply.setStyle(
-                    "-fx-background-color:#685c52;-fx-background-radius:10px;-fx-text-fill:white;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:11px 22px;");
+            javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow();
+            javafx.scene.Scene currentScene = apply.getScene();
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(
+                    job[0], 
+                    job[2] + ", " + job[3], 
+                    "₹" + job[4], 
+                    String.format("/assets/images/worker/foreman/skill-%s.jpg", job[5])
+            ).getScene(() -> stage.setScene(currentScene)));
         });
-        VBox details = new VBox(8, verified, name, hindi, line(), place, wage, apply);
-        details.setPadding(new Insets(17));
-        details.setAlignment(Pos.TOP_LEFT);
-        VBox card = new VBox(photo, details);
-        card.setPrefSize(336, 415);
-        card.setStyle(cardStyle("#ffffff"));
-        card.setOnMouseEntered(e -> card.setStyle(cardStyle("#fffdf8") + "-fx-border-color:#d4af37;"));
-        card.setOnMouseExited(e -> card.setStyle(cardStyle("#ffffff")));
+        HBox pay = new HBox(wageLabel, wage);
+        pay.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(wageLabel, Priority.ALWAYS);
+        VBox card = new VBox(14, photo, name, location, space, pay, apply);
+        card.setAlignment(Pos.CENTER);
+        card.setPrefSize(344, 380);
+        card.setPadding(new Insets(14));
+        card.setStyle(cardStyle("#fff8f0"));
         return card;
     }
 
