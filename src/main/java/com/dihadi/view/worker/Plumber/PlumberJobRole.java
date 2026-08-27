@@ -22,6 +22,60 @@ public class PlumberJobRole {
     private ImageView slide;
     private int index;
 
+    private java.util.List<String[]> getAllJobs() {
+        java.util.List<String[]> all = new java.util.ArrayList<>();
+        try {
+            java.util.List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
+            java.util.List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
+            java.util.Map<String, String> projectLocations = new java.util.HashMap<>();
+            if (projects != null) {
+                for (com.dihadi.model.Project p : projects) {
+                    String loc = (p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
+                                 (p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
+                    if (p.getProjectId() != null) projectLocations.put(p.getProjectId(), loc);
+                    if (p.getMobile() != null) projectLocations.put(p.getMobile(), loc);
+                }
+            }
+            if (reqs != null) {
+                int imgIdx = 1;
+                for (com.dihadi.model.WorkforceRequirement req : reqs) {
+                    if (req.getWorkerType() != null && req.getWorkerType().toLowerCase().contains("plumber")) {
+                        String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "Plumber";
+                        String loc = req.getProjectId() != null && projectLocations.containsKey(req.getProjectId()) 
+                                    ? projectLocations.get(req.getProjectId()) : "Pune, Maharashtra";
+                        String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
+                        String imgNum = String.format("%02d", (imgIdx % 13) + 1);
+                        imgIdx++;
+                        all.add(new String[]{ title, loc, wage, imgNum });
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (String[] j : J) {
+            all.add(j);
+        }
+        return all;
+    }
+
+    private void renderJobs(FlowPane grid, java.util.List<String[]> jobsList, String state, String city, String skill) {
+        grid.getChildren().clear();
+        for (String[] j : jobsList) {
+            String searchable = (j[0] + " " + j[1]).toLowerCase();
+            boolean stateMatches = state == null || state.startsWith("All") || searchable.contains(state.toLowerCase());
+            boolean cityMatches = city == null || city.startsWith("All") || searchable.contains(city.toLowerCase());
+            boolean skillMatches = skill == null || skill.startsWith("All") || searchable.contains(skill.toLowerCase());
+            if (stateMatches && cityMatches && skillMatches) {
+                grid.getChildren().add(job(j));
+            }
+        }
+        if (grid.getChildren().isEmpty()) {
+            grid.getChildren().add(l("No exact roles found matching your filter. Clear filters to view all roles.",
+                    "-fx-font-size:15px;-fx-text-fill:#4d4635;"));
+        }
+    }
+
     public Scene getPlumberJobRoleScene(Runnable back) {
         Label badge = l("DIHADI WORK MARKETPLACE",
                 "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#735c00;"),
@@ -41,10 +95,11 @@ public class PlumberJobRole {
         hero.setPadding(new Insets(28));
         hero.setMaxWidth(1200);
         hero.setStyle(style("#fff8f0"));
-        ComboBox<String> state = c("Select state", "Maharashtra", "Karnataka", "Tamil Nadu", "Delhi"),
-                city = c("Select city", "Pune", "Mumbai", "Nashik", "Bangalore"),
-                skill = c("Select plumbing skill", "Pipe fitting", "Sanitary", "Drainage", "Waterline");
-        HBox controls = new HBox(12, state, city, skill, o("Clear filters"), p("Find roles"));
+        ComboBox<String> state = c("Select state", "All States", "Maharashtra", "Karnataka", "Tamil Nadu", "Delhi"),
+                city = c("Select city", "All Cities", "Pune", "Mumbai", "Nashik", "Bangalore"),
+                skill = c("Select plumbing skill", "All Skills", "Pipe fitting", "Sanitary", "Drainage", "Waterline", "Bathroom", "Plumber");
+        Button clear = o("Clear filters"), find = p("Find roles");
+        HBox controls = new HBox(12, state, city, skill, clear, find);
         controls.setAlignment(Pos.CENTER);
         VBox filter = new VBox(14,
                 l("Find a suitable job role for you", "-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
@@ -56,8 +111,18 @@ public class PlumberJobRole {
         FlowPane grid = new FlowPane(24, 24);
         grid.setAlignment(Pos.CENTER);
         grid.setPrefWrapLength(1140);
-        for (String[] j : J)
-            grid.getChildren().add(job(j));
+
+        java.util.List<String[]> allJobs = getAllJobs();
+        renderJobs(grid, allJobs, null, null, null);
+
+        find.setOnAction(e -> renderJobs(grid, allJobs, state.getValue(), city.getValue(), skill.getValue()));
+        clear.setOnAction(e -> {
+            state.getSelectionModel().selectFirst();
+            city.getSelectionModel().selectFirst();
+            skill.getSelectionModel().selectFirst();
+            renderJobs(grid, allJobs, null, null, null);
+        });
+
         VBox content = new VBox(28, hero, filter,
                 l("Available opportunities",
                         "-fx-font-family:'Georgia';-fx-font-size:29px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
@@ -107,9 +172,10 @@ public class PlumberJobRole {
         n.setMaxWidth(Double.MAX_VALUE);
         Button a = p("Apply now");
         a.setMaxWidth(Double.MAX_VALUE);
-        a.setOnAction(event -> {
-            a.setText("Applied ✓");
-            a.setDisable(true);
+        a.setOnAction(e -> { 
+            javafx.stage.Stage stage = (javafx.stage.Stage) a.getScene().getWindow(); 
+            javafx.scene.Scene currentScene = a.getScene();
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(j[0], j[1], j[2], "/assets/images/worker/plumber/skill-01.jpg").getScene(() -> stage.setScene(currentScene))); 
         });
         VBox v = new VBox(13, im, n, loc, w, a);
         v.setAlignment(Pos.CENTER);

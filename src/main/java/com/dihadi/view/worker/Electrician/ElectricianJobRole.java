@@ -1,6 +1,7 @@
 package com.dihadi.view.worker.Electrician;
 
 import com.dihadi.view.AppNavigator;
+import java.util.List;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
@@ -135,9 +136,46 @@ public class ElectricianJobRole {
         return section;
     }
 
+    private List<Job> getAllJobs() {
+        List<Job> all = new java.util.ArrayList<>();
+        try {
+            List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
+            List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
+            java.util.Map<String, String> projectLocations = new java.util.HashMap<>();
+            if (projects != null) {
+                for (com.dihadi.model.Project p : projects) {
+                    String loc = (p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
+                                 (p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
+                    if (p.getProjectId() != null) projectLocations.put(p.getProjectId(), loc);
+                    if (p.getMobile() != null) projectLocations.put(p.getMobile(), loc);
+                }
+            }
+            if (reqs != null) {
+                int imgIdx = 1;
+                for (com.dihadi.model.WorkforceRequirement req : reqs) {
+                    if (req.getWorkerType() != null && req.getWorkerType().toLowerCase().contains("electrician")) {
+                        String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "Electrician";
+                        String loc = req.getProjectId() != null && projectLocations.containsKey(req.getProjectId()) 
+                                    ? projectLocations.get(req.getProjectId()) : "Pune, Maharashtra";
+                        String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
+                        all.add(new Job(title, loc, wage, (imgIdx % 9) + 1));
+                        imgIdx++;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (Job j : JOBS) {
+            all.add(j);
+        }
+        return all;
+    }
+
     private void renderJobs(String state, String city, String skill) {
         jobs.getChildren().clear();
-        for (Job job : JOBS) {
+        List<Job> allJobs = getAllJobs();
+        for (Job job : allJobs) {
             String all = (job.title + " " + job.location).toLowerCase();
             boolean a = state == null || state.startsWith("All") || all.contains(state.toLowerCase()),
                     b = city == null || city.startsWith("All") || all.contains(city.toLowerCase()),
@@ -166,9 +204,10 @@ public class ElectricianJobRole {
         VBox.setVgrow(space, Priority.ALWAYS);
         Button apply = primary("Apply now");
         apply.setMaxWidth(Double.MAX_VALUE);
-        apply.setOnAction(e -> {
-            apply.setText("Applied ✓");
-            apply.setDisable(true);
+        apply.setOnAction(e -> { 
+            javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow(); 
+            javafx.scene.Scene currentScene = apply.getScene();
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(job.title, job.location, job.wage, String.format("/assets/images/worker/electrician/skill-%02d.jpg", job.image)).getScene(() -> stage.setScene(currentScene))); 
         });
         HBox pay = new HBox(wageLabel, wage);
         pay.setAlignment(Pos.CENTER_LEFT);

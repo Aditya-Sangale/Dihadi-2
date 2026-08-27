@@ -118,33 +118,84 @@ public class PlumberResultPage {
         return row;
     }
 
+    private static class WorkerCardData {
+        String name;
+        String age;
+        String location;
+        String wage;
+        String skill;
+        String photo;
+
+        WorkerCardData(String name, String age, String location, String wage, String skill, String photo) {
+            this.name = name;
+            this.age = age;
+            this.location = location;
+            this.wage = wage;
+            this.skill = skill;
+            this.photo = photo;
+        }
+    }
+
+    private java.util.List<WorkerCardData> getAllPlumberWorkers() {
+        java.util.List<WorkerCardData> list = new java.util.ArrayList<>();
+        try {
+            java.util.List<com.dihadi.model.Worker> realWorkers = new com.dihadi.controller.WorkerController().getAllWorkers();
+            if (realWorkers != null) {
+                int pIdx = 0;
+                for (com.dihadi.model.Worker w : realWorkers) {
+                    if (w.getWorkerType() != null && w.getWorkerType().toLowerCase().contains("plumber")) {
+                        String fullName = ((w.getFirstName() != null ? w.getFirstName() : "") + " " +
+                                          (w.getLastName() != null ? w.getLastName() : "")).trim();
+                        if (fullName.isBlank()) fullName = "Verified Plumber";
+                        String demo = (w.getExperience() != null && !w.getExperience().equals("Select") ? w.getExperience() : "Experienced")
+                                      + ", " + (w.getGender() != null && !w.getGender().equals("Select") ? w.getGender() : "Male");
+                        String loc = (w.getCity() != null && !w.getCity().isBlank() ? w.getCity() + ", " : "") +
+                                     (w.getState() != null && !w.getState().isBlank() ? w.getState() : "Maharashtra");
+                        String wage = w.getDailyWage() > 0 ? String.format("%,d", (long)w.getDailyWage()) : "950";
+                        String skillTag = w.getSubSkill() != null && !w.getSubSkill().isBlank() ? w.getSubSkill() : "Plumber";
+                        String photo = w.getProfilePhotoUrl() != null && !w.getProfilePhotoUrl().isBlank() 
+                                       ? w.getProfilePhotoUrl() : PHOTOS[pIdx % PHOTOS.length];
+                        pIdx++;
+                        list.add(new WorkerCardData(fullName, demo, loc, wage, skillTag, photo));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < PLUMBERS.length; i++) {
+            list.add(new WorkerCardData(PLUMBERS[i][0], PLUMBERS[i][1], PLUMBERS[i][2], PLUMBERS[i][3], PLUMBERS[i][4], PHOTOS[i % PHOTOS.length]));
+        }
+        return list;
+    }
+
     private TilePane cards() {
         TilePane grid = new TilePane();
         grid.setPrefColumns(3);
         grid.setHgap(26);
         grid.setVgap(24);
-        for (int i = 0; i < PLUMBERS.length; i++)
-            grid.getChildren().add(card(PLUMBERS[i], PHOTOS[i]));
+        for (WorkerCardData w : getAllPlumberWorkers())
+            grid.getChildren().add(card(w));
         return grid;
     }
 
-    private VBox card(String[] p, String path) {
+    private VBox card(WorkerCardData p) {
         Label watermark = l("DIHADI", "-fx-font-size:15px;-fx-font-weight:800;-fx-letter-spacing:2px;-fx-text-fill:"
                 + GOLD + ";-fx-opacity:.10;");
-        ImageView portrait = img(path, 76, 76);
+        ImageView portrait = img(p.photo, 76, 76);
         portrait.setPreserveRatio(false);
         portrait.setClip(new Circle(38, 38, 38));
         StackPane avatar = new StackPane(portrait);
         avatar.setPrefSize(76, 76);
         avatar.setStyle(
                 "-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-background-radius:999px;");
-        Label name = l(p[0] + "  ✓", "-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
-        Label age = l(p[1], "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
+        Label name = l(p.name + "  ✓", "-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
+        Label age = l(p.age, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
         HBox profile = new HBox(14, avatar, new VBox(5, name, age));
         profile.setAlignment(Pos.CENTER_LEFT);
-        Label skill = l(p[4],
+        Label skill = l(p.skill,
                 "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#b48700;-fx-border-color:#d4af37;-fx-border-radius:12px;-fx-padding:4px 9px;");
-        Label location = l("⌖  " + p[2], "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
+        Label location = l("⌖  " + p.location, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
         HBox info = new HBox(12, skill, location);
         info.setAlignment(Pos.CENTER_LEFT);
         Region line = new Region();
@@ -152,15 +203,15 @@ public class PlumberResultPage {
         line.setPrefHeight(1);
         line.setMaxWidth(Double.MAX_VALUE);
         line.setStyle("-fx-background-color:#cfc6b2;");
-        Label wage = l("₹" + p[3], "-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#d4af37;");
+        Label wage = l("₹" + p.wage, "-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#d4af37;");
         Label per = l(" / day", "-fx-font-size:11px;-fx-text-fill:" + MUTED + ";");
         HBox pay = new HBox(wage, per);
         pay.setAlignment(Pos.BASELINE_LEFT);
         Button hire = new Button("HIRE NOW");
         hire.setStyle(
                 "-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#ffffff;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 16px;-fx-cursor:hand;");
-        hire.setOnAction(e -> AppNavigator.information("Hire " + p[0],
-                "Your hiring request for " + p[0] + " has been initiated. We will connect you shortly."));
+        hire.setOnAction(e -> AppNavigator.information("Hire " + p.name,
+                "Your hiring request for " + p.name + " has been initiated. We will connect you shortly."));
         Region gap = new Region();
         HBox.setHgrow(gap, Priority.ALWAYS);
         HBox bottom = new HBox(pay, gap, hire);
@@ -174,7 +225,9 @@ public class PlumberResultPage {
         root.setStyle(cardStyle(false));
         root.setOnMouseEntered(e -> root.setStyle(cardStyle(true)));
         root.setOnMouseExited(e -> root.setStyle(cardStyle(false)));
-        return new VBox(root);
+        VBox card = new VBox(root);
+        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); stage.setScene(new RecruiterWorkerProfilePage(p.name, "Plumber", p.age, p.location, p.wage, p.photo).getProfileScene(() -> com.dihadi.view.AppNavigator.open(stage, "Recruiter"))); });
+        return card;
     }
 
     private String cardStyle(boolean active) {
@@ -321,6 +374,10 @@ public class PlumberResultPage {
     }
 
     private Image load(String path) {
+        if (path == null || path.isBlank()) return null;
+        if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("file:")) {
+            return new Image(path, true);
+        }
         var resource = getClass().getResource(path);
         return resource == null ? null : new Image(resource.toExternalForm());
     }

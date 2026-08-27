@@ -174,7 +174,7 @@ public class CreateProjectPage {
 
             Stage stage = (Stage) save.getScene().getWindow();
             stage.setScene(
-                    new AddWorkersPage(projectId).getAddWorkersScene(() -> stage.setScene(getCreateProjectScene(closeAction))));
+                    new AddWorkersPage(projectId, projectName.getText().trim(), contactName.getText().trim(), mobile.getText().trim(), email.getText().trim(), addressLine.getText().trim(), uploadedImageUrls.isEmpty() ? "" : uploadedImageUrls.get(0)).getAddWorkersScene(() -> stage.setScene(getCreateProjectScene(closeAction))));
         });
         Button close = new Button("Close");
         close.setStyle(
