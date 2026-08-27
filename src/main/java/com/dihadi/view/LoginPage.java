@@ -65,26 +65,19 @@ public class LoginPage {
         VBox introBox = new VBox(8, welcome, intro);
         introBox.setAlignment(Pos.CENTER);
         TextField account = new TextField();
-        account.setPromptText(recruiter ? "e.g. 9876543210" : "Mobile Number or Email");
+        account.setPromptText("Mobile Number or Email");
         account.setStyle(inputStyle());
-        
+
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Enter Password");
         passwordField.setStyle(inputStyle());
-        
-        VBox credentials;
-        if (recruiter) {
-            credentials = new VBox(12,
-                    label("Enter your Mobile Number", "-fx-font-size:19px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
-                    account);
-        } else {
-            credentials = new VBox(12,
-                    label("Enter Mobile Number or Email", "-fx-font-size:19px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
-                    account,
-                    passwordField);
-        }
-        
-        Button continueButton = new Button(recruiter ? "Continue with OTP" : "Login");
+
+        VBox credentials = new VBox(12,
+                label("Enter Mobile Number or Email", "-fx-font-size:19px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
+                account,
+                passwordField);
+
+        Button continueButton = new Button("Login");
         continueButton.setMaxWidth(Double.MAX_VALUE);
         continueButton.setStyle(
                 "-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#231b00;-fx-font-size:18px;-fx-font-weight:700;-fx-padding:13px;-fx-cursor:hand;");
@@ -184,24 +177,41 @@ public class LoginPage {
             return;
         }
 
-        if (!recruiter) {
-            String password = passwordField.getText();
-            if (password == null || password.trim().isEmpty()) {
-                AppNavigator.information("Login", "Please enter your password.");
-                return;
-            }
-            
-            continueButton.setDisable(true);
-            continueButton.setText("Verifying...");
-            
-            new Thread(() -> {
-                com.dihadi.controller.WorkerController workerController = new com.dihadi.controller.WorkerController();
-                Worker worker = workerController.getWorkerByEmailOrMobile(identifierInput);
-                
+        String password = passwordField.getText();
+        if (password == null || password.trim().isEmpty()) {
+            AppNavigator.information("Login", "Please enter your password.");
+            return;
+        }
+
+        continueButton.setDisable(true);
+        continueButton.setText("Verifying...");
+
+        new Thread(() -> {
+            if (recruiter) {
+                com.dihadi.controller.RecruiterController recruiterController = new com.dihadi.controller.RecruiterController();
+                Recruiter r = recruiterController.getRecruiterByEmailOrMobile(identifierInput);
+
                 javafx.application.Platform.runLater(() -> {
                     continueButton.setDisable(false);
                     continueButton.setText("Login");
-                    
+
+                    if (r == null || r.getPassword() == null || !r.getPassword().equals(password)) {
+                        AppNavigator.information("Login Failed", "Invalid credentials. Please try again.");
+                    } else {
+                        com.dihadi.view.SessionManager.currentRecruiter = r;
+                        Stage stage = (Stage) continueButton.getScene().getWindow();
+                        Runnable homeNav = (back != null) ? back : () -> AppNavigator.open(stage, "Home");
+                        stage.setScene(new com.dihadi.view.recruiter.RecruiterPage().getRecruiterScene(homeNav));
+                    }
+                });
+            } else {
+                com.dihadi.controller.WorkerController workerController = new com.dihadi.controller.WorkerController();
+                Worker worker = workerController.getWorkerByEmailOrMobile(identifierInput);
+
+                javafx.application.Platform.runLater(() -> {
+                    continueButton.setDisable(false);
+                    continueButton.setText("Login");
+
                     if (worker == null || worker.getPassword() == null || !worker.getPassword().equals(password)) {
                         AppNavigator.information("Login Failed", "Invalid credentials. Please try again.");
                     } else {
@@ -211,81 +221,7 @@ public class LoginPage {
                         stage.setScene(new com.dihadi.view.WorkerPage(worker).getWorkerScene(homeNav));
                     }
                 });
-            }).start();
-            
-            return;
-        }
-
-        // Recruiter OTP Flow
-        // Clean input: remove spaces, hyphens, parentheses
-        String cleaned = identifierInput.replaceAll("[\\s\\-\\(\\)]", "");
-
-        String phoneNumber;
-        if (cleaned.startsWith("+91") && cleaned.length() == 13 && cleaned.substring(3).matches("\\d{10}")) {
-            phoneNumber = cleaned;
-        } else if (cleaned.startsWith("91") && cleaned.length() == 12 && cleaned.matches("\\d{12}")) {
-            phoneNumber = "+" + cleaned;
-        } else if (cleaned.length() == 10 && cleaned.matches("\\d{10}")) {
-            phoneNumber = "+91" + cleaned;
-        } else if (cleaned.startsWith("+") && cleaned.length() >= 8 && cleaned.substring(1).matches("\\d+")) {
-            phoneNumber = cleaned;
-        } else {
-            AppNavigator.information("Invalid Mobile Number",
-                    "Please enter a valid 10-digit mobile number (e.g., 9876543210 or +919876543210).");
-            return;
-        }
-
-        continueButton.setDisable(true);
-        continueButton.setText("Sending OTP...");
-
-        final String finalPhone = phoneNumber;
-        new Thread(() -> {
-            String sessionInfo = AuthService.sendOtp(finalPhone);
-            javafx.application.Platform.runLater(() -> {
-                continueButton.setDisable(false);
-                continueButton.setText("Continue");
-
-                if (sessionInfo == null) {
-                    AppNavigator.information("OTP Error",
-                            "Failed to send OTP. Please check the mobile number and try again.");
-                    return;
-                }
-
-                // Show OTP input dialog
-                TextInputDialog otpDialog = new TextInputDialog();
-                otpDialog.setTitle("OTP Verification");
-                otpDialog.setHeaderText("Enter the 6-digit OTP sent to " + finalPhone);
-                otpDialog.setContentText("OTP:");
-                Optional<String> result = otpDialog.showAndWait();
-
-                if (result.isPresent() && !result.get().isBlank()) {
-                    String otp = result.get().trim();
-                    continueButton.setDisable(true);
-                    continueButton.setText("Verifying...");
-
-                    new Thread(() -> {
-                        String uid = AuthService.verifyOtp(sessionInfo, otp);
-                        javafx.application.Platform.runLater(() -> {
-                            continueButton.setDisable(false);
-                            continueButton.setText("Continue");
-
-                            if (uid == null) {
-                                AppNavigator.information("Verification Failed",
-                                        "Invalid OTP. Please try again.");
-                                return;
-                            }
-
-                            Stage stage = (Stage) continueButton.getScene().getWindow();
-                            Runnable homeNav = (back != null) ? back : () -> AppNavigator.open(stage, "Home");
-                            if (recruiter) {
-                                stage.setScene(new com.dihadi.view.recruiter.RecruiterPage().getRecruiterScene(homeNav));
-                            } else {
-                                stage.setScene(new com.dihadi.view.WorkerPage().getWorkerScene(homeNav));
-                            }
-                        });
-                    }).start();
-                }
-            });
+            }
         }).start();
     }
 }

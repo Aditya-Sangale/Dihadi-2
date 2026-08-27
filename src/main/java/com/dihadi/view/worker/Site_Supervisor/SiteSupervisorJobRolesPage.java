@@ -34,22 +34,17 @@ import java.util.Locale;
  */
 public class SiteSupervisorJobRolesPage {
     private static final String ALL = "All";
-    // English title, Hindi title, city, state, daily wage, local image number.
+    // Title, Location, Wage, Image, Project ID, Mobile, Requirement ID
     private static final String[][] JOBS = {
-            { "Site Supervisor", "साइट सुपरवाइज़र", "Pune", "Maharashtra", "1400", "01" },
-            { "Construction Foreman", "निर्माण फोरमैन", "Balimi", "Odisha", "1150", "02" },
-            { "Electrical Supervisor", "इलेक्ट्रिकल सुपरवाइज़र", "Bangalore", "Karnataka", "1450", "03" },
-            { "Painting Supervisor", "पेंटिंग सुपरवाइज़र", "Kanakapura", "Karnataka", "1050", "04" },
-            { "Masonry Supervisor", "राजमिस्त्री सुपरवाइज़र", "Panvel", "Maharashtra", "1300", "05" },
-            { "Safety Supervisor", "सुरक्षा सुपरवाइज़र", "Gurgaon", "Haryana", "1450", "06" },
-            { "Plumbing Supervisor", "प्लंबिंग सुपरवाइज़र", "Mumbai", "Maharashtra", "1250", "01" },
-            { "ITI / Technician Supervisor", "आईटीआई / तकनीशियन सुपरवाइज़र", "Ghosi", "Uttar Pradesh", "1100", "02" },
-            { "Carpenter Supervisor", "बढ़ई सुपरवाइज़र", "Thiruvananthapuram", "Kerala", "1350", "03" },
-            { "General Labour Supervisor", "सामान्य श्रम सुपरवाइज़र", "Ahmedabad", "Gujarat", "1050", "04" },
-            { "Road Construction Supervisor", "सड़क निर्माण सुपरवाइज़र", "Jalna", "Maharashtra", "1400", "05" },
-            { "Bar Bender Supervisor", "बार बेंडर सुपरवाइज़र", "Raghunathapali", "Odisha", "1300", "06" },
-            { "Factory Worker Supervisor", "कारखाना मजदूर सुपरवाइज़र", "Indore", "Madhya Pradesh", "1200", "01" },
-            { "Tiles Mason Supervisor", "टाइल्स राजमिस्त्री सुपरवाइज़र", "Noida", "Uttar Pradesh", "1350", "02" }
+            {"Foreman", "Pune, Maharashtra", "₹1,500", "01", null, null, null},
+            {"Safety Supervisor", "Mumbai, Maharashtra", "₹1,600", "02", null, null, null},
+            {"Quality Inspector", "Nashik, Maharashtra", "₹1,450", "03", null, null, null},
+            {"General Supervisor", "Bangalore, Karnataka", "₹1,700", "04", null, null, null},
+            {"Material Supervisor", "New Delhi, Delhi", "₹1,550", "05", null, null, null},
+            {"Site Engineer", "Chennai, Tamil Nadu", "₹1,800", "06", null, null, null},
+            {"Project Coordinator", "Hyderabad, Telangana", "₹1,650", "07", null, null, null},
+            {"Construction Supervisor", "Gurgaon, Haryana", "₹1,750", "08", null, null, null},
+            {"Shift Incharge", "Bhiwandi, Maharashtra", "₹1,400", "09", null, null, null}
     };
 
     private java.util.List<String[]> getAllJobs() {
@@ -57,33 +52,25 @@ public class SiteSupervisorJobRolesPage {
         try {
             java.util.List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
             java.util.List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
-            java.util.Map<String, String> projectCities = new java.util.HashMap<>();
-            java.util.Map<String, String> projectStates = new java.util.HashMap<>();
+            java.util.Map<String, com.dihadi.model.Project> projectMap = new java.util.HashMap<>();
             if (projects != null) {
                 for (com.dihadi.model.Project p : projects) {
-                    String c = p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune";
-                    String s = p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra";
-                    if (p.getProjectId() != null) {
-                        projectCities.put(p.getProjectId(), c);
-                        projectStates.put(p.getProjectId(), s);
-                    }
-                    if (p.getMobile() != null) {
-                        projectCities.put(p.getMobile(), c);
-                        projectStates.put(p.getMobile(), s);
-                    }
+                    if (p.getProjectId() != null) projectMap.put(p.getProjectId(), p);
                 }
             }
             if (reqs != null) {
                 int imgIdx = 1;
                 for (com.dihadi.model.WorkforceRequirement req : reqs) {
-                    if (req.getWorkerType() != null && (req.getWorkerType().toLowerCase().contains("supervisor") || req.getWorkerType().toLowerCase().contains("foreman") || req.getWorkerType().toLowerCase().contains("site"))) {
+                    if (req.getWorkerType() != null && req.getWorkerType().toLowerCase().contains("supervisor")) {
                         String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "Site Supervisor";
-                        String c = req.getProjectId() != null && projectCities.containsKey(req.getProjectId()) ? projectCities.get(req.getProjectId()) : "Pune";
-                        String s = req.getProjectId() != null && projectStates.containsKey(req.getProjectId()) ? projectStates.get(req.getProjectId()) : "Maharashtra";
-                        String wage = String.valueOf((long)req.getDailyWages());
-                        String imgNum = String.format("%02d", (imgIdx % 6) + 1);
+                        com.dihadi.model.Project p = req.getProjectId() != null ? projectMap.get(req.getProjectId()) : null;
+                        String loc = (p != null && p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
+                                     (p != null && p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
+                        String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
+                        String imgNum = String.format("%02d", (imgIdx % 12) + 1);
                         imgIdx++;
-                        all.add(new String[]{ title, "साइट सुपरवाइज़र", c, s, wage, imgNum });
+                        String recruiterMobile = p != null ? p.getMobile() : null;
+                        all.add(new String[]{ title, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId() });
                     }
                 }
             }
@@ -241,19 +228,19 @@ public class SiteSupervisorJobRolesPage {
     }
 
     private boolean matches(String[] job) {
-        return (ALL.equals(state.getValue()) || job[3].equalsIgnoreCase(state.getValue()))
-                && (ALL.equals(city.getValue()) || job[2].equalsIgnoreCase(city.getValue()))
+        return (ALL.equals(state.getValue()) || job[1].contains(state.getValue()))
+                && (ALL.equals(city.getValue()) || job[1].contains(city.getValue()))
                 && (ALL.equals(role.getValue())
                         || job[0].toLowerCase(Locale.ROOT).contains(role.getValue().toLowerCase(Locale.ROOT)));
     }
 
     private Node card(String[] job) {
-        ImageView photo = image(String.format("/assets/images/worker/foreman/skill-%s.jpg", job[5]), 316, 178);
+        ImageView photo = image(String.format("/assets/images/worker/foreman/skill-%s.jpg", job[3]), 316, 178);
         photo.setClip(roundClip(316, 178));
         Label name = label(job[0], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
-                location = label("⌖  " + job[2] + ", " + job[3], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
+                location = label("⌖  " + job[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
                 wageLabel = label("Daily wage", "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
-                wage = label("₹" + job[4], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+                wage = label(job[2], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#735c00;");
         name.setWrapText(true);
         name.setAlignment(Pos.CENTER);
         name.setMaxWidth(Double.MAX_VALUE);
@@ -266,12 +253,7 @@ public class SiteSupervisorJobRolesPage {
         apply.setOnAction(e -> {
             javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow();
             javafx.scene.Scene currentScene = apply.getScene();
-            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(
-                    job[0], 
-                    job[2] + ", " + job[3], 
-                    "₹" + job[4], 
-                    String.format("/assets/images/worker/foreman/skill-%s.jpg", job[5])
-            ).getScene(() -> stage.setScene(currentScene)));
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(job[0], job[1], job[2], "/assets/images/worker/site_supervisor/skill-01.jpg", job[4], job[5], job[6]).getScene(() -> stage.setScene(currentScene), currentScene));
         });
         HBox pay = new HBox(wageLabel, wage);
         pay.setAlignment(Pos.CENTER_LEFT);
@@ -285,7 +267,7 @@ public class SiteSupervisorJobRolesPage {
     }
 
     private Node bottomBar(Runnable backAction) {
-        Button back = outline("← Back to skills");
+        Button back = outline("�? Back to skills");
         back.setOnAction(e -> {
             if (backAction != null)
                 backAction.run();

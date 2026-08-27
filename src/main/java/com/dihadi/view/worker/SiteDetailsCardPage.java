@@ -20,15 +20,19 @@ import javafx.stage.Stage;
  */
 public class SiteDetailsCardPage {
     private final String title, location, wage, imagePath;
+    private final String projectId, recruiterMobile, requirementId;
 
-    public SiteDetailsCardPage(String title, String location, String wage, String imagePath) {
+    public SiteDetailsCardPage(String title, String location, String wage, String imagePath, String projectId, String recruiterMobile, String requirementId) {
         this.title = title;
         this.location = location;
         this.wage = wage;
         this.imagePath = imagePath;
+        this.projectId = projectId;
+        this.recruiterMobile = recruiterMobile;
+        this.requirementId = requirementId;
     }
 
-    public Scene getScene(Runnable back) {
+    public Scene getScene(Runnable back, Scene currentScene) {
         VBox overview = new VBox(14,
                 heading("Project Overview"), details("Project Name", title),
                 details("Contact Person", "Project Site Supervisor"),
@@ -79,19 +83,24 @@ public class SiteDetailsCardPage {
         }
 
         apply.setOnAction(e -> {
-            apply.setText("APPLICATION SENT ✓");
+            apply.setText("Applied ✓");
+            apply.setStyle("-fx-background-color:#2a7e3b;-fx-text-fill:#ffffff;-fx-font-size:16px;-fx-font-weight:700;-fx-padding:14px 28px;-fx-background-radius:8px;");
             apply.setDisable(true);
-            
             if (com.dihadi.view.SessionManager.currentWorker != null) {
-                com.dihadi.model.JobApplication app = new com.dihadi.model.JobApplication(
-                        java.util.UUID.randomUUID().toString(),
-                        com.dihadi.view.SessionManager.currentWorker.getMobileNumber(),
-                        title,
-                        location,
-                        wage,
-                        "Pending"
-                );
-                new com.dihadi.controller.JobApplicationController().saveApplication(app);
+                new Thread(() -> { 
+                    com.dihadi.model.JobApplication app = new com.dihadi.model.JobApplication(
+                            java.util.UUID.randomUUID().toString(),
+                            com.dihadi.view.SessionManager.currentWorker.getMobileNumber(),
+                            title,
+                            location,
+                            wage,
+                            "Pending",
+                            projectId,
+                            recruiterMobile,
+                            requirementId
+                    );
+                    new com.dihadi.controller.JobApplicationController().saveApplication(app);
+                }).start();
             }
         });
         Button close = new Button("←  BACK");
@@ -112,13 +121,21 @@ public class SiteDetailsCardPage {
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
         scroll.setMaxSize(1040, 640);
-        scroll.setStyle("-fx-background:#fff8f0;-fx-background-color:#fff8f0;-fx-border-color:#d0c5af;-fx-border-radius:18px;");
+        scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;");
         StackPane card = new StackPane(scroll);
         card.setMaxSize(1080, 670);
-        card.setStyle("-fx-background-color:#fffdf9;-fx-background-radius:20px;-fx-border-color:#d0c5af;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.22),30,0,0,8px);");
-        StackPane root = new StackPane(card);
-        root.setPadding(new Insets(28));
-        root.setStyle("-fx-background-color:#e9e2d7;");
+        card.setStyle("-fx-background-color:rgba(255,253,249,0.85);-fx-background-radius:20px;-fx-border-color:#d0c5af;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.22),30,0,0,8px);");
+        
+        StackPane root = new StackPane();
+        if (currentScene != null) {
+            javafx.scene.image.WritableImage snapshot = currentScene.snapshot(null);
+            ImageView bgView = new ImageView(snapshot);
+            javafx.scene.effect.BoxBlur blur = new javafx.scene.effect.BoxBlur(12, 12, 3);
+            bgView.setEffect(blur);
+            root.getChildren().add(bgView);
+        }
+        root.getChildren().add(card);
+        root.setStyle("-fx-background-color:rgba(233, 226, 215, 0.4);");
         Scene scene = new Scene(root, 1120, 740);
         scene.windowProperty().addListener((o, a, w) -> { if (w instanceof Stage stage) { stage.setMinWidth(980); stage.setMinHeight(680); } });
         return scene;

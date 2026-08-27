@@ -1,9 +1,6 @@
 package com.dihadi.view;
-
-import com.dihadi.view.recruiter.HireSuitableSkilledWorkersPage;
 import com.dihadi.view.recruiter.SignUpRecruiter;
 import com.dihadi.view.recruiter.RecruiterPage;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;

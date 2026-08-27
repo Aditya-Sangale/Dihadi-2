@@ -19,7 +19,8 @@ public class WorkerDashboard {
         String name = value(worker.getFirstName()) + (worker.getLastName() == null ? "" : " " + worker.getLastName());
         String category = value(worker.getWorkerType(), "Skilled Worker");
         String location = (value(worker.getCity()) + ", " + value(worker.getState())).replace("Not provided, Not provided", "Location not provided");
-        VBox content = new VBox(24, header(name), hero(name, category), metrics(), lowerSections(location), footer(back));
+        VBox heroContainer = hero(name, category);
+        VBox content = new VBox(24, header(name), heroContainer, metrics(), lowerSections(location, heroContainer), footer(back));
         content.setPadding(new Insets(32, 80, 40, 80)); content.setMaxWidth(1440); content.setAlignment(Pos.TOP_CENTER);
         ScrollPane scroll = new ScrollPane(content); scroll.setFitToWidth(true); scroll.setStyle("-fx-background:#fff8f0;-fx-background-color:#fff8f0;");
         return new Scene(scroll, 1440, 900);
@@ -36,12 +37,18 @@ public class WorkerDashboard {
         Label role = label(category + "   •   KYC Verified ✓", "-fx-font-size:17px;-fx-font-weight:700;-fx-text-fill:#735c00;");
         Label copy = label("Your skills are in high demand. Check your active projects and upcoming invitations below.", "-fx-font-size:15px;-fx-text-fill:#4c4637;"); copy.setMaxWidth(420); copy.setWrapText(true);
         VBox welcome = new VBox(10, title, role, copy); welcome.setPrefWidth(410);
-        VBox project = panel("ACTIVE SITE PROJECT", label("No active project assigned", "-fx-font-family:Georgia;-fx-font-size:23px;-fx-font-weight:700;"), detail("Role", category), detail("Daily wage", "Rs. " + worker.getDailyWage() + " / day"), detail("Site status", "Ready for opportunities"));
-        HBox h = new HBox(36, welcome, project); h.setAlignment(Pos.CENTER_LEFT); return new VBox(h);
+        Label activeProjTitle = label("No active project assigned", "-fx-font-family:Georgia;-fx-font-size:23px;-fx-font-weight:700;");
+        VBox roleDetail = detail("Role", category);
+        VBox wageDetail = detail("Daily wage", "Rs. " + worker.getDailyWage() + " / day");
+        VBox siteStatusDetail = detail("Site status", "Ready for opportunities");
+        VBox project = panel("ACTIVE SITE PROJECT", activeProjTitle, roleDetail, wageDetail, siteStatusDetail);
+        HBox h = new HBox(36, welcome, project); h.setAlignment(Pos.CENTER_LEFT); 
+        h.setUserData(new Node[]{activeProjTitle, roleDetail, wageDetail, siteStatusDetail});
+        return new VBox(h);
     }
     private HBox metrics() { HBox row = new HBox(24, metric("Wallet Balance", "Rs. 0", "+ Earnings will appear here"), metric("Attendance (Month)", "0 Days Present", "No attendance recorded"), metric("Job Requests", "0 New", "Invitations"), metric("Reputation", "New", "No deployments yet")); for (Node n : row.getChildren()) HBox.setHgrow(n, Priority.ALWAYS); return row; }
     private VBox metric(String title,String value,String note){ VBox v=panel(title,label(value,"-fx-font-family:Georgia;-fx-font-size:28px;-fx-font-weight:700;-fx-text-fill:#735c00;"),label(note,"-fx-font-size:13px;-fx-text-fill:#3f4938;")); v.setMinHeight(145); return v; }
-    private HBox lowerSections(String location) {
+    private HBox lowerSections(String location, VBox heroContainer) {
         VBox history = panel("RECENT WORK HISTORY", label("No completed work history yet.", "-fx-font-size:15px;-fx-text-fill:#4c4637;"), detail("Current location", location), detail("Experience", value(worker.getExperience())));
         
         VBox invitations = panel("PENDING JOB INVITATIONS", label("Loading applications...", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
@@ -53,32 +60,47 @@ public class WorkerDashboard {
                 if (apps.isEmpty()) {
                     invitations.getChildren().addAll(label("No pending invitations", "-fx-font-size:17px;-fx-font-weight:700;"), label("New opportunities will appear here.", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
                 } else {
+                    boolean hasActive = false;
                     for (com.dihadi.model.JobApplication app : apps) {
-                        Label withdraw = new Label("Withdraw application");
-                        withdraw.setStyle("-fx-font-size:12px;-fx-text-fill:#e74c3c;-fx-underline:true;-fx-cursor:hand;");
-                        
-                        VBox appCard = new VBox(3, 
-                            label(app.getJobTitle(), "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
-                            label("⌖ " + app.getJobLocation(), "-fx-font-size:12px;-fx-text-fill:#4d4635;"),
-                            label("Status: " + app.getStatus(), "-fx-font-size:13px;-fx-text-fill:#d4af37;-fx-font-weight:700;"),
-                            withdraw
-                        );
-                        appCard.setPadding(new Insets(10));
-                        appCard.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:#e5d9c7;-fx-border-radius:8px;");
-                        
-                        withdraw.setOnMouseClicked(ev -> {
-                            new Thread(() -> {
-                                new com.dihadi.controller.JobApplicationController().deleteApplication(app.getApplicationId());
-                                javafx.application.Platform.runLater(() -> {
-                                    invitations.getChildren().remove(appCard);
-                                    if (invitations.getChildren().size() == 1) {
-                                        invitations.getChildren().addAll(label("No pending invitations", "-fx-font-size:17px;-fx-font-weight:700;"), label("New opportunities will appear here.", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
-                                    }
-                                });
-                            }).start();
-                        });
-                        
-                        invitations.getChildren().add(appCard);
+                        if ("Accepted".equalsIgnoreCase(app.getStatus())) {
+                            hasActive = true;
+                            // Update Active Project Panel
+                            HBox heroHBox = (HBox) heroContainer.getChildren().get(0);
+                            Node[] details = (Node[]) heroHBox.getUserData();
+                            ((Label)details[0]).setText(app.getJobTitle() + " @ " + app.getJobLocation());
+                            ((Label)((VBox)details[1]).getChildren().get(1)).setText(app.getJobTitle());
+                            ((Label)((VBox)details[2]).getChildren().get(1)).setText("Rs. " + app.getJobWage() + " / day");
+                            ((Label)((VBox)details[3]).getChildren().get(1)).setText("Assigned");
+                        } else if ("Pending".equalsIgnoreCase(app.getStatus())) {
+                            Label withdraw = new Label("Withdraw application");
+                            withdraw.setStyle("-fx-font-size:12px;-fx-text-fill:#e74c3c;-fx-underline:true;-fx-cursor:hand;");
+                            
+                            VBox appCard = new VBox(3, 
+                                label(app.getJobTitle(), "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
+                                label("⌖ " + app.getJobLocation(), "-fx-font-size:12px;-fx-text-fill:#4d4635;"),
+                                label("Status: " + app.getStatus(), "-fx-font-size:13px;-fx-text-fill:#d4af37;-fx-font-weight:700;"),
+                                withdraw
+                            );
+                            appCard.setPadding(new Insets(10));
+                            appCard.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:#e5d9c7;-fx-border-radius:8px;");
+                            
+                            withdraw.setOnMouseClicked(ev -> {
+                                new Thread(() -> {
+                                    new com.dihadi.controller.JobApplicationController().deleteApplication(app.getApplicationId());
+                                    javafx.application.Platform.runLater(() -> {
+                                        invitations.getChildren().remove(appCard);
+                                        if (invitations.getChildren().size() == 1) {
+                                            invitations.getChildren().addAll(label("No pending invitations", "-fx-font-size:17px;-fx-font-weight:700;"), label("New opportunities will appear here.", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
+                                        }
+                                    });
+                                }).start();
+                            });
+                            
+                            invitations.getChildren().add(appCard);
+                        }
+                    }
+                    if (invitations.getChildren().size() == 1) {
+                        invitations.getChildren().addAll(label("No pending invitations", "-fx-font-size:17px;-fx-font-weight:700;"), label("New opportunities will appear here.", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
                     }
                 }
             });

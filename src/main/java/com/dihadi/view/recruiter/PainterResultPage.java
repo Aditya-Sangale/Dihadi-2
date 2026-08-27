@@ -206,7 +206,7 @@ public class PainterResultPage {
         avatar.setPrefSize(64, 64);
         avatar.setStyle(
                 "-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-background-radius:999px;");
-        Label name = label(painter.name + "  ✓", "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
+        Label name = label(painter.name, "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
         Label age = label(painter.age, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
         Label skill = label(painter.skill, "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:" + GOLD
                 + ";-fx-background-color:#f4ede2;-fx-background-radius:5px;-fx-padding:4px 7px;");
@@ -236,7 +236,7 @@ public class PainterResultPage {
         card.setStyle(cardStyle(false));
         card.setOnMouseEntered(e -> card.setStyle(cardStyle(true)));
         card.setOnMouseExited(e -> card.setStyle(cardStyle(false)));
-        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); stage.setScene(new RecruiterWorkerProfilePage(painter.name, "Painter", painter.age, painter.location, painter.wage, painter.photo).getProfileScene(() -> com.dihadi.view.AppNavigator.open(stage, "Recruiter"))); });
+        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); javafx.scene.Scene currentScene = card.getScene(); stage.setScene(new RecruiterWorkerProfilePage(painter.name, "Painter", painter.age, painter.location, painter.wage, painter.photo).getProfileScene(() -> stage.setScene(currentScene), currentScene)); });
         return card;
     }
 
