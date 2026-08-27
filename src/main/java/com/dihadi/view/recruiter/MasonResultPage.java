@@ -190,52 +190,45 @@ public class MasonResultPage {
         return grid;
     }
 
-    private VBox card(WorkerCardData worker) {
-        ImageView portrait = image(worker.photo, 56, 56);
+    private VBox card(WorkerCardData m) {
+        ImageView portrait = image(m.photo, 64, 64);
         portrait.setPreserveRatio(false);
-        portrait.setClip(new Circle(28, 28, 28));
+        portrait.setClip(new Circle(32, 32, 32));
         StackPane avatar = new StackPane(portrait);
-        avatar.setPrefSize(56, 56);
+        avatar.setPrefSize(64, 64);
         avatar.setStyle(
                 "-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-background-radius:999px;");
-        Label name = label(worker.name, "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
-        Label demographic = label(worker.demographic, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
-        HBox profile = new HBox(13, avatar, new VBox(3, name, demographic));
-        profile.setAlignment(Pos.CENTER_LEFT);
-        Label verified = label("✓ Verified", "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:" + GOLD
-                + ";-fx-background-color:#fff5cf;-fx-background-radius:10px;-fx-padding:4px 8px;");
-        Label skill = label(worker.skill, "-fx-font-size:10px;-fx-font-weight:700;-fx-text-fill:" + GOLD
-                + ";-fx-border-color:#d4af37;-fx-border-radius:10px;-fx-padding:3px 8px;");
-        HBox tags = new HBox(7, skill, verified);
-        tags.setAlignment(Pos.CENTER_LEFT);
-        Label location = label("⌖  " + worker.location, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
+        Label name = label(m.name, "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
+        Label age = label(m.demographic, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
+        Label skill = label(m.skill,
+                "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#b48700;-fx-background-color:#f4ede2;-fx-background-radius:5px;-fx-padding:4px 7px;");
+        Label location = label("⌖  " + m.location, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
+        VBox details = new VBox(4, name, age, skill, location);
+        HBox top = new HBox(14, avatar, details);
+        top.setAlignment(Pos.TOP_LEFT);
         Region divider = new Region();
         divider.setMinHeight(1);
         divider.setPrefHeight(1);
         divider.setMaxWidth(Double.MAX_VALUE);
-        divider.setStyle("-fx-background-color:" + BORDER + ";");
-        Label wageCaption = label("DAILY WAGE",
-                "-fx-font-size:10px;-fx-font-weight:800;-fx-letter-spacing:.6px;-fx-text-fill:" + MUTED + ";");
-        Label wage = label("₹" + worker.wage, "-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:#b48700;");
-        Label perDay = label(" / day", "-fx-font-size:10px;-fx-text-fill:" + MUTED + ";");
-        HBox wageLine = new HBox(wage, perDay);
-        wageLine.setAlignment(Pos.BASELINE_LEFT);
-        VBox pay = new VBox(1, wageCaption, wageLine);
+        divider.setStyle("-fx-background-color:#e9e2d7;");
+        Label wage = label("Wage:  ₹" + m.wage + " / day",
+                "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#d4a300;");
         Button hire = new Button("HIRE NOW");
-        hire.setStyle("-fx-background-color:" + GOLD
-                + ";-fx-background-radius:18px;-fx-text-fill:#f6d676;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 15px;-fx-cursor:hand;");
-        hire.setOnAction(e -> AppNavigator.information("Hire " + worker.name,
-                "Your hiring request for " + worker.name + " has been initiated. We will connect you shortly."));
-        HBox bottom = new HBox(pay, hire);
+        hire.setStyle(
+                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-radius:18px;-fx-text-fill:#b48700;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;");
+        hire.setOnAction(e -> AppNavigator.information("Hire " + m.name,
+                "Your hiring request for " + m.name + " has been initiated. We will connect you shortly."));
+        Region gap = new Region();
+        HBox.setHgrow(gap, Priority.ALWAYS);
+        HBox bottom = new HBox(wage, gap, hire);
         bottom.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(pay, Priority.ALWAYS);
-        VBox card = new VBox(12, profile, tags, location, divider, bottom);
+        VBox card = new VBox(16, top, divider, bottom);
         card.setPrefSize(360, 194);
-        card.setPadding(new Insets(18));
+        card.setPadding(new Insets(20));
         card.setStyle(cardStyle(false));
         card.setOnMouseEntered(e -> card.setStyle(cardStyle(true)));
         card.setOnMouseExited(e -> card.setStyle(cardStyle(false)));
-        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); stage.setScene(new RecruiterWorkerProfilePage(worker.name, "Mason", worker.demographic, worker.location, worker.wage, worker.photo).getProfileScene(() -> com.dihadi.view.AppNavigator.open(stage, "Recruiter"))); });
+        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); javafx.scene.Scene currentScene = card.getScene(); stage.setScene(new RecruiterWorkerProfilePage(m.name, "Mason", m.demographic, m.location, m.wage, m.photo).getProfileScene(() -> stage.setScene(currentScene), currentScene)); });
         return card;
     }
 

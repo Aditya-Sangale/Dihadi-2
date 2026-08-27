@@ -28,7 +28,7 @@ public class RecruiterWorkerProfilePage {
         this.photo = photo;
     }
 
-    public Scene getProfileScene(Runnable back) {
+    public Scene getProfileScene(Runnable back, javafx.scene.Scene currentScene) {
         ImageView portrait = new ImageView(load(photo));
         portrait.setFitWidth(180);
         portrait.setFitHeight(180);
@@ -80,15 +80,21 @@ public class RecruiterWorkerProfilePage {
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
         scroll.setMaxSize(930, 620);
-        scroll.setStyle("-fx-background:#fff8f0;-fx-background-color:#fff8f0;");
+        scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;");
         StackPane card = new StackPane(scroll);
         card.setMaxSize(960, 650);
         card.setStyle(
-                "-fx-background-color:#fffdf9;-fx-background-radius:20px;-fx-border-color:#d0c5af;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.22),28,0,0,8px);");
-        StackPane root = new StackPane(card);
-        root.setPadding(new Insets(26));
-        root.setStyle("-fx-background-color:#e9e2d7;");
-        Scene scene = new Scene(root, 1020, 700);
+                "-fx-background-color:rgba(255, 253, 249, 0.95);-fx-background-radius:20px;-fx-border-color:#d0c5af;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.32),38,0,0,12px);");
+
+        javafx.scene.image.WritableImage snapshot = currentScene.snapshot(null);
+        ImageView bg = new ImageView(snapshot);
+        javafx.scene.effect.ColorAdjust darken = new javafx.scene.effect.ColorAdjust();
+        darken.setBrightness(-0.6);
+        bg.setEffect(darken);
+
+        StackPane root = new StackPane(bg, card);
+        root.setStyle("-fx-background-color:#000000;");
+        Scene scene = new Scene(root, currentScene.getWidth(), currentScene.getHeight());
         scene.windowProperty().addListener((o, a, w) -> {
             if (w instanceof Stage s) {
                 s.setMinWidth(900);

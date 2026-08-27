@@ -26,13 +26,10 @@ public class GeneralLabourJobRole {
         try {
             List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
             List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
-            java.util.Map<String, String> projectLocations = new java.util.HashMap<>();
+            java.util.Map<String, com.dihadi.model.Project> projectMap = new java.util.HashMap<>();
             if (projects != null) {
                 for (com.dihadi.model.Project p : projects) {
-                    String loc = (p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
-                                 (p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
-                    if (p.getProjectId() != null) projectLocations.put(p.getProjectId(), loc);
-                    if (p.getMobile() != null) projectLocations.put(p.getMobile(), loc);
+                    if (p.getProjectId() != null) projectMap.put(p.getProjectId(), p);
                 }
             }
             if (reqs != null) {
@@ -40,12 +37,14 @@ public class GeneralLabourJobRole {
                 for (com.dihadi.model.WorkforceRequirement req : reqs) {
                     if (req.getWorkerType() != null && (req.getWorkerType().toLowerCase().contains("labour") || req.getWorkerType().toLowerCase().contains("labor"))) {
                         String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "General Labour";
-                        String loc = req.getProjectId() != null && projectLocations.containsKey(req.getProjectId()) 
-                                    ? projectLocations.get(req.getProjectId()) : "Pune, Maharashtra";
+                        com.dihadi.model.Project p = req.getProjectId() != null ? projectMap.get(req.getProjectId()) : null;
+                        String loc = (p != null && p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
+                                     (p != null && p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
                         String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
                         String imgNum = String.format("%02d", (imgIdx % 15) + 1);
                         imgIdx++;
-                        all.add(new String[]{ title, loc, wage, imgNum });
+                        String recruiterMobile = p != null ? p.getMobile() : null;
+                        all.add(new String[]{ title, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId() });
                     }
                 }
             }
@@ -109,7 +108,7 @@ public class GeneralLabourJobRole {
         ScrollPane scroll = new ScrollPane(canvas);
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
-        Button previous = outline("← Back to skills");
+        Button previous = outline("�? Back to skills");
         previous.setOnAction(e -> {
             if (back != null)
                 back.run();
@@ -210,7 +209,7 @@ public class GeneralLabourJobRole {
         apply.setOnAction(e -> { 
             javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow(); 
             javafx.scene.Scene currentScene = apply.getScene();
-            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(j[0], j[1], j[2], "/assets/images/worker/general_labour/skill-01.jpg").getScene(() -> stage.setScene(currentScene))); 
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(j[0], j[1], j[2], "/assets/images/worker/general_labour/skill-01.jpg", j[4], j[5], j[6]).getScene(() -> stage.setScene(currentScene), currentScene)); 
         });
         VBox box = new VBox(13, pic, name, loc, wage, apply);
         box.setAlignment(Pos.CENTER);

@@ -6,8 +6,6 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.cloud.firestore.Query.Direction;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,14 +44,54 @@ public class JobApplicationDao {
             for (QueryDocumentSnapshot document : documents) {
                 applications.add(document.toObject(JobApplication.class));
             }
-            
+
             // Sort locally to avoid needing a Firebase composite index
+            applications.sort((a, b) -> {
+                if (a.getTimestamp() == null && b.getTimestamp() == null)
+                    return 0;
+                if (a.getTimestamp() == null)
+                    return 1;
+                if (b.getTimestamp() == null)
+                    return -1;
+                return b.getTimestamp().compareTo(a.getTimestamp());
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return applications;
+    }
+
+    public List<JobApplication> getApplicationsByRecruiter(String recruiterMobile) {
+        List<JobApplication> applications = new ArrayList<>();
+        try {
+            ApiFuture<QuerySnapshot> future = db.collection("JobApplications")
+                    .whereEqualTo("recruiterMobile", recruiterMobile)
+                    .get();
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            for (QueryDocumentSnapshot document : documents) {
+                applications.add(document.toObject(JobApplication.class));
+            }
+
             applications.sort((a, b) -> {
                 if (a.getTimestamp() == null && b.getTimestamp() == null) return 0;
                 if (a.getTimestamp() == null) return 1;
                 if (b.getTimestamp() == null) return -1;
                 return b.getTimestamp().compareTo(a.getTimestamp());
             });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return applications;
+    }
+
+    public List<JobApplication> getAllApplications() {
+        List<JobApplication> applications = new ArrayList<>();
+        try {
+            ApiFuture<QuerySnapshot> future = db.collection("JobApplications").get();
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            for (QueryDocumentSnapshot document : documents) {
+                applications.add(document.toObject(JobApplication.class));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
