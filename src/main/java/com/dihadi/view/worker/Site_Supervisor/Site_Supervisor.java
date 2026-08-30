@@ -63,7 +63,7 @@ public class Site_Supervisor {
         page.setTop(createHeader(backAction, homeAction, aboutAction));
         page.setCenter(scroll);
         page.setBottom(createActionBar(backAction));
-        page.setStyle("-fx-background-color:#fff8f0;");
+        page.setStyle("-fx-background-color:#f3e7ce;");
         return new Scene(page, 1400, 780);
     }
 
@@ -210,7 +210,7 @@ public class Site_Supervisor {
         bar.setAlignment(Pos.CENTER);
         bar.setPadding(new Insets(16, 70, 16, 70));
         bar.setStyle(
-                "-fx-background-color:#fff8f0;-fx-border-color:#cfc6b2;-fx-border-width:1px 0 0 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.05),12,0,0,-4px);");
+                "-fx-background-color:#f3e7ce;-fx-border-color:#cfc6b2;-fx-border-width:1px 0 0 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.05),12,0,0,-4px);");
         return bar;
     }
 

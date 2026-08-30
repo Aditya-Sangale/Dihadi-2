@@ -47,7 +47,7 @@ public class ITI_Technician {
         BorderPane page = new BorderPane(scroll);
         page.setTop(header(backAction));
         page.setBottom(actionBar(backAction));
-        page.setStyle("-fx-background-color:#fff8f0;");
+        page.setStyle("-fx-background-color:#f3e7ce;");
         return new Scene(page, 1400, 780);
     }
 
@@ -156,7 +156,7 @@ public class ITI_Technician {
         HBox bar = new HBox(back, spacer, next);
         bar.setAlignment(Pos.CENTER);
         bar.setPadding(new Insets(16, 70, 16, 70));
-        bar.setStyle("-fx-background-color:rgba(255,248,240,.96);-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
+        bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
         return bar;
     }
 
