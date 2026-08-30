@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DIHADI - Grievance Resolution Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#f4ede2",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#dbe1ff",
+                        "on-tertiary-fixed-variant": "#27438a",
+                        "on-surface-muted": "#4D4635",
+                        "gold-accent": "#D4AF37",
+                        "surface-variant": "#e9e2d7",
+                        "surface-bright": "#fff8f0",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed": "#231b00",
+                        "outline": "#7e7665",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#1e1b15",
+                        "secondary": "#685c52",
+                        "surface-container-low": "#faf3e8",
+                        "background": "#fff8f0",
+                        "tertiary-container": "#415ba4",
+                        "secondary-container": "#eeddd0",
+                        "on-secondary-fixed": "#221a12",
+                        "on-tertiary-container": "#cdd7ff",
+                        "inverse-surface": "#333029",
+                        "secondary-fixed": "#f0dfd3",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#574500",
+                        "on-error-container": "#93000a",
+                        "border-subtle": "#D0C5AF",
+                        "on-surface-variant": "#4c4637",
+                        "surface": "#fff8f0",
+                        "primary-container": "#735c00",
+                        "on-surface": "#1e1b15",
+                        "surface-warm": "#FFF8F0",
+                        "on-secondary-container": "#6d6056",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e9e2d7",
+                        "primary": "#574500",
+                        "surface-tint": "#735c00",
+                        "on-secondary-fixed-variant": "#50453b",
+                        "inverse-primary": "#e3c466",
+                        "error": "#ba1a1a",
+                        "outline-variant": "#cfc6b2",
+                        "on-primary-container": "#f6d676",
+                        "tertiary": "#27438a",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#e3c466",
+                        "inverse-on-surface": "#f7f0e5",
+                        "secondary-fixed-dim": "#d4c4b7",
+                        "surface-container-high": "#eee7dc",
+                        "on-tertiary-fixed": "#00174b",
+                        "primary-fixed": "#ffe085",
+                        "surface-dim": "#e0d9ce",
+                        "tertiary-fixed-dim": "#b4c5ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "80px",
+                        "lg": "48px",
+                        "gutter": "24px",
+                        "base": "8px",
+                        "md": "24px",
+                        "sm": "12px",
+                        "xs": "4px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Be Vietnam Pro"],
+                        "display-lg": ["Playfair Display"],
+                        "quote-it": ["Playfair Display"],
+                        "body-md": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "title-md": ["Be Vietnam Pro"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "headline-lg": ["Playfair Display"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "quote-it": ["22px", { "lineHeight": "32px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.surface-warm');
+            color: theme('colors.on-surface');
+        }
+        .ambient-shadow {
+            box-shadow: 0 4px 20px rgba(58, 48, 39, 0.05);
+        }
+        .interactive-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .interactive-card:hover {
+            box-shadow: 0 8px 30px rgba(58, 48, 39, 0.1);
+            transform: translateY(-2px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="flex">
+<!-- TopNavBar for Mobile (Hidden on lg, visible on md and below) -->
+<header class="md:hidden bg-surface-warm border-b border-outline-variant fixed top-0 left-0 w-full z-50 flex justify-between items-center px-md h-20 shadow-sm">
+<div class="flex items-center gap-sm">
+<span class="text-headline-lg-mobile font-headline-lg-mobile text-primary tracking-tight">DIHADI</span>
+</div>
+<button class="text-primary p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<!-- SideNavBar (Visible on lg and above) -->
+<nav class="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-64 bg-surface-container border-r border-outline-variant p-md space-y-base z-50">
+<div class="flex items-center gap-sm mb-lg">
+<img alt="DIHADI Corporate Logo" class="w-10 h-10 rounded-full object-cover" data-alt="A small circular corporate logo for DIHADI featuring a minimalist geometric design in deep gold and navy blue, set against a warm cream background, symbolizing premium professional services." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbq4FXDogtK4Dz_pu48Jyg-YjX2MWoQjFwmDdSSgSSH0eiKXcmlQqCsP1bj0ZXq6nAtCsXz47RMxT-5pvRGwvhoDw2nJpUfrpOjSZJ0F-jFXKt3hxBjx0k6ZdyNQ8PJ6YCkubuwFl2j7oENjCx210f7YohoxcDXIR5F7aLD5NclqtzRx6RoT6xkZni61Ymn8tzDcCosn4oJgKMCZejRFZaGsmbAHnQ7Vf1ZPhE7YTb_cPp4dJCcizp9Q"/>
+<div>
+<h1 class="text-title-md font-title-md text-primary leading-tight">DIHADI</h1>
+<p class="text-label-md font-label-md text-on-surface-variant">Enterprise Admin</p>
+</div>
+</div>
+<div class="flex-1 space-y-2">
+<a class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-md font-label-md">Command Center</span>
+</a>
+<a class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="text-label-md font-label-md">Workforce</span>
+</a>
+<a class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-label-md font-label-md">Financials</span>
+</a>
+<a class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+<span class="text-label-md font-label-md">Verification</span>
+</a>
+<a class="flex items-center gap-sm p-sm rounded-lg bg-primary-container text-on-primary-container font-bold scale-95 transition-transform duration-150 shadow-sm border border-gold-accent/20" href="#">
+<span class="material-symbols-outlined fill-icon">report_problem</span>
+<span class="text-label-md font-label-md">Grievances</span>
+</a>
+</div>
+<div class="pt-md border-t border-outline-variant space-y-2">
+<a class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined">support_agent</span>
+<span class="text-label-md font-label-md">Support</span>
+</a>
+<a class="flex items-center gap-sm p-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all duration-200" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="text-label-md font-label-md">Compliance</span>
+</a>
+</div>
+<button class="mt-md w-full bg-primary text-on-primary py-sm rounded-full text-label-md font-label-md hover:bg-primary/90 transition-colors">
+            Generate Report
+        </button>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 lg:ml-64 p-md md:p-xl max-w-container-max mx-auto mt-20 lg:mt-0 w-full min-h-screen">
+<div class="mb-lg">
+<h2 class="text-headline-lg font-headline-lg text-primary mb-2 hidden md:block">Grievance Resolution Command Center</h2>
+<h2 class="text-headline-lg-mobile font-headline-lg-mobile text-primary mb-2 md:hidden">Command Center</h2>
+<p class="text-body-md font-body-md text-on-surface-variant">Manage, investigate, and resolve workforce disputes.</p>
+</div>
+<!-- KPI Cards Summary Strip -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md mb-lg">
+<div class="bg-surface-container-lowest p-md rounded-xl ambient-shadow interactive-card border-l-4 border-secondary">
+<div class="flex justify-between items-start mb-sm">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Total Open Cases</h3>
+<span class="material-symbols-outlined text-secondary">folder_open</span>
+</div>
+<div class="flex items-end gap-sm">
+<span class="text-display-lg font-display-lg text-on-surface">162</span>
+<span class="text-body-sm text-error flex items-center mb-2"><span class="material-symbols-outlined text-sm">arrow_upward</span> 12%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-md rounded-xl ambient-shadow interactive-card border-l-4 border-gold-accent">
+<div class="flex justify-between items-start mb-sm">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Pending Investigation</h3>
+<span class="material-symbols-outlined text-gold-accent">search</span>
+</div>
+<div class="flex items-end gap-sm">
+<span class="text-display-lg font-display-lg text-on-surface">48</span>
+<span class="text-body-sm text-on-surface-variant mb-2">Requiring Action</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-md rounded-xl ambient-shadow interactive-card border-l-4 border-error">
+<div class="flex justify-between items-start mb-sm">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">High Priority Disputes</h3>
+<span class="material-symbols-outlined text-error">warning</span>
+</div>
+<div class="flex items-end gap-sm">
+<span class="text-display-lg font-display-lg text-on-surface">12</span>
+<span class="text-body-sm text-error flex items-center mb-2 font-bold">Escalated</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-md rounded-xl ambient-shadow interactive-card border-l-4 border-tertiary-fixed-dim">
+<div class="flex justify-between items-start mb-sm">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Resolved (30 Days)</h3>
+<span class="material-symbols-outlined text-tertiary-fixed-dim">task_alt</span>
+</div>
+<div class="flex items-end gap-sm">
+<span class="text-display-lg font-display-lg text-on-surface">324</span>
+<span class="text-body-sm text-tertiary flex items-center mb-2"><span class="material-symbols-outlined text-sm">arrow_upward</span> 5%</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Main Data Table Area (Spans 2 columns on lg) -->
+<div class="lg:col-span-2">
+<div class="bg-surface-container-lowest rounded-xl ambient-shadow overflow-hidden">
+<div class="p-md border-b border-surface-variant flex justify-between items-center bg-surface-container-low">
+<h3 class="text-title-md font-title-md text-primary">Active Grievances</h3>
+<div class="flex gap-sm">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">filter_list</span></button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">sort</span></button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-surface-variant text-label-md font-label-md text-on-surface-variant">
+<th class="p-sm md:p-md whitespace-nowrap">Case ID</th>
+<th class="p-sm md:p-md">Subject / Details</th>
+<th class="p-sm md:p-md whitespace-nowrap">Priority / Status</th>
+<th class="p-sm md:p-md text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="text-body-md font-body-md">
+<!-- Row 1 -->
+<tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors">
+<td class="p-sm md:p-md font-semibold text-primary">#GR-1024</td>
+<td class="p-sm md:p-md">
+<div class="font-semibold text-on-surface">Payment Delay</div>
+<div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">J. Doe (W-882)</span></div>
+<div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Project Alpha</span></div>
+</td>
+<td class="p-sm md:p-md">
+<div class="flex flex-col gap-2 items-start">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Critical</span>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-container">Investigating</span>
+</div>
+</td>
+<td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap">
+<button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors" title="View Evidence">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors" title="Assign Mediator">
+<span class="material-symbols-outlined">person_add</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors" title="Resolve">
+<span class="material-symbols-outlined">check_circle</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors bg-surface-bright border-l-2 border-l-gold-accent shadow-inner">
+<td class="p-sm md:p-md font-semibold text-primary">#GR-1025</td>
+<td class="p-sm md:p-md">
+<div class="font-semibold text-on-surface">Safety Breach</div>
+<div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">M. Smith (W-910)</span></div>
+<div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Site Supervisor B</span></div>
+</td>
+<td class="p-sm md:p-md">
+<div class="flex flex-col gap-2 items-start">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface-variant">High</span>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">New</span>
+</div>
+</td>
+<td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap">
+<button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors" title="View Evidence">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors" title="Assign Mediator">
+<span class="material-symbols-outlined">person_add</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors" title="Resolve">
+<span class="material-symbols-outlined">check_circle</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors">
+<td class="p-sm md:p-md font-semibold text-primary">#GR-1021</td>
+<td class="p-sm md:p-md">
+<div class="font-semibold text-on-surface">Contract Dispute</div>
+<div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">A. Garcia (W-442)</span></div>
+<div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Recruiter Omega</span></div>
+</td>
+<td class="p-sm md:p-md">
+<div class="flex flex-col gap-2 items-start">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-variant text-on-surface-variant">Medium</span>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Escalated</span>
+</div>
+</td>
+<td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap">
+<button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors" title="View Evidence">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors" title="Assign Mediator">
+<span class="material-symbols-outlined">person_add</span>
+</button>
+<button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors" title="Resolve">
+<span class="material-symbols-outlined">check_circle</span>
+</button>
+</td>
+</tr>
+<tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1026</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Equipment Damage</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">R. Chen (W-112)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Logistics Hub 4</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-variant text-on-surface-variant">Medium</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">New</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1027</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Wage Mismatch</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">L. Thompson (W-554)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Payroll Dept</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface-variant">High</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-container">Investigating</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1028</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Unfair Dismissal</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">K. Patel (W-229)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Project Beta</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Critical</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Escalated</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1029</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Site Conduct</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">S. Miller (W-881)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Site Manager D</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-variant text-on-surface-variant">Medium</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">New</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1030</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Overtime Dispute</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">B. Wilson (W-332)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Project Gamma</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface-variant">High</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-container">Investigating</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1031</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Safety Violation</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">D. Lee (W-901)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Site Supervisor C</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Critical</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">New</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1032</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Contract Breach</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">F. Garcia (W-445)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Recruiter Delta</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-variant text-on-surface-variant">Medium</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-container">Investigating</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1033</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Harassment Claim</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">E. White (W-772)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Project Alpha</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Critical</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Escalated</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1034</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Payment Error</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">G. Harris (W-119)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Finance Team</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface-variant">High</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">New</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1035</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Workplace Hazard</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">H. Clark (W-663)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Site B</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Critical</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-container">Investigating</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1036</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Shift Dispute</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">I. Lewis (W-441)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Scheduling Dept</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-variant text-on-surface-variant">Medium</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">New</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1037</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Equipment Failure</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">J. Walker (W-221)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Maintenance Team</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface-variant">High</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-container">Investigating</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1038</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Policy Violation</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">K. Young (W-559)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Project Delta</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Critical</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Escalated</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1039</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Wage Dispute</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">L. King (W-887)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Payroll</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-variant text-on-surface-variant">Medium</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">New</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1040</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Safety Concern</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">M. Wright (W-339)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Site A</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface-variant">High</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-container">Investigating</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1041</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Contract Issue</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">N. Scott (W-991)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Recruiter Alpha</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Critical</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">New</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1042</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Overtime Pay</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">O. Green (W-449)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Project Omega</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-variant text-on-surface-variant">Medium</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-container">Investigating</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1043</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Site Conduct</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">P. Adams (W-771)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Site Supervisor E</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Critical</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Escalated</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1044</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Equipment Damage</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">Q. Baker (W-111)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Logistics Hub 2</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface-variant">High</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">New</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr><tr class="border-b border-surface-variant hover:bg-surface-warm transition-colors"><td class="p-sm md:p-md font-semibold text-primary">#GR-1045</td><td class="p-sm md:p-md"><div class="font-semibold text-on-surface">Unfair Dismissal</div><div class="text-sm text-on-surface-variant mt-1">Filed by: <span class="font-medium">R. Nelson (W-669)</span></div><div class="text-sm text-on-surface-variant">Against: <span class="font-medium">Project Beta</span></div></td><td class="p-sm md:p-md"><div class="flex flex-col gap-2 items-start"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-error-container text-on-error-container">Critical</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-container">Investigating</span></div></td><td class="p-sm md:p-md text-right space-x-2 whitespace-nowrap"><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">visibility</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">person_add</span></button><button class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-variant text-primary transition-colors"><span class="material-symbols-outlined">check_circle</span></button></td></tr></tbody>
+</table>
+</div>
+<div class="p-sm border-t border-surface-variant bg-surface-container-low flex justify-center">
+<button class="text-label-md font-label-md text-primary hover:underline">View All Cases</button>
+</div>
+</div>
+</div>
+<!-- Case Activity Feed Right Sidebar -->
+<div class="lg:col-span-1">
+</div>
+</div>
+</main>
+</body></html>

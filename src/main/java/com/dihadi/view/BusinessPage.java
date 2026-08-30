@@ -129,8 +129,12 @@ public class BusinessPage {
                                 "Finding dependable, skilled labour should not be a bottleneck. DIHADI\nseamlessly connects your enterprise with verified blue-collar\nprofessionals—from specialized artisans to large-scale general\nworkforces. Mobilize with confidence, speed, and absolute\ntransparency.",
                                 body(14));
                 Button hire = primary("HIRE WORKERS NOW");
-                hire.setOnAction(event -> AppNavigator.open(
-                                (javafx.stage.Stage) hire.getScene().getWindow(), "Recruiter"));
+                hire.setOnAction(event -> {
+                    javafx.stage.Stage stage = (javafx.stage.Stage) hire.getScene().getWindow();
+                    javafx.scene.Scene currentScene = hire.getScene();
+                    stage.setScene(new com.dihadi.view.recruiter.SignUpRecruiter()
+                            .getRecruiterSignUpScene(() -> stage.setScene(currentScene)));
+                });
                 VBox words = new VBox(18, eyebrow, title, copy, hire);
                 words.setAlignment(Pos.CENTER_LEFT);
                 words.setPrefWidth(560);

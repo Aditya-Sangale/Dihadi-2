@@ -1,0 +1,297 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DIHADI - Recruiter Sign Up</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600&amp;family=Playfair+Display:ital,wght@0,600;0,700;1,400&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-background": "#1e1b15",
+                        "on-surface-variant": "#4c4637",
+                        "gold-accent": "#D4AF37",
+                        "on-tertiary-fixed": "#00174b",
+                        "surface": "#fff8f0",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#333029",
+                        "on-tertiary-fixed-variant": "#27438a",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#735c00",
+                        "surface-container-high": "#eee7dc",
+                        "on-surface": "#1e1b15",
+                        "primary": "#574500",
+                        "secondary-fixed-dim": "#d4c4b7",
+                        "tertiary-container": "#415ba4",
+                        "primary-container": "#735c00",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "on-secondary-fixed": "#221a12",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#f0dfd3",
+                        "surface-variant": "#e9e2d7",
+                        "primary-fixed": "#ffe085",
+                        "on-primary-container": "#f6d676",
+                        "surface-container-highest": "#e9e2d7",
+                        "on-secondary-container": "#6d6056",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed-dim": "#e3c466",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#dbe1ff",
+                        "tertiary": "#27438a",
+                        "on-secondary-fixed-variant": "#50453b",
+                        "on-primary-fixed": "#231b00",
+                        "surface-dim": "#e0d9ce",
+                        "surface-container": "#f4ede2",
+                        "surface-warm": "#FFF8F0",
+                        "inverse-primary": "#e3c466",
+                        "inverse-on-surface": "#f7f0e5",
+                        "on-surface-muted": "#4D4635",
+                        "secondary": "#685c52",
+                        "surface-container-low": "#faf3e8",
+                        "error": "#ba1a1a",
+                        "outline": "#7e7665",
+                        "surface-bright": "#fff8f0",
+                        "secondary-container": "#eeddd0",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#cfc6b2",
+                        "background": "#fff8f0",
+                        "on-primary-fixed-variant": "#574500",
+                        "border-subtle": "#D0C5AF",
+                        "on-tertiary-container": "#cdd7ff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "xl": "80px",
+                        "container-max": "1280px",
+                        "gutter": "24px",
+                        "sm": "12px",
+                        "base": "8px",
+                        "xs": "4px",
+                        "md": "24px",
+                        "lg": "48px"
+                    },
+                    fontFamily: {
+                        "body-lg": ["Be Vietnam Pro"],
+                        "title-md": ["Be Vietnam Pro"],
+                        "quote-it": ["Playfair Display"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "label-md": ["Be Vietnam Pro"],
+                        "display-lg": ["Playfair Display"],
+                        "headline-lg": ["Playfair Display"],
+                        "body-md": ["Be Vietnam Pro"]
+                    },
+                    fontSize: {
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "title-md": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+                        "quote-it": ["22px", { lineHeight: "32px", fontWeight: "400", fontStyle: "italic" }],
+                        "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+                        "label-md": ["14px", { lineHeight: "20px", letterSpacing: "0.05em", fontWeight: "600" }],
+                        "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .carousel-container {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 30px;
+        }
+        .carousel-track {
+            display: flex;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+        }
+        .carousel-slide {
+            min-width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="bg-surface-warm min-h-screen text-on-surface font-body-md antialiased overflow-x-hidden flex flex-col md:flex-row">
+<!-- Left Panel: Form -->
+<div class="w-full md:w-1/2 flex flex-col items-center justify-start p-gutter md:p-lg xl:p-xl overflow-y-auto max-h-screen custom-scrollbar">
+<!-- Header / Logo -->
+<div class="text-center mb-12">
+<img alt="DIHADI Logo" class="h-24 mx-auto mb-4 object-contain rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVBiV7eh7Rjk24Y4qsqwjuuAxZvagGlUFBZqDGfPi0nGdc228qsjUybLj7lQcEaBTXFojRmrsdgFyjvrHjEAQ79jD3NsaEY2s9-1iQYg7hz4ZkvlbpA7wilVDjsiu-upa8Vo_Q7UvJ_f_8RDMmVdHJqbnpY-YxYaP7kV6NhrC9GA_-6WxUbfhmjzZe-3xDJnkyM3uCEC7xPHnN2bKm2YSy0IP4G-cwvrHDDCj5rBGhGTgbqpacjIyHXGFByMsSJbWPGqU">
+<h1 class="font-display-lg text-display-lg text-on-background mb-2 tracking-tight">DIHADI</h1>
+<p class="font-quote-it text-quote-it text-on-surface-variant italic">Mera Dihadi ~ Mera Haq</p>
+</div>
+<!-- Welcome Text -->
+<div class="text-center mb-10 w-full max-w-xl">
+<h2 class="font-headline-lg text-headline-lg mb-3">👋 Welcome to DIHADI</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-1">Sign In to Create a Admin Account</p>
+<p class="font-body-md text-body-md text-on-surface-muted">Remember to Enter you Dihadi Admin Code to Complete the Sign Up Process.</p>
+</div>
+<!-- The Form -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_8px_30px_rgb(58,48,39,0.08)] p-gutter md:p-10 w-full max-w-2xl border border-surface-variant overflow-y-auto">
+<form action="#" class="space-y-10" method="POST">
+<!-- Section 1: Personal Details -->
+<div class="space-y-6">
+<div class="flex items-center gap-3 border-b border-surface-variant pb-3 mb-6">
+<span class="material-symbols-outlined text-gold-accent">person</span>
+<h3 class="font-title-md text-title-md text-on-surface">Enter your Details</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="col-span-1 md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Enter Your Full Name <span class="text-error">*required</span></label>
+<input class="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-gold-accent p-3 text-on-surface placeholder:text-on-surface-muted" placeholder="e.g. Ram" type="text">
+</div>
+
+
+
+
+
+
+
+<div class="col-span-1 md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Create your Dihadi official Email address</label>
+<input class="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-gold-accent p-3 text-on-surface placeholder:text-on-surface-muted" placeholder="e.g rushi.sawant@meridihadi.com" type="email">
+</div>
+<div class="col-span-1">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Create a Strong Password</label>
+<input class="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-gold-accent p-3 text-on-surface placeholder:text-on-surface-muted" type="password">
+</div>
+<div class="col-span-1">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Re-Enter &amp; Confirm the Password</label>
+<input class="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-gold-accent p-3 text-on-surface placeholder:text-on-surface-muted" type="password">
+</div>
+<div class="col-span-1 md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Enter your Personal Email Address</label>
+<input class="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-gold-accent p-3 text-on-surface placeholder:text-on-surface-muted" placeholder="e.g ram@email.com" type="email">
+</div>
+<div class="col-span-1">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Enter your Mobile No</label>
+<input class="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-gold-accent p-3 text-on-surface placeholder:text-on-surface-muted" placeholder="e.g +91 9876543210" type="tel">
+</div>
+<div class="col-span-1">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2">Enter your Dihadi Admin Code</label>
+<input class="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-gold-accent p-3 text-on-surface placeholder:text-on-surface-muted" placeholder="Enter Admin Access Code" type="text">
+</div></div>
+</div>
+<!-- Section 2: Business Details -->
+
+<!-- Section 3: Business Address -->
+
+<!-- Actions -->
+<div class="pt-6 border-t border-surface-variant text-center space-y-4">
+<button class="w-full md:w-auto px-12 py-4 bg-gold-accent hover:bg-[#c4a133] text-on-primary-fixed font-title-md text-title-md rounded-full shadow-md transition-all duration-300 transform hover:-translate-y-1" type="submit">
+                        SIGN IN</button>
+<p class="font-body-md text-body-md text-on-surface-variant mt-4">
+                        Already Having Account? <a class="text-gold-accent hover:underline font-semibold" href="#">Login</a>
+</p>
+</div>
+</form>
+</div>
+<!-- Footer -->
+<div class="mt-12 text-center text-on-surface-muted font-body-md text-sm pb-8">
+            © 2024 DIHADI. Meri Dihadi ~ Mera Haq. All Rights Reserved.
+        </div>
+</div>
+<!-- Right Panel: Slideshow -->
+<div class="hidden md:block md:w-1/2 h-screen p-8 sticky top-0">
+<div class="carousel-container shadow-[0_20px_50px_rgb(58,48,39,0.15)] bg-surface-container-high relative">
+<div class="carousel-track" id="sliderTrack" style="transform: translateX(-100%);">
+<!-- Slide 1 -->
+<div class="carousel-slide flex-shrink-0 relative">
+<img alt="Construction workers networking app" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuYDnXEVXmVQL-gSI_g08DhE137rAs6IXdxvhoIe-PGeT1_O3cckKTnv9cwuH6Hpk3H7aAq7OynaOpWL_NwqlVT3k7XqRwvem8f6Jy_xFRJImOXTNVNYVavuQB1Yceko8kzuC9-KZViFDyfo27Mh4CyvEUJS8BTS2EfaIKEJJh8QX9mBcyZl9eM34EzGVw2Yz_2H0LfF3DiV6z_ml3SmYyxgTH4katJGMExoGHLxB83fhbcYJFj5Rw9wXbHFUd1ypy5fI">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-12">
+<h3 class="font-headline-lg text-headline-lg text-white">Fastest-Growing Hiring Network</h3>
+</div>
+</div>
+<!-- Slide 2 -->
+<div class="carousel-slide flex-shrink-0 relative">
+<img alt="Job portal for daily wage workers" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnd5EOhRrUc3LKVK0D8VNPHzF-aWhXVkjimZ_Vs-YiQIB5pPy8Um9VYSNimLFvIZcCMuxAGLp2mnQ082JJ8-tfXCH6arHrkiu2tjY60wTahJZgzJM67xWZbi4-Mm1LKf24v7SLkZko3Paxnf62dm_OC7O2mdwbLaLBSN0Ai7-d7k9Zv53tHwms8QIqWe5m5ItFzB1kig_DXa1VPPUpPjV20yxFv_Jc4ZJ88i_rUh4vpXG4_ygPLRpYRSax3WPN4hv_CJs">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-12">
+<h3 class="font-headline-lg text-headline-lg text-white">Connect Easily with Workers</h3>
+</div>
+</div>
+<!-- Slide 3 -->
+<div class="carousel-slide flex-shrink-0 relative">
+<img alt="Verified workers instantly" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSeJuZUE-hirs-VYrluhtCcWZ4evBF8-re-kBhLdHHohw6g5l01T29RCyIhnSeFfNybv_W-JmJBXHWt_LJKhlDOxYfCan0kVjZ9Czhp0Cvhocd1Jid4557KBH9e4-dzO4ZMtt2x5yEaUlJaGtY5zbmaz5ltfnIbp5ah1Jv5KxpejR1cshmL73p9OFoIcoStslu0ZDppvaOMPFIOhiDof1jUupG2KP2QpTNHbn3VFKBp2ZY1XmRhtR4o3FAcq5xCJKBhPg">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-12">
+<h3 class="font-headline-lg text-headline-lg text-white">Verified Workforce Instantly</h3>
+</div>
+</div>
+<!-- Slide 4 -->
+<div class="carousel-slide flex-shrink-0 relative">
+<img alt="Insurance for workers" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOxlF22k4UsJybfBOQZj5iQJ2iozOerJAtEkNu61xlDherIfjF2QhoyQGb1QO9sarIX-MqFuP9pvvl7me1ImQv_zaZZ4IqvvC_0mAglKEAFbjII-3gJZYkc13eAgjieeXuNDMvl9zp3nFT1zsWg9R-BAPzn6kg9mUDZ1_9YZdx-XvBx5tnI2BlEiNe3TtohCMH8m5_w-wy0XeGgdftbkGv1ztjYLIkXnJ_HeD0ag95H4OQVTEe5AyCndHiw5O_SW9y-uU">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-12">
+<h3 class="font-headline-lg text-headline-lg text-white">Safeguard Your Team</h3>
+</div>
+</div>
+<!-- Slide 5 -->
+<div class="carousel-slide flex-shrink-0 relative">
+<img alt="Contractor dashboard features" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnCDpbJiVQQjbP2UYr2apdoJXkCJGRQOmJzA2xos-f3n33WNno7R8d0jHp3RGkL8NKYNlcyxMHVYtZYG7WPpJO9eT-navj1sYDvxG0RFt50ZC3QTn5Kbo6Zm-gWQ2cNtii-k_4YKuKhCBe63K04aYr_MVukErGg6fh39CcuGsOHH5dCO7YYhimQJWsa3KTwuaAxlUdTJSPqWl1dY7rmzNbto4-dIm50hqxRweePzGTEWmprh7lNGwgRAy0jeR8cCntuT0">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-12">
+<h3 class="font-headline-lg text-headline-lg text-white">Manage Projects Seamlessly</h3>
+</div>
+</div>
+</div>
+<!-- Indicators -->
+<div class="absolute bottom-6 left-0 right-0 flex justify-center gap-2" id="sliderIndicators">
+<button class="w-3 h-3 rounded-full transition-all bg-white/50"></button>
+<button class="w-3 h-3 rounded-full hover:bg-white/80 transition-all bg-gold-accent"></button>
+<button class="w-3 h-3 rounded-full hover:bg-white/80 transition-all bg-white/50"></button>
+<button class="w-3 h-3 rounded-full hover:bg-white/80 transition-all bg-white/50"></button>
+<button class="w-3 h-3 rounded-full hover:bg-white/80 transition-all bg-white/50"></button>
+</div>
+</div>
+</div>
+<script>
+        // Simple Carousel Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const track = document.getElementById('sliderTrack');
+            const slides = document.querySelectorAll('.carousel-slide');
+            const indicators = document.querySelectorAll('#sliderIndicators button');
+            let currentIndex = 0;
+            const slideCount = slides.length;
+
+            function updateSlider() {
+                track.style.transform = `translateX(-${currentIndex * 100}%)`;
+                indicators.forEach((ind, i) => {
+                    if(i === currentIndex) {
+                        ind.classList.remove('bg-white/50');
+                        ind.classList.add('bg-gold-accent');
+                    } else {
+                        ind.classList.add('bg-white/50');
+                        ind.classList.remove('bg-gold-accent');
+                    }
+                });
+            }
+
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % slideCount;
+                updateSlider();
+            }
+
+            // Auto advance every 7 seconds
+            setInterval(nextSlide, 7000);
+
+            // Manual dot click
+            indicators.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    updateSlider();
+                });
+            });
+        });
+    </script>
+
+
+</body></html>
