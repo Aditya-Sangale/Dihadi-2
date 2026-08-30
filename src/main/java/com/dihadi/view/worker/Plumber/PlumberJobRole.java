@@ -11,14 +11,16 @@ import javafx.util.Duration;
 
 /** Plumber opportunities marketplace matching the DIHADI JobRole design. */
 public class PlumberJobRole {
-    private static final String[][] J = { { "Residential Plumber", "Pune, Maharashtra", "₹950", "01" },
-            { "Pipe Fitting Plumber", "Mumbai, Maharashtra", "₹1,100", "03" },
-            { "Waterline Technician", "Nashik, Maharashtra", "₹1,050", "04" },
-            { "Sanitary Plumber", "Bangalore, Karnataka", "₹1,150", "05" },
-            { "Industrial Plumber", "New Delhi, Delhi", "₹1,300", "07" },
-            { "Drainage Specialist", "Chennai, Tamil Nadu", "₹1,000", "09" },
-            { "Bathroom Fitter", "Hyderabad, Telangana", "₹1,100", "11" },
-            { "Plumbing Helper", "Bhiwandi, Maharashtra", "₹800", "13" } };
+    private static final String[][] J = {
+            { "Lodha Crown Pipeline Network", "Pune, Maharashtra", "₹950", "01", null, null, null, "Residential Plumber" },
+            { "Oberoi Sky City Water Mains", "Mumbai, Maharashtra", "₹1,100", "03", null, null, null, "Pipe Fitting Plumber" },
+            { "Nashik Smart City Drainage", "Nashik, Maharashtra", "₹1,050", "04", null, null, null, "Waterline Technician" },
+            { "Brigade Tech Gardens Sanitary", "Bangalore, Karnataka", "₹1,150", "05", null, null, null, "Sanitary Plumber" },
+            { "NTPC Plant High Pressure Lines", "New Delhi, Delhi", "₹1,300", "07", null, null, null, "Industrial Plumber" },
+            { "Chennai Port Storm Water System", "Chennai, Tamil Nadu", "₹1,000", "09", null, null, null, "Drainage Specialist" },
+            { "Hitec City Luxury Residency", "Hyderabad, Telangana", "₹1,100", "11", null, null, null, "Bathroom Fitter" },
+            { "Bhiwandi Warehousing Sewerage", "Bhiwandi, Maharashtra", "₹800", "13", null, null, null, "Plumbing Helper" }
+    };
     private ImageView slide;
     private int index;
 
@@ -39,13 +41,20 @@ public class PlumberJobRole {
                     if (req.getWorkerType() != null && req.getWorkerType().toLowerCase().contains("plumber")) {
                         String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "Plumber";
                         com.dihadi.model.Project p = req.getProjectId() != null ? projectMap.get(req.getProjectId()) : null;
+                        String projectName = (p != null && p.getProjectName() != null && !p.getProjectName().isBlank())
+                                ? p.getProjectName()
+                                : title + " Project";
                         String loc = (p != null && p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
                                      (p != null && p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
                         String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
-                        String imgNum = String.format("%02d", (imgIdx % 12) + 1);
+                        String photoUrl = null;
+                        if (p != null && p.getImageUrls() != null && !p.getImageUrls().isEmpty()) {
+                            photoUrl = p.getImageUrls().get(0);
+                        }
+                        String imgNum = (photoUrl != null && !photoUrl.isBlank()) ? photoUrl : String.format("%02d", (imgIdx % 12) + 1);
                         imgIdx++;
                         String recruiterMobile = p != null ? p.getMobile() : null;
-                        all.add(new String[]{ title, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId() });
+                        all.add(new String[]{ projectName, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId(), title });
                     }
                 }
             }
@@ -61,10 +70,11 @@ public class PlumberJobRole {
     private void renderJobs(FlowPane grid, java.util.List<String[]> jobsList, String state, String city, String skill) {
         grid.getChildren().clear();
         for (String[] j : jobsList) {
-            String searchable = (j[0] + " " + j[1]).toLowerCase();
+            String roleTitle = j.length > 7 && j[7] != null ? j[7] : j[0];
+            String searchable = (j[0] + " " + j[1] + " " + roleTitle).toLowerCase();
             boolean stateMatches = state == null || state.startsWith("All") || searchable.contains(state.toLowerCase());
             boolean cityMatches = city == null || city.startsWith("All") || searchable.contains(city.toLowerCase());
-            boolean skillMatches = skill == null || skill.startsWith("All") || searchable.contains(skill.toLowerCase());
+            boolean skillMatches = skill == null || skill.startsWith("All") || searchable.contains(skill.toLowerCase()) || roleTitle.toLowerCase().contains(skill.toLowerCase());
             if (stateMatches && cityMatches && skillMatches) {
                 grid.getChildren().add(job(j));
             }
@@ -76,72 +86,53 @@ public class PlumberJobRole {
     }
 
     public Scene getPlumberJobRoleScene(Runnable back) {
-        Label badge = l("DIHADI WORK MARKETPLACE",
-                "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#735c00;"),
-                t = l("Plumber Job Roles",
-                        "-fx-font-family:'Georgia';-fx-font-size:40px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
-                q = l("“Every reliable waterline begins with a skilled hand and careful craft.�?",
-                        "-fx-font-family:'Georgia';-fx-font-size:20px;-fx-font-style:italic;-fx-text-fill:#4d4635;");
-        q.setWrapText(true);
-        q.setMaxWidth(390);
-        VBox words = new VBox(15, badge, t, q);
-        words.setAlignment(Pos.CENTER);
-        StackPane visual = slider();
-        HBox row = new HBox(34, visual, words);
-        row.setAlignment(Pos.CENTER);
-        VBox hero = new VBox(row);
-        hero.setAlignment(Pos.CENTER);
-        hero.setPadding(new Insets(28));
-        hero.setMaxWidth(1200);
-        hero.setStyle(style("#fff8f0"));
-        ComboBox<String> state = c("Select state", "All States", "Maharashtra", "Karnataka", "Tamil Nadu", "Delhi"),
-                city = c("Select city", "All Cities", "Pune", "Mumbai", "Nashik", "Bangalore"),
-                skill = c("Select plumbing skill", "All Skills", "Pipe fitting", "Sanitary", "Drainage", "Waterline", "Bathroom", "Plumber");
-        Button clear = o("Clear filters"), find = p("Find roles");
-        HBox controls = new HBox(12, state, city, skill, clear, find);
-        controls.setAlignment(Pos.CENTER);
-        VBox filter = new VBox(14,
-                l("Find a suitable job role for you", "-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
-                controls);
-        filter.setAlignment(Pos.CENTER);
-        filter.setPadding(new Insets(22));
-        filter.setMaxWidth(1200);
-        filter.setStyle(style("#faf3e8"));
+        Label eyebrow = l("DIHADI WORK MARKETPLACE",
+                "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#735c00;");
+        Label title = l("Plumber Job Roles",
+                "-fx-font-family:'Georgia';-fx-font-size:40px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
+        Label subtitle = l(
+                "Ensuring high-efficiency water, drainage, and industrial fluid systems across modern infrastructures.",
+                "-fx-font-size:16px;-fx-text-fill:#4d4635;");
+        VBox heroMeta = new VBox(12, eyebrow, title, subtitle);
+        heroMeta.setAlignment(Pos.CENTER);
+        heroMeta.setPadding(new Insets(32, 36, 30, 36));
+        heroMeta.setMaxWidth(1140);
+        heroMeta.setStyle(style("#fff8f0"));
+
         FlowPane grid = new FlowPane(24, 24);
         grid.setAlignment(Pos.CENTER);
-        grid.setPrefWrapLength(1140);
+        grid.setPrefWrapLength(1100);
 
         java.util.List<String[]> allJobs = getAllJobs();
         renderJobs(grid, allJobs, null, null, null);
 
-        find.setOnAction(e -> renderJobs(grid, allJobs, state.getValue(), city.getValue(), skill.getValue()));
-        clear.setOnAction(e -> {
-            state.getSelectionModel().selectFirst();
-            city.getSelectionModel().selectFirst();
-            skill.getSelectionModel().selectFirst();
-            renderJobs(grid, allJobs, null, null, null);
-        });
-
-        VBox content = new VBox(28, hero, filter,
+        VBox content = new VBox(28, heroMeta, slider(), filterBox(grid, allJobs),
                 l("Available opportunities",
                         "-fx-font-family:'Georgia';-fx-font-size:29px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
                 grid);
         content.setAlignment(Pos.TOP_CENTER);
         content.setPadding(new Insets(30, 36, 42, 36));
+        content.setMaxWidth(1240);
+
         StackPane canvas = new StackPane(content);
+        canvas.setAlignment(Pos.TOP_CENTER);
         canvas.setStyle("-fx-background-color:#f3e7ce;");
+
         ScrollPane scroll = new ScrollPane(canvas);
         scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
-        Button backButton = o("�? Back to skills");
-        backButton.setOnAction(event -> {
+
+        Button backBtn = o("← Back to categories");
+        backBtn.setOnAction(e -> {
             if (back != null)
                 back.run();
         });
-        HBox bottom = new HBox(backButton);
+        HBox bottom = new HBox(backBtn);
         bottom.setAlignment(Pos.CENTER_LEFT);
         bottom.setPadding(new Insets(14, 60, 14, 60));
         bottom.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
+
         BorderPane page = new BorderPane(scroll);
         page.setBottom(bottom);
         page.setStyle("-fx-background-color:#f3e7ce;");
@@ -149,37 +140,94 @@ public class PlumberJobRole {
     }
 
     private StackPane slider() {
-        slide = img("/assets/images/worker/plumber/skill-00.jpg", 640, 320);
-        StackPane box = new StackPane(slide);
-        box.setPrefSize(640, 320);
-        box.setStyle(style("#faf3e8"));
-        Timeline timer = new Timeline(new KeyFrame(Duration.seconds(3), event -> {
-            index = (index + 1) % 8;
-            slide.setImage(load(String.format("/assets/images/worker/plumber/skill-%02d.jpg", index + 1)));
+        slide = img("/assets/images/worker/plumber/skill-01.jpg", 600, 300);
+        StackPane s = new StackPane(slide);
+        s.setPrefSize(600, 300);
+        s.setStyle(
+                "-fx-background-color:#fff8f0;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;");
+        Timeline t = new Timeline(new KeyFrame(Duration.seconds(3), e -> {
+            index = (index % 12) + 1;
+            slide.setImage(load(String.format("/assets/images/worker/plumber/skill-%02d.jpg", index)));
         }));
-        timer.setCycleCount(Timeline.INDEFINITE);
-        timer.play();
+        t.setCycleCount(Timeline.INDEFINITE);
+        t.play();
+        return s;
+    }
+
+    private HBox filterBox(FlowPane grid, java.util.List<String[]> allJobs) {
+        ComboBox<String> stateFilter = c("All States", "Maharashtra", "Karnataka", "Delhi", "Tamil Nadu");
+        ComboBox<String> cityFilter = c("All Cities", "Pune", "Mumbai", "Nashik", "Bangalore", "New Delhi", "Chennai");
+        ComboBox<String> skillFilter = c("All Skills", "Commercial Plumber", "Residential Plumber", "Pipefitter",
+                "Drain Technician", "Steamfitter");
+        stateFilter.setOnAction(e -> renderJobs(grid, allJobs, stateFilter.getValue(), cityFilter.getValue(), skillFilter.getValue()));
+        cityFilter.setOnAction(e -> renderJobs(grid, allJobs, stateFilter.getValue(), cityFilter.getValue(), skillFilter.getValue()));
+        skillFilter.setOnAction(e -> renderJobs(grid, allJobs, stateFilter.getValue(), cityFilter.getValue(), skillFilter.getValue()));
+        HBox box = new HBox(15, stateFilter, cityFilter, skillFilter);
+        box.setAlignment(Pos.CENTER);
         return box;
     }
 
     private VBox job(String[] j) {
-        ImageView im = img("/assets/images/worker/plumber/skill-" + j[3] + ".jpg", 316, 178);
-        Label n = l(j[0], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
-                loc = l("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
-                w = l("Daily wage  " + j[2], "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        String imgPath = j[3];
+        if (imgPath != null && imgPath.matches("\\d+")) {
+            imgPath = "/assets/images/worker/plumber/skill-" + j[3] + ".jpg";
+        }
+        ImageView im = img(imgPath, 316, 178);
+        String projectName = j[0];
+        String roleTitle = j.length > 7 && j[7] != null ? j[7] : j[0];
+
+        Label n = l(projectName, "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
+        Label role = l("Role: " + roleTitle, "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#735c00;");
+        Label loc = l("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;");
+        Label w = l("Daily wage  " + j[2], "-fx-font-size:15px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        n.setWrapText(true);
         n.setAlignment(Pos.CENTER);
         n.setMaxWidth(Double.MAX_VALUE);
+        role.setAlignment(Pos.CENTER);
+        role.setMaxWidth(Double.MAX_VALUE);
+        loc.setAlignment(Pos.CENTER);
+        loc.setMaxWidth(Double.MAX_VALUE);
         Button a = p("Apply now");
         a.setMaxWidth(Double.MAX_VALUE);
+        
+        Runnable checkAppliedStatus = () -> {
+            if (com.dihadi.view.SessionManager.currentWorker != null) {
+                new Thread(() -> {
+                    try {
+                        java.util.List<com.dihadi.model.JobApplication> apps = new com.dihadi.controller.JobApplicationController().getApplicationsByWorker(com.dihadi.view.SessionManager.currentWorker.getMobileNumber());
+                        boolean hasApplied = false;
+                        for (com.dihadi.model.JobApplication app : apps) {
+                            if ((app.getJobTitle() != null && app.getJobTitle().equalsIgnoreCase(roleTitle)) || (j[4] != null && j[4].equals(app.getProjectId()))) {
+                                hasApplied = true;
+                                break;
+                            }
+                        }
+                        if (hasApplied) {
+                            javafx.application.Platform.runLater(() -> {
+                                a.setText("Already applied ✓");
+                                a.setStyle("-fx-background-color:#2a7e3b;-fx-background-radius:12px;-fx-text-fill:#ffffff;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;");
+                                a.setDisable(true);
+                            });
+                        }
+                    } catch (Exception ignored) {}
+                }).start();
+            }
+        };
+        checkAppliedStatus.run();
+
+        final String detailImg = (imgPath != null && !imgPath.isBlank()) ? imgPath : "/assets/images/worker/plumber/skill-01.jpg";
         a.setOnAction(e -> { 
             javafx.stage.Stage stage = (javafx.stage.Stage) a.getScene().getWindow(); 
             javafx.scene.Scene currentScene = a.getScene();
-            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(j[0], j[1], j[2], "/assets/images/worker/plumber/skill-01.jpg", j[4], j[5], j[6]).getScene(() -> stage.setScene(currentScene), currentScene)); 
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(roleTitle, j[1], j[2], detailImg, j[4], j[5], j[6]).getScene(() -> {
+                checkAppliedStatus.run();
+                stage.setScene(currentScene);
+            }, currentScene)); 
         });
-        VBox v = new VBox(13, im, n, loc, w, a);
+        VBox v = new VBox(10, im, n, role, loc, w, a);
         v.setAlignment(Pos.CENTER);
         v.setPadding(new Insets(14));
-        v.setPrefSize(344, 350);
+        v.setPrefSize(344, 380);
         v.setStyle(style("#fff8f0"));
         return v;
     }
@@ -195,10 +243,16 @@ public class PlumberJobRole {
     }
 
     private ImageView img(String p, double w, double h) {
-        ImageView v = new ImageView(load(p));
+        ImageView v = new ImageView();
+        Image img = load(p);
+        if (img == null) {
+            img = load("/assets/images/worker/plumber/skill-01.jpg");
+        }
+        v.setImage(img);
         v.setFitWidth(w);
         v.setFitHeight(h);
         v.setPreserveRatio(false);
+        v.setSmooth(true);
         Rectangle r = new Rectangle(w, h);
         r.setArcWidth(24);
         r.setArcHeight(24);
@@ -207,8 +261,21 @@ public class PlumberJobRole {
     }
 
     private Image load(String p) {
-        var r = getClass().getResource(p);
-        return r == null ? null : new Image(r.toExternalForm());
+        if (p == null || p.isBlank()) return null;
+        try {
+            if (p.startsWith("http://") || p.startsWith("https://") || p.startsWith("file:")) {
+                return new Image(p, true);
+            }
+            java.io.File file = new java.io.File(p);
+            if (file.exists()) {
+                return new Image(file.toURI().toString(), true);
+            }
+            var r = getClass().getResource(p);
+            if (r != null) {
+                return new Image(r.toExternalForm());
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 
     private Label l(String t, String s) {

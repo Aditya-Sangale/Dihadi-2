@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DIHADI Admin Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#27438a",
+                        "surface-bright": "#fff8f0",
+                        "outline": "#7e7665",
+                        "secondary-container": "#eeddd0",
+                        "tertiary-container": "#415ba4",
+                        "secondary-fixed-dim": "#d4c4b7",
+                        "surface-container": "#f4ede2",
+                        "surface-dim": "#e0d9ce",
+                        "error-container": "#ffdad6",
+                        "border-subtle": "#D0C5AF",
+                        "on-error-container": "#93000a",
+                        "secondary": "#685c52",
+                        "background": "#fff8f0",
+                        "on-secondary-fixed": "#221a12",
+                        "primary-fixed-dim": "#e3c466",
+                        "surface": "#fff8f0",
+                        "on-secondary-container": "#6d6056",
+                        "inverse-on-surface": "#f7f0e5",
+                        "inverse-primary": "#e3c466",
+                        "secondary-fixed": "#f0dfd3",
+                        "on-primary-fixed": "#231b00",
+                        "primary": "#574500",
+                        "surface-tint": "#735c00",
+                        "surface-variant": "#e9e2d7",
+                        "tertiary-fixed": "#dbe1ff",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-muted": "#4D4635",
+                        "on-surface": "#1e1b15",
+                        "on-primary-fixed-variant": "#574500",
+                        "on-surface-variant": "#4c4637",
+                        "surface-container-low": "#faf3e8",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-container": "#f6d676",
+                        "inverse-surface": "#333029",
+                        "on-secondary-fixed-variant": "#50453b",
+                        "surface-container-high": "#eee7dc",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#27438a",
+                        "on-background": "#1e1b15",
+                        "error": "#ba1a1a",
+                        "gold-accent": "#D4AF37",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#cdd7ff",
+                        "on-tertiary-fixed": "#00174b",
+                        "surface-container-highest": "#e9e2d7",
+                        "primary-fixed": "#ffe085",
+                        "primary-container": "#735c00",
+                        "on-error": "#ffffff",
+                        "surface-warm": "#FFF8F0",
+                        "outline-variant": "#cfc6b2",
+                        "dihadi-espresso": "#3A3027"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "lg": "48px",
+                        "sm": "12px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "base": "8px",
+                        "xl": "80px",
+                        "md": "24px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Be Vietnam Pro"],
+                        "headline-lg": ["Playfair Display"],
+                        "label-md": ["Be Vietnam Pro"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "display-lg": ["Playfair Display"],
+                        "quote-it": ["Playfair Display"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "body-md": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "quote-it": ["22px", { "lineHeight": "32px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    },
+                    "animation": {
+                        "marquee": "marquee 40s linear infinite",
+                        "shimmer": "shimmer 2s infinite"
+                    },
+                    "keyframes": {
+                        "marquee": {
+                            "0%": { transform: "translateX(0%)" },
+                            "100%": { transform: "translateX(-100%)" }
+                        },
+                        "shimmer": {
+                            "0%": { backgroundPosition: "-200% 0" },
+                            "100%": { backgroundPosition: "200% 0" }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .shimmer-bg {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            background-size: 200% 100%;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-background dark:bg-surface text-primary dark:text-primary-fixed-dim font-body-md text-body-md fixed top-0 w-full h-[100px] z-50 bg-background/95 backdrop-blur-md shadow-sm">
+<div class="flex justify-between items-center px-20 max-w-container-max mx-auto h-full">
+<div class="flex items-center gap-4">
+<img alt="DIHADI Corporate Logo" class="h-16 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDa-9kwl4IcQVn13XWroOo0nKFH6vubEnZIdLGKcYH0yMsSHzouW2mqgEgNzAxM0FwKRO01J5vAFP4PRZUat7PxeTp_qfxzy94qTTG84c85ayPqPzE1F_hgC3869XXMS1H6h-Iqt6tgjtWhpm2domn_JUVjK-Mq_DI8BWqRYYSXk5nbB1SIj6RZyr4udxtCmWFJ9z2zBZ93cBlWekkaQuNapJAA7FvWW3i8tzV3LxTpwuHGpId059ERPorx0W39iAxqO8E"/>
+<span class="font-headline-lg text-headline-lg text-primary dark:text-primary-fixed-dim tracking-tight hidden md:block">DIHADI</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-primary font-bold border-b-2 border-primary pb-1" href="#">Home</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-300 hover:bg-surface-container-low transition-all duration-200 px-2 py-1 rounded" href="#">Business</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-300 hover:bg-surface-container-low transition-all duration-200 px-2 py-1 rounded" href="#">Worker</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-300 hover:bg-surface-container-low transition-all duration-200 px-2 py-1 rounded" href="#">Recruiter</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-300 hover:bg-surface-container-low transition-all duration-200 px-2 py-1 rounded" href="#">About Us</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-300 hover:bg-surface-container-low transition-all duration-200 px-2 py-1 rounded" href="#">Contact Us</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-6 py-2 rounded-full bg-gold-accent text-white hover:bg-primary-container transition-colors font-label-md text-label-md shadow-sm">Admin</button>
+</div>
+</div>
+</nav>
+<main class="flex-grow pt-[100px]">
+<!-- Hero Section -->
+<section class="py-20 px-6 md:px-20 max-w-container-max mx-auto text-center">
+<h1 class="font-display-lg text-display-lg text-on-background mb-6">ADMIN CONTROL CENTER</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl mx-auto">
+        Empowering trusted workforce management through transparency, technology and dignity.
+    </p>
+</section>
+<!-- Marquee Hero -->
+<section class="w-full h-[440px] overflow-hidden relative bg-surface-container-lowest flex items-center">
+<div class="flex gap-6 w-full">
+<div class="flex gap-6 animate-marquee whitespace-nowrap shrink-0 pr-6">
+<!-- 10 High-Fidelity Image Cards -->
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 1" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1UXtxj3srTwMky_nqHeH8V-_LkAjZiyuljznuk0FXUCJOdPdasupy0NhanYXEERJZnZ9rKRuW9WqgTMjaA_FqEMWxQfnkjDxxTv1Ng0PFruaVzArEDy8ibZZiKS8T4-Gx7Q57p9dftXwM-WQRhk8T2vcXkZ6P3TfoPqy5TkzVR064lVg4gGjbzYzTmbcVX1ym27YYRLCovpxkAxs3-8aFuaiAlT0YV02Dea7HHtG661Kp2zfJ7PYVT65aWD"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 2" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VCJbNurVzWug6J0L2iqCxeQxDx2yhj1pDkJY3y_XT0O6fp8P9HYXdFuYaLewpA5C39s8RIr3B_Qs0XWdXToRDryunRAZSt85g-qKPpWMpQiS1eE1AmkZ_o95YyTAO_oE3RDt6i9ub9r_q8l4jxuc7OQBVsFZlLNPR3Dc_nqlhwsTt-RtxyM2M3YF79NCkecNosC6xkHsjnsQBnTkMfuHaKIl_OSudkwjF43NPyu0efeKhUynhBtjy9OJQ"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 3" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1WM7zg4xDOpmZl-E90XPX0tZJ6OVK_oUe4J57-XFilURSI3Mb-aEsmFqf8aI71NJwUWm0GAYqHh18k5jXp7KGu07BzFM3ZxsFuBB1O80G47nBlpSrQzU0rQjynhtlo4pURju1Y32e8Z2FMH5YAafssmcjwxRFfIWNHM5tI0w2y5abQ4u2OM-rlFD-crCJW0f75btb3rOHONFhL-DDvFjSEdjhJrBIJcyNUq0AGhPYfU55RJtIiZ_uIb-Ao"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 4" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VTO25BylWy69TTseWwuoY0O6X3VDMETMMKQdsZOb-BF_oYbkJRp-wqGiT64n-d9heFgYxHvPRsvZtXeY6mPTmWv8CNP7odIW3oomRQt3ZklEsnrj2-kwgwFNUA4i1cyDRu1CVmOCteD4YqGb861m0UrCBOqNxuFcxFLf_H9Tvqz21ksP6UOLs1ZPsJZwtqaFBSlf788gbs0d-y-07arb4TKhiRX3hifHc9q2Myz4N9kF42dwjrjL_nsVyT"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 5" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Xi0L9IA5vjjOLEBr_SDXnzPOmvJOvBgMhdZOSfpwu9qgBB6e9qMnYnGVpqjTekmca_BtTIbTFZOgUVQVTht4n5Papvso6iFVnJVIBziEF9oMrqByG2avRSH4y_eC6M80wXGD8XpqPZTlRYSUk_sm6P3oj_8RuEKKKV0GaICUWmOPy7kj93hMMw3MUDCzFLxzta-HZGqeLcfu5fAWJ3DyNfOcAbHR-Ss_JahfRfGg7njwiE8UiXmSEgOf1Y"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 6" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VI9EIoUebGt_yUge766WQedSvNAov2kQuj318DR4wX-0e1CgWqR3-A_nchrxWKv77C8GnVosRj9-zIaNay_AIuCsEwqep62OvTQmA3QqjEw-lECg0kKxJThGb1p6nwaAoptb5MeiP7IZ_25NMuBeEL-5th75MlkTwHjCEjTSh4sT8mCFAEGa_m9w2iCEuZM1kOhJfZcjGaQ-ruKSgcYPuxsF0qsTq6qW3v6IWOxUkIM5ydJecGD8CrYo0"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 7" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1USCOn3lnTmPCnlwoqli13ck7WLgN55tWcCwgeJXdzFNavAkmZyYUmTFLpAMj9G0YPvFd8JoqWfjcHdRWPvF0N2VpwZQ_ON6qe72wVd9bOnrlDOHK7L7moKzwHmU0YH0BFGTHfLq4f2GoMbXptM4LJd19hWg0Mu8STRLAVELhxhvWwG13OanQE79zt4gSzBInxfr8fpkNAxpATfXrwlx6BfRCj4qwetRbRHbXvurGzLTv6JYaNpIOolaSDD"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 8" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1WH71R4jzotvXB6mc0emCcRKJpCZav0VhO0n794-I08YhU6Jf2YGMSqdVXbstr7Sqw2pxWSEDpcSs9J5g48p9nAaTCmxhR7xWEhGSqnnxuV7AZpVQFYm17kvu_qYxctpMYtoh6MJwsehHId-KuuDVUzpnXLpvrvV8TglULwjHuyx4H8ycNQ1mwLzhGSDwwG4ICuhxg1fT_RqMF5PN6YL8E2vDqSN_Bns6x3TFzCOGJ083PdnZKl0kIHZMqI"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 9" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1XaXidVAS7SLB9BeUB7O0Q-r-m9Te5R4GJGm8USrSQcJclURCYRdJIAoCWWVI_ZAOKAsYtzJa1VBNgrlhaifijHUXLOOkuq4VqXwq1M4W0LUYYt7qrNlarLNIzCPrY6euc0SEIGvAG9NqSc-P40lmNyOcBWwxWB3A1xC3agyZC9esiSU0DYxFbPibaJ3iULe8nvRyegDQKbFWiO9Hh3mrsNJ2jBz777wak5naqeFkirEkykbZbt3wnQijg7"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 10" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1WvexTm-lEbM-nYOjCYnr7aR8UlJaVs4oUVyO470EeaVgTKXbvwiyAfRRqhCR7OCzIXQ-eBLpPm8QP0BgssF5KW-TwDjGh8UkwYYi-UAKvJDccc-fT1N2attFHI8rVPObdxwVW96i4KbWvXE2Xk1Xxfym5S-ywL3vDhObyrHuttcR2crkB0DfnAhFcYWcyJC5Cwty7tGdHNYIYOaADEmZFJy8Iol7K8D6hFc666PVB_vF5iTTN_ero9yPs"/>
+</div>
+</div>
+<!-- Duplicate for seamless scroll -->
+<div class="flex gap-6 animate-marquee whitespace-nowrap shrink-0 pr-6">
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 1" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1UXtxj3srTwMky_nqHeH8V-_LkAjZiyuljznuk0FXUCJOdPdasupy0NhanYXEERJZnZ9rKRuW9WqgTMjaA_FqEMWxQfnkjDxxTv1Ng0PFruaVzArEDy8ibZZiKS8T4-Gx7Q57p9dftXwM-WQRhk8T2vcXkZ6P3TfoPqy5TkzVR064lVg4gGjbzYzTmbcVX1ym27YYRLCovpxkAxs3-8aFuaiAlT0YV02Dea7HHtG661Kp2zfJ7PYVT65aWD"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 2" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VCJbNurVzWug6J0L2iqCxeQxDx2yhj1pDkJY3y_XT0O6fp8P9HYXdFuYaLewpA5C39s8RIr3B_Qs0XWdXToRDryunRAZSt85g-qKPpWMpQiS1eE1AmkZ_o95YyTAO_oE3RDt6i9ub9r_q8l4jxuc7OQBVsFZlLNPR3Dc_nqlhwsTt-RtxyM2M3YF79NCkecNosC6xkHsjnsQBnTkMfuHaKIl_OSudkwjF43NPyu0efeKhUynhBtjy9OJQ"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 3" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1WM7zg4xDOpmZl-E90XPX0tZJ6OVK_oUe4J57-XFilURSI3Mb-aEsmFqf8aI71NJwUWm0GAYqHh18k5jXp7KGu07BzFM3ZxsFuBB1O80G47nBlpSrQzU0rQjynhtlo4pURju1Y32e8Z2FMH5YAafssmcjwxRFfIWNHM5tI0w2y5abQ4u2OM-rlFD-crCJW0f75btb3rOHONFhL-DDvFjSEdjhJrBIJcyNUq0AGhPYfU55RJtIiZ_uIb-Ao"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 4" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VTO25BylWy69TTseWwuoY0O6X3VDMETMMKQdsZOb-BF_oYbkJRp-wqGiT64n-d9heFgYxHvPRsvZtXeY6mPTmWv8CNP7odIW3oomRQt3ZklEsnrj2-kwgwFNUA4i1cyDRu1CVmOCteD4YqGb861m0UrCBOqNxuFcxFLf_H9Tvqz21ksP6UOLs1ZPsJZwtqaFBSlf788gbs0d-y-07arb4TKhiRX3hifHc9q2Myz4N9kF42dwjrjL_nsVyT"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 5" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Xi0L9IA5vjjOLEBr_SDXnzPOmvJOvBgMhdZOSfpwu9qgBB6e9qMnYnGVpqjTekmca_BtTIbTFZOgUVQVTht4n5Papvso6iFVnJVIBziEF9oMrqByG2avRSH4y_eC6M80wXGD8XpqPZTlRYSUk_sm6P3oj_8RuEKKKV0GaICUWmOPy7kj93hMMw3MUDCzFLxzta-HZGqeLcfu5fAWJ3DyNfOcAbHR-Ss_JahfRfGg7njwiE8UiXmSEgOf1Y"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 6" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VI9EIoUebGt_yUge766WQedSvNAov2kQuj318DR4wX-0e1CgWqR3-A_nchrxWKv77C8GnVosRj9-zIaNay_AIuCsEwqep62OvTQmA3QqjEw-lECg0kKxJThGb1p6nwaAoptb5MeiP7IZ_25NMuBeEL-5th75MlkTwHjCEjTSh4sT8mCFAEGa_m9w2iCEuZM1kOhJfZcjGaQ-ruKSgcYPuxsF0qsTq6qW3v6IWOxUkIM5ydJecGD8CrYo0"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 7" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1USCOn3lnTmPCnlwoqli13ck7WLgN55tWcCwgeJXdzFNavAkmZyYUmTFLpAMj9G0YPvFd8JoqWfjcHdRWPvF0N2VpwZQ_ON6qe72wVd9bOnrlDOHK7L7moKzwHmU0YH0BFGTHfLq4f2GoMbXptM4LJd19hWg0Mu8STRLAVELhxhvWwG13OanQE79zt4gSzBInxfr8fpkNAxpATfXrwlx6BfRCj4qwetRbRHbXvurGzLTv6JYaNpIOolaSDD"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 8" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1WH71R4jzotvXB6mc0emCcRKJpCZav0VhO0n794-I08YhU6Jf2YGMSqdVXbstr7Sqw2pxWSEDpcSs9J5g48p9nAaTCmxhR7xWEhGSqnnxuV7AZpVQFYm17kvu_qYxctpMYtoh6MJwsehHId-KuuDVUzpnXLpvrvV8TglULwjHuyx4H8ycNQ1mwLzhGSDwwG4ICuhxg1fT_RqMF5PN6YL8E2vDqSN_Bns6x3TFzCOGJ083PdnZKl0kIHZMqI"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 9" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1XaXidVAS7SLB9BeUB7O0Q-r-m9Te5R4GJGm8USrSQcJclURCYRdJIAoCWWVI_ZAOKAsYtzJa1VBNgrlhaifijHUXLOOkuq4VqXwq1M4W0LUYYt7qrNlarLNIzCPrY6euc0SEIGvAG9NqSc-P40lmNyOcBWwxWB3A1xC3agyZC9esiSU0DYxFbPibaJ3iULe8nvRyegDQKbFWiO9Hh3mrsNJ2jBz777wak5naqeFkirEkykbZbt3wnQijg7"/>
+</div>
+<div class="h-[360px] w-[280px] rounded-[20px] border border-[#D4AF37] shadow-md overflow-hidden flex-shrink-0 bg-surface">
+<img alt="Workforce Image 10" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1WvexTm-lEbM-nYOjCYnr7aR8UlJaVs4oUVyO470EeaVgTKXbvwiyAfRRqhCR7OCzIXQ-eBLpPm8QP0BgssF5KW-TwDjGh8UkwYYi-UAKvJDccc-fT1N2attFHI8rVPObdxwVW96i4KbWvXE2Xk1Xxfym5S-ywL3vDhObyrHuttcR2crkB0DfnAhFcYWcyJC5Cwty7tGdHNYIYOaADEmZFJy8Iol7K8D6hFc666PVB_vF5iTTN_ero9yPs"/>
+</div>
+</div>
+</div>
+<!-- Gradient overlays to soften edges -->
+<div class="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-surface-container-lowest to-transparent pointer-events-none z-10"></div>
+<div class="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-surface-container-lowest to-transparent pointer-events-none z-10"></div>
+</section>
+<!-- Quote Section -->
+<section class="py-24 px-6 md:px-20 max-w-container-max mx-auto text-center relative">
+<span class="material-symbols-outlined absolute top-10 left-1/2 -translate-x-1/2 text-[120px] text-surface-dim opacity-30 select-none">format_quote</span>
+<p class="font-quote-it text-quote-it text-on-surface max-w-3xl mx-auto relative z-10 italic">
+                "Value for Time. Skill. Money. A trusted portal that gives labourers the right to work, the value of their skill, and the dignity they deserve."
+            </p>
+</section>
+<!-- Admin Actions -->
+<section class="py-12 px-6 md:px-20 max-w-container-max mx-auto flex flex-col sm:flex-row justify-center gap-6">
+<button class="relative overflow-hidden group px-12 py-4 rounded-full bg-dihadi-espresso text-white font-label-md text-label-md shadow-sm hover:shadow-md transition-all">
+<span class="relative z-10">ADMIN LOGIN</span>
+<div class="absolute inset-0 shimmer-bg opacity-0 group-hover:opacity-100 animate-shimmer transition-opacity"></div>
+</button>
+<button class="relative overflow-hidden group px-12 py-4 rounded-full border-2 border-gold-accent bg-[#FDFBF7] text-on-surface font-label-md text-label-md shadow-sm hover:shadow-md transition-all">
+<span class="relative z-10">ADMIN SIGN UP</span>
+<div class="absolute inset-0 shimmer-bg opacity-0 group-hover:opacity-100 animate-shimmer transition-opacity"></div>
+</button>
+</section>
+<!-- Admin Cards -->
+<section class="py-20 px-6 md:px-20 max-w-container-max mx-auto">
+<div class="text-center mb-16">
+<h2 class="font-display-lg text-display-lg text-on-background mb-4">DIHADI ADMINISTRATION</h2>
+<div class="w-24 h-1 bg-gold-accent mx-auto rounded-full"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_8px_30px_rgb(58,48,39,0.05)] border border-surface-variant hover:border-gold-accent hover:shadow-[0_8px_30px_rgb(58,48,39,0.1)] transition-all duration-300 group flex flex-col h-full text-center">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mx-auto mb-4 group-hover:bg-gold-accent/10 transition-colors">
+<span class="material-symbols-outlined text-3xl text-gold-accent" style="font-variation-settings: 'FILL' 1;">groups</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface mb-2">Workforce Management</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow text-sm">
+    Onboard and verify skilled workers safely.
+</p>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_8px_30px_rgb(58,48,39,0.05)] border border-surface-variant hover:border-gold-accent hover:shadow-[0_8px_30px_rgb(58,48,39,0.1)] transition-all duration-300 group flex flex-col h-full text-center">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mx-auto mb-4 group-hover:bg-gold-accent/10 transition-colors">
+<span class="material-symbols-outlined text-3xl text-gold-accent" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface mb-2">Labour Demand</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow text-sm">
+    Track geographic requirements and project needs.
+</p>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_8px_30px_rgb(58,48,39,0.05)] border border-surface-variant hover:border-gold-accent hover:shadow-[0_8px_30px_rgb(58,48,39,0.1)] transition-all duration-300 group flex flex-col h-full text-center">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mx-auto mb-4 group-hover:bg-gold-accent/10 transition-colors">
+<span class="material-symbols-outlined text-3xl text-gold-accent" style="font-variation-settings: 'FILL' 1;">handshake</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface mb-2">Smart Matching</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow text-sm">
+    Connect verified skills with active requirements.
+</p>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_8px_30px_rgb(58,48,39,0.05)] border border-surface-variant hover:border-gold-accent hover:shadow-[0_8px_30px_rgb(58,48,39,0.1)] transition-all duration-300 group flex flex-col h-full text-center">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mx-auto mb-4 group-hover:bg-gold-accent/10 transition-colors">
+<span class="material-symbols-outlined text-3xl text-gold-accent" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface mb-2">Trust &amp; Transparency</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow text-sm">
+    Ensure compliance and secure payments.
+</p>
+</div>
+</div>
+</section>
+<!-- Process Flow -->
+<section class="py-16 bg-surface-container-low">
+<div class="px-6 md:px-20 max-w-container-max mx-auto text-center">
+<h2 class="font-display-lg text-display-lg text-on-background mb-12">ONE PLATFORM. COMPLETE CONTROL.</h2>
+<div class="flex flex-col md:flex-row items-center justify-between gap-4 relative">
+<div class="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-border-subtle -z-10"></div>
+<div class="bg-surface-container-lowest p-6 rounded-full border border-gold-accent z-10 w-40 h-40 flex flex-col items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-3xl text-gold-accent mb-2">group_add</span>
+<span class="font-label-md text-sm">Supply</span>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-full border border-gold-accent z-10 w-40 h-40 flex flex-col items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-3xl text-gold-accent mb-2">fact_check</span>
+<span class="font-label-md text-sm">Verify</span>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-full border border-gold-accent z-10 w-40 h-40 flex flex-col items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-3xl text-gold-accent mb-2">swap_calls</span>
+<span class="font-label-md text-sm">Match</span>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-full border border-gold-accent z-10 w-40 h-40 flex flex-col items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-3xl text-gold-accent mb-2">work_history</span>
+<span class="font-label-md text-sm">Demand</span>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-full border border-gold-accent z-10 w-40 h-40 flex flex-col items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-3xl text-gold-accent mb-2">analytics</span>
+<span class="font-label-md text-sm">Deploy</span>
+</div>
+</div>
+</div>
+</section>
+<!-- System Overview -->
+<section class="py-20 px-6 md:px-20 max-w-container-max mx-auto">
+<div class="bg-dihadi-espresso rounded-2xl p-10 shadow-lg text-white">
+<h3 class="font-title-md text-2xl mb-8 text-gold-accent border-b border-white/20 pb-4">System Overview</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+<div>
+<p class="text-4xl font-bold text-white mb-2">25K+</p>
+<p class="text-sm text-white/70 uppercase tracking-wider">Total Workers</p>
+</div>
+<div>
+<p class="text-4xl font-bold text-white mb-2">12K</p>
+<p class="text-sm text-white/70 uppercase tracking-wider">Available Now</p>
+</div>
+<div>
+<p class="text-4xl font-bold text-white mb-2">850</p>
+<p class="text-sm text-white/70 uppercase tracking-wider">Active Projects</p>
+</div>
+<div>
+<p class="text-4xl font-bold text-white mb-2">99%</p>
+<p class="text-sm text-white/70 uppercase tracking-wider">Match Rate</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-dihadi-espresso text-inverse-on-surface font-body-md text-body-md w-full py-12 border-t border-outline-variant/30">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-20 max-w-container-max mx-auto">
+<div class="col-span-1 md:col-span-1">
+<div class="flex items-center gap-3 mb-6">
+<img alt="DIHADI Corporate Logo" class="h-12 w-auto object-contain brightness-0 invert sepia-[1] hue-rotate-[10deg] saturate-[3]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU9G5iwIbBZJegveCf15VYAFkZSb7OoSWdsGTw-ontsawX0XKafd5gdo6P0sEHxJdvrrjbQ2ZqyYZfTNNzT-qW5R4NUyBuudCnwt9C-g3ScuGrkxWPkn7pEK0EbUw42aSUt01FsSvhITqQnZgEzUnsXzlWpZybbHjB3SVsOvUwl2bfsYHGg87OnkmeajRLqoDTYo6z6mAUVfhKcuaO4raX-HPHUO3MlVqH1QvPH8E9w5d1QPIy7jz3BVbXw6eHiNMvBBw"/>
+</div>
+<p class="text-secondary-fixed-dim text-sm max-w-xs">
+                    Mera Haq ~ Meri Dihadi. Empowering India's skilled workforce with dignity, transparency, and opportunity.
+                </p>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-primary-fixed mb-4">Links</h4>
+<ul class="space-y-3">
+<li class=""><a class="text-secondary-fixed-dim hover:text-primary-fixed transition-colors duration-200 hover:translate-x-1 inline-block" href="#">Company</a></li>
+<li class=""><a class="text-secondary-fixed-dim hover:text-primary-fixed transition-colors duration-200 hover:translate-x-1 inline-block" href="#">Opportunities</a></li>
+<li class=""><a class="text-secondary-fixed-dim hover:text-primary-fixed transition-colors duration-200 hover:translate-x-1 inline-block" href="#">Legal</a></li>
+<li class=""><a class="text-secondary-fixed-dim hover:text-primary-fixed transition-colors duration-200 hover:translate-x-1 inline-block" href="#">Addresses</a></li>
+<li class=""><a class="text-secondary-fixed-dim hover:text-primary-fixed transition-colors duration-200 hover:translate-x-1 inline-block" href="#">Contact</a></li>
+</ul>
+</div>
+<div class="col-span-1 md:col-span-2">
+<h4 class="font-title-md text-title-md text-primary-fixed mb-4">Pune Headquarters</h4>
+<p class="text-secondary-fixed-dim mb-2">
+<span class="material-symbols-outlined text-sm inline-block mr-2 align-middle">location_on</span>
+                    Tech Park One, Yerawada, Pune, Maharashtra 411006
+                </p>
+<p class="text-secondary-fixed-dim">
+<span class="material-symbols-outlined text-sm inline-block mr-2 align-middle">mail</span>
+                    admin@dihadi.com
+                </p>
+</div>
+</div>
+<div class="mt-12 pt-8 border-t border-outline-variant/10 text-center px-20 max-w-container-max mx-auto">
+<p class="text-secondary-fixed-dim text-sm">© 2024 DIHADI. Mera Haq ~ Meri Dihadi. All Rights Reserved.</p>
+</div>
+</footer>
+</body></html>

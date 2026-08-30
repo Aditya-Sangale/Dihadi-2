@@ -12,14 +12,16 @@ import javafx.stage.Stage;
 
 /** General Labour job marketplace opened by Save & Continue. */
 public class GeneralLabourJobRole {
-    private static final String[][] JOBS = { { "Construction General Labour", "Pune, Maharashtra", "₹700", "01" },
-            { "Material Shifting Helper", "Bhiwandi, Maharashtra", "₹750", "02" },
-            { "Factory Worker Helper", "Nashik, Maharashtra", "₹800", "03" },
-            { "Road Construction Labour", "Chennai, Tamil Nadu", "₹850", "06" },
-            { "Loading & Unloading Helper", "New Delhi, Delhi", "₹750", "10" },
-            { "Concrete Mixer Labour", "Bangalore South, Karnataka", "₹900", "08" },
-            { "Shuttering Helper", "Gurgaon, Haryana", "₹950", "15" },
-            { "Mason Helper", "Mumbai, Maharashtra", "₹850", "09" } };
+    private static final String[][] JOBS = {
+            { "Skyline Tower Civil Works", "Pune, Maharashtra", "₹700", "01", null, null, null, "Construction General Labour" },
+            { "Bhiwandi Logistics Hub", "Bhiwandi, Maharashtra", "₹750", "02", null, null, null, "Material Shifting Helper" },
+            { "Ambad MIDC Plant", "Nashik, Maharashtra", "₹800", "03", null, null, null, "Factory Worker Helper" },
+            { "Outer Ring Road Extension", "Chennai, Tamil Nadu", "₹850", "06", null, null, null, "Road Construction Labour" },
+            { "Cargo Terminal Phase 1", "New Delhi, Delhi", "₹750", "10", null, null, null, "Loading & Unloading Helper" },
+            { "Whitefield IT SEZ", "Bangalore South, Karnataka", "₹900", "08", null, null, null, "Concrete Mixer Labour" },
+            { "Cyber City Flyover", "Gurgaon, Haryana", "₹950", "15", null, null, null, "Shuttering Helper" },
+            { "Worli Sea View Tower", "Mumbai, Maharashtra", "₹850", "09", null, null, null, "Mason Helper" }
+    };
 
     private List<String[]> getAllJobs() {
         List<String[]> all = new java.util.ArrayList<>();
@@ -38,13 +40,20 @@ public class GeneralLabourJobRole {
                     if (req.getWorkerType() != null && (req.getWorkerType().toLowerCase().contains("labour") || req.getWorkerType().toLowerCase().contains("labor"))) {
                         String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "General Labour";
                         com.dihadi.model.Project p = req.getProjectId() != null ? projectMap.get(req.getProjectId()) : null;
+                        String projectName = (p != null && p.getProjectName() != null && !p.getProjectName().isBlank())
+                                ? p.getProjectName()
+                                : title + " Project";
                         String loc = (p != null && p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
                                      (p != null && p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
                         String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
-                        String imgNum = String.format("%02d", (imgIdx % 15) + 1);
+                        String photoUrl = null;
+                        if (p != null && p.getImageUrls() != null && !p.getImageUrls().isEmpty()) {
+                            photoUrl = p.getImageUrls().get(0);
+                        }
+                        String imgNum = (photoUrl != null && !photoUrl.isBlank()) ? photoUrl : String.format("%02d", (imgIdx % 15) + 1);
                         imgIdx++;
                         String recruiterMobile = p != null ? p.getMobile() : null;
-                        all.add(new String[]{ title, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId() });
+                        all.add(new String[]{ projectName, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId(), title });
                     }
                 }
             }
@@ -60,10 +69,11 @@ public class GeneralLabourJobRole {
     private void renderJobs(FlowPane grid, List<String[]> jobsList, String state, String city, String skill) {
         grid.getChildren().clear();
         for (String[] j : jobsList) {
-            String searchable = (j[0] + " " + j[1]).toLowerCase();
+            String roleTitle = j.length > 7 && j[7] != null ? j[7] : j[0];
+            String searchable = (j[0] + " " + j[1] + " " + roleTitle).toLowerCase();
             boolean stateMatches = state == null || state.startsWith("All") || searchable.contains(state.toLowerCase());
             boolean cityMatches = city == null || city.startsWith("All") || searchable.contains(city.toLowerCase());
-            boolean skillMatches = skill == null || skill.startsWith("All") || searchable.contains(skill.toLowerCase());
+            boolean skillMatches = skill == null || skill.startsWith("All") || searchable.contains(skill.toLowerCase()) || roleTitle.toLowerCase().contains(skill.toLowerCase());
             if (stateMatches && cityMatches && skillMatches) {
                 grid.getChildren().add(card(j));
             }
@@ -195,25 +205,65 @@ public class GeneralLabourJobRole {
     }
 
     private VBox card(String[] j) {
-        ImageView pic = image("/assets/images/general-labour/skill-" + j[3] + ".jpg", 316, 178);
-        Label name = label(j[0], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
-                loc = label("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
-                wage = label("Daily wage  " + j[2], "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        String imgPath = j[3];
+        if (imgPath != null && imgPath.matches("\\d+")) {
+            imgPath = "/assets/images/general-labour/skill-" + j[3] + ".jpg";
+        }
+        ImageView pic = image(imgPath, 316, 178);
+        String projectName = j[0];
+        String roleTitle = j.length > 7 && j[7] != null ? j[7] : j[0];
+
+        Label name = label(projectName, "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
+        Label role = label("Role: " + roleTitle, "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#735c00;");
+        Label loc = label("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;");
+        Label wage = label("Daily wage  " + j[2], "-fx-font-size:15px;-fx-font-weight:800;-fx-text-fill:#735c00;");
         name.setWrapText(true);
         name.setAlignment(Pos.CENTER);
         name.setMaxWidth(Double.MAX_VALUE);
+        role.setAlignment(Pos.CENTER);
+        role.setMaxWidth(Double.MAX_VALUE);
         loc.setAlignment(Pos.CENTER);
         loc.setMaxWidth(Double.MAX_VALUE);
         Button apply = primary("Apply now");
         apply.setMaxWidth(Double.MAX_VALUE);
+        
+        Runnable checkAppliedStatus = () -> {
+            if (com.dihadi.view.SessionManager.currentWorker != null) {
+                new Thread(() -> {
+                    try {
+                        java.util.List<com.dihadi.model.JobApplication> apps = new com.dihadi.controller.JobApplicationController().getApplicationsByWorker(com.dihadi.view.SessionManager.currentWorker.getMobileNumber());
+                        boolean hasApplied = false;
+                        for (com.dihadi.model.JobApplication app : apps) {
+                            if ((app.getJobTitle() != null && app.getJobTitle().equalsIgnoreCase(roleTitle)) || (j[4] != null && j[4].equals(app.getProjectId()))) {
+                                hasApplied = true;
+                                break;
+                            }
+                        }
+                        if (hasApplied) {
+                            javafx.application.Platform.runLater(() -> {
+                                apply.setText("Already applied ✓");
+                                apply.setStyle("-fx-background-color:#2a7e3b;-fx-background-radius:12px;-fx-text-fill:#ffffff;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;");
+                                apply.setDisable(true);
+                            });
+                        }
+                    } catch (Exception ignored) {}
+                }).start();
+            }
+        };
+        checkAppliedStatus.run();
+
+        final String detailImg = (imgPath != null && !imgPath.isBlank()) ? imgPath : "/assets/images/general-labour/skill-01.jpg";
         apply.setOnAction(e -> { 
             javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow(); 
             javafx.scene.Scene currentScene = apply.getScene();
-            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(j[0], j[1], j[2], "/assets/images/worker/general_labour/skill-01.jpg", j[4], j[5], j[6]).getScene(() -> stage.setScene(currentScene), currentScene)); 
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(roleTitle, j[1], j[2], detailImg, j[4], j[5], j[6]).getScene(() -> {
+                checkAppliedStatus.run();
+                stage.setScene(currentScene);
+            }, currentScene)); 
         });
-        VBox box = new VBox(13, pic, name, loc, wage, apply);
+        VBox box = new VBox(10, pic, name, role, loc, wage, apply);
         box.setAlignment(Pos.CENTER);
-        box.setPrefSize(344, 350);
+        box.setPrefSize(344, 380);
         box.setPadding(new Insets(14));
         box.setStyle(cardStyle());
         return box;
@@ -231,16 +281,39 @@ public class GeneralLabourJobRole {
     }
 
     private ImageView image(String p, double w, double h) {
-        var r = getClass().getResource(p);
-        ImageView v = new ImageView(r == null ? null : new Image(r.toExternalForm()));
+        ImageView v = new ImageView();
+        Image img = load(p);
+        if (img == null) {
+            img = load("/assets/images/general-labour/skill-01.jpg");
+        }
+        v.setImage(img);
         v.setFitWidth(w);
         v.setFitHeight(h);
         v.setPreserveRatio(false);
+        v.setSmooth(true);
         Rectangle c = new Rectangle(w, h);
         c.setArcWidth(24);
         c.setArcHeight(24);
         v.setClip(c);
         return v;
+    }
+
+    private Image load(String path) {
+        if (path == null || path.isBlank()) return null;
+        try {
+            if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("file:")) {
+                return new Image(path, true);
+            }
+            java.io.File file = new java.io.File(path);
+            if (file.exists()) {
+                return new Image(file.toURI().toString(), true);
+            }
+            var resource = getClass().getResource(path);
+            if (resource != null) {
+                return new Image(resource.toExternalForm());
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 
     private Label label(String t, String s) {
