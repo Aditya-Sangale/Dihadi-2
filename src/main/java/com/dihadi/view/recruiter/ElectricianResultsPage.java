@@ -55,17 +55,17 @@ public class ElectricianResultsPage {
                         { "Meera D.", "30 Years, Female", "West Bengal", "1550" } };
 
         public Scene getElectricianScene(Runnable back) {
-                BorderPane page = new BorderPane();
-                page.setTop(header());
-                page.setCenter(content());
-                page.setStyle("-fx-background-color:#fff8f0;");
-                return new Scene(page, 1400, 780);
-        }
+        BorderPane page = new BorderPane();
+        page.setTop(header());
+        page.setCenter(content(back));
+        page.setStyle("-fx-background-color:#fff8f0;");
+        return new Scene(page, 1400, 780);
+    }
 
-        private ScrollPane content() {
-                Label title = label("Looking for Skilled Electrician",
-                                "-fx-font-family:'Georgia';-fx-font-size:35px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
-                VBox page = new VBox(29, title, hero(), filterBar(), cards(), moreButton(), footer());
+    private ScrollPane content(Runnable back) {
+        Label title = label("Looking for Skilled Electrician",
+                "-fx-font-family:'Georgia';-fx-font-size:35px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+        VBox page = new VBox(29, title, hero(), filterBar(), cards(), bottomActions(back), footer());
                 page.setMaxWidth(1190);
                 page.setPadding(new Insets(35, 0, 46, 0));
                 StackPane canvas = new StackPane(page);
@@ -107,69 +107,133 @@ public class ElectricianResultsPage {
                 return row;
         }
 
+        private static class WorkerCardData {
+                String name;
+                String demographic;
+                String location;
+                String wage;
+                String photo;
+
+                WorkerCardData(String name, String demographic, String location, String wage, String photo) {
+                        this.name = name;
+                        this.demographic = demographic;
+                        this.location = location;
+                        this.wage = wage;
+                        this.photo = photo;
+                }
+        }
+
+        private java.util.List<WorkerCardData> getAllElectricianWorkers() {
+                java.util.List<WorkerCardData> list = new java.util.ArrayList<>();
+                try {
+                        java.util.List<com.dihadi.model.Worker> realWorkers = new com.dihadi.controller.WorkerController().getAllWorkers();
+                        if (realWorkers != null) {
+                                int pIdx = 0;
+                                for (com.dihadi.model.Worker w : realWorkers) {
+                                        if (w.getWorkerType() != null && w.getWorkerType().toLowerCase().contains("electrician")) {
+                                                String fullName = ((w.getFirstName() != null ? w.getFirstName() : "") + " " +
+                                                                  (w.getLastName() != null ? w.getLastName() : "")).trim();
+                                                if (fullName.isBlank()) fullName = "Verified Electrician";
+                                                String demo = (w.getExperience() != null && !w.getExperience().equals("Select") ? w.getExperience() : "Experienced")
+                                                              + ", " + (w.getGender() != null && !w.getGender().equals("Select") ? w.getGender() : "Male");
+                                                String loc = (w.getState() != null && !w.getState().isBlank() ? w.getState() : "Maharashtra");
+                                                String wage = w.getDailyWage() > 0 ? String.format("%,d", (long)w.getDailyWage()) : "1200";
+                                                String photo = w.getProfilePhotoUrl() != null && !w.getProfilePhotoUrl().isBlank() 
+                                                               ? w.getProfilePhotoUrl() : PHOTOS[pIdx % PHOTOS.length];
+                                                pIdx++;
+                                                list.add(new WorkerCardData(fullName, demo, loc, wage, photo));
+                                        }
+                                }
+                        }
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+                for (int i = 0; i < WORKERS.length; i++) {
+                        list.add(new WorkerCardData(WORKERS[i][0], WORKERS[i][1], WORKERS[i][2], WORKERS[i][3], PHOTOS[i % PHOTOS.length]));
+                }
+                return list;
+        }
+
         private TilePane cards() {
                 TilePane grid = new TilePane();
                 grid.setPrefColumns(3);
                 grid.setHgap(26);
                 grid.setVgap(24);
-                for (int i = 0; i < WORKERS.length; i++)
-                        grid.getChildren().add(card(WORKERS[i], PHOTOS[i % PHOTOS.length]));
+                for (WorkerCardData w : getAllElectricianWorkers())
+                        grid.getChildren().add(card(w));
                 return grid;
         }
 
-        private VBox card(String[] w, String photoPath) {
-                ImageView portrait = image(photoPath, 54, 54);
+        private VBox card(WorkerCardData w) {
+                ImageView portrait = image(w.photo, 64, 64);
                 portrait.setPreserveRatio(false);
-                portrait.setClip(new Circle(27, 27, 27));
-                StackPane portraitBox = new StackPane(portrait);
-                portraitBox.setPrefSize(54, 54);
-                portraitBox.setStyle(
+                portrait.setClip(new Circle(32, 32, 32));
+                StackPane avatar = new StackPane(portrait);
+                avatar.setPrefSize(64, 64);
+                avatar.setStyle(
                                 "-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-background-radius:999px;");
-                VBox identity = new VBox(3,
-                                label(w[0], "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
-                                label(w[1], "-fx-font-size:12px;-fx-text-fill:#4c4637;"));
-                HBox profile = new HBox(13, portraitBox, identity);
-                profile.setAlignment(Pos.CENTER_LEFT);
+                Label name = label(w.name, "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+                Label age = label(w.demographic, "-fx-font-size:12px;-fx-text-fill:#4c4637;");
                 Label skill = label("Electrician",
-                                "-fx-font-size:10px;-fx-text-fill:#574500;-fx-border-color:#d4af37;-fx-border-radius:10px;-fx-padding:3px 7px;");
-                Label location = label("⌾  " + w[2], "-fx-font-size:12px;-fx-text-fill:#4c4637;");
-                Region line = new Region();
-                line.setMinHeight(1);
-                line.setPrefHeight(1);
-                line.setMaxWidth(Double.MAX_VALUE);
-                line.setStyle("-fx-background-color:#d0c5af;");
-                VBox pay = new VBox(1, label("Wage", "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#4c4637;"),
-                                new HBox(label("₹" + w[3],
-                                                "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#d4a300;"),
-                                                label(" / day", "-fx-font-size:10px;-fx-text-fill:#4c4637;")));
+                                "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#b48700;-fx-background-color:#f4ede2;-fx-background-radius:5px;-fx-padding:4px 7px;");
+                Label location = label("⌖  " + w.location, "-fx-font-size:12px;-fx-text-fill:#4c4637;");
+                VBox details = new VBox(4, name, age, skill, location);
+                HBox top = new HBox(14, avatar, details);
+                top.setAlignment(Pos.TOP_LEFT);
+                Region divider = new Region();
+                divider.setMinHeight(1);
+                divider.setPrefHeight(1);
+                divider.setMaxWidth(Double.MAX_VALUE);
+                divider.setStyle("-fx-background-color:#e9e2d7;");
+                Label wage = label("Wage:  ₹" + w.wage + " / day",
+                                "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#d4a300;");
                 Button hire = new Button("HIRE NOW");
                 hire.setStyle(
-                                "-fx-background-color:#735c00;-fx-background-radius:18px;-fx-text-fill:#f6d676;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:7px 14px;-fx-cursor:hand;");
-                hire.setOnAction(
-                                e -> AppNavigator.information("Hire " + w[0], "Your hiring request has been started."));
-                HBox bottom = new HBox(pay, hire);
+                                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-radius:18px;-fx-text-fill:#b48700;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;");
+                hire.setOnAction(e -> AppNavigator.information("Hire " + w.name,
+                                "Your hiring request for " + w.name + " has been initiated. We will connect you shortly."));
+                Region gap = new Region();
+                HBox.setHgrow(gap, Priority.ALWAYS);
+                HBox bottom = new HBox(wage, gap, hire);
                 bottom.setAlignment(Pos.CENTER_LEFT);
-                HBox.setHgrow(pay, Priority.ALWAYS);
-                VBox card = new VBox(12, profile, skill, location, line, bottom);
-                card.setPrefSize(360, 185);
-                card.setPadding(new Insets(17));
-                card.setStyle(
-                                "-fx-background-color:#ffffff;-fx-background-radius:12px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),7,0,0,2px);");
+                VBox card = new VBox(16, top, divider, bottom);
+                card.setPrefSize(360, 194);
+                card.setPadding(new Insets(20));
+                card.setStyle(cardStyle(false));
+                card.setOnMouseEntered(e -> card.setStyle(cardStyle(true)));
+                card.setOnMouseExited(e -> card.setStyle(cardStyle(false)));
+                card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); javafx.scene.Scene currentScene = card.getScene(); stage.setScene(new RecruiterWorkerProfilePage(w.name, "Electrician", w.demographic, w.location, w.wage, w.photo).getProfileScene(() -> stage.setScene(currentScene), currentScene)); });
                 return card;
         }
 
-        private Button moreButton() {
-                Button button = new Button("View More Electricians");
-                button.setStyle(
-                                "-fx-background-color:#ffffff;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-radius:18px;-fx-font-size:11px;-fx-padding:7px 34px;-fx-cursor:hand;");
-                button.setOnAction(
-                                e -> AppNavigator.information("Electricians",
-                                                "More electrician profiles will be loaded here."));
-                StackPane.setAlignment(button, Pos.CENTER);
-                VBox holder = new VBox(button);
-                holder.setAlignment(Pos.CENTER);
-                return button;
+        private String cardStyle(boolean active) {
+            return "-fx-background-color:#ffffff;-fx-background-radius:13px;-fx-border-color:"
+                    + (active ? "#d4af37" : "transparent") + ";-fx-border-width:" + (active ? "2px" : "1px")
+                    + ";-fx-border-radius:13px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,"
+                    + (active ? ".14" : ".06") + ")," + (active ? "17" : "8") + ",0,0," + (active ? "4" : "2") + "px);";
         }
+
+    private HBox bottomActions(Runnable backAction) {
+        Button back = new Button("← Back");
+        back.setStyle("-fx-background-color:transparent;-fx-font-size:14px;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+        if (backAction != null) {
+            back.setOnAction(e -> backAction.run());
+        }
+
+        Button more = new Button("View More Electricians");
+        more.setStyle(
+                "-fx-background-color:#ffffff;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-radius:18px;-fx-font-size:11px;-fx-padding:7px 34px;-fx-cursor:hand;");
+        more.setOnAction(e -> AppNavigator.information("Electricians", "More electrician profiles will be loaded here."));
+
+        HBox centerBox = new HBox(more);
+        centerBox.setAlignment(Pos.CENTER);
+        HBox.setHgrow(centerBox, Priority.ALWAYS);
+
+        HBox row = new HBox(back, centerBox);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(0, 70, 0, 0)); // To visually balance the center if needed
+        return row;
+    }
 
         private BorderPane header() {
                 ImageView logo = image("/assets/logo/dihadi logo.jpeg", 54, 54);
@@ -293,6 +357,10 @@ public class ElectricianResultsPage {
         }
 
         private Image load(String path) {
+                if (path == null || path.isBlank()) return null;
+                if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("file:")) {
+                        return new Image(path, true);
+                }
                 var resource = getClass().getResource(path);
                 return resource == null ? null : new Image(resource.toExternalForm());
         }

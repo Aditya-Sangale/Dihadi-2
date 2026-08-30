@@ -46,18 +46,18 @@ public class ITI_TechnicianResultPage {
     public Scene getITITechnicianScene(Runnable back) {
         BorderPane page = new BorderPane();
         page.setTop(header());
-        page.setCenter(content());
+        page.setCenter(content(back));
         page.setStyle("-fx-background-color:" + PAPER + ";");
         return new Scene(page, 1400, 780);
     }
 
-    private ScrollPane content() {
+    private ScrollPane content(Runnable back) {
         Label title = label("Looking for Skilled ITI / Technician",
                 "-fx-font-family:'Georgia';-fx-font-size:37px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
         Label subTitle = label("Connect with certified professionals for safe, precise, and reliable technical work.",
                 "-fx-font-size:14px;-fx-text-fill:" + MUTED + ";");
         VBox heading = new VBox(6, title, subTitle);
-        VBox body = new VBox(28, heading, hero(), filters(), resultHeader(), cards(), loadMore(), footer());
+        VBox body = new VBox(28, heading, hero(), filters(), resultHeader(), cards(), bottomActions(back), footer());
         body.setMaxWidth(1190);
         body.setPadding(new Insets(40, 0, 48, 0));
         StackPane canvas = new StackPane(body);
@@ -140,60 +140,107 @@ public class ITI_TechnicianResultPage {
         return box;
     }
 
+    private static class WorkerCardData {
+        String name;
+        String age;
+        String location;
+        String wage;
+        String trade;
+        String photo;
+
+        WorkerCardData(String name, String age, String location, String wage, String trade, String photo) {
+            this.name = name;
+            this.age = age;
+            this.location = location;
+            this.wage = wage;
+            this.trade = trade;
+            this.photo = photo;
+        }
+    }
+
+    private java.util.List<WorkerCardData> getAllTechnicianWorkers() {
+        java.util.List<WorkerCardData> list = new java.util.ArrayList<>();
+        try {
+            java.util.List<com.dihadi.model.Worker> realWorkers = new com.dihadi.controller.WorkerController().getAllWorkers();
+            if (realWorkers != null) {
+                int pIdx = 0;
+                for (com.dihadi.model.Worker w : realWorkers) {
+                    if (w.getWorkerType() != null && (w.getWorkerType().toLowerCase().contains("iti") || w.getWorkerType().toLowerCase().contains("technician"))) {
+                        String fullName = ((w.getFirstName() != null ? w.getFirstName() : "") + " " +
+                                          (w.getLastName() != null ? w.getLastName() : "")).trim();
+                        if (fullName.isBlank()) fullName = "Verified Technician";
+                        String demo = (w.getExperience() != null && !w.getExperience().equals("Select") ? w.getExperience() : "Experienced")
+                                      + ", " + (w.getGender() != null && !w.getGender().equals("Select") ? w.getGender() : "Male");
+                        String loc = (w.getCity() != null && !w.getCity().isBlank() ? w.getCity() + ", " : "") +
+                                     (w.getState() != null && !w.getState().isBlank() ? w.getState() : "Maharashtra");
+                        String wage = w.getDailyWage() > 0 ? String.format("%,d", (long)w.getDailyWage()) : "1100";
+                        String skillTag = w.getSubSkill() != null && !w.getSubSkill().isBlank() ? w.getSubSkill() : "ITI Technician";
+                        String photo = w.getProfilePhotoUrl() != null && !w.getProfilePhotoUrl().isBlank() 
+                                       ? w.getProfilePhotoUrl() : PHOTOS[pIdx % PHOTOS.length];
+                        pIdx++;
+                        list.add(new WorkerCardData(fullName, demo, loc, wage, skillTag, photo));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < TECHNICIANS.length; i++) {
+            list.add(new WorkerCardData(TECHNICIANS[i][0], TECHNICIANS[i][1], TECHNICIANS[i][2], TECHNICIANS[i][3], TECHNICIANS[i][4], PHOTOS[i % PHOTOS.length]));
+        }
+        return list;
+    }
+
     private TilePane cards() {
         TilePane grid = new TilePane();
         grid.setPrefColumns(3);
         grid.setHgap(26);
         grid.setVgap(24);
-        for (int i = 0; i < TECHNICIANS.length; i++)
-            grid.getChildren().add(card(TECHNICIANS[i], PHOTOS[i]));
+        for (WorkerCardData w : getAllTechnicianWorkers())
+            grid.getChildren().add(card(w));
         return grid;
     }
 
-    private VBox card(String[] technician, String photoPath) {
-        Label watermark = label("DIHADI", "-fx-font-size:15px;-fx-font-weight:800;-fx-letter-spacing:2px;-fx-text-fill:"
-                + GOLD + ";-fx-opacity:.10;");
-        ImageView image = image(photoPath, 66, 66);
-        image.setPreserveRatio(false);
-        image.setClip(new Circle(33, 33, 33));
-        StackPane avatar = new StackPane(image);
-        avatar.setPrefSize(66, 66);
+    private VBox card(WorkerCardData technician) {
+        ImageView portrait = image(technician.photo, 64, 64);
+        portrait.setPreserveRatio(false);
+        portrait.setClip(new Circle(32, 32, 32));
+        StackPane avatar = new StackPane(portrait);
+        avatar.setPrefSize(64, 64);
         avatar.setStyle(
                 "-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-background-radius:999px;");
-        Label name = label(technician[0], "-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
-        Label age = label(technician[1], "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
-        Label trade = label(technician[4], "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:" + INK
-                + ";-fx-background-color:#e9e2d7;-fx-background-radius:6px;-fx-border-color:#cfc6b2;-fx-border-radius:6px;-fx-padding:4px 7px;");
-        Label location = label("⌖  " + technician[2], "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
-        VBox details = new VBox(4, name, age, trade, location);
+        Label name = label(technician.name, "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
+        Label age = label(technician.age, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
+        Label skill = label(technician.trade,
+                "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#b48700;-fx-background-color:#f4ede2;-fx-background-radius:5px;-fx-padding:4px 7px;");
+        Label location = label("⌖  " + technician.location, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
+        VBox details = new VBox(4, name, age, skill, location);
         HBox top = new HBox(14, avatar, details);
         top.setAlignment(Pos.TOP_LEFT);
-        Region line = new Region();
-        line.setMinHeight(1);
-        line.setPrefHeight(1);
-        line.setMaxWidth(Double.MAX_VALUE);
-        line.setStyle("-fx-background-color:#cfc6b2;");
-        Label wage = label("Wage:  ₹" + technician[3] + " / day",
-                "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#b48700;");
+        Region divider = new Region();
+        divider.setMinHeight(1);
+        divider.setPrefHeight(1);
+        divider.setMaxWidth(Double.MAX_VALUE);
+        divider.setStyle("-fx-background-color:#e9e2d7;");
+        Label wage = label("Wage:  ₹" + technician.wage + " / day",
+                "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#d4a300;");
         Button hire = new Button("HIRE NOW");
         hire.setStyle(
-                "-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#ffffff;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 15px;-fx-cursor:hand;");
-        hire.setOnAction(e -> AppNavigator.information("Hire " + technician[0],
-                "Your hiring request for " + technician[0] + " has been initiated. We will connect you shortly."));
-        Region space = new Region();
-        HBox.setHgrow(space, Priority.ALWAYS);
-        HBox bottom = new HBox(wage, space, hire);
+                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-radius:18px;-fx-text-fill:#b48700;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;");
+        hire.setOnAction(e -> AppNavigator.information("Hire " + technician.name,
+                "Your hiring request for " + technician.name + " has been initiated. We will connect you shortly."));
+        Region gap = new Region();
+        HBox.setHgrow(gap, Priority.ALWAYS);
+        HBox bottom = new HBox(wage, gap, hire);
         bottom.setAlignment(Pos.CENTER_LEFT);
-        VBox content = new VBox(16, top, line, bottom);
-        content.setPadding(new Insets(20));
-        StackPane card = new StackPane(content, watermark);
-        StackPane.setAlignment(watermark, Pos.TOP_RIGHT);
-        StackPane.setMargin(watermark, new Insets(13, 16, 0, 0));
-        card.setPrefSize(360, 196);
+        VBox card = new VBox(16, top, divider, bottom);
+        card.setPrefSize(360, 194);
+        card.setPadding(new Insets(20));
         card.setStyle(cardStyle(false));
         card.setOnMouseEntered(e -> card.setStyle(cardStyle(true)));
         card.setOnMouseExited(e -> card.setStyle(cardStyle(false)));
-        return new VBox(card);
+        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); javafx.scene.Scene currentScene = card.getScene(); stage.setScene(new RecruiterWorkerProfilePage(technician.name, "ITI / Technician", technician.age, technician.location, technician.wage, technician.photo).getProfileScene(() -> stage.setScene(currentScene), currentScene)); });
+        return card;
     }
 
     private String cardStyle(boolean active) {
@@ -203,16 +250,28 @@ public class ITI_TechnicianResultPage {
                 + (active ? ".13" : ".06") + ")," + (active ? "18" : "9") + ",0,0," + (active ? "4" : "2") + "px);";
     }
 
-    private VBox loadMore() {
+    private HBox bottomActions(Runnable backAction) {
+        Button back = new Button("← Back");
+        back.setStyle("-fx-background-color:transparent;-fx-font-size:14px;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+        if (backAction != null) {
+            back.setOnAction(e -> backAction.run());
+        }
+
         Button b = new Button("Load More Profiles  ▾");
         b.setStyle(
                 "-fx-background-color:transparent;-fx-background-radius:19px;-fx-border-color:#7e7665;-fx-border-radius:19px;-fx-text-fill:"
                         + GOLD + ";-fx-font-size:12px;-fx-font-weight:800;-fx-padding:10px 23px;-fx-cursor:hand;");
         b.setOnAction(e -> AppNavigator.information("ITI Technicians",
                 "More verified technician profiles will be loaded here."));
-        VBox box = new VBox(b);
-        box.setAlignment(Pos.CENTER);
-        return box;
+
+        HBox centerBox = new HBox(b);
+        centerBox.setAlignment(Pos.CENTER);
+        HBox.setHgrow(centerBox, Priority.ALWAYS);
+
+        HBox row = new HBox(back, centerBox);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(0, 70, 0, 0)); // To visually balance the center if needed
+        return row;
     }
 
     private BorderPane header() {
@@ -330,6 +389,10 @@ public class ITI_TechnicianResultPage {
     }
 
     private Image load(String path) {
+        if (path == null || path.isBlank()) return null;
+        if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("file:")) {
+            return new Image(path, true);
+        }
         var r = getClass().getResource(path);
         return r == null ? null : new Image(r.toExternalForm());
     }

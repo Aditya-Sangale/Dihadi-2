@@ -1,6 +1,7 @@
 package com.dihadi.view.recruiter;
 
 import com.dihadi.controller.RecruiterController;
+import com.dihadi.view.AppNavigator;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -44,6 +45,7 @@ public class SignUpRecruiter {
     private TextField alternateEmailField;
     private TextField companyNameField;
     private ComboBox<String> businessTypeField;
+    private javafx.scene.control.PasswordField passwordField;
     private Runnable backAction;
 
     public Scene getRecruiterSignUpScene(Runnable back) {
@@ -153,12 +155,12 @@ public class SignUpRecruiter {
         fields.add(new VBox(8, text("Gender", labelStyle()), genderField), 0, 2, 2, 1);
 
         mobileField = new TextField();
-        mobileField.setPromptText("+91     00000 0000");
+        mobileField.setPromptText("+91 000000000");
         mobileField.setStyle(inputStyle());
         fields.add(new VBox(8, text("Mobile Number\n*required", labelStyle()), mobileField), 0, 3);
 
         alternateMobileField = new TextField();
-        alternateMobileField.setPromptText("+91     00000 0000");
+        alternateMobileField.setPromptText("+91 000000000");
         alternateMobileField.setStyle(inputStyle());
         fields.add(new VBox(8, text("Alternate Mobile", labelStyle()), alternateMobileField), 1, 3);
 
@@ -184,30 +186,31 @@ public class SignUpRecruiter {
         businessTypeField.setStyle(inputStyle());
         fields.add(new VBox(8, text("Business Type *", labelStyle()), businessTypeField), 0, 6, 2, 1);
 
+        passwordField = new javafx.scene.control.PasswordField();
+        passwordField.setPromptText("Enter your password");
+        passwordField.setStyle(inputStyle());
+        fields.add(new VBox(8, text("Create Dihadi Password *required", labelStyle()), passwordField), 0, 7, 2, 1);
+
         Button backButton = button("←  BACK", false);
-        backButton.setOnAction(e -> {
-            if (back != null)
-                back.run();
-        });
+        backButton.setOnAction(e -> AppNavigator.open((Stage) backButton.getScene().getWindow(), "Home"));
         Button sectionBack = new Button("<");
-        sectionBack.setStyle("-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:18px;-fx-font-weight:800;-fx-padding:7px 14px;-fx-cursor:hand;");
-        sectionBack.setOnAction(e -> { if (back != null) back.run(); });
-        Label personalDetails = text("PERSONAL DETAILS", "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:11px 16px;");
-        Button skipForNow = button("SKIP FOR NOW", false);
-        skipForNow.setOnAction(e -> ((javafx.stage.Stage) skipForNow.getScene().getWindow()).setScene(
-                new RecruiterPage().getRecruiterScene(() -> { if (back != null) back.run(); })));
+        sectionBack.setStyle(
+                "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:18px;-fx-font-weight:800;-fx-padding:7px 14px;-fx-cursor:hand;");
+        sectionBack.setOnAction(e -> AppNavigator.open((Stage) sectionBack.getScene().getWindow(), "Home"));
+        Label personalDetails = text("PERSONAL DETAILS",
+                "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:11px 16px;");
         Button submit = button("CREATE RECRUITER ACCOUNT", true);
         submit.setOnAction(e -> submitRecruiter());
         Button loginLink = new Button("Already having account? Login");
         loginLink.setStyle(
                 "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:700;-fx-cursor:hand;");
-        loginLink.setOnAction(e -> ((javafx.stage.Stage) loginLink.getScene().getWindow())
-                .setScene(new RecruiterLoginPage(back).getLoginScene()));
+        loginLink.setOnAction(e -> {
+            Stage stage = (Stage) loginLink.getScene().getWindow();
+            stage.setScene(new RecruiterLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
+        });
         VBox actionArea = new VBox(10, loginLink);
         actionArea.setAlignment(Pos.CENTER_RIGHT);
-        Region headingSpacer = new Region();
-        HBox.setHgrow(headingSpacer, Priority.ALWAYS);
-        HBox formHeading = new HBox(10, sectionBack, personalDetails, headingSpacer, skipForNow);
+        HBox formHeading = new HBox(10, sectionBack, personalDetails);
         formHeading.setAlignment(Pos.CENTER_LEFT);
         HBox actions = new HBox(14, submit);
         actions.setAlignment(Pos.CENTER_RIGHT);
@@ -223,7 +226,8 @@ public class SignUpRecruiter {
 
     private void submitRecruiter() {
         if (firstNameField.getText().isBlank() || mobileField.getText().isBlank()
-                || emailField.getText().isBlank() || companyNameField.getText().isBlank()) {
+                || emailField.getText().isBlank() || companyNameField.getText().isBlank()
+                || passwordField.getText().isBlank()) {
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
                     javafx.scene.control.Alert.AlertType.WARNING);
             alert.setTitle("Complete your details");
@@ -245,10 +249,11 @@ public class SignUpRecruiter {
                     emailField.getText().trim(),
                     alternateEmailField.getText().trim(),
                     companyNameField.getText().trim(),
-                    businessTypeField.getValue() != null ? businessTypeField.getValue() : "");
+                    businessTypeField.getValue() != null ? businessTypeField.getValue() : "",
+                    passwordField.getText().trim());
 
             Stage stage = (Stage) firstNameField.getScene().getWindow();
-            stage.setScene(new RecruiterLoginPage(backAction).getLoginScene());
+            stage.setScene(new RecruiterLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
         } catch (Exception ex) {
             ex.printStackTrace();
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(

@@ -76,16 +76,16 @@ public class RecruiterPage {
                 }), nav("About Us", false, () -> navigate("About Us")),
                 nav("Contact Us", false, () -> navigate("Contact Us")));
         nav.setAlignment(Pos.CENTER);
-        Button login = secondary("Login");
-        login.setOnAction(
-                e -> scene(login, new RecruiterLoginPage(() -> scene(login, getRecruiterScene(home))).getLoginScene()));
-        Button signup = primary("Sign Up");
-        signup.setOnAction(e -> scene(signup,
-                new SignUpRecruiter().getRecruiterSignUpScene(() -> scene(signup, getRecruiterScene(home)))));
+        Button dashboard = primary("Dashboard");
+        dashboard.setOnAction(e -> { 
+            Stage stage = (Stage) dashboard.getScene().getWindow(); 
+            com.dihadi.model.Recruiter r = com.dihadi.view.SessionManager.currentRecruiter != null ? com.dihadi.view.SessionManager.currentRecruiter : new com.dihadi.model.Recruiter();
+            stage.setScene(new RecruiterDashboard(r).getScene(() -> stage.setScene(getRecruiterScene(home)))); 
+        });
         BorderPane bar = new BorderPane();
         bar.setLeft(brand);
         bar.setCenter(nav);
-        bar.setRight(new HBox(10, login, signup));
+        bar.setRight(new HBox(10, dashboard));
         bar.setPadding(new Insets(16, 24, 14, 24));
         bar.setStyle(
                 "-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
@@ -106,7 +106,7 @@ public class RecruiterPage {
         text.setMaxWidth(545);
         Button create = heroButton("CREATE PROJECT");
         create.setOnAction(e -> scene(create,
-                new SignUpRecruiter().getRecruiterSignUpScene(() -> scene(create, getRecruiterScene(home)))));
+                new CreateProjectPage().getCreateProjectScene(() -> scene(create, getRecruiterScene(home)))));
         Button hire = heroButton("HIRE WORKERS");
         hire.setOnAction(e -> scene(hire,
                 new HireSuitableSkilledWorkersPage().getHireWorkersScene(() -> scene(hire, getRecruiterScene(home)))));
@@ -359,13 +359,22 @@ public class RecruiterPage {
         imageView.setSmooth(true);
     }
 
+    private static final java.util.Map<String, Image> IMAGE_CACHE = new java.util.HashMap<>();
+
     private Image load(String path) {
-        var resource = getClass().getResource(path);
-        return resource == null ? null : new Image(resource.toExternalForm());
+        return IMAGE_CACHE.computeIfAbsent(path, p -> {
+            var resource = getClass().getResource(p);
+            return resource == null ? null : new Image(resource.toExternalForm(), 800, 800, true, true);
+        });
     }
 
     private void scene(Button button, Scene scene) {
-        ((Stage) button.getScene().getWindow()).setScene(scene);
+        javafx.stage.Window window = button.getScene().getWindow();
+        if (window instanceof Stage stage) {
+            stage.setScene(scene);
+        } else {
+            sceneFromFocused(scene);
+        }
     }
 
     private void sceneFromFocused(Scene scene) {

@@ -1,6 +1,7 @@
 package com.dihadi.view.worker.Carpenter;
 
 import com.dihadi.view.AppNavigator;
+import java.util.List;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
@@ -30,16 +31,13 @@ public class CarpenterJobRole {
             "/assets/images/worker/carpenter/skill-01.jpg", "/assets/images/worker/carpenter/skill-02.jpg",
             "/assets/images/worker/carpenter/skill-04.jpg", "/assets/images/worker/carpenter/skill-06.jpg"
     };
-    private static final Job[] JOBS = {
-            new Job("Window Carpenter", "Bhiwandi, Maharashtra", "₹850", 1),
-            new Job("Carpenter Helper", "Lepripara, Odisha", "₹750", 3),
-            new Job("Modular Kitchen Carpenter", "Bangalore South, Karnataka", "₹1,350", 4),
-            new Job("Shuttering & Centering", "Borivali East, Maharashtra", "₹1,150", 5),
-            new Job("Scaffolding Carpenter", "Radhapuram, Tamil Nadu", "₹1,250", 7),
-            new Job("Wood Polishing Specialist", "New Delhi, Delhi", "₹1,450", 8),
-            new Job("Interior Woodwork Carpenter", "Saidapet, Tamil Nadu", "₹1,400", 9),
-            new Job("Door & Window Frames", "Bhiwandi, Maharashtra", "₹950", 10),
-            new Job("Furniture Carpenter", "New Delhi, Delhi", "₹1,050", 11)
+    private static final String[][] JOBS = {
+            {"Furniture Carpenter", "Pune, Maharashtra", "₹1,000", "01", null, null, null},
+            {"Framing Carpenter", "Mumbai, Maharashtra", "₹1,200", "02", null, null, null},
+            {"Cabinet Maker", "Nashik, Maharashtra", "₹1,150", "03", null, null, null},
+            {"Formwork Carpenter", "Bangalore, Karnataka", "₹1,100", "04", null, null, null},
+            {"Roofing Carpenter", "New Delhi, Delhi", "₹1,300", "05", null, null, null},
+            {"Trim Carpenter", "Chennai, Tamil Nadu", "₹1,050", "06", null, null, null}
     };
 
     private final FlowPane jobs = new FlowPane(24, 24);
@@ -53,8 +51,6 @@ public class CarpenterJobRole {
         content.setPadding(new Insets(30, 36, 42, 36));
         content.setMaxWidth(1280);
 
-        // Keep the 1280px canvas centred in the available viewport instead of anchoring
-        // it to the left edge.
         StackPane canvas = new StackPane(content);
         canvas.setAlignment(Pos.TOP_CENTER);
         canvas.setStyle("-fx-background-color:#f3e7ce;");
@@ -85,7 +81,7 @@ public class CarpenterJobRole {
         startSlider();
 
         Label quote = label(
-                "“Precision in every cut, strength in every joint. We honour the skilled hands that build the spaces of our lives.”",
+                "“Precision in every cut, strength in every joint. We honour the skilled hands that build the spaces of our lives.?",
                 "-fx-font-family:'Georgia';-fx-font-size:21px;-fx-font-style:italic;-fx-text-fill:#4d4635;-fx-line-spacing:5px;");
         quote.setWrapText(true);
         quote.setMaxWidth(385);
@@ -145,10 +141,47 @@ public class CarpenterJobRole {
         return section;
     }
 
+    private List<String[]> getAllJobs() {
+        List<String[]> all = new java.util.ArrayList<>();
+        try {
+            List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
+            List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
+            java.util.Map<String, com.dihadi.model.Project> projectMap = new java.util.HashMap<>();
+            if (projects != null) {
+                for (com.dihadi.model.Project p : projects) {
+                    if (p.getProjectId() != null) projectMap.put(p.getProjectId(), p);
+                }
+            }
+            if (reqs != null) {
+                int imgIdx = 1;
+                for (com.dihadi.model.WorkforceRequirement req : reqs) {
+                    if (req.getWorkerType() != null && req.getWorkerType().toLowerCase().contains("carpenter")) {
+                        String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "Carpenter";
+                        com.dihadi.model.Project p = req.getProjectId() != null ? projectMap.get(req.getProjectId()) : null;
+                        String loc = (p != null && p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
+                                     (p != null && p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
+                        String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
+                        String imgNum = String.format("%02d", (imgIdx % 6) + 1);
+                        imgIdx++;
+                        String recruiterMobile = p != null ? p.getMobile() : null;
+                        all.add(new String[]{ title, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId() });
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (String[] j : JOBS) {
+            all.add(j);
+        }
+        return all;
+    }
+
     private void renderJobs(String state, String city, String skill) {
         jobs.getChildren().clear();
-        for (Job job : JOBS) {
-            String searchable = (job.title + " " + job.location).toLowerCase();
+        List<String[]> allJobs = getAllJobs();
+        for (String[] job : allJobs) {
+            String searchable = (job[0] + " " + job[1]).toLowerCase();
             boolean stateMatches = state == null || state.startsWith("All") || searchable.contains(state.toLowerCase());
             boolean cityMatches = city == null || city.startsWith("All") || searchable.contains(city.toLowerCase());
             boolean skillMatches = skill == null || skill.startsWith("All") || searchable.contains(skill.toLowerCase());
@@ -160,21 +193,22 @@ public class CarpenterJobRole {
                     "-fx-font-size:15px;-fx-text-fill:#4d4635;"));
     }
 
-    private VBox jobCard(Job job) {
-        ImageView photo = image(String.format("/assets/images/worker/carpenter/skill-%02d.jpg", job.image), 316, 178);
+    private VBox jobCard(String[] j) {
+        ImageView photo = image(String.format("/assets/images/worker/carpenter/skill-%s.jpg", j[3]), 316, 178);
         clip(photo, 316, 178, 12);
-        Label name = label(job.title, "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
+        Label name = label(j[0], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
         name.setWrapText(true);
-        Label location = label("⌖  " + job.location, "-fx-font-size:13px;-fx-text-fill:#4d4635;");
+        Label location = label("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;");
         Label wageLabel = label("Daily wage", "-fx-font-size:13px;-fx-text-fill:#4d4635;");
-        Label wage = label(job.wage, "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        Label wage = label(j[2], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#735c00;");
         Region space = new Region();
         VBox.setVgrow(space, Priority.ALWAYS);
         Button apply = primary("Apply now");
         apply.setMaxWidth(Double.MAX_VALUE);
-        apply.setOnAction(e -> {
-            apply.setText("Applied ✓");
-            apply.setDisable(true);
+        apply.setOnAction(e -> { 
+            javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow(); 
+            javafx.scene.Scene currentScene = apply.getScene();
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(j[0], j[1], j[2], "/assets/images/worker/carpenter/skill-01.jpg", j[4], j[5], j[6]).getScene(() -> stage.setScene(currentScene), currentScene)); 
         });
         HBox pay = new HBox(wageLabel, wage);
         pay.setAlignment(Pos.CENTER_LEFT);
@@ -214,7 +248,7 @@ public class CarpenterJobRole {
     }
 
     private HBox actionBar(Runnable back) {
-        Button previous = outline("← Back to skills");
+        Button previous = outline("? Back to skills");
         previous.setOnAction(e -> {
             stopSlider();
             if (back != null)
@@ -311,5 +345,12 @@ public class CarpenterJobRole {
     }
 
     private record Job(String title, String location, String wage, int image) {
+    }
+
+    private String workerCardStyle(boolean active) {
+        return "-fx-background-color:#ffffff;-fx-background-radius:13px;-fx-border-color:"
+                + (active ? "#d4af37" : "transparent") + ";-fx-border-width:" + (active ? "2px" : "1px")
+                + ";-fx-border-radius:13px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,"
+                + (active ? ".14" : ".06") + ")," + (active ? "17" : "8") + ",0,0," + (active ? "4" : "2") + "px);";
     }
 }

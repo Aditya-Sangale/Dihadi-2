@@ -1,6 +1,7 @@
 package com.dihadi.view.worker.Electrician;
 
 import com.dihadi.view.AppNavigator;
+import java.util.List;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
@@ -30,16 +31,14 @@ public class ElectricianJobRole {
     private static final String[] HERO_IMAGES = { "/assets/images/worker/electrician/skill-01.jpg",
             "/assets/images/worker/electrician/skill-02.jpg", "/assets/images/worker/electrician/skill-04.jpg",
             "/assets/images/worker/electrician/skill-06.jpg" };
-    private static final Job[] JOBS = {
-            new Job("Residential Electrician", "Pune, Maharashtra", "₹1,000", 1),
-            new Job("Industrial Wireman", "Nashik, Maharashtra", "₹1,250", 2),
-            new Job("Electrical Helper", "Bangalore South, Karnataka", "₹800", 3),
-            new Job("Cable Jointer", "Chennai, Tamil Nadu", "₹1,400", 4),
-            new Job("Lineman", "Gurgaon, Haryana", "₹1,350", 5),
-            new Job("HVAC Technician", "New Delhi, Delhi", "₹1,500", 6),
-            new Job("Substation Attendant", "Mumbai, Maharashtra", "₹1,300", 7),
-            new Job("Fire Safety Technician", "Hyderabad, Telangana", "₹1,450", 8),
-            new Job("Power Testing Technician", "Bhiwandi, Maharashtra", "₹1,200", 9) };
+    private static final String[][] JOBS = {
+            {"Residential Electrician", "Pune, Maharashtra", "₹1,000", "01", null, null, null},
+            {"Commercial Electrician", "Mumbai, Maharashtra", "₹1,200", "02", null, null, null},
+            {"Industrial Electrician", "Nashik, Maharashtra", "₹1,150", "03", null, null, null},
+            {"Maintenance Electrician", "Bangalore, Karnataka", "₹1,100", "04", null, null, null},
+            {"Installation Electrician", "New Delhi, Delhi", "₹1,300", "05", null, null, null},
+            {"Construction Electrician", "Chennai, Tamil Nadu", "₹1,050", "06", null, null, null}
+    };
     private final FlowPane jobs = new FlowPane(24, 24);
     private ImageView heroImage;
     private Timeline slider;
@@ -77,7 +76,7 @@ public class ElectricianJobRole {
                 "-fx-background-color:#faf3e8;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.12),20,0,0,6px);");
         startSlider();
         Label quote = label(
-                "“Bringing light to the dark and power to the future. Every safe connection begins with a skilled electrician.”",
+                "“Bringing light to the dark and power to the future. Every safe connection begins with a skilled electrician.?",
                 "-fx-font-family:'Georgia';-fx-font-size:21px;-fx-font-style:italic;-fx-text-fill:#4d4635;-fx-line-spacing:5px;");
         quote.setWrapText(true);
         quote.setMaxWidth(385);
@@ -135,28 +134,65 @@ public class ElectricianJobRole {
         return section;
     }
 
+    private List<String[]> getAllJobs() {
+        List<String[]> all = new java.util.ArrayList<>();
+        try {
+            List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
+            List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
+            java.util.Map<String, com.dihadi.model.Project> projectMap = new java.util.HashMap<>();
+            if (projects != null) {
+                for (com.dihadi.model.Project p : projects) {
+                    if (p.getProjectId() != null) projectMap.put(p.getProjectId(), p);
+                }
+            }
+            if (reqs != null) {
+                int imgIdx = 1;
+                for (com.dihadi.model.WorkforceRequirement req : reqs) {
+                    if (req.getWorkerType() != null && req.getWorkerType().toLowerCase().contains("electrician")) {
+                        String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "Electrician";
+                        com.dihadi.model.Project p = req.getProjectId() != null ? projectMap.get(req.getProjectId()) : null;
+                        String loc = (p != null && p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
+                                     (p != null && p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
+                        String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
+                        String imgNum = String.format("%02d", (imgIdx % 6) + 1);
+                        imgIdx++;
+                        String recruiterMobile = p != null ? p.getMobile() : null;
+                        all.add(new String[]{ title, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId() });
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (String[] j : JOBS) {
+            all.add(j);
+        }
+        return all;
+    }
+
     private void renderJobs(String state, String city, String skill) {
         jobs.getChildren().clear();
-        for (Job job : JOBS) {
-            String all = (job.title + " " + job.location).toLowerCase();
+        List<String[]> allJobs = getAllJobs();
+        for (String[] j : allJobs) {
+            String all = (j[0] + " " + j[1]).toLowerCase();
             boolean a = state == null || state.startsWith("All") || all.contains(state.toLowerCase()),
                     b = city == null || city.startsWith("All") || all.contains(city.toLowerCase()),
                     c = skill == null || skill.startsWith("All") || all.contains(skill.toLowerCase());
             if (a && b && c)
-                jobs.getChildren().add(jobCard(job));
+                jobs.getChildren().add(jobCard(j));
         }
         if (jobs.getChildren().isEmpty())
             jobs.getChildren().add(label("No exact role found. Clear filters to view all electrician roles.",
                     "-fx-font-size:15px;-fx-text-fill:#4d4635;"));
     }
 
-    private VBox jobCard(Job job) {
-        ImageView photo = image(String.format("/assets/images/worker/electrician/skill-%02d.jpg", job.image), 316, 178);
+    private VBox jobCard(String[] j) {
+        ImageView photo = image(String.format("/assets/images/worker/electrician/skill-%s.jpg", j[3]), 316, 178);
         clip(photo, 316, 178, 12);
-        Label name = label(job.title, "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
-                location = label("⌖  " + job.location, "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
+        Label name = label(j[0], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
+                location = label("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
                 wageLabel = label("Daily wage", "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
-                wage = label(job.wage, "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+                wage = label(j[2], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#735c00;");
         name.setWrapText(true);
         name.setAlignment(Pos.CENTER);
         name.setMaxWidth(Double.MAX_VALUE);
@@ -166,9 +202,10 @@ public class ElectricianJobRole {
         VBox.setVgrow(space, Priority.ALWAYS);
         Button apply = primary("Apply now");
         apply.setMaxWidth(Double.MAX_VALUE);
-        apply.setOnAction(e -> {
-            apply.setText("Applied ✓");
-            apply.setDisable(true);
+        apply.setOnAction(e -> { 
+            javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow(); 
+            javafx.scene.Scene currentScene = apply.getScene();
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(j[0], j[1], j[2], "/assets/images/worker/electrician/skill-01.jpg", j[4], j[5], j[6]).getScene(() -> stage.setScene(currentScene), currentScene)); 
         });
         HBox pay = new HBox(wageLabel, wage);
         pay.setAlignment(Pos.CENTER_LEFT);
@@ -204,7 +241,7 @@ public class ElectricianJobRole {
     }
 
     private HBox actionBar(Runnable back) {
-        Button previous = outline("← Back to skills");
+        Button previous = outline("? Back to skills");
         previous.setOnAction(e -> {
             stopSlider();
             if (back != null)
@@ -301,5 +338,12 @@ public class ElectricianJobRole {
     }
 
     private record Job(String title, String location, String wage, int image) {
+    }
+
+    private String workerCardStyle(boolean active) {
+        return "-fx-background-color:#ffffff;-fx-background-radius:13px;-fx-border-color:"
+                + (active ? "#d4af37" : "transparent") + ";-fx-border-width:" + (active ? "2px" : "1px")
+                + ";-fx-border-radius:13px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,"
+                + (active ? ".14" : ".06") + ")," + (active ? "17" : "8") + ",0,0," + (active ? "4" : "2") + "px);";
     }
 }

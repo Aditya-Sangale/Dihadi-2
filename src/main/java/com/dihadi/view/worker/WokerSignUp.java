@@ -2,7 +2,9 @@ package com.dihadi.view.worker;
 
 import java.io.File;
 
+import com.dihadi.controller.ImageUploadController;
 import com.dihadi.controller.WorkerController;
+import com.dihadi.view.AppNavigator;
 
 import javafx.beans.binding.Bindings;
 import javafx.animation.KeyFrame;
@@ -51,8 +53,15 @@ public class WokerSignUp {
             "12th Pass", "ITI", "Graduate");
     private final ComboBox<String> experience = combo("Select", "Fresher", "0-1 Years", "1-3 Years", "3-5 Years",
             "5+ Years");
+    private final ComboBox<String> workerType = combo("Labour (General Labour)", "Mason", "Carpenter", "Electrician",
+            "Plumber", "Painter", "ITI / Technician", "Site Supervisor");
+    private final TextField city = field("e.g. Pune");
+    private final ComboBox<String> state = combo("Maharashtra", "Delhi", "Gujarat", "Karnataka", "Uttar Pradesh", "Rajasthan", "Tamil Nadu", "Other");
+    private final javafx.scene.control.PasswordField password = new javafx.scene.control.PasswordField();
     private final DatePicker dateOfBirth = new DatePicker();
     private final ImageView profileImage = new ImageView();
+    private String profilePhotoUrl;
+    private File selectedPhotoFile;
     private final String[] showcaseImages = { "/assets/images/worker 5.jpeg", "/assets/images/worker 2.jpeg",
             "/assets/images/sitesuperviser.jpeg", "/assets/images/welder.jpeg" };
     private Runnable backAction;
@@ -88,21 +97,10 @@ public class WokerSignUp {
         back.setText("<");
         back.setStyle(
                 "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:18px;-fx-font-weight:800;-fx-padding:7px 14px;-fx-cursor:hand;");
-        back.setOnAction(event -> {
-            if (backAction != null)
-                backAction.run();
-        });
+        back.setOnAction(event -> AppNavigator.open((Stage) back.getScene().getWindow(), "Home"));
         Label personalDetails = label("PERSONAL DETAILS",
                 "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:11px 16px;");
-        Button skipTrial = new Button("SKIP FOR TRIAL");
-        skipTrial.setStyle(
-                "-fx-background-color:transparent;-fx-background-radius:12px;-fx-border-color:#735c00;-fx-border-radius:12px;"
-                        + "-fx-text-fill:#735c00;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:10px 14px;-fx-cursor:hand;");
-        skipTrial.setOnAction(event -> com.dihadi.view.AppNavigator.openFooterLink(
-                (javafx.stage.Stage) skipTrial.getScene().getWindow(), "Worker Categories"));
-        Region headingSpacer = new Region();
-        HBox.setHgrow(headingSpacer, Priority.ALWAYS);
-        HBox formHeading = new HBox(10, back, personalDetails, headingSpacer, skipTrial);
+        HBox formHeading = new HBox(10, back, personalDetails);
         formHeading.setAlignment(Pos.CENTER_LEFT);
         VBox card = new VBox(22, formHeading, createPhotoPicker(), createFields(), createActions());
         card.setMaxWidth(560);
@@ -160,8 +158,14 @@ public class WokerSignUp {
         add(grid, 0, 3, "Mobile number *", phone, 2);
         add(grid, 0, 4, "Alternate mobile number", alternateMobile, 2);
         add(grid, 0, 5, "Email", email, 2);
-        add(grid, 0, 6, "Education / Qualification *", education, 1);
-        add(grid, 1, 6, "Experience *", experience, 1);
+        add(grid, 0, 6, "Worker Type / Trade *", workerType, 2);
+        add(grid, 0, 7, "State *", state, 1);
+        add(grid, 1, 7, "City / Town", city, 1);
+        add(grid, 0, 8, "Education / Qualification *", education, 1);
+        add(grid, 1, 8, "Experience *", experience, 1);
+        password.setPromptText("Create Dihadi Password");
+        password.setStyle(inputStyle());
+        add(grid, 0, 9, "Create Dihadi Password *", password, 2);
         Label expectedDay = label("", "-fx-font-size:14px;-fx-text-fill:#685c52;");
         Label expectedMonth = label("", "-fx-font-size:14px;-fx-text-fill:#685c52;");
         expectedDay.textProperty().bind(Bindings.createStringBinding(() -> "Your expected daily wages: ₹" + wageValue(),
@@ -172,7 +176,7 @@ public class WokerSignUp {
         wages.setPadding(new Insets(18));
         wages.setStyle(
                 "-fx-background-color:#f4ede2;-fx-background-radius:12px;-fx-border-color:#e9e2d7;-fx-border-radius:12px;");
-        grid.add(wages, 0, 7, 2, 1);
+        grid.add(wages, 0, 10, 2, 1);
         return grid;
     }
 
@@ -188,8 +192,10 @@ public class WokerSignUp {
         submit.setOnAction(event -> submit(consent.isSelected()));
         Button login = new Button("Already having account? Login");
         login.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
-        login.setOnAction(event -> ((javafx.stage.Stage) login.getScene().getWindow())
-                .setScene(new WorkerLoginPage(backAction).getLoginScene()));
+        login.setOnAction(event -> {
+            Stage stage = (Stage) login.getScene().getWindow();
+            stage.setScene(new WorkerLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
+        });
         VBox actions = new VBox(18, consent, submit, login);
         actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(22, 0, 0, 0));
@@ -248,16 +254,25 @@ public class WokerSignUp {
         chooser.setTitle("Choose profile photo");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image files", "*.png", "*.jpg", "*.jpeg"));
         File file = chooser.showOpenDialog(profileImage.getScene().getWindow());
-        if (file != null)
+        if (file != null) {
+            selectedPhotoFile = file;
             profileImage.setImage(new Image(file.toURI().toString()));
+            new Thread(() -> {
+                ImageUploadController uploadController = new ImageUploadController();
+                String url = uploadController.imageUpload(file);
+                if (url != null) {
+                    profilePhotoUrl = url;
+                }
+            }).start();
+        }
     }
 
     private void submit(boolean consent) {
         if (firstName.getText().isBlank() || gender.getValue().equals("Select") || dateOfBirth.getValue() == null
                 || !mobile.getText().matches("\\d{10}") || education.getValue().equals("Select")
-                || experience.getValue().equals("Select") || wageValue() <= 0) {
+                || experience.getValue().equals("Select") || wageValue() <= 0 || password.getText().isBlank()) {
             message(Alert.AlertType.WARNING, "Complete your profile",
-                    "Enter all required fields, a valid 10-digit mobile number, and a daily wage.");
+                    "Enter all required fields, a valid 10-digit mobile number, a daily wage, and a password.");
             return;
         }
         if (!consent) {
@@ -266,8 +281,13 @@ public class WokerSignUp {
         }
 
         try {
+            if (selectedPhotoFile != null && profilePhotoUrl == null) {
+                ImageUploadController uploadController = new ImageUploadController();
+                profilePhotoUrl = uploadController.imageUpload(selectedPhotoFile);
+            }
+
             WorkerController controller = new WorkerController();
-            controller.addWorker(
+            com.dihadi.model.Worker newWorker = new com.dihadi.model.Worker(
                     firstName.getText().trim(),
                     middleName.getText().trim(),
                     lastName.getText().trim(),
@@ -278,10 +298,17 @@ public class WokerSignUp {
                     dateOfBirth.getValue().toString(),
                     education.getValue(),
                     experience.getValue(),
-                    wageValue());
+                    wageValue(),
+                    profilePhotoUrl,
+                    workerType.getValue(),
+                    workerType.getValue(),
+                    city.getText().trim().isEmpty() ? "Pune" : city.getText().trim(),
+                    state.getValue());
+            newWorker.setPassword(password.getText().trim());
+            controller.addWorker(newWorker);
 
             Stage stage = (Stage) firstName.getScene().getWindow();
-            stage.setScene(new WorkerLoginPage(backAction).getLoginScene());
+            stage.setScene(new WorkerLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
         } catch (Exception e) {
             e.printStackTrace();
             message(Alert.AlertType.ERROR, "Error",
