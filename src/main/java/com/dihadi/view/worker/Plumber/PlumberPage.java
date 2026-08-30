@@ -36,7 +36,7 @@ public class PlumberPage {
         BorderPane p = new BorderPane(sp);
         p.setTop(head(back, home, about));
         p.setBottom(actions(back));
-        p.setStyle("-fx-background-color:#fff8f0;");
+        p.setStyle("-fx-background-color:#f3e7ce;");
         return new Scene(p, 1400, 780);
     }
 
@@ -172,7 +172,7 @@ public class PlumberPage {
         HBox bar = new HBox(x, r, n);
         bar.setAlignment(Pos.CENTER);
         bar.setPadding(new Insets(16, 70, 16, 70));
-        bar.setStyle("-fx-background-color:rgba(255,248,240,.96);-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
+        bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
         return bar;
     }
 
