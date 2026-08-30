@@ -118,9 +118,7 @@ public class CreateProjectPage {
         Label addressHeading = text("ADDRESS DETAILS",
                 "-fx-font-size:13px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#1e1b15;");
         pincode = input("Enter pincode");
-        HBox pinRow = new HBox(16, fieldBox("Pincode *required", pincode),
-                selectField("Post office", "Select post office"));
-        equalWidth(pinRow);
+        VBox pinRow = fieldBox("Pincode *required", pincode);
         TextField city = input("Enter city");
         TextField state = input("Enter state");
         HBox locationRow = new HBox(16, fieldBox("City", city), fieldBox("State", state));
@@ -154,14 +152,40 @@ public class CreateProjectPage {
                 }
             }
 
-            String projectId = java.util.UUID.randomUUID().toString();
+            String recruiterMobile = (com.dihadi.view.SessionManager.currentRecruiter != null && com.dihadi.view.SessionManager.currentRecruiter.getMobileNumber() != null && !com.dihadi.view.SessionManager.currentRecruiter.getMobileNumber().isBlank())
+                    ? com.dihadi.view.SessionManager.currentRecruiter.getMobileNumber()
+                    : mobile.getText().trim();
+            String recruiterEmail = (com.dihadi.view.SessionManager.currentRecruiter != null && com.dihadi.view.SessionManager.currentRecruiter.getEmail() != null && !com.dihadi.view.SessionManager.currentRecruiter.getEmail().isBlank())
+                    ? com.dihadi.view.SessionManager.currentRecruiter.getEmail()
+                    : email.getText().trim();
+
+            boolean hasActive = false;
+            try {
+                List<com.dihadi.model.Project> existingProjects = new com.dihadi.controller.ProjectController().getAllProjects();
+                if (existingProjects != null) {
+                    String cleanRecruiterMobile = recruiterMobile.replaceAll("\\D", "");
+                    for (com.dihadi.model.Project p : existingProjects) {
+                        String pMobile = p.getMobile() != null ? p.getMobile().replaceAll("\\D", "") : "";
+                        boolean mobileMatch = !cleanRecruiterMobile.isBlank() && !pMobile.isBlank() && (pMobile.endsWith(cleanRecruiterMobile) || cleanRecruiterMobile.endsWith(pMobile));
+                        boolean emailMatch = recruiterEmail != null && !recruiterEmail.isBlank() && p.getEmail() != null && p.getEmail().equalsIgnoreCase(recruiterEmail);
+                        if (mobileMatch || emailMatch) {
+                            if ("Active".equalsIgnoreCase(p.getStatus())) {
+                                hasActive = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ex) {}
+
+            String projectId = String.valueOf(System.currentTimeMillis()) + String.format("%03d", (int)(Math.random() * 1000));
             com.dihadi.model.Project project = new com.dihadi.model.Project(
                 projectId,
                 projectName.getText().trim(),
                 contactName.getText().trim(),
-                mobile.getText().trim(),
+                recruiterMobile,
                 alternateMobile.getText().trim(),
-                email.getText().trim(),
+                recruiterEmail,
                 pincode.getText().trim(),
                 city.getText().trim(),
                 state.getText().trim(),
@@ -170,6 +194,7 @@ public class CreateProjectPage {
                 landmark.getText().trim(),
                 new ArrayList<>(uploadedImageUrls)
             );
+            project.setStatus(hasActive ? "Upcoming" : "Active");
             new com.dihadi.controller.ProjectController().addProject(project);
 
             Stage stage = (Stage) save.getScene().getWindow();
