@@ -89,7 +89,7 @@ public class SiteDetailsCardPage {
             if (com.dihadi.view.SessionManager.currentWorker != null) {
                 new Thread(() -> { 
                     com.dihadi.model.JobApplication app = new com.dihadi.model.JobApplication(
-                            java.util.UUID.randomUUID().toString(),
+                            String.valueOf(System.currentTimeMillis()) + String.format("%03d", (int)(Math.random() * 1000)),
                             com.dihadi.view.SessionManager.currentWorker.getMobileNumber(),
                             title,
                             location,

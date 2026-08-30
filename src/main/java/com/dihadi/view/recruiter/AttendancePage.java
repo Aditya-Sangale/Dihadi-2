@@ -175,7 +175,7 @@ public class AttendancePage {
             statusLabel.setText("Saving...");
             new Thread(() -> {
                 try {
-                    Attendance att = new Attendance(java.util.UUID.randomUUID().toString(), app.getProjectId(), app.getWorkerMobile(), date, "Present");
+                    Attendance att = new Attendance(String.valueOf(System.currentTimeMillis()) + String.format("%03d", (int)(Math.random() * 1000)), app.getProjectId(), app.getWorkerMobile(), date, "Present");
                     ac.saveAttendance(att);
                     Platform.runLater(() -> {
                         statusLabel.setText("Marked Present");
@@ -193,7 +193,7 @@ public class AttendancePage {
             statusLabel.setText("Saving...");
             new Thread(() -> {
                 try {
-                    Attendance att = new Attendance(java.util.UUID.randomUUID().toString(), app.getProjectId(), app.getWorkerMobile(), date, "Absent");
+                    Attendance att = new Attendance(String.valueOf(System.currentTimeMillis()) + String.format("%03d", (int)(Math.random() * 1000)), app.getProjectId(), app.getWorkerMobile(), date, "Absent");
                     ac.saveAttendance(att);
                     Platform.runLater(() -> {
                         statusLabel.setText("Marked Absent");

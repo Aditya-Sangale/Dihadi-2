@@ -76,7 +76,7 @@ public class ElectricianJobRole {
                 "-fx-background-color:#faf3e8;-fx-background-radius:22px;-fx-border-color:#d0c5af;-fx-border-radius:22px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.12),20,0,0,6px);");
         startSlider();
         Label quote = label(
-                "â€œBringing light to the dark and power to the future. Every safe connection begins with a skilled electrician.â€?",
+                "â€œBringing light to the dark and power to the future. Every safe connection begins with a skilled electrician.?",
                 "-fx-font-family:'Georgia';-fx-font-size:21px;-fx-font-style:italic;-fx-text-fill:#4d4635;-fx-line-spacing:5px;");
         quote.setWrapText(true);
         quote.setMaxWidth(385);
@@ -241,7 +241,7 @@ public class ElectricianJobRole {
     }
 
     private HBox actionBar(Runnable back) {
-        Button previous = outline("â†? Back to skills");
+        Button previous = outline("? Back to skills");
         previous.setOnAction(e -> {
             stopSlider();
             if (back != null)
@@ -338,5 +338,12 @@ public class ElectricianJobRole {
     }
 
     private record Job(String title, String location, String wage, int image) {
+    }
+
+    private String workerCardStyle(boolean active) {
+        return "-fx-background-color:#ffffff;-fx-background-radius:13px;-fx-border-color:"
+                + (active ? "#d4af37" : "transparent") + ";-fx-border-width:" + (active ? "2px" : "1px")
+                + ";-fx-border-radius:13px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,"
+                + (active ? ".14" : ".06") + ")," + (active ? "17" : "8") + ",0,0," + (active ? "4" : "2") + "px);";
     }
 }
