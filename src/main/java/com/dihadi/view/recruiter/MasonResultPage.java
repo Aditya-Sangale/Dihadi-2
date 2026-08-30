@@ -53,17 +53,17 @@ public class MasonResultPage {
     public Scene getMasonScene(Runnable back) {
         BorderPane page = new BorderPane();
         page.setTop(header());
-        page.setCenter(content());
+        page.setCenter(content(back));
         page.setStyle("-fx-background-color:" + PAPER + ";");
         return new Scene(page, 1400, 780);
     }
 
-    private ScrollPane content() {
+    private ScrollPane content(Runnable back) {
         Label title = label("Looking for Skilled Mason",
                 "-fx-font-family:'Georgia';-fx-font-size:38px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
         Label count = label("12 verified masons available near you", "-fx-font-size:13px;-fx-text-fill:" + MUTED + ";");
         VBox heading = new VBox(5, title, count);
-        VBox body = new VBox(28, heading, hero(), filterBar(), resultsHeader(), cards(), viewMore(), footer());
+        VBox body = new VBox(28, heading, hero(), filterBar(), resultsHeader(), cards(), bottomActions(back), footer());
         body.setMaxWidth(1190);
         body.setPadding(new Insets(40, 0, 48, 0));
         StackPane canvas = new StackPane(body);
@@ -129,61 +129,106 @@ public class MasonResultPage {
         return header;
     }
 
+    private static class WorkerCardData {
+        String name;
+        String demographic;
+        String location;
+        String wage;
+        String skill;
+        String photo;
+
+        WorkerCardData(String name, String demographic, String location, String wage, String skill, String photo) {
+            this.name = name;
+            this.demographic = demographic;
+            this.location = location;
+            this.wage = wage;
+            this.skill = skill;
+            this.photo = photo;
+        }
+    }
+
+    private java.util.List<WorkerCardData> getAllMasonWorkers() {
+        java.util.List<WorkerCardData> list = new java.util.ArrayList<>();
+        try {
+            java.util.List<com.dihadi.model.Worker> realWorkers = new com.dihadi.controller.WorkerController().getAllWorkers();
+            if (realWorkers != null) {
+                int pIdx = 0;
+                for (com.dihadi.model.Worker w : realWorkers) {
+                    if (w.getWorkerType() == null || w.getWorkerType().toLowerCase().contains("mason")) {
+                        String fullName = ((w.getFirstName() != null ? w.getFirstName() : "") + " " +
+                                          (w.getLastName() != null ? w.getLastName() : "")).trim();
+                        if (fullName.isBlank()) fullName = "Verified Worker";
+                        String demo = (w.getExperience() != null && !w.getExperience().equals("Select") ? w.getExperience() : "Experienced")
+                                      + ", " + (w.getGender() != null && !w.getGender().equals("Select") ? w.getGender() : "Male");
+                        String loc = (w.getCity() != null && !w.getCity().isBlank() ? w.getCity() : "Pune") + ", " +
+                                     (w.getState() != null && !w.getState().isBlank() ? w.getState() : "Maharashtra");
+                        String wage = w.getDailyWage() > 0 ? String.format("%,d", (long)w.getDailyWage()) : "950";
+                        String skillTag = w.getSubSkill() != null && !w.getSubSkill().isBlank() ? w.getSubSkill() : "Brick Mason";
+                        String photo = w.getProfilePhotoUrl() != null && !w.getProfilePhotoUrl().isBlank() 
+                                       ? w.getProfilePhotoUrl() : PHOTOS[pIdx % PHOTOS.length];
+                        pIdx++;
+                        list.add(new WorkerCardData(fullName, demo, loc, wage, skillTag, photo));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < WORKERS.length; i++) {
+            list.add(new WorkerCardData(WORKERS[i][0], WORKERS[i][1], WORKERS[i][2], WORKERS[i][3], WORKERS[i][4], PHOTOS[i % PHOTOS.length]));
+        }
+        return list;
+    }
+
     private TilePane cards() {
         TilePane grid = new TilePane();
         grid.setPrefColumns(3);
         grid.setHgap(26);
         grid.setVgap(24);
-        for (int index = 0; index < WORKERS.length; index++)
-            grid.getChildren().add(card(WORKERS[index], PHOTOS[index]));
+        for (WorkerCardData w : getAllMasonWorkers())
+            grid.getChildren().add(card(w));
         return grid;
     }
 
-    private VBox card(String[] worker, String photoPath) {
-        ImageView portrait = image(photoPath, 56, 56);
+    private VBox card(WorkerCardData m) {
+        ImageView portrait = image(m.photo, 64, 64);
         portrait.setPreserveRatio(false);
-        portrait.setClip(new Circle(28, 28, 28));
+        portrait.setClip(new Circle(32, 32, 32));
         StackPane avatar = new StackPane(portrait);
-        avatar.setPrefSize(56, 56);
+        avatar.setPrefSize(64, 64);
         avatar.setStyle(
                 "-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-background-radius:999px;");
-        Label name = label(worker[0], "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
-        Label demographic = label(worker[1], "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
-        HBox profile = new HBox(13, avatar, new VBox(3, name, demographic));
-        profile.setAlignment(Pos.CENTER_LEFT);
-        Label verified = label("✓ Verified", "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:" + GOLD
-                + ";-fx-background-color:#fff5cf;-fx-background-radius:10px;-fx-padding:4px 8px;");
-        Label skill = label(worker[4], "-fx-font-size:10px;-fx-font-weight:700;-fx-text-fill:" + GOLD
-                + ";-fx-border-color:#d4af37;-fx-border-radius:10px;-fx-padding:3px 8px;");
-        HBox tags = new HBox(7, skill, verified);
-        tags.setAlignment(Pos.CENTER_LEFT);
-        Label location = label("⌖  " + worker[2], "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
+        Label name = label(m.name, "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
+        Label age = label(m.demographic, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
+        Label skill = label(m.skill,
+                "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#b48700;-fx-background-color:#f4ede2;-fx-background-radius:5px;-fx-padding:4px 7px;");
+        Label location = label("⌖  " + m.location, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
+        VBox details = new VBox(4, name, age, skill, location);
+        HBox top = new HBox(14, avatar, details);
+        top.setAlignment(Pos.TOP_LEFT);
         Region divider = new Region();
         divider.setMinHeight(1);
         divider.setPrefHeight(1);
         divider.setMaxWidth(Double.MAX_VALUE);
-        divider.setStyle("-fx-background-color:" + BORDER + ";");
-        Label wageCaption = label("DAILY WAGE",
-                "-fx-font-size:10px;-fx-font-weight:800;-fx-letter-spacing:.6px;-fx-text-fill:" + MUTED + ";");
-        Label wage = label("₹" + worker[3], "-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:#b48700;");
-        Label perDay = label(" / day", "-fx-font-size:10px;-fx-text-fill:" + MUTED + ";");
-        HBox wageLine = new HBox(wage, perDay);
-        wageLine.setAlignment(Pos.BASELINE_LEFT);
-        VBox pay = new VBox(1, wageCaption, wageLine);
+        divider.setStyle("-fx-background-color:#e9e2d7;");
+        Label wage = label("Wage:  ₹" + m.wage + " / day",
+                "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#d4a300;");
         Button hire = new Button("HIRE NOW");
-        hire.setStyle("-fx-background-color:" + GOLD
-                + ";-fx-background-radius:18px;-fx-text-fill:#f6d676;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 15px;-fx-cursor:hand;");
-        hire.setOnAction(e -> AppNavigator.information("Hire " + worker[0],
-                "Your hiring request for " + worker[0] + " has been initiated. We will connect you shortly."));
-        HBox bottom = new HBox(pay, hire);
+        hire.setStyle(
+                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-radius:18px;-fx-text-fill:#b48700;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;");
+        hire.setOnAction(e -> AppNavigator.information("Hire " + m.name,
+                "Your hiring request for " + m.name + " has been initiated. We will connect you shortly."));
+        Region gap = new Region();
+        HBox.setHgrow(gap, Priority.ALWAYS);
+        HBox bottom = new HBox(wage, gap, hire);
         bottom.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(pay, Priority.ALWAYS);
-        VBox card = new VBox(12, profile, tags, location, divider, bottom);
+        VBox card = new VBox(16, top, divider, bottom);
         card.setPrefSize(360, 194);
-        card.setPadding(new Insets(18));
+        card.setPadding(new Insets(20));
         card.setStyle(cardStyle(false));
         card.setOnMouseEntered(e -> card.setStyle(cardStyle(true)));
         card.setOnMouseExited(e -> card.setStyle(cardStyle(false)));
+        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); javafx.scene.Scene currentScene = card.getScene(); stage.setScene(new RecruiterWorkerProfilePage(m.name, "Mason", m.demographic, m.location, m.wage, m.photo).getProfileScene(() -> stage.setScene(currentScene), currentScene)); });
         return card;
     }
 
@@ -195,16 +240,28 @@ public class MasonResultPage {
                 + (active ? "15" : "8") + ",0,0," + (active ? "5" : "2") + "px);";
     }
 
-    private VBox viewMore() {
+    private HBox bottomActions(Runnable backAction) {
+        Button back = new Button("← Back");
+        back.setStyle("-fx-background-color:transparent;-fx-font-size:14px;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+        if (backAction != null) {
+            back.setOnAction(e -> backAction.run());
+        }
+
         Button button = new Button("View More Masons");
         button.setStyle("-fx-background-color:#ffffff;-fx-background-radius:18px;-fx-border-color:" + BORDER
                 + ";-fx-border-radius:18px;-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:" + GOLD
                 + ";-fx-padding:9px 31px;-fx-cursor:hand;");
         button.setOnAction(
                 e -> AppNavigator.information("Masons", "More verified mason profiles will be available here soon."));
-        VBox box = new VBox(button);
-        box.setAlignment(Pos.CENTER);
-        return box;
+        
+        HBox centerBox = new HBox(button);
+        centerBox.setAlignment(Pos.CENTER);
+        HBox.setHgrow(centerBox, Priority.ALWAYS);
+
+        HBox row = new HBox(back, centerBox);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(0, 70, 0, 0)); // To visually balance the center if needed
+        return row;
     }
 
     private BorderPane header() {
@@ -335,6 +392,10 @@ public class MasonResultPage {
     }
 
     private Image load(String path) {
+        if (path == null || path.isBlank()) return null;
+        if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("file:")) {
+            return new Image(path, true);
+        }
         var resource = getClass().getResource(path);
         return resource == null ? null : new Image(resource.toExternalForm());
     }

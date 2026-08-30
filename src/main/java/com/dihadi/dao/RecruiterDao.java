@@ -17,7 +17,7 @@ public class RecruiterDao {
         try {
             db.collection("Recruiters")
                     .document(recruiter.getMobileNumber())
-                    .create(recruiter);
+                    .set(recruiter);
 
             System.out.println("Recruiter Data Inserted");
         } catch (Exception e) {
@@ -33,6 +33,26 @@ public class RecruiterDao {
             DocumentSnapshot document = future.get();
             if (document.exists()) {
                 return document.toObject(Recruiter.class);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Recruiter getRecruiterByEmailOrMobile(String identifier) {
+        try {
+            // First check by document ID (which is mobile number)
+            Recruiter r = getRecruiter(identifier);
+            if (r != null) return r;
+            
+            // If not found, check by email field
+            ApiFuture<QuerySnapshot> future = db.collection("Recruiters")
+                    .whereEqualTo("email", identifier)
+                    .get();
+            java.util.List<com.google.cloud.firestore.QueryDocumentSnapshot> documents = future.get().getDocuments();
+            if (!documents.isEmpty()) {
+                return documents.get(0).toObject(Recruiter.class);
             }
         } catch (Exception e) {
             e.printStackTrace();

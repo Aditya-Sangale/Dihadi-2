@@ -12,6 +12,7 @@ public class Recruiter {
     private String companyName;
     private String businessType;
     private String uid;
+    private String password;
 
     public Recruiter() {
     }
@@ -19,7 +20,7 @@ public class Recruiter {
     public Recruiter(String firstName, String middleName, String lastName,
                      String gender, String mobileNumber, String alternateMobile,
                      String email, String alternateEmail, String companyName,
-                     String businessType) {
+                     String businessType, String password) {
         this.firstName = firstName;
         this.middleName = middleName;
         this.lastName = lastName;
@@ -30,6 +31,7 @@ public class Recruiter {
         this.alternateEmail = alternateEmail;
         this.companyName = companyName;
         this.businessType = businessType;
+        this.password = password;
     }
 
     public String getFirstName() {
@@ -118,5 +120,13 @@ public class Recruiter {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+    
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

@@ -1,5 +1,7 @@
 package com.dihadi.view.worker.Mason;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.animation.*;
 import javafx.geometry.*;
 import javafx.scene.Scene;
@@ -12,18 +14,68 @@ import javafx.util.Duration;
 /** Mason opportunities marketplace with a professional DIHADI theme. */
 public class MasonJobRole {
     private static final String[][] JOBS = {
-            { "Brick Mason", "Pune, Maharashtra", "₹950", "01" },
-            { "Plastering Mason", "Mumbai, Maharashtra", "₹1,050", "03" },
-            { "Stone Mason", "Nashik, Maharashtra", "₹1,150", "04" },
-            { "Tiles Mason", "Bangalore, Karnataka", "₹1,100", "05" },
-            { "Cement Concrete Mason", "New Delhi, Delhi", "₹1,200", "06" },
-            { "Bar Bender", "Chennai, Tamil Nadu", "₹1,250", "07" },
-            { "Shuttering Mason", "Gurgaon, Haryana", "₹1,150", "08" },
-            { "Flooring Mason", "Hyderabad, Telangana", "₹1,050", "10" },
-            { "Reinforcement Fitter", "Bhiwandi, Maharashtra", "₹1,300", "15" }
+            { "Brick Mason", "Pune, Maharashtra", "₹1,000", "01", null, null, null },
+            { "Stone Mason", "Mumbai, Maharashtra", "₹1,200", "02", null, null, null },
+            { "Concrete Finisher", "Nashik, Maharashtra", "₹1,150", "03", null, null, null },
+            { "Tilesetter", "Bangalore, Karnataka", "₹1,100", "04", null, null, null },
+            { "Refractory Mason", "New Delhi, Delhi", "₹1,300", "05", null, null, null },
+            { "Terrazzo Worker", "Chennai, Tamil Nadu", "₹1,050", "06", null, null, null }
     };
     private ImageView slide;
     private int slideIndex;
+
+    private List<String[]> getAllJobs() {
+        List<String[]> all = new ArrayList<>();
+        try {
+            List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
+            List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
+            java.util.Map<String, com.dihadi.model.Project> projectMap = new java.util.HashMap<>();
+            if (projects != null) {
+                for (com.dihadi.model.Project p : projects) {
+                    if (p.getProjectId() != null) projectMap.put(p.getProjectId(), p);
+                }
+            }
+            if (reqs != null) {
+                int imgIdx = 1;
+                for (com.dihadi.model.WorkforceRequirement req : reqs) {
+                    if (req.getWorkerType() != null && req.getWorkerType().toLowerCase().contains("mason")) {
+                        String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "Mason";
+                        com.dihadi.model.Project p = req.getProjectId() != null ? projectMap.get(req.getProjectId()) : null;
+                        String loc = (p != null && p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
+                                     (p != null && p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
+                        String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
+                        String imgNum = String.format("%02d", (imgIdx % 10) + 1);
+                        imgIdx++;
+                        String recruiterMobile = p != null ? p.getMobile() : null;
+                        all.add(new String[]{ title, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId() });
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (String[] j : JOBS) {
+            all.add(j);
+        }
+        return all;
+    }
+
+    private void renderJobs(FlowPane grid, List<String[]> jobsList, String state, String city, String skill) {
+        grid.getChildren().clear();
+        for (String[] job : jobsList) {
+            String searchable = (job[0] + " " + job[1]).toLowerCase();
+            boolean stateMatches = state == null || state.startsWith("All") || searchable.contains(state.toLowerCase());
+            boolean cityMatches = city == null || city.startsWith("All") || searchable.contains(city.toLowerCase());
+            boolean skillMatches = skill == null || skill.startsWith("All") || searchable.contains(skill.toLowerCase());
+            if (stateMatches && cityMatches && skillMatches) {
+                grid.getChildren().add(jobCard(job));
+            }
+        }
+        if (grid.getChildren().isEmpty()) {
+            grid.getChildren().add(label("No exact roles found matching your filter. Clear filters to view all roles.",
+                    "-fx-font-size:15px;-fx-text-fill:#4d4635;"));
+        }
+    }
 
     public Scene getMasonJobRoleScene(Runnable back) {
         Label eyebrow = label("DIHADI WORK MARKETPLACE",
@@ -47,12 +99,13 @@ public class MasonJobRole {
         hero.setStyle(cardStyle("#fff8f0"));
         hero.setMaxWidth(1200);
 
-        ComboBox<String> state = choice("Select state", "Maharashtra", "Karnataka", "Tamil Nadu", "Delhi", "Haryana");
-        ComboBox<String> city = choice("Select city", "Pune", "Mumbai", "Nashik", "Bangalore", "New Delhi");
-        ComboBox<String> skill = choice("Select mason skill", "Brickwork", "Plastering", "Stonework", "Tiles",
-                "Shuttering");
+        ComboBox<String> state = choice("Select state", "All States", "Maharashtra", "Karnataka", "Tamil Nadu", "Delhi", "Haryana");
+        ComboBox<String> city = choice("Select city", "All Cities", "Pune", "Mumbai", "Nashik", "Bangalore", "New Delhi");
+        ComboBox<String> skill = choice("Select mason skill", "All Skills", "Brick", "Plaster", "Stone", "Tiles",
+                "Shuttering", "Concrete", "Labour");
         Button clear = outline("Clear filters");
-        HBox controls = new HBox(12, state, city, skill, clear, primary("Find roles"));
+        Button find = primary("Find roles");
+        HBox controls = new HBox(12, state, city, skill, clear, find);
         controls.setAlignment(Pos.CENTER);
         VBox suitable = new VBox(14, label("Find a suitable job role for you",
                 "-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#3a3027;"), controls);
@@ -64,8 +117,17 @@ public class MasonJobRole {
         FlowPane grid = new FlowPane(24, 24);
         grid.setAlignment(Pos.CENTER);
         grid.setPrefWrapLength(1140);
-        for (String[] job : JOBS)
-            grid.getChildren().add(jobCard(job));
+        List<String[]> allJobs = getAllJobs();
+        renderJobs(grid, allJobs, null, null, null);
+
+        find.setOnAction(e -> renderJobs(grid, allJobs, state.getValue(), city.getValue(), skill.getValue()));
+        clear.setOnAction(e -> {
+            state.getSelectionModel().selectFirst();
+            city.getSelectionModel().selectFirst();
+            skill.getSelectionModel().selectFirst();
+            renderJobs(grid, allJobs, null, null, null);
+        });
+
         VBox content = new VBox(28, hero, suitable,
                 label("Available opportunities",
                         "-fx-font-family:'Georgia';-fx-font-size:29px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
@@ -109,12 +171,12 @@ public class MasonJobRole {
         return box;
     }
 
-    private VBox jobCard(String[] job) {
-        ImageView picture = image(String.format("/assets/images/worker/mason/skill-%02d.jpg", Integer.parseInt(job[3])),
+    private VBox jobCard(String[] j) {
+        ImageView picture = image(String.format("/assets/images/worker/mason/skill-%02d.jpg", Integer.parseInt(j[3])),
                 316, 178);
-        Label name = label(job[0], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
-                location = label("⌖  " + job[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
-                wage = label("Daily wage  " + job[2], "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        Label name = label(j[0], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
+                location = label("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
+                wage = label("Daily wage  " + j[2], "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#735c00;");
         name.setWrapText(true);
         name.setAlignment(Pos.CENTER);
         name.setMaxWidth(Double.MAX_VALUE);
@@ -122,9 +184,10 @@ public class MasonJobRole {
         location.setMaxWidth(Double.MAX_VALUE);
         Button apply = primary("Apply now");
         apply.setMaxWidth(Double.MAX_VALUE);
-        apply.setOnAction(e -> {
-            apply.setText("Applied ✓");
-            apply.setDisable(true);
+        apply.setOnAction(e -> { 
+            javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow(); 
+            javafx.scene.Scene currentScene = apply.getScene();
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(j[0], j[1], j[2], "/assets/images/worker/mason/skill-01.jpg", j[4], j[5], j[6]).getScene(() -> stage.setScene(currentScene), currentScene)); 
         });
         VBox card = new VBox(13, picture, name, location, wage, apply);
         card.setAlignment(Pos.CENTER);
@@ -184,5 +247,12 @@ public class MasonJobRole {
         button.setStyle(
                 "-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:9px 18px;-fx-cursor:hand;");
         return button;
+    }
+
+    private String workerCardStyle(boolean active) {
+        return "-fx-background-color:#ffffff;-fx-background-radius:13px;-fx-border-color:"
+                + (active ? "#d4af37" : "transparent") + ";-fx-border-width:" + (active ? "2px" : "1px")
+                + ";-fx-border-radius:13px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,"
+                + (active ? ".14" : ".06") + ")," + (active ? "17" : "8") + ",0,0," + (active ? "4" : "2") + "px);";
     }
 }

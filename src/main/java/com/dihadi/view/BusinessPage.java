@@ -73,10 +73,9 @@ public class BusinessPage {
                 contact.setOnAction(e -> navigate(contact, "Contact Us"));
                 HBox navigation = new HBox(12, home, business, worker, recruiter, about, contact);
                 navigation.setAlignment(Pos.CENTER);
-                Button login = outline("Login"), signUp = primary("Sign Up");
-                login.setOnAction(e -> AppNavigator.adminLoginInProgress());
-                signUp.setOnAction(e -> AppNavigator.adminLoginInProgress());
-                HBox account = new HBox(12, login, signUp);
+                Button admin = primary("Admin");
+                admin.setOnAction(e -> AppNavigator.adminLoginInProgress());
+                HBox account = new HBox(12, admin);
                 account.setAlignment(Pos.CENTER_RIGHT);
 
                 BorderPane bar = new BorderPane();
@@ -249,6 +248,11 @@ public class BusinessPage {
                 Label one = label(first, "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:" + text + ";");
                 Label two = label(second, "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:" + text + ";");
                 Button button = primary(action);
+                if ("BECOME A PARTNER".equalsIgnoreCase(action)) {
+                        button.setOnAction(e -> navigate(button, "Contact Us"));
+                } else if ("POST A REQUIREMENT".equalsIgnoreCase(action)) {
+                        button.setOnAction(e -> navigate(button, "Recruiter"));
+                }
                 VBox card = new VBox(16, heading, subtitle, divider, one, two, spacer(24), button);
                 card.setAlignment(Pos.TOP_LEFT);
                 card.setPadding(new Insets(44));
