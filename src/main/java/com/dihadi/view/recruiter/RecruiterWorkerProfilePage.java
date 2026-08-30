@@ -16,16 +16,22 @@ import javafx.stage.Stage;
 
 /** Compact profile card shown when a recruiter selects a worker. */
 public class RecruiterWorkerProfilePage {
-    private final String name, category, demographic, location, wage, photo;
+    private final String name, category, demographic, location, wage, photo, workerMobile;
 
     public RecruiterWorkerProfilePage(String name, String category, String demographic, String location, String wage,
             String photo) {
+        this(name, category, demographic, location, wage, photo, "");
+    }
+
+    public RecruiterWorkerProfilePage(String name, String category, String demographic, String location, String wage,
+            String photo, String workerMobile) {
         this.name = name;
         this.category = category;
         this.demographic = demographic;
         this.location = location;
         this.wage = wage;
         this.photo = photo;
+        this.workerMobile = workerMobile;
     }
 
     public Scene getProfileScene(Runnable back, javafx.scene.Scene currentScene) {
@@ -64,6 +70,44 @@ public class RecruiterWorkerProfilePage {
         hire.setOnAction(e -> {
             hire.setText("HIRING REQUEST SENT ✓");
             hire.setDisable(true);
+            new Thread(() -> {
+                try {
+                    String recruiterMobile = (com.dihadi.view.SessionManager.currentRecruiter != null && com.dihadi.view.SessionManager.currentRecruiter.getMobileNumber() != null)
+                            ? com.dihadi.view.SessionManager.currentRecruiter.getMobileNumber()
+                            : "";
+                    String appId = String.valueOf(System.currentTimeMillis()) + String.format("%03d", (int)(Math.random() * 1000));
+                    String targetMobile = (workerMobile != null && !workerMobile.isBlank()) ? workerMobile : "";
+                    
+                    if (targetMobile.isBlank()) {
+                        java.util.List<com.dihadi.model.Worker> allW = new com.dihadi.controller.WorkerController().getAllWorkers();
+                        if (allW != null) {
+                            for (com.dihadi.model.Worker w : allW) {
+                                String fullName = ((w.getFirstName() != null ? w.getFirstName() : "") + " " + (w.getLastName() != null ? w.getLastName() : "")).trim();
+                                if (fullName.equalsIgnoreCase(name) || (w.getFirstName() != null && name.contains(w.getFirstName()))) {
+                                    targetMobile = w.getMobileNumber();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    com.dihadi.model.JobApplication app = new com.dihadi.model.JobApplication(
+                            appId,
+                            targetMobile,
+                            category + " Hiring Request",
+                            location,
+                            wage,
+                            "Pending",
+                            "",
+                            recruiterMobile,
+                            ""
+                    );
+                    new com.dihadi.controller.JobApplicationController().saveApplication(app);
+                    System.out.println("Hiring request sent successfully to worker: " + targetMobile);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }).start();
         });
         Button close = new Button("←  BACK TO WORKERS");
         close.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
@@ -74,27 +118,38 @@ public class RecruiterWorkerProfilePage {
         HBox actions = new HBox(14, close, hire);
         actions.setAlignment(Pos.CENTER_RIGHT);
         HBox.setHgrow(hire, Priority.ALWAYS);
-        VBox content = new VBox(24, hero, new HBox(18, personal, skills), actions);
-        content.setPadding(new Insets(30));
+        VBox heroCard = new VBox(14, hero);
+        heroCard.setPadding(new Insets(20));
+        heroCard.setStyle(boxStyle());
+
+        actions.setPadding(new Insets(14, 20, 14, 20));
+        actions.setStyle(boxStyle());
+
+        VBox content = new VBox(20, heroCard, new HBox(18, personal, skills), actions);
+        content.setPadding(new Insets(24));
         content.setMaxWidth(900);
+        content.setStyle("-fx-background-color:transparent;");
+
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
         scroll.setMaxSize(930, 620);
-        scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;");
+        scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
+        
         StackPane card = new StackPane(scroll);
         card.setMaxSize(960, 650);
-        card.setStyle(
-                "-fx-background-color:rgba(255, 253, 249, 0.95);-fx-background-radius:20px;-fx-border-color:#d0c5af;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.32),38,0,0,12px);");
+        card.setStyle("-fx-background-color:rgba(255,248,240,0.30);-fx-background-radius:24px;-fx-border-color:rgba(212,175,55,0.45);-fx-border-radius:24px;-fx-border-width:1.5px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.25),35,0,0,10px);");
 
-        javafx.scene.image.WritableImage snapshot = currentScene.snapshot(null);
-        ImageView bg = new ImageView(snapshot);
-        javafx.scene.effect.ColorAdjust darken = new javafx.scene.effect.ColorAdjust();
-        darken.setBrightness(-0.6);
-        bg.setEffect(darken);
-
-        StackPane root = new StackPane(bg, card);
-        root.setStyle("-fx-background-color:#000000;");
-        Scene scene = new Scene(root, currentScene.getWidth(), currentScene.getHeight());
+        StackPane root = new StackPane();
+        if (currentScene != null) {
+            javafx.scene.image.WritableImage snapshot = currentScene.snapshot(null);
+            ImageView bgView = new ImageView(snapshot);
+            javafx.scene.effect.BoxBlur blur = new javafx.scene.effect.BoxBlur(14, 14, 3);
+            bgView.setEffect(blur);
+            root.getChildren().add(bgView);
+        }
+        root.getChildren().add(card);
+        root.setStyle("-fx-background-color:rgba(30, 27, 21, 0.45);");
+        Scene scene = new Scene(root, currentScene != null ? currentScene.getWidth() : 1120, currentScene != null ? currentScene.getHeight() : 740);
         scene.windowProperty().addListener((o, a, w) -> {
             if (w instanceof Stage s) {
                 s.setMinWidth(900);
@@ -121,7 +176,7 @@ public class RecruiterWorkerProfilePage {
     }
 
     private String boxStyle() {
-        return "-fx-background-color:#f4ede2;-fx-background-radius:10px;-fx-border-color:#e9e2d7;-fx-border-radius:10px;";
+        return "-fx-background-color:#fff8f0;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.12),16,0,0,5px);";
     }
 
     private Image load(String path) {

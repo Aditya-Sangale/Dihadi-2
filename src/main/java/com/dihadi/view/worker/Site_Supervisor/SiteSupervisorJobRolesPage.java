@@ -381,4 +381,11 @@ public class SiteSupervisorJobRolesPage {
         return "-fx-background-color:" + background
                 + ";-fx-background-radius:14px;-fx-border-color:#d0c5af;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),16,0,0,5px);";
     }
+
+    private String workerCardStyle(boolean active) {
+        return "-fx-background-color:#ffffff;-fx-background-radius:13px;-fx-border-color:"
+                + (active ? "#d4af37" : "transparent") + ";-fx-border-width:" + (active ? "2px" : "1px")
+                + ";-fx-border-radius:13px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,"
+                + (active ? ".14" : ".06") + ")," + (active ? "17" : "8") + ",0,0," + (active ? "4" : "2") + "px);";
+    }
 }

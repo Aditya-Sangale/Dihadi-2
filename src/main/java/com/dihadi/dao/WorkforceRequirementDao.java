@@ -15,24 +15,39 @@ public class WorkforceRequirementDao {
 
     public void saveRequirement(WorkforceRequirement req) {
         try {
+            String docId = (req.getProjectId() != null && !req.getProjectId().isBlank())
+                    ? req.getProjectId()
+                    : (req.getRequirementId() != null && !req.getRequirementId().isBlank()
+                            ? req.getRequirementId()
+                            : String.valueOf(System.currentTimeMillis()));
             db.collection("WorkforceRequirements")
-                    .document(req.getRequirementId())
+                    .document(docId)
                     .set(req);
-            System.out.println("Workforce Requirement Data Inserted");
+            System.out.println("Workforce Requirement Data Inserted: " + docId);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public List<WorkforceRequirement> getRequirementsForProject(String projectId) {
+    public List<WorkforceRequirement> getRequirementsForProject(String projectIdOrMobile) {
         List<WorkforceRequirement> list = new ArrayList<>();
         try {
-            ApiFuture<QuerySnapshot> future = db.collection("WorkforceRequirements")
-                    .whereEqualTo("projectId", projectId).get();
-            QuerySnapshot snapshot = future.get();
-            for (DocumentSnapshot doc : snapshot.getDocuments()) {
-                WorkforceRequirement req = doc.toObject(WorkforceRequirement.class);
-                list.add(req);
+            List<WorkforceRequirement> all = getAllRequirements();
+            if (all != null) {
+                for (WorkforceRequirement req : all) {
+                    if (projectIdOrMobile != null && (projectIdOrMobile.equals(req.getProjectId()) || projectIdOrMobile.equals(req.getRequirementId()))) {
+                        list.add(req);
+                    }
+                }
+            }
+            if (list.isEmpty()) {
+                ApiFuture<QuerySnapshot> future = db.collection("WorkforceRequirements")
+                        .whereEqualTo("projectId", projectIdOrMobile).get();
+                QuerySnapshot snapshot = future.get();
+                for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                    WorkforceRequirement req = doc.toObject(WorkforceRequirement.class);
+                    list.add(req);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

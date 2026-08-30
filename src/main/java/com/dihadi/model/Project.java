@@ -17,6 +17,7 @@ public class Project {
     private String addressLine2;
     private String landmark;
     private List<String> imageUrls = new ArrayList<>();
+    private String status = "Active"; // Active, Upcoming, Completed
 
     public Project() {
     }
@@ -149,5 +150,16 @@ public class Project {
 
     public void setImageUrls(List<String> imageUrls) {
         this.imageUrls = imageUrls;
+    }
+
+    public String getStatus() {
+        if (status == null || status.isBlank()) {
+            return "Active";
+        }
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
