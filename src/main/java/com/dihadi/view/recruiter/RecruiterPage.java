@@ -77,7 +77,11 @@ public class RecruiterPage {
                 nav("Contact Us", false, () -> navigate("Contact Us")));
         nav.setAlignment(Pos.CENTER);
         Button dashboard = primary("Dashboard");
-        dashboard.setOnAction(e -> { Stage stage = (Stage) dashboard.getScene().getWindow(); stage.setScene(new RecruiterDashboard(new com.dihadi.model.Recruiter()).getScene(() -> scene(dashboard, getRecruiterScene(home)))); });
+        dashboard.setOnAction(e -> { 
+            Stage stage = (Stage) dashboard.getScene().getWindow(); 
+            com.dihadi.model.Recruiter r = com.dihadi.view.SessionManager.currentRecruiter != null ? com.dihadi.view.SessionManager.currentRecruiter : new com.dihadi.model.Recruiter();
+            stage.setScene(new RecruiterDashboard(r).getScene(() -> stage.setScene(getRecruiterScene(home)))); 
+        });
         BorderPane bar = new BorderPane();
         bar.setLeft(brand);
         bar.setCenter(nav);

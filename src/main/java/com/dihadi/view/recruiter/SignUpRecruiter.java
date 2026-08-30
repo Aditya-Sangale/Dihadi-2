@@ -155,12 +155,12 @@ public class SignUpRecruiter {
         fields.add(new VBox(8, text("Gender", labelStyle()), genderField), 0, 2, 2, 1);
 
         mobileField = new TextField();
-        mobileField.setPromptText("+91     00000 0000");
+        mobileField.setPromptText("+91 000000000");
         mobileField.setStyle(inputStyle());
         fields.add(new VBox(8, text("Mobile Number\n*required", labelStyle()), mobileField), 0, 3);
 
         alternateMobileField = new TextField();
-        alternateMobileField.setPromptText("+91     00000 0000");
+        alternateMobileField.setPromptText("+91 000000000");
         alternateMobileField.setStyle(inputStyle());
         fields.add(new VBox(8, text("Alternate Mobile", labelStyle()), alternateMobileField), 1, 3);
 
@@ -194,9 +194,11 @@ public class SignUpRecruiter {
         Button backButton = button("←  BACK", false);
         backButton.setOnAction(e -> AppNavigator.open((Stage) backButton.getScene().getWindow(), "Home"));
         Button sectionBack = new Button("<");
-        sectionBack.setStyle("-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:18px;-fx-font-weight:800;-fx-padding:7px 14px;-fx-cursor:hand;");
+        sectionBack.setStyle(
+                "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:18px;-fx-font-weight:800;-fx-padding:7px 14px;-fx-cursor:hand;");
         sectionBack.setOnAction(e -> AppNavigator.open((Stage) sectionBack.getScene().getWindow(), "Home"));
-        Label personalDetails = text("PERSONAL DETAILS", "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:11px 16px;");
+        Label personalDetails = text("PERSONAL DETAILS",
+                "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:11px 16px;");
         Button submit = button("CREATE RECRUITER ACCOUNT", true);
         submit.setOnAction(e -> submitRecruiter());
         Button loginLink = new Button("Already having account? Login");
@@ -224,7 +226,8 @@ public class SignUpRecruiter {
 
     private void submitRecruiter() {
         if (firstNameField.getText().isBlank() || mobileField.getText().isBlank()
-                || emailField.getText().isBlank() || companyNameField.getText().isBlank() || passwordField.getText().isBlank()) {
+                || emailField.getText().isBlank() || companyNameField.getText().isBlank()
+                || passwordField.getText().isBlank()) {
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
                     javafx.scene.control.Alert.AlertType.WARNING);
             alert.setTitle("Complete your details");

@@ -15,22 +15,33 @@ public class ProjectDao {
 
     public void saveProject(Project project) {
         try {
+            String docId = (project.getProjectId() != null && !project.getProjectId().isBlank())
+                    ? project.getProjectId()
+                    : (project.getMobile() != null && !project.getMobile().isBlank()
+                            ? project.getMobile() + "_" + System.currentTimeMillis()
+                            : String.valueOf(System.currentTimeMillis()));
             db.collection("Projects")
-                    .document(project.getMobile())
+                    .document(docId)
                     .set(project);
-            System.out.println("Project Data Inserted");
+            System.out.println("Project Data Inserted for Recruiter (" + project.getMobile() + "): " + docId);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public Project getProject(String getMobile) {
+    public Project getProject(String idOrMobile) {
         try {
             ApiFuture<DocumentSnapshot> future = db.collection("Projects")
-                    .document(getMobile).get();
+                    .document(idOrMobile).get();
             DocumentSnapshot document = future.get();
             if (document.exists()) {
                 return document.toObject(Project.class);
+            }
+            List<Project> all = getAllProjects();
+            for (Project p : all) {
+                if (idOrMobile.equals(p.getProjectId()) || idOrMobile.equals(p.getMobile())) {
+                    return p;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

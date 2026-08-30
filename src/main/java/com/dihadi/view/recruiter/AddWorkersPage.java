@@ -50,9 +50,11 @@ public class AddWorkersPage {
     private static final String[] PAINTER_SKILLS = { "Enamel Painting", "Roller Painting", "POP Work", "Wall Putty",
             "Stencil Work", "Texture Painting", "Waterproofing", "Wood Polish" };
     private static final String[] ITI_SKILLS = { "Pump Operator", "Fitter Technician", "Belt Jointer",
-            "Lift & Escalator Mechanic", "Electrical ITI Technician", "Woodwork Technician", "Fabricator", "Welder", "Machinist" };
+            "Lift & Escalator Mechanic", "Electrical ITI Technician", "Woodwork Technician", "Fabricator", "Welder",
+            "Machinist" };
     private static final String[] SUPERVISOR_SKILLS = { "Site Supervisor", "Construction Foreman",
-            "Electrical Supervisor", "Painting Supervisor", "Masonry Supervisor", "Safety Supervisor", "Plumbing Supervisor",
+            "Electrical Supervisor", "Painting Supervisor", "Masonry Supervisor", "Safety Supervisor",
+            "Plumbing Supervisor",
             "Carpenter Supervisor", "General Labour Supervisor", "Quality Supervisor", "Tiles Mason Supervisor" };
     private Timeline slideshow;
     private int visualIndex;
@@ -65,11 +67,24 @@ public class AddWorkersPage {
     }
 
     public AddWorkersPage(String projectId) {
-        this.projectId = projectId; this.projectName = "Project"; this.contactName = ""; this.mobile = ""; this.email = ""; this.projectAddress = ""; this.projectImage = "/assets/images/recruiter/slide-03.jpeg";
+        this.projectId = projectId;
+        this.projectName = "Project";
+        this.contactName = "";
+        this.mobile = "";
+        this.email = "";
+        this.projectAddress = "";
+        this.projectImage = "/assets/images/recruiter/slide-03.jpeg";
     }
 
-    public AddWorkersPage(String projectId, String projectName, String contactName, String mobile, String email, String projectAddress, String projectImage) {
-        this.projectId = projectId; this.projectName = projectName; this.contactName = contactName; this.mobile = mobile; this.email = email; this.projectAddress = projectAddress; this.projectImage = projectImage;
+    public AddWorkersPage(String projectId, String projectName, String contactName, String mobile, String email,
+            String projectAddress, String projectImage) {
+        this.projectId = projectId;
+        this.projectName = projectName;
+        this.contactName = contactName;
+        this.mobile = mobile;
+        this.email = email;
+        this.projectAddress = projectAddress;
+        this.projectImage = projectImage;
     }
 
     public Scene getAddWorkersScene(Runnable backAction) {
@@ -152,7 +167,7 @@ public class AddWorkersPage {
                 skill.setValue(skill.getItems().get(0));
             }
         });
-        ComboBox<String> quantity = quantityField = combo("50", "100", "200");
+        ComboBox<String> quantity = quantityField = combo("1", "2", "5", "10", "20", "50", "100", "200");
         TextField wage = wageField = input("");
 
         HBox numbers = new HBox(16, field("No. of worker *required", quantity),
@@ -217,7 +232,7 @@ public class AddWorkersPage {
             }
 
             // Save details to Firebase
-            String requirementId = java.util.UUID.randomUUID().toString();
+            String requirementId = String.valueOf(System.currentTimeMillis()) + String.format("%03d", (int)(Math.random() * 1000));
             int qty = Integer.parseInt(quantityField.getValue());
             com.dihadi.model.WorkforceRequirement req = new com.dihadi.model.WorkforceRequirement(
                     requirementId,
@@ -234,7 +249,13 @@ public class AddWorkersPage {
             new com.dihadi.controller.WorkforceRequirementController().addRequirement(req);
 
             javafx.stage.Stage stage = (javafx.stage.Stage) button.getScene().getWindow();
-            stage.setScene(new ProjectDetailsPage(projectName, contactName, mobile, email, projectAddress, priorityField.getValue(), workerTypeField.getValue(), skillField.getValue(), quantityField.getValue(), wageField.getText(), projectImage, facilitiesText()).getScene(() -> com.dihadi.view.AppNavigator.open(stage, "Recruiter")));
+            stage.setScene(new ProjectDetailsPage(projectName, contactName, mobile, email, projectAddress,
+                    priorityField.getValue(), workerTypeField.getValue(), skillField.getValue(),
+                    quantityField.getValue(), wageField.getText(), projectImage, facilitiesText()).getScene(() -> {
+                        com.dihadi.model.Recruiter r = com.dihadi.view.SessionManager.currentRecruiter;
+                        stage.setScene(new RecruiterDashboard(r)
+                                .getScene(() -> com.dihadi.view.AppNavigator.open(stage, "Home")));
+                    }));
         });
         Button close = new Button("Close");
         close.setStyle(
@@ -261,7 +282,10 @@ public class AddWorkersPage {
     }
 
     private String facilitiesText() {
-        return "Water: " + (waterBox.isSelected() ? "Provided" : "Not provided") + " | Electricity: " + (electricityBox.isSelected() ? "Provided" : "Not provided") + " | Accommodation: " + (accommodationBox.isSelected() ? "Provided" : "Not provided") + " | Transportation: " + (transportationBox.isSelected() ? "Provided" : "Not provided");
+        return "Water: " + (waterBox.isSelected() ? "Provided" : "Not provided") + " | Electricity: "
+                + (electricityBox.isSelected() ? "Provided" : "Not provided") + " | Accommodation: "
+                + (accommodationBox.isSelected() ? "Provided" : "Not provided") + " | Transportation: "
+                + (transportationBox.isSelected() ? "Provided" : "Not provided");
     }
 
     private VBox wageField(String label, TextField input) {
