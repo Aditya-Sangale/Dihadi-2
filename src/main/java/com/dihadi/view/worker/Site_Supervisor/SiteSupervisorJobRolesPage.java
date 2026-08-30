@@ -26,6 +26,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -36,22 +37,22 @@ public class SiteSupervisorJobRolesPage {
     private static final String ALL = "All";
     // Title, Location, Wage, Image, Project ID, Mobile, Requirement ID
     private static final String[][] JOBS = {
-            {"Foreman", "Pune, Maharashtra", "₹1,500", "01", null, null, null},
-            {"Safety Supervisor", "Mumbai, Maharashtra", "₹1,600", "02", null, null, null},
-            {"Quality Inspector", "Nashik, Maharashtra", "₹1,450", "03", null, null, null},
-            {"General Supervisor", "Bangalore, Karnataka", "₹1,700", "04", null, null, null},
-            {"Material Supervisor", "New Delhi, Delhi", "₹1,550", "05", null, null, null},
-            {"Site Engineer", "Chennai, Tamil Nadu", "₹1,800", "06", null, null, null},
-            {"Project Coordinator", "Hyderabad, Telangana", "₹1,650", "07", null, null, null},
-            {"Construction Supervisor", "Gurgaon, Haryana", "₹1,750", "08", null, null, null},
-            {"Shift Incharge", "Bhiwandi, Maharashtra", "₹1,400", "09", null, null, null}
+            {"Lodha Grandeur Site Office", "Pune, Maharashtra", "₹1,500", "01", null, null, null, "Foreman"},
+            {"Coastal Road Safety Zone", "Mumbai, Maharashtra", "₹1,600", "02", null, null, null, "Safety Supervisor"},
+            {"Nashik Expressway QA Unit", "Nashik, Maharashtra", "₹1,450", "03", null, null, null, "Quality Inspector"},
+            {"Electronic City Highrise", "Bangalore, Karnataka", "₹1,700", "04", null, null, null, "General Supervisor"},
+            {"Central Vista Materials Yard", "New Delhi, Delhi", "₹1,550", "05", null, null, null, "Material Supervisor"},
+            {"Chennai Metro Rail Phase 2", "Chennai, Tamil Nadu", "₹1,800", "06", null, null, null, "Site Engineer"},
+            {"Hitec Smart City Tower B", "Hyderabad, Telangana", "₹1,650", "07", null, null, null, "Project Coordinator"},
+            {"DLF Cyber City Expansion", "Gurgaon, Haryana", "₹1,750", "08", null, null, null, "Construction Supervisor"},
+            {"Bhiwandi Amazon SEZ", "Bhiwandi, Maharashtra", "₹1,400", "09", null, null, null, "Shift Incharge"}
     };
 
     private java.util.List<String[]> getAllJobs() {
         java.util.List<String[]> all = new java.util.ArrayList<>();
         try {
             java.util.List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
-            java.util.List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
+            List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
             java.util.Map<String, com.dihadi.model.Project> projectMap = new java.util.HashMap<>();
             if (projects != null) {
                 for (com.dihadi.model.Project p : projects) {
@@ -64,13 +65,20 @@ public class SiteSupervisorJobRolesPage {
                     if (req.getWorkerType() != null && req.getWorkerType().toLowerCase().contains("supervisor")) {
                         String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "Site Supervisor";
                         com.dihadi.model.Project p = req.getProjectId() != null ? projectMap.get(req.getProjectId()) : null;
+                        String projectName = (p != null && p.getProjectName() != null && !p.getProjectName().isBlank())
+                                ? p.getProjectName()
+                                : title + " Project";
                         String loc = (p != null && p.getCity() != null && !p.getCity().isBlank() ? p.getCity() : "Pune") + ", " +
                                      (p != null && p.getState() != null && !p.getState().isBlank() ? p.getState() : "Maharashtra");
                         String wage = "₹" + String.format("%,d", (long)req.getDailyWages());
-                        String imgNum = String.format("%02d", (imgIdx % 12) + 1);
+                        String photoUrl = null;
+                        if (p != null && p.getImageUrls() != null && !p.getImageUrls().isEmpty()) {
+                            photoUrl = p.getImageUrls().get(0);
+                        }
+                        String imgNum = (photoUrl != null && !photoUrl.isBlank()) ? photoUrl : String.format("%02d", (imgIdx % 12) + 1);
                         imgIdx++;
                         String recruiterMobile = p != null ? p.getMobile() : null;
-                        all.add(new String[]{ title, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId() });
+                        all.add(new String[]{ projectName, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId(), title });
                     }
                 }
             }
@@ -218,56 +226,103 @@ public class SiteSupervisorJobRolesPage {
             return;
         cards.getChildren().clear();
         int count = 0;
-        for (String[] job : getAllJobs())
+        for (String[] job : getAllJobs()) {
             if (matches(job)) {
                 cards.getChildren().add(card(job));
                 count++;
             }
+        }
         resultText.setText(count == 0 ? "No roles found. Try clearing one or more filters."
                 : count + " role" + (count == 1 ? "" : "s") + " available");
     }
 
     private boolean matches(String[] job) {
+        String roleTitle = job.length > 7 && job[7] != null ? job[7] : job[0];
         return (ALL.equals(state.getValue()) || job[1].contains(state.getValue()))
                 && (ALL.equals(city.getValue()) || job[1].contains(city.getValue()))
                 && (ALL.equals(role.getValue())
-                        || job[0].toLowerCase(Locale.ROOT).contains(role.getValue().toLowerCase(Locale.ROOT)));
+                        || job[0].toLowerCase(Locale.ROOT).contains(role.getValue().toLowerCase(Locale.ROOT))
+                        || roleTitle.toLowerCase(Locale.ROOT).contains(role.getValue().toLowerCase(Locale.ROOT)));
     }
 
     private Node card(String[] job) {
-        ImageView photo = image(String.format("/assets/images/worker/foreman/skill-%s.jpg", job[3]), 316, 178);
+        String imgPath = job[3];
+        if (imgPath != null && imgPath.matches("\\d+")) {
+            imgPath = String.format("/assets/images/worker/foreman/skill-%s.jpg", job[3]);
+        }
+        ImageView photo = image(imgPath, 316, 178);
         photo.setClip(roundClip(316, 178));
-        Label name = label(job[0], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#3a3027;"),
-                location = label("⌖  " + job[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
-                wageLabel = label("Daily wage", "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
-                wage = label(job[2], "-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        String projectName = job[0];
+        String roleTitle = job.length > 7 && job[7] != null ? job[7] : job[0];
+
+        Label name = label(projectName, "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
         name.setWrapText(true);
-        name.setAlignment(Pos.CENTER);
-        name.setMaxWidth(Double.MAX_VALUE);
-        location.setAlignment(Pos.CENTER);
-        location.setMaxWidth(Double.MAX_VALUE);
+        Label roleLabel = label("Role: " + roleTitle, "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#735c00;");
+        Label location = label("⌖  " + job[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;");
+        Label wageLabel = label("Daily wage", "-fx-font-size:13px;-fx-text-fill:#4d4635;");
+        Label wage = label(job[2], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#735c00;");
         Region space = new Region();
         VBox.setVgrow(space, Priority.ALWAYS);
         Button apply = primary("Apply now");
         apply.setMaxWidth(Double.MAX_VALUE);
+        
+        Runnable checkAppliedStatus = () -> {
+            if (com.dihadi.view.SessionManager.currentWorker != null) {
+                new Thread(() -> {
+                    try {
+                        java.util.List<com.dihadi.model.JobApplication> apps = new com.dihadi.controller.JobApplicationController().getApplicationsByWorker(com.dihadi.view.SessionManager.currentWorker.getMobileNumber());
+                        boolean hasApplied = false;
+                        for (com.dihadi.model.JobApplication app : apps) {
+                            if ((app.getJobTitle() != null && app.getJobTitle().equalsIgnoreCase(roleTitle)) || (job[4] != null && job[4].equals(app.getProjectId()))) {
+                                hasApplied = true;
+                                break;
+                            }
+                        }
+                        if (hasApplied) {
+                            javafx.application.Platform.runLater(() -> {
+                                apply.setText("Already applied ✓");
+                                apply.setStyle("-fx-background-color:#2a7e3b;-fx-background-radius:12px;-fx-text-fill:#ffffff;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;");
+                                apply.setDisable(true);
+                            });
+                        }
+                    } catch (Exception ignored) {}
+                }).start();
+            }
+        };
+        checkAppliedStatus.run();
+
+        final String detailImg = (imgPath != null && !imgPath.isBlank()) ? imgPath : "/assets/images/worker/foreman/skill-01.jpg";
         apply.setOnAction(e -> {
             javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow();
             javafx.scene.Scene currentScene = apply.getScene();
-            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(job[0], job[1], job[2], "/assets/images/worker/site_supervisor/skill-01.jpg", job[4], job[5], job[6]).getScene(() -> stage.setScene(currentScene), currentScene));
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(roleTitle, job[1], job[2], detailImg, job[4], job[5], job[6]).getScene(() -> {
+                checkAppliedStatus.run();
+                stage.setScene(currentScene);
+            }, currentScene));
         });
         HBox pay = new HBox(wageLabel, wage);
         pay.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(wageLabel, Priority.ALWAYS);
-        VBox card = new VBox(14, photo, name, location, space, pay, apply);
+        VBox card = new VBox(10, photo, name, roleLabel, location, space, pay, apply);
+        name.setAlignment(Pos.CENTER);
+        name.setMaxWidth(Double.MAX_VALUE);
+        roleLabel.setAlignment(Pos.CENTER);
+        roleLabel.setMaxWidth(Double.MAX_VALUE);
+        location.setAlignment(Pos.CENTER);
+        location.setMaxWidth(Double.MAX_VALUE);
         card.setAlignment(Pos.CENTER);
-        card.setPrefSize(344, 380);
+        card.setPrefSize(344, 400);
         card.setPadding(new Insets(14));
         card.setStyle(cardStyle("#fff8f0"));
         return card;
     }
 
+    private String jobTitleFallback(String[] job) {
+        return job.length > 7 && job[7] != null ? job[7] : job[0];
+    }
+
     private Node bottomBar(Runnable backAction) {
-        Button back = outline("�? Back to skills");
+        Button back = outline("← Back to skills");
         back.setOnAction(e -> {
             if (backAction != null)
                 backAction.run();
@@ -336,7 +391,12 @@ public class SiteSupervisorJobRolesPage {
     }
 
     private ImageView image(String path, double width, double height) {
-        ImageView view = new ImageView(load(path));
+        ImageView view = new ImageView();
+        Image img = load(path);
+        if (img == null) {
+            img = load("/assets/images/worker/foreman/skill-01.jpg");
+        }
+        view.setImage(img);
         view.setFitWidth(width);
         view.setFitHeight(height);
         view.setPreserveRatio(false);
@@ -345,8 +405,21 @@ public class SiteSupervisorJobRolesPage {
     }
 
     private Image load(String path) {
-        var resource = getClass().getResource(path);
-        return resource == null ? null : new Image(resource.toExternalForm());
+        if (path == null || path.isBlank()) return null;
+        try {
+            if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("file:")) {
+                return new Image(path, true);
+            }
+            java.io.File file = new java.io.File(path);
+            if (file.exists()) {
+                return new Image(file.toURI().toString(), true);
+            }
+            var resource = getClass().getResource(path);
+            if (resource != null) {
+                return new Image(resource.toExternalForm());
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 
     private Label label(String text, String style) {

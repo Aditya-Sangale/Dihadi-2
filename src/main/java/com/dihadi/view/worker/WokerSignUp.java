@@ -56,7 +56,8 @@ public class WokerSignUp {
     private final ComboBox<String> workerType = combo("Labour (General Labour)", "Mason", "Carpenter", "Electrician",
             "Plumber", "Painter", "ITI / Technician", "Site Supervisor");
     private final TextField city = field("e.g. Pune");
-    private final ComboBox<String> state = combo("Maharashtra", "Delhi", "Gujarat", "Karnataka", "Uttar Pradesh", "Rajasthan", "Tamil Nadu", "Other");
+    private final ComboBox<String> state = combo("Maharashtra", "Delhi", "Gujarat", "Karnataka", "Uttar Pradesh",
+            "Rajasthan", "Tamil Nadu", "Other");
     private final javafx.scene.control.PasswordField password = new javafx.scene.control.PasswordField();
     private final DatePicker dateOfBirth = new DatePicker();
     private final ImageView profileImage = new ImageView();
@@ -126,7 +127,7 @@ public class WokerSignUp {
         avatar.setPrefSize(94, 94);
         avatar.setStyle(
                 "-fx-background-color:#eee7dc;-fx-background-radius:47px;-fx-border-color:#cfc6b2;-fx-border-radius:47px;-fx-border-width:2px;");
-        Button change = secondaryButton("Change Photo");
+        Button change = secondaryButton("Upload Photo");
         change.setOnAction(event -> choosePhoto());
         HBox row = new HBox(18, avatar, change);
         row.setAlignment(Pos.CENTER_LEFT);

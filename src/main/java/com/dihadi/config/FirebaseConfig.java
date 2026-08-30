@@ -1,6 +1,8 @@
 package com.dihadi.config;
 
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
@@ -15,12 +17,26 @@ public class FirebaseConfig {
 
     private static void getFirebaseConfig() {
         try {
-            InputStream serviceAccount = FirebaseConfig.class
-                    .getResourceAsStream("/assets/dihadi_fb.json");
+            if (!FirebaseApp.getApps().isEmpty()) {
+                return;
+            }
 
-            FirebaseOptions options = new FirebaseOptions.Builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .build();
+            String credentialPath = System.getenv("DIHADI_FIREBASE_CREDENTIALS");
+            InputStream serviceAccount = credentialPath == null || credentialPath.isBlank()
+                    ? FirebaseConfig.class.getResourceAsStream("/assets/dihadi_fb.json")
+                    : Files.newInputStream(Path.of(credentialPath));
+
+            if (serviceAccount == null) {
+                throw new IllegalStateException(
+                        "Firebase credentials are missing. Set DIHADI_FIREBASE_CREDENTIALS to your service-account JSON path.");
+            }
+
+            FirebaseOptions options;
+            try (serviceAccount) {
+                options = new FirebaseOptions.Builder()
+                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                        .build();
+            }
 
             FirebaseApp.initializeApp(options);
 
