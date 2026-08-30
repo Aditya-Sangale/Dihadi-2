@@ -254,8 +254,10 @@ public class RecruiterDashboard {
                                 label("⌖ " + (locStr.isBlank() ? "Location not provided" : locStr), "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
                                 label("Status: Active Ongoing", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#2a7e3b;")
                         );
-                        activeCard.setPadding(new Insets(10));
-                        activeCard.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:#e5d9c7;-fx-border-radius:8px;");
+                        activeCard.setPadding(new Insets(12));
+                        activeCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:10px;");
+                        activeCard.setOnMouseEntered(e -> activeCard.setStyle("-fx-background-color:linear-gradient(to right, #ffffff, #fffdf2);-fx-background-radius:10px;-fx-border-color:#b8921e;-fx-border-width:2px;-fx-border-radius:10px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.25),12,0,0,3px);"));
+                        activeCard.setOnMouseExited(e -> activeCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:10px;"));
                         activeProjPanel.getChildren().add(activeCard);
                     }
 
@@ -272,8 +274,10 @@ public class RecruiterDashboard {
                                     label("⌖ " + (upLoc.isBlank() ? "Location not provided" : upLoc), "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
                                     label("Status: Upcoming", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#735c00;")
                             );
-                            upCard.setPadding(new Insets(10));
-                            upCard.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:#e5d9c7;-fx-border-radius:8px;");
+                            upCard.setPadding(new Insets(12));
+                            upCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#e5d9c7;-fx-border-width:1.5px;-fx-border-radius:10px;");
+                            upCard.setOnMouseEntered(e -> upCard.setStyle("-fx-background-color:linear-gradient(to right, #ffffff, #fffdf2);-fx-background-radius:10px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:10px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.25),12,0,0,3px);"));
+                            upCard.setOnMouseExited(e -> upCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#e5d9c7;-fx-border-width:1.5px;-fx-border-radius:10px;"));
                             upcomingProjPanel.getChildren().add(upCard);
                         }
                     }
@@ -291,8 +295,10 @@ public class RecruiterDashboard {
                                     label("⌖ " + (cpLoc.isBlank() ? "Location not provided" : cpLoc), "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
                                     label("Status: Completed ✓", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#2a7e3b;")
                             );
-                            cpCard.setPadding(new Insets(10));
-                            cpCard.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:#e5d9c7;-fx-border-radius:8px;");
+                            cpCard.setPadding(new Insets(12));
+                            cpCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#e5d9c7;-fx-border-width:1.5px;-fx-border-radius:10px;");
+                            cpCard.setOnMouseEntered(e -> cpCard.setStyle("-fx-background-color:linear-gradient(to right, #ffffff, #fffdf2);-fx-background-radius:10px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:10px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.25),12,0,0,3px);"));
+                            cpCard.setOnMouseExited(e -> cpCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#e5d9c7;-fx-border-width:1.5px;-fx-border-radius:10px;"));
                             pastProjPanel.getChildren().add(cpCard);
                         }
                     }
@@ -314,18 +320,21 @@ public class RecruiterDashboard {
     }
 
     private VBox panel(String title, Node... nodes) {
-        VBox v = new VBox(12, label(title, "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.3px;-fx-text-fill:#685c52;"));
+        String headerTitle = title.startsWith("✦") ? title : "✦  " + title;
+        VBox v = new VBox(12, label(headerTitle, "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.2px;-fx-text-fill:#735c00;"));
         v.getChildren().addAll(nodes);
         v.setPadding(new Insets(22));
-        v.setStyle("-fx-background-color:#ffffff;-fx-background-radius:16px;-fx-border-color:#cfc6b2;-fx-border-radius:16px;-fx-effect:dropshadow(gaussian,rgba(34,34,34,.08),18,0,0,5px);");
+        v.setStyle("-fx-background-color:linear-gradient(to bottom right, #ffffff 0%, #fffcf5 100%);-fx-background-radius:18px;-fx-border-color:#e8ddc8;-fx-border-width:1.5px;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(115,92,0,.08),16,0,0,5px);");
+        v.setOnMouseEntered(e -> v.setStyle("-fx-background-color:linear-gradient(to bottom right, #ffffff 0%, #fffbf0 100%);-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:18px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.30),22,0,0,7px);"));
+        v.setOnMouseExited(e -> v.setStyle("-fx-background-color:linear-gradient(to bottom right, #ffffff 0%, #fffcf5 100%);-fx-background-radius:18px;-fx-border-color:#e8ddc8;-fx-border-width:1.5px;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(115,92,0,.08),16,0,0,5px);"));
         return v;
     }
 
     private Button action(String text, boolean filled) {
         Button b = new Button(text);
         b.setStyle(filled
-                ? "-fx-background-color:#d4af37;-fx-background-radius:8px;-fx-text-fill:#222222;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:10px 16px;-fx-cursor:hand;"
-                : "-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:#cfc6b2;-fx-border-radius:8px;-fx-text-fill:#4c4637;-fx-font-size:12px;-fx-font-weight:700;-fx-padding:9px 15px;-fx-cursor:hand;");
+                ? "-fx-background-color:linear-gradient(to right, #d4af37, #b8921e);-fx-background-radius:8px;-fx-text-fill:#ffffff;-fx-font-weight:800;-fx-font-size:12px;-fx-padding:9px 18px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(184,146,30,.3),8,0,0,2px);"
+                : "-fx-background-color:#ffffff;-fx-background-radius:8px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:8px;-fx-text-fill:#735c00;-fx-font-size:12px;-fx-font-weight:700;-fx-padding:8px 16px;-fx-cursor:hand;");
         return b;
     }
 
@@ -338,8 +347,8 @@ public class RecruiterDashboard {
     }
 
     private VBox detail(String k, String v) {
-        return new VBox(3, label(k, "-fx-font-size:11px;-fx-text-fill:#7e7665;"),
-                label(val(v, "Not provided"), "-fx-font-size:15px;-fx-font-weight:600;-fx-text-fill:#1e1b15;"));
+        return new VBox(3, label(k, "-fx-font-size:11px;-fx-font-weight:700;-fx-letter-spacing:.3px;-fx-text-fill:#8c7e6b;"),
+                label(val(v, "Not provided"), "-fx-font-size:15px;-fx-font-weight:600;-fx-text-fill:#231b00;"));
     }
 
     private boolean blank(String v) {
