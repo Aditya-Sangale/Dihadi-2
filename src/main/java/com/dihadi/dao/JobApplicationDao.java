@@ -16,7 +16,8 @@ public class JobApplicationDao {
         try {
             db.collection("JobApplications")
                     .document(application.getApplicationId())
-                    .set(application);
+                    .set(application)
+                    .get();
             System.out.println("Job Application Saved: " + application.getApplicationId());
         } catch (Exception e) {
             e.printStackTrace();
@@ -27,7 +28,8 @@ public class JobApplicationDao {
         try {
             db.collection("JobApplications")
                     .document(applicationId)
-                    .delete();
+                    .delete()
+                    .get();
             System.out.println("Job Application Withdrawn: " + applicationId);
         } catch (Exception e) {
             e.printStackTrace();

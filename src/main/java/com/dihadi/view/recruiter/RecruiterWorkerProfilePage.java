@@ -103,7 +103,29 @@ public class RecruiterWorkerProfilePage {
                             ""
                     );
                     new com.dihadi.controller.JobApplicationController().saveApplication(app);
+                    String recName = "Site Recruiter";
+                    if (com.dihadi.view.SessionManager.currentRecruiter != null) {
+                        String fn = com.dihadi.view.SessionManager.currentRecruiter.getFirstName() != null ? com.dihadi.view.SessionManager.currentRecruiter.getFirstName() : "";
+                        String ln = com.dihadi.view.SessionManager.currentRecruiter.getLastName() != null ? com.dihadi.view.SessionManager.currentRecruiter.getLastName() : "";
+                        String full = (fn + " " + ln).trim();
+                        if (!full.isEmpty()) recName = full;
+                    }
+                    new com.dihadi.controller.NotificationController().notifyWorkerHiringRequest(
+                            targetMobile,
+                            recName,
+                            recruiterMobile,
+                            category,
+                            location,
+                            wage,
+                            category + " Deployment"
+                    );
                     System.out.println("Hiring request sent successfully to worker: " + targetMobile);
+                    final String finalTargetMob = targetMobile;
+                    javafx.application.Platform.runLater(() -> {
+                        com.dihadi.view.NotificationToast.show(hire, "Hiring Offer Dispatched! 📋",
+                                "Direct hiring offer for " + category + " sent to " + name + " (" + finalTargetMob + ").",
+                                com.dihadi.view.NotificationToast.ToastType.ACTION);
+                    });
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

@@ -1,6 +1,7 @@
 package com.dihadi.view;
 import com.dihadi.view.recruiter.SignUpRecruiter;
 import com.dihadi.view.recruiter.RecruiterPage;
+import com.dihadi.view.admin.AdminHomePage;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -29,9 +30,19 @@ import javafx.util.Duration;
 /** Main application controller and premium DIHADI landing page. */
 public class HomePage extends Application {
     private static final String[] HERO_IMAGES = {
-            "/assets/images/worker 1 (2).jpeg", "/assets/images/worker 2.jpeg",
-            "/assets/images/worker 5.jpeg", "/assets/images/woker 6.jpeg",
-            "/assets/images/sitesuperviser.jpeg", "/assets/images/welder.jpeg"
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_crane_operator_inside_a_high_tech_cabin_overlooking_a_large_bridge/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_electrician_repairing_a_complex_electrical_panel_in_a_corporate/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_site_supervisor_in_a_reflective_jacket_and_helmet_with_dihadi/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_professional_indian_female_factory_worker_at_a_high_precision_assembly_line/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_professional_indian_hvac_technician_servicing_a_large_air_conditioning_unit/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_professional_indian_plumber_working_on_industrial_piping._he_is_wearing_a/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_professional_indian_welder_working_in_an_industrial_workshop_wearing/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_high_quality_photograph_of_an_indian_female_civil_engineer_on_a/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_high_quality_photograph_of_a_professional_indian_construction_mason/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_photograph_of_an_indian_delivery_professional_with_a_modern/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_photo_of_an_indian_carpenter_in_a_woodworking_shop_wearing_a_dihadi/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_photo_of_an_indian_industrial_mechanic_repairing_a_large_gear/screen.png",
+            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_photo_of_an_indian_warehouse_worker_operating_a_forklift_in_a/screen.png"
     };
 
     private Stage primaryStage;
@@ -110,7 +121,7 @@ public class HomePage extends Application {
         navigation.setAlignment(Pos.CENTER);
 
         Button admin = primaryButton("Admin");
-        admin.setOnAction(event -> AppNavigator.adminLoginInProgress());
+        admin.setOnAction(event -> showAdmin());
         BorderPane header = new BorderPane();
         header.setLeft(brand);
         header.setCenter(navigation);
@@ -281,6 +292,12 @@ public class HomePage extends Application {
     private void showRecruiterSignUp() {
         stopSlider();
         primaryStage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(this::showRecruiter));
+    }
+
+    /** Opens the visual administration portal linked from the homepage header. */
+    private void showAdmin() {
+        stopSlider();
+        primaryStage.setScene(new AdminHomePage().getAdminHomeScene(this::showHome));
     }
 
     private void showAbout() {
