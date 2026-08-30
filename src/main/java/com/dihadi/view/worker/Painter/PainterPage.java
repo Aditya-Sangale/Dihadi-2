@@ -26,7 +26,7 @@ public class PainterPage {
         BorderPane p = new BorderPane(s);
         p.setTop(head(back));
         p.setBottom(footer(back));
-        p.setStyle("-fx-background-color:#fff8f0;");
+        p.setStyle("-fx-background-color:#f3e7ce;");
         return new Scene(p, 1400, 780);
     }
 
@@ -135,7 +135,7 @@ public class PainterPage {
         HBox h = new HBox(b, r, n);
         h.setAlignment(Pos.CENTER);
         h.setPadding(new Insets(16, 70, 16, 70));
-        h.setStyle("-fx-background-color:rgba(255,248,240,.96);-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
+        h.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
         return h;
     }
 
