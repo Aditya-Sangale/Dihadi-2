@@ -48,7 +48,7 @@ public class ElectricianPage {
         BorderPane page = new BorderPane(scroll);
         page.setTop(header(back, home, about));
         page.setBottom(actionBar(back));
-        page.setStyle("-fx-background-color:#fff8f0;");
+        page.setStyle("-fx-background-color:#f3e7ce;");
         return new Scene(page, 1400, 780);
     }
 
@@ -187,7 +187,7 @@ public class ElectricianPage {
         HBox bar = new HBox(previous, gap, next);
         bar.setAlignment(Pos.CENTER);
         bar.setPadding(new Insets(16, 70, 16, 70));
-        bar.setStyle("-fx-background-color:rgba(255,248,240,.96);-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
+        bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
         return bar;
     }
 

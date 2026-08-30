@@ -70,10 +70,8 @@ public class GeneralLabourPage {
         page.setTop(createHeader(backAction, homeAction, aboutAction));
         page.setCenter(scroll);
         page.setBottom(createActionBar(backAction));
-        page.setStyle("-fx-background-color:transparent;");
-        StackPane root = new StackPane(page);
-        setWorkerBackground(root);
-        return new Scene(root, 1400, 780);
+        page.setStyle("-fx-background-color:#f3e7ce;");
+        return new Scene(page, 1400, 780);
     }
 
     private HBox createHero() {
@@ -171,7 +169,7 @@ public class GeneralLabourPage {
         bar.setAlignment(Pos.CENTER);
         bar.setPadding(new Insets(16, 70, 16, 70));
         bar.setStyle(
-                "-fx-background-color:rgba(255,255,255,.94);-fx-border-color:rgba(208,197,175,.30);-fx-border-width:1px 0 0 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.05),30,0,0,-10px);");
+                "-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.05),30,0,0,-10px);");
         return bar;
     }
 
@@ -231,7 +229,7 @@ public class GeneralLabourPage {
         header.setCenter(navigation);
         header.setRight(account);
         header.setPadding(new Insets(20, 70, 18, 70));
-        header.setStyle("-fx-background-color:#fff8f0;-fx-border-color:#efe7da;-fx-border-width:0 0 1px 0;");
+        header.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;");
         return header;
     }
 
