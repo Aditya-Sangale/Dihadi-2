@@ -1,4 +1,4 @@
-package com.dihadi.service;
+package com.dihadi.controller;
 
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;

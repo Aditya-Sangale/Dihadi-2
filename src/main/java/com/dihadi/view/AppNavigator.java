@@ -27,7 +27,8 @@ public final class AppNavigator {
                     () -> open(stage, "Worker"), () -> open(stage, "About Us")));
             case "Recruiter" -> stage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(
                     () -> open(stage, "Home")));
-            case "Admin" -> stage.setScene(new com.dihadi.view.admin.AdminLoginPage().getAdminLoginScene(() -> open(stage, "Home")));
+            case "Admin" -> stage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(() -> open(stage, "Home")));
+            case "AdminLogin" -> stage.setScene(new com.dihadi.view.admin.AdminLoginPage().getAdminLoginScene(() -> open(stage, "Home")));
             case "Dashboard" -> openDashboard(stage);
             default -> throw new IllegalArgumentException("Unknown destination: " + destination);
         }
@@ -39,8 +40,18 @@ public final class AppNavigator {
         } else if (SessionManager.currentRecruiter != null) {
             stage.setScene(new com.dihadi.view.recruiter.RecruiterDashboard(SessionManager.currentRecruiter).getScene(() -> open(stage, "Home")));
         } else {
-            stage.setScene(new com.dihadi.view.admin.AdminLoginPage().getAdminLoginScene(() -> open(stage, "Home")));
+            stage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(() -> open(stage, "Home")));
         }
+    }
+
+    public static Button createHeaderAdminButton() {
+        Button btn = new Button("Admin");
+        btn.setStyle("-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#342f28;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:11px 24px;-fx-cursor:hand;");
+        btn.setOnAction(e -> {
+            Stage stage = (Stage) btn.getScene().getWindow();
+            open(stage, "Admin");
+        });
+        return btn;
     }
 
     public static Button createHeaderActionButton() {

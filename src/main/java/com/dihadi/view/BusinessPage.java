@@ -75,7 +75,7 @@ public class BusinessPage {
                 contact.setOnAction(e -> navigate(contact, "Contact Us"));
                 HBox navigation = new HBox(12, home, business, worker, recruiter, about, contact);
                 navigation.setAlignment(Pos.CENTER);
-                Button admin = AppNavigator.createHeaderActionButton();
+                Button admin = AppNavigator.createHeaderAdminButton();
                 HBox account = new HBox(10, admin);
                 account.setAlignment(Pos.CENTER_RIGHT);
 
