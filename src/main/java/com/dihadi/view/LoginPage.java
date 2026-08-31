@@ -42,18 +42,17 @@ public class LoginPage {
         BorderPane page = new BorderPane();
         page.setLeft(form());
         page.setCenter(visual());
-        page.setStyle("-fx-background-color:#fff8f0;");
+        page.setStyle("-fx-background-color:#f3e7ce;");
         return new Scene(page, 1400, 780);
     }
 
     private VBox form() {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 72, 72);
-        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
         logo.setPreserveRatio(true);
         VBox brand = new VBox(4, logo,
                 label("DIHADI",
                         "-fx-font-family:'Georgia';-fx-font-size:34px;-fx-font-weight:800;-fx-text-fill:#27438a;"),
-                label("Mera Haq ~ Meri Dihadi",
+                label("Meri Dihadi ~ Mera Haq",
                         "-fx-font-family:'Georgia';-fx-font-size:17px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
         brand.setAlignment(Pos.CENTER);
         Label welcome = label("👋  Welcome to DIHADI", "-fx-font-size:28px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");

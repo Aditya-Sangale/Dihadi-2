@@ -26,11 +26,7 @@
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-media</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
+        
 
         <!-- Source: https://mvnrepository.com/artifact/com.google.firebase/firebase-admin -->
         <dependency>
@@ -45,6 +41,32 @@
             <artifactId>cloudinary-http5</artifactId>
             <version>2.3.2</version>
         </dependency>
+
+        <dependency>
+        <groupId>com.razorpay</groupId>
+        <artifactId>razorpay-java</artifactId>
+        <version>1.4.3</version>
+    </dependency>
+
+    <!-- JavaFX Web Module for embedding Razorpay Standard Checkout -->
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-web</artifactId>
+        <version>21.0.2</version>
+    </dependency>
+
+    <!-- JSON parsing utility -->
+    <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>20231013</version>
+    </dependency>
+    
+    <dependency>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-media</artifactId>
+    <version>17.0.10</version>
+    </dependency>
 
     </dependencies>
 

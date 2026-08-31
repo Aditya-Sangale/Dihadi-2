@@ -1,0 +1,235 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DIHADI - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#cfc6b2",
+                        "on-secondary-fixed-variant": "#50453b",
+                        "surface-dim": "#e0d9ce",
+                        "on-tertiary-fixed": "#00174b",
+                        "surface-container-low": "#faf3e8",
+                        "on-secondary": "#ffffff",
+                        "primary": "#574500",
+                        "on-surface": "#1e1b15",
+                        "on-secondary-fixed": "#221a12",
+                        "outline": "#7e7665",
+                        "gold-accent": "#D4AF37",
+                        "inverse-primary": "#e3c466",
+                        "surface-container-high": "#eee7dc",
+                        "on-tertiary-container": "#cdd7ff",
+                        "surface-variant": "#e9e2d7",
+                        "on-secondary-container": "#6d6056",
+                        "background": "#fff8f0",
+                        "on-surface-variant": "#4c4637",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#333029",
+                        "primary-fixed": "#ffe085",
+                        "primary-container": "#735c00",
+                        "inverse-on-surface": "#f7f0e5",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "surface-bright": "#fff8f0",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#1e1b15",
+                        "secondary-fixed-dim": "#d4c4b7",
+                        "on-primary-container": "#f6d676",
+                        "surface-container": "#f4ede2",
+                        "on-tertiary-fixed-variant": "#27438a",
+                        "surface-warm": "#FFF8F0",
+                        "secondary": "#685c52",
+                        "secondary-fixed": "#f0dfd3",
+                        "on-surface-muted": "#4D4635",
+                        "primary-fixed-dim": "#e3c466",
+                        "tertiary-fixed": "#dbe1ff",
+                        "surface": "#fff8f0",
+                        "secondary-container": "#eeddd0",
+                        "surface-container-highest": "#e9e2d7",
+                        "tertiary-container": "#415ba4",
+                        "surface-tint": "#735c00",
+                        "on-primary-fixed": "#231b00",
+                        "border-subtle": "#D0C5AF",
+                        "tertiary": "#27438a",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#574500",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "md": "24px",
+                        "gutter": "24px",
+                        "sm": "12px",
+                        "container-max": "1280px",
+                        "lg": "48px",
+                        "xl": "80px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Be Vietnam Pro"],
+                        "quote-it": ["Playfair Display"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "headline-lg": ["Playfair Display"],
+                        "display-lg": ["Playfair Display"],
+                        "title-md": ["Be Vietnam Pro"],
+                        "body-md": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "quote-it": ["22px", { "lineHeight": "32px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        .slideshow-container {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+            transform: translateX(20px);
+        }
+        
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md h-screen w-full flex items-center justify-center m-0 p-0 overflow-hidden">
+<div class="w-full h-full flex flex-col md:flex-row max-w-[1600px] mx-auto bg-surface-container-lowest shadow-2xl rounded-none md:rounded-3xl overflow-hidden md:m-md border border-outline-variant/20 relative">
+<!-- Left Panel: Login Form -->
+<div class="w-full md:w-1/2 h-full flex flex-col justify-center px-lg py-xl md:p-xl lg:p-[120px] bg-surface-container-lowest z-10 relative">
+<div class="max-w-md w-full mx-auto space-y-lg">
+<!-- Brand Header -->
+<div class="text-center space-y-sm">
+<img alt="DIHADI Logo" class="h-16 mx-auto mb-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOGc1gbOr9-tVam9Q7p3yVMKWrVu30jEoVycZaeW4-2U3IugautoCtwNDIlVw_0hQ9vkxiq9LEIGf6de1XOmkg3y870Q_vYGZUjUONTRZNl46dw2cveHElwXlwwZzk3YiM-27SAhxxEagLyaXXKETXsS5JnrLNp3LGAVIzLnpN5uILcbwzDRF5efJD4jQKiPtCNuqSaKt5hCISR94KIvCHeKWGLJs9J1aBJeZhayEUKLFYyO3gyMagHAQW6LEp0eYCw8k">
+<h1 class="font-display-lg text-display-lg text-tertiary tracking-tight uppercase">DIHADI</h1>
+<p class="font-quote-it text-quote-it italic text-secondary">Meri Dihadi ~ Mera Haq</p>
+</div>
+<!-- Welcome Text -->
+<div class="space-y-base text-center mt-xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">👋 Welcome to DIHADI</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Please Enter your Dihadi Official Email Address &amp; Password to Proceed&nbsp; Ahead</p>
+</div>
+<!-- Login Form -->
+<form class="space-y-md mt-lg" onsubmit="event.preventDefault();"><h3 class="font-title-md text-title-md text-on-surface mb-sm">Enter your&nbsp; Login Credentials &amp; Password</h3>
+<div class="space-y-md"><div class="space-y-xs"><label class="sr-only" for="identifier">Mobile Number or Email</label><div class="flex items-center rounded-xl bg-surface-container-high border border-outline-variant/30 focus-within:border-gold-accent focus-within:ring-1 focus-within:ring-gold-accent transition-all duration-200 shadow-sm p-xs pl-md"><input class="w-full bg-transparent border-none focus:ring-0 font-body-lg text-body-lg text-on-surface placeholder-on-surface-variant/50 py-sm" id="identifier" name="identifier" placeholder="Enter your Official Email Address." required="" type="text"></div></div><div class="space-y-xs"><label class="sr-only" for="password">Password</label><div class="flex items-center rounded-xl bg-surface-container-high border border-outline-variant/30 focus-within:border-gold-accent focus-within:ring-1 focus-within:ring-gold-accent transition-all duration-200 shadow-sm p-xs pl-md"><input class="w-full bg-transparent border-none focus:ring-0 font-body-lg text-body-lg text-on-surface placeholder-on-surface-variant/50 py-sm" id="password" name="password" placeholder="Enter your Password" required="" type="password"></div></div></div>
+<div class="flex items-center justify-between pt-xs"><div class="flex items-center gap-sm"><div class="flex items-center h-5"><input class="h-5 w-5 rounded border-outline text-gold-accent focus:ring-gold-accent bg-surface-container-lowest cursor-pointer" id="remember" name="remember" type="checkbox"></div><label class="font-body-md text-body-md text-on-surface-variant text-sm cursor-pointer leading-tight" for="remember">Remember Me</label></div><a class="text-gold-accent hover:underline font-semibold text-sm" href="#">Forgot Password?</a></div>
+<button class="w-full py-md px-lg bg-gold-accent hover:bg-[#c29f2f] text-on-primary-fixed font-title-md text-title-md rounded-full shadow-md hover:shadow-lg transition-all duration-300 mt-md" type="submit">LOGIN</button>
+</form>
+</div>
+</div>
+<!-- Right Panel: Animated Slideshow -->
+<div class="hidden md:block w-1/2 h-full bg-surface-variant p-md relative">
+<div class="w-full h-full rounded-[30px] overflow-hidden shadow-2xl relative border-4 border-surface-container-lowest/50">
+<div class="slideshow-container bg-surface-dim">
+<div class="slide">
+<img class="w-full h-full object-cover" data-alt="A construction site with workers using the DIHADI app, emphasizing the fastest-growing hiring network." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEWtM1mSB0PlRgZdzw7OfMpjEBqiD-rrEUMgZS-CPLOYYPFs-p2CsXIo3B95Hf1smR_kgFMnkHu9ljrRed5ttsKk2KBq0uJrSuFs5Pb1T4hfct2IqSmi0f7h5lVjUH6rjk09k0cs3UAuckmWirTmrKV_fmA69o-UvOCV7It8CQ-SgEcH0hVDX2oG6c33YIVeghRZLFomjNl5DVmVzdajF4D1JImKD7RbOJloXKLGYVl4Mb5nc4I4j8YqebLryK7ViaTEc">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+</div>
+<div class="slide">
+<img class="w-full h-full object-cover" data-alt="Daily wage workers finding jobs through a modern mobile portal app on a construction site." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRM4B9oWQOxNk16xPcxQVmDJJ9BjMikQbSXhVBO2-CDTY7xThqwZL7zUxbjlIH-p0PKZ4WLtEpRUiq92YL4dw1_rhx7aolHPHCb_EBAr5EGvsD2KKnN55pv9lafJvlVpxOCmLbBJKrpbIvSw3wJvJEDE8mbHRdRdfPGj0cDBdTkQHvTzgy6XzrESsosSEXVXoTzFExMCJJWZ8x9biphzizXlMkYIeQu3JIt-qwf5FfLAGeXQrcwaGvFXu8lHkl1wYmy_c">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+</div>
+<div class="slide">
+<img class="w-full h-full object-cover" data-alt="Verified construction workers standing confidently, highlighting instant verification services." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD37uHaDSepu4v1ftcTArkAAswXnFOGifPhAzG1kbYe6kRfCjAq-8h53cMjSiqh2_-7byHz9QsMVgvw4RkNYq7b6YpAezsz7Oug9kwHHQVWiVYbdFqSQlojngo6YaLM8iAvyQ33hWvf5eNhtM71BkbG2L0s1BXmDhVP30cVfquoRC65LK-dXq2kK7bx3vStuCpCvICQ-615PAKk4cK55_hnybD4I7xGWAIoCdxdIuGtS7fw0u0y83ZeZF57jMPiDPVbLwQ">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+</div>
+<div class="slide active">
+<img class="w-full h-full object-cover" data-alt="Insurance protection for construction workers, showing health, life, and accident coverage options." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAY3_C4yA28VeLwlH6MR-HuOxX1mdzKDbX8f8e-PIwtXEyWGRBhxHgL0yOPdV_Vodp44TdFSHgxSomMFfS8RN6nshhdXHa7u6aY7oqTOOdrNXhyU53I6IW9KH2wYwnrsYNymOmgwjMWgLvt1pWdKCDdPN1KQtLv2kVYo8cSES8ALfAjiXO5Z_bCiBIvY825CMk-joPOCW5aQG2-Dye2z3liXGZCejpokdaHaMJyBpAW28uTTsmhxXWRoQzxsYwtgpdebRQ">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+</div>
+<div class="slide">
+<img class="w-full h-full object-cover" data-alt="Contractors and builders using a dashboard to manage their construction workforce seamlessly." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAubL2Hn-4EfoWj9Ci67xpYjnRPbdCSeoxtQPswhPr4LMXnDbVZSecS0bIrcRmkgdFKGE01g0IV3hADnw0eE1C6PaM_zaiUfqVSuW6b8HwoxLS7d9FCmr2Cbqn8slSWv59EcCkaHduMDOJWH27UzIobo8uOszBKQ8Jz-W3fxdmwX_JE5ln4aInlqIGhTkoZX6h-gSs_dVS_H57kq31d1N3uD-9_BQizh8FZ9xrbUUO3KRYUCDJONJe8u7lXkJ8rNUzjQTA">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+</div>
+</div>
+<!-- Slideshow Indicators -->
+<div class="absolute bottom-lg left-1/2 transform -translate-x-1/2 flex gap-xs z-20">
+<div class="w-3 h-3 rounded-full transition-all duration-300 bg-white/50" id="dot-0"></div>
+<div class="w-3 h-3 rounded-full transition-all duration-300 bg-white/50" id="dot-1"></div>
+<div class="w-3 h-3 rounded-full transition-all duration-300 bg-white/50" id="dot-2"></div>
+<div class="w-3 h-3 rounded-full transition-all duration-300 bg-gold-accent" id="dot-3"></div>
+<div class="w-3 h-3 rounded-full transition-all duration-300 bg-white/50" id="dot-4"></div>
+</div>
+</div>
+</div>
+</div>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const dots = [
+                document.getElementById('dot-0'),
+                document.getElementById('dot-1'),
+                document.getElementById('dot-2'),
+                document.getElementById('dot-3'),
+                document.getElementById('dot-4')
+            ];
+            let currentSlide = 0;
+
+            function nextSlide() {
+                // Remove active class from current
+                slides[currentSlide].classList.remove('active');
+                if(dots[currentSlide]) {
+                    dots[currentSlide].classList.remove('bg-gold-accent');
+                    dots[currentSlide].classList.add('bg-white/50');
+                }
+
+                // Move to next
+                currentSlide = (currentSlide + 1) % slides.length;
+
+                // Add active class to new current
+                slides[currentSlide].classList.add('active');
+                if(dots[currentSlide]) {
+                    dots[currentSlide].classList.remove('bg-white/50');
+                    dots[currentSlide].classList.add('bg-gold-accent');
+                }
+            }
+
+            // Start slideshow
+            setInterval(nextSlide, 5000);
+        });
+    </script>
+
+
+
+
+</body></html>

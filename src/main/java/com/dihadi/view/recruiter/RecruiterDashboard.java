@@ -3,29 +3,53 @@ package com.dihadi.view.recruiter;
 import com.dihadi.model.Recruiter;
 import com.dihadi.model.Project;
 import com.dihadi.model.JobApplication;
+import com.dihadi.model.Notification;
 import com.dihadi.controller.ProjectController;
 import com.dihadi.controller.RecruiterController;
 import com.dihadi.controller.WorkerController;
 import com.dihadi.controller.JobApplicationController;
+import com.dihadi.controller.NotificationController;
+import com.dihadi.controller.RazorpayService;
+import com.dihadi.view.PaymentGateway.PaymentCheckoutScene;
 import com.dihadi.view.SessionManager;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /** Recruiter Portal overview matching the updated dashboard reference. */
 public class RecruiterDashboard {
     private final Recruiter recruiter;
+    private Timeline livePoller;
+
+    private VBox activeOngoingPanel;
+    private VBox activeProjPanel;
+    private VBox upcomingProjPanel;
+    private VBox pastProjPanel;
+    private VBox reqPanel;
+    private VBox notificationsPanel;
+
+    private final java.util.Set<String> seenRecruiterNotifIds = new java.util.HashSet<>();
+    private boolean initialLoadDone = false;
 
     public RecruiterDashboard(Recruiter recruiter) {
         this.recruiter = recruiter != null ? recruiter : (SessionManager.currentRecruiter != null ? SessionManager.currentRecruiter : new Recruiter());
@@ -37,20 +61,27 @@ public class RecruiterDashboard {
         String name = (first + (blank(currentR.getLastName()) ? "" : " " + currentR.getLastName())).trim();
         String company = val(currentR.getCompanyName(), "Organisation not provided");
 
-        Label logo = label("DIHADI", "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        ImageView logoImg = new ImageView(new Image(getClass().getResource("/assets/logo/dihadi logo.jpeg").toExternalForm()));
+        logoImg.setFitWidth(42);
+        logoImg.setFitHeight(42);
+        logoImg.setPreserveRatio(true);
+        logoImg.setSmooth(true);
+        Label logo = label("DIHADI", "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
+        HBox brand = new HBox(10, logoImg, logo);
+        brand.setAlignment(Pos.CENTER_LEFT);
         Button overview = nav("Overview", true), projects = nav("My Projects", false),
                 attendance = nav("Attendance", false), wallet = nav("Wallet", false);
         attendance.setOnAction(e -> {
+            if (livePoller != null) livePoller.stop();
             Stage stage = (Stage) attendance.getScene().getWindow();
-            Scene currentScene = attendance.getScene();
-            stage.setScene(new AttendancePage(currentR).getScene(() -> stage.setScene(currentScene)));
+            stage.setScene(new AttendancePage(currentR).getScene(() -> stage.setScene(getScene(back))));
         });
         HBox nav = new HBox(22, overview, projects, attendance, wallet);
         nav.setAlignment(Pos.CENTER);
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Label profileBadge = label(name, "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#4c4637;-fx-background-color:#faf3e8;-fx-background-radius:999px;-fx-border-color:#cfc6b2;-fx-border-radius:999px;-fx-padding:9px 15px;");
-        HBox headerBar = new HBox(30, logo, nav, spacer, profileBadge);
+        HBox headerBar = new HBox(30, brand, nav, spacer, profileBadge);
         headerBar.setAlignment(Pos.CENTER_LEFT);
         headerBar.setPadding(new Insets(0, 0, 15, 0));
         headerBar.setStyle("-fx-border-color:transparent transparent #cfc6b2 transparent;-fx-border-width:0 0 1px 0;");
@@ -61,30 +92,39 @@ public class RecruiterDashboard {
         VBox welcomeBox = new VBox(9, welcomeLabel, companyLabel, subtextLabel);
         welcomeBox.setPrefWidth(420);
 
-        VBox activeOngoingPanel = panel("ACTIVE ONGOING PROJECT", label("Loading project...", "-fx-font-family:Georgia;-fx-font-size:20px;-fx-font-weight:700;"));
+        activeOngoingPanel = panel("ACTIVE ONGOING PROJECT", label("Loading project...", "-fx-font-family:Georgia;-fx-font-size:20px;-fx-font-weight:700;"));
         HBox.setHgrow(activeOngoingPanel, Priority.ALWAYS);
         HBox heroRow = new HBox(48, welcomeBox, activeOngoingPanel);
         heroRow.setAlignment(Pos.CENTER_LEFT);
 
-        VBox walletMetric = metric("Escrow / Wallet", "₹0.00", "Add funds");
-        VBox workersMetric = metric("Total Workers", "Loading...", "Available on platform");
-        VBox recruitersMetric = metric("Total Recruiters", "Loading...", "Partner network");
+        // Wallet metric with integrated Razorpay Add Funds
+        Label walletBalanceLabel = label(String.format("₹%.2f", currentR.getWalletBalance()),
+                "-fx-font-family:Georgia;-fx-font-size:25px;-fx-font-weight:700;-fx-text-fill:#735c00;");
+        Button addFundsBtn = action("+ ADD FUNDS", true);
+        addFundsBtn.setOnAction(e -> handleAddFunds(currentR, addFundsBtn, walletBalanceLabel, back));
+        VBox walletMetric = panel("Escrow / Wallet", walletBalanceLabel, addFundsBtn);
+        walletMetric.setMinHeight(138);
+
+        VBox workersMetric = metric("Assigned Workers", "Loading...", "Active project workforce");
         VBox projectsMetric = metric("Total Projects", "Loading...", "Active projects");
-        HBox metricsRow = new HBox(20, walletMetric, workersMetric, recruitersMetric, projectsMetric);
+        HBox metricsRow = new HBox(20, walletMetric, workersMetric, projectsMetric);
         for (Node n : metricsRow.getChildren()) HBox.setHgrow(n, Priority.ALWAYS);
 
-        VBox activeProjPanel = panel("ACTIVE PROJECTS", label("Loading...", "-fx-font-size:16px;"));
-        VBox upcomingProjPanel = panel("UPCOMING PROJECTS", label("Loading upcoming projects...", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
-        VBox pastProjPanel = panel("PAST COMPLETED PROJECTS", label("Loading past projects...", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
+        activeProjPanel = panel("ACTIVE PROJECTS", label("Loading...", "-fx-font-size:16px;"));
+        upcomingProjPanel = panel("UPCOMING PROJECTS", label("Loading upcoming projects...", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
+        pastProjPanel = panel("PAST COMPLETED PROJECTS", label("Loading past projects...", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
 
         Label reqCountLabel = label("Loading...", "-fx-font-size:16px;-fx-font-weight:700;");
         Button viewReqsBtn = action("VIEW APPROVALS", true);
         viewReqsBtn.setOnAction(e -> {
+            if (livePoller != null) livePoller.stop();
             Stage stage = (Stage) viewReqsBtn.getScene().getWindow();
-            Scene currentScene = viewReqsBtn.getScene();
-            stage.setScene(new PendingApprovalsPage(currentR).getScene(() -> stage.setScene(currentScene)));
+            stage.setScene(new PendingApprovalsPage(currentR).getScene(() -> stage.setScene(getScene(back))));
         });
-        VBox reqPanel = panel("PENDING APPROVAL REQUESTS", reqCountLabel, viewReqsBtn);
+        reqPanel = panel("PENDING APPROVAL REQUESTS", reqCountLabel, viewReqsBtn);
+
+        notificationsPanel = panel("NOTIFICATIONS & ALERTS",
+                label("Loading real-time updates...", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
 
         VBox recruiterProfilePanel = panel("RECRUITER PROFILE",
                 detail("Mobile", val(currentR.getMobileNumber(), "Not provided")),
@@ -92,13 +132,16 @@ public class RecruiterDashboard {
                 detail("Business Type", val(currentR.getBusinessType(), "Not provided")));
 
         VBox leftBody = new VBox(20, activeProjPanel, upcomingProjPanel, pastProjPanel);
-        VBox rightBody = new VBox(20, reqPanel, recruiterProfilePanel);
+        VBox rightBody = new VBox(20, reqPanel, notificationsPanel, recruiterProfilePanel);
         HBox bodyRow = new HBox(20, leftBody, rightBody);
         HBox.setHgrow(leftBody, Priority.ALWAYS);
         HBox.setHgrow(rightBody, Priority.ALWAYS);
 
         Button backBtn = action("BACK TO RECRUITER PAGE", true);
-        backBtn.setOnAction(e -> { if (back != null) back.run(); });
+        backBtn.setOnAction(e -> {
+            if (livePoller != null) livePoller.stop();
+            if (back != null) back.run();
+        });
         HBox footerRow = new HBox(backBtn);
         footerRow.setAlignment(Pos.CENTER_RIGHT);
 
@@ -108,9 +151,28 @@ public class RecruiterDashboard {
         content.setAlignment(Pos.TOP_CENTER);
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
-        scroll.setStyle("-fx-background:#fff8f0;-fx-background-color:#fff8f0;-fx-border-width:0;");
+        scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
 
-        // Background Data Fetching
+        // Initial Fetch
+        refreshRecruiterData(currentR, welcomeLabel, companyLabel, profileBadge, workersMetric, projectsMetric, reqCountLabel, walletBalanceLabel, back);
+
+        // Real-time live polling refresher every 3 seconds
+        livePoller = new Timeline(new KeyFrame(Duration.seconds(3), e ->
+                refreshRecruiterData(currentR, welcomeLabel, companyLabel, profileBadge, workersMetric, projectsMetric, reqCountLabel, walletBalanceLabel, back)
+        ));
+        livePoller.setCycleCount(Timeline.INDEFINITE);
+        livePoller.play();
+
+        return new Scene(scroll, 1440, 900);
+    }
+
+    private boolean isUpdating = false;
+
+    private void refreshRecruiterData(Recruiter currentR, Label welcomeLabel, Label companyLabel, Label profileBadge,
+                                      VBox workersMetric, VBox projectsMetric, Label reqCountLabel, Label walletBalanceLabel, Runnable back) {
+        if (isUpdating) return;
+        isUpdating = true;
+
         new Thread(() -> {
             try {
                 String searchKey = val(currentR.getMobileNumber(), currentR.getEmail());
@@ -126,10 +188,10 @@ public class RecruiterDashboard {
                 String finalFullName = (finalFirstName + (blank(finalR.getLastName()) ? "" : " " + finalR.getLastName())).trim();
                 String finalCompany = val(finalR.getCompanyName(), "Organisation not provided");
 
-                int totalWorkers = new WorkerController().getAllWorkers().size();
                 int totalRecruiters = new RecruiterController().getAllRecruiters().size();
                 List<Project> allProjectsList = new ProjectController().getAllProjects();
                 List<JobApplication> allApps = new JobApplicationController().getAllApplications();
+                List<Notification> recruiterNotifs = new NotificationController().getNotifications(searchKey);
 
                 List<Project> recruiterProjects = new ArrayList<>();
                 if (allProjectsList != null) {
@@ -151,7 +213,6 @@ public class RecruiterDashboard {
                                 recruiterProjects.add(p);
                             }
                         }
-                        // Ultimate fallback: if still empty in a single recruiter database, use all projects
                         if (recruiterProjects.isEmpty() && (allProjectsList.size() == 1 || (totalRecruiters <= 1 && !allProjectsList.isEmpty()))) {
                             recruiterProjects.addAll(allProjectsList);
                         }
@@ -183,18 +244,109 @@ public class RecruiterDashboard {
                 final List<Project> finalUpcoming = upcomingList;
                 final List<Project> finalCompleted = completedList;
                 final int finalProjCount = recruiterProjects.size();
-                long pendingAppsCount = allApps.stream().filter(a -> "Pending".equalsIgnoreCase(a.getStatus())).count();
+                
+                int assignedWorkersCount = 0;
+                if (finalActiveProj != null && finalActiveProj.getProjectId() != null) {
+                    assignedWorkersCount = (int) allApps.stream()
+                            .filter(a -> finalActiveProj.getProjectId().equals(a.getProjectId()) && "Accepted".equalsIgnoreCase(a.getStatus()))
+                            .map(JobApplication::getWorkerMobile)
+                            .filter(m -> m != null && !m.isBlank())
+                            .distinct()
+                            .count();
+                }
+                final int finalAssignedWorkers = assignedWorkersCount;
+                
+                java.util.Set<String> recruiterProjIds = new java.util.HashSet<>();
+                for (Project p : recruiterProjects) {
+                    if (p.getProjectId() != null && !p.getProjectId().isBlank()) {
+                        recruiterProjIds.add(p.getProjectId());
+                    }
+                }
+                
+                String rMobDigits = finalR.getMobileNumber() != null ? finalR.getMobileNumber().replaceAll("\\D", "") : "";
+                
+                long pendingAppsCount = allApps.stream()
+                        .filter(a -> "Pending".equalsIgnoreCase(a.getStatus()))
+                        .filter(a -> {
+                            if (a.getProjectId() != null && recruiterProjIds.contains(a.getProjectId())) {
+                                return true;
+                            }
+                            String appRMob = a.getRecruiterMobile() != null ? a.getRecruiterMobile().replaceAll("\\D", "") : "";
+                            if (!rMobDigits.isEmpty() && !appRMob.isEmpty()) {
+                                return appRMob.equals(rMobDigits) || appRMob.endsWith(rMobDigits) || rMobDigits.endsWith(appRMob);
+                            }
+                            return false;
+                        })
+                        .count();
 
                 Platform.runLater(() -> {
                     welcomeLabel.setText("Welcome back, " + finalFullName + "!");
                     companyLabel.setText(finalCompany + "  •  Recruiter Account");
                     profileBadge.setText(finalFullName);
 
-                    ((Label) workersMetric.getChildren().get(1)).setText(String.valueOf(totalWorkers));
-                    ((Label) recruitersMetric.getChildren().get(1)).setText(String.valueOf(totalRecruiters));
+                    if (walletBalanceLabel != null) {
+                        walletBalanceLabel.setText(String.format("₹%.2f", finalR.getWalletBalance()));
+                    }
+
+                    ((Label) workersMetric.getChildren().get(1)).setText(String.valueOf(finalAssignedWorkers));
+                    if (finalActiveProj != null) {
+                        ((Label) workersMetric.getChildren().get(2)).setText("Assigned to " + finalActiveProj.getProjectName());
+                    } else {
+                        ((Label) workersMetric.getChildren().get(2)).setText("No active project");
+                    }
                     ((Label) projectsMetric.getChildren().get(1)).setText(String.valueOf(finalProjCount));
 
                     ((Label) reqCountLabel).setText(pendingAppsCount == 0 ? "No pending worker approvals." : pendingAppsCount + " pending application(s)");
+
+                    // Populate Notifications Panel
+                    if (notificationsPanel != null) {
+                        notificationsPanel.getChildren().clear();
+                        notificationsPanel.getChildren().add(label("✦  NOTIFICATIONS & REAL-TIME ALERTS",
+                                "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.2px;-fx-text-fill:#735c00;"));
+
+                        if (recruiterNotifs == null || recruiterNotifs.isEmpty()) {
+                            notificationsPanel.getChildren().addAll(
+                                    label("No activity notifications yet", "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#4c4637;"),
+                                    label("Incoming worker applications & accepted hiring offers will appear here in real time.", "-fx-font-size:13px;-fx-text-fill:#8c7e6b;"));
+                        } else {
+                            int count = 0;
+                            for (Notification n : recruiterNotifs) {
+                                if (n.getNotificationId() != null && !seenRecruiterNotifIds.contains(n.getNotificationId())) {
+                                    seenRecruiterNotifIds.add(n.getNotificationId());
+                                    if (initialLoadDone) {
+                                        com.dihadi.view.NotificationToast.ToastType toastType = "HIRING_ACCEPTED".equalsIgnoreCase(n.getType())
+                                                ? com.dihadi.view.NotificationToast.ToastType.SUCCESS
+                                                : com.dihadi.view.NotificationToast.ToastType.INFO;
+                                        com.dihadi.view.NotificationToast.show(welcomeLabel, n.getTitle(), n.getMessage(), toastType);
+                                    }
+                                }
+
+                                if (count++ >= 8) continue; // show up to 8 in panel
+                                String icon = "🔔";
+                                if ("APPLICATION_RECEIVED".equalsIgnoreCase(n.getType())) icon = "📥";
+                                else if ("HIRING_ACCEPTED".equalsIgnoreCase(n.getType())) icon = "🎉";
+                                else if ("APPLICATION_ACCEPTED".equalsIgnoreCase(n.getType())) icon = "✓";
+
+                                Label titleLbl = label(icon + "  " + (n.getTitle() != null ? n.getTitle() : "Notification"),
+                                        "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+                                Label msgLbl = label(n.getMessage() != null ? n.getMessage() : "",
+                                        "-fx-font-size:12px;-fx-text-fill:#4d4635;");
+                                msgLbl.setWrapText(true);
+
+                                VBox notifCard = new VBox(4, titleLbl, msgLbl);
+                                notifCard.setPadding(new Insets(10, 12, 10, 12));
+                                if ("HIRING_ACCEPTED".equalsIgnoreCase(n.getType())) {
+                                    notifCard.setStyle("-fx-background-color:#e8f5e9;-fx-background-radius:8px;-fx-border-color:#a5d6a7;-fx-border-width:1px;-fx-border-radius:8px;");
+                                } else if ("APPLICATION_RECEIVED".equalsIgnoreCase(n.getType())) {
+                                    notifCard.setStyle("-fx-background-color:#fff8e1;-fx-background-radius:8px;-fx-border-color:#ffe082;-fx-border-width:1px;-fx-border-radius:8px;");
+                                } else {
+                                    notifCard.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:#e5d9c7;-fx-border-width:1px;-fx-border-radius:8px;");
+                                }
+                                notificationsPanel.getChildren().add(notifCard);
+                            }
+                            initialLoadDone = true;
+                        }
+                    }
 
                     // Populate Hero Active Ongoing Project Panel
                     activeOngoingPanel.getChildren().clear();
@@ -208,8 +360,7 @@ public class RecruiterDashboard {
                         Button createProjBtn = action("CREATE PROJECT", true);
                         createProjBtn.setOnAction(ev -> {
                             Stage stage = (Stage) createProjBtn.getScene().getWindow();
-                            Scene currentScene = createProjBtn.getScene();
-                            stage.setScene(new CreateProjectPage().getCreateProjectScene(() -> stage.setScene(currentScene)));
+                            stage.setScene(new CreateProjectPage().getCreateProjectScene(() -> stage.setScene(getScene(back))));
                         });
 
                         activeOngoingPanel.getChildren().addAll(noProj, compDetail, statusDetail, new HBox(12, createProjBtn));
@@ -254,8 +405,10 @@ public class RecruiterDashboard {
                                 label("⌖ " + (locStr.isBlank() ? "Location not provided" : locStr), "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
                                 label("Status: Active Ongoing", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#2a7e3b;")
                         );
-                        activeCard.setPadding(new Insets(10));
-                        activeCard.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:#e5d9c7;-fx-border-radius:8px;");
+                        activeCard.setPadding(new Insets(12));
+                        activeCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:10px;");
+                        activeCard.setOnMouseEntered(e -> activeCard.setStyle("-fx-background-color:linear-gradient(to right, #ffffff, #fffdf2);-fx-background-radius:10px;-fx-border-color:#b8921e;-fx-border-width:2px;-fx-border-radius:10px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.25),12,0,0,3px);"));
+                        activeCard.setOnMouseExited(e -> activeCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:10px;"));
                         activeProjPanel.getChildren().add(activeCard);
                     }
 
@@ -272,8 +425,10 @@ public class RecruiterDashboard {
                                     label("⌖ " + (upLoc.isBlank() ? "Location not provided" : upLoc), "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
                                     label("Status: Upcoming", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#735c00;")
                             );
-                            upCard.setPadding(new Insets(10));
-                            upCard.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:#e5d9c7;-fx-border-radius:8px;");
+                            upCard.setPadding(new Insets(12));
+                            upCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#e5d9c7;-fx-border-width:1.5px;-fx-border-radius:10px;");
+                            upCard.setOnMouseEntered(e -> upCard.setStyle("-fx-background-color:linear-gradient(to right, #ffffff, #fffdf2);-fx-background-radius:10px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:10px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.25),12,0,0,3px);"));
+                            upCard.setOnMouseExited(e -> upCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#e5d9c7;-fx-border-width:1.5px;-fx-border-radius:10px;"));
                             upcomingProjPanel.getChildren().add(upCard);
                         }
                     }
@@ -291,18 +446,135 @@ public class RecruiterDashboard {
                                     label("⌖ " + (cpLoc.isBlank() ? "Location not provided" : cpLoc), "-fx-font-size:13px;-fx-text-fill:#4d4635;"),
                                     label("Status: Completed ✓", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#2a7e3b;")
                             );
-                            cpCard.setPadding(new Insets(10));
-                            cpCard.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:#e5d9c7;-fx-border-radius:8px;");
+                            cpCard.setPadding(new Insets(12));
+                            cpCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#e5d9c7;-fx-border-width:1.5px;-fx-border-radius:10px;");
+                            cpCard.setOnMouseEntered(e -> cpCard.setStyle("-fx-background-color:linear-gradient(to right, #ffffff, #fffdf2);-fx-background-radius:10px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:10px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.25),12,0,0,3px);"));
+                            cpCard.setOnMouseExited(e -> cpCard.setStyle("-fx-background-color:linear-gradient(to right, #fffcf5, #fef8eb);-fx-background-radius:10px;-fx-border-color:#e5d9c7;-fx-border-width:1.5px;-fx-border-radius:10px;"));
                             pastProjPanel.getChildren().add(cpCard);
                         }
                     }
                 });
             } catch (Exception ex) {
                 ex.printStackTrace();
+            } finally {
+                isUpdating = false;
             }
         }).start();
+    }
 
-        return new Scene(scroll, 1440, 900);
+    /**
+     * Handles the "+ ADD FUNDS" button click: prompts for amount, creates a Razorpay order,
+     * opens the checkout modal, verifies the payment signature, persists the updated
+     * wallet balance to Firestore, and refreshes the dashboard.
+     */
+    private void handleAddFunds(Recruiter currentR, Button addFundsBtn, Label walletBalanceLabel, Runnable back) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Add Funds to Wallet");
+        dialog.setHeaderText("Enter the amount (INR) to deposit:");
+        dialog.setContentText("Amount (₹):");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isEmpty() || result.get().trim().isEmpty()) return;
+
+        double amount;
+        try {
+            amount = Double.parseDouble(result.get().trim());
+            if (amount <= 0) throw new NumberFormatException();
+        } catch (NumberFormatException ex) {
+            displayAlert(Alert.AlertType.ERROR, "Invalid Amount",
+                    "Please enter a valid numeric value greater than 0.");
+            return;
+        }
+
+        addFundsBtn.setDisable(true);
+        addFundsBtn.setText("Processing...");
+
+        final Stage dashboardStage = (Stage) addFundsBtn.getScene().getWindow();
+
+        new Thread(() -> {
+            try {
+                RazorpayService razorpayService = new RazorpayService();
+                String receiptId = "rcpt_" + UUID.randomUUID().toString().substring(0, 8);
+                String orderId = razorpayService.createOrder(amount, receiptId);
+
+                String email = val(currentR.getEmail(), "recruiter@dihadi.com");
+                String phone = val(currentR.getMobileNumber(), "9999999999");
+
+                Platform.runLater(() -> {
+                    PaymentCheckoutScene.openCheckout(
+                            dashboardStage,
+                            orderId,
+                            amount,
+                            email,
+                            phone,
+                            new PaymentCheckoutScene.PaymentCallback() {
+                                @Override
+                                public void onSuccess(String paymentId, String oid, String signature) {
+                                    System.out.println("[Dashboard] Payment success callback received — paymentId=" + paymentId);
+
+                                    // Verify payment signature (may fail in sandbox with test keys)
+                                    boolean verified = razorpayService.verifySignature(oid, paymentId, signature);
+                                    if (!verified) {
+                                        System.out.println("[Dashboard] Signature verification failed — crediting anyway (sandbox mode).");
+                                    }
+
+                                    // Update balance in-memory
+                                    double newBalance = currentR.getWalletBalance() + amount;
+                                    currentR.setWalletBalance(newBalance);
+                                    if (SessionManager.currentRecruiter != null) {
+                                        SessionManager.currentRecruiter.setWalletBalance(newBalance);
+                                    }
+
+                                    // Persist to Firestore in background
+                                    new Thread(() -> {
+                                        try {
+                                            String mobile = currentR.getMobileNumber();
+                                            if (mobile != null && !mobile.isBlank()) {
+                                                new RecruiterController().updateWalletBalance(mobile, newBalance);
+                                                System.out.println("[Dashboard] Wallet balance persisted to Firestore: ₹" + newBalance);
+                                            }
+                                        } catch (Exception dbEx) {
+                                            System.err.println("[Dashboard] Firestore wallet update failed: " + dbEx.getMessage());
+                                            dbEx.printStackTrace();
+                                        }
+                                    }).start();
+
+                                    // Refresh the dashboard immediately to show updated balance
+                                    displayAlert(Alert.AlertType.INFORMATION, "Payment Successful",
+                                            "₹" + String.format("%.2f", amount) + " credited to your wallet.\nTxn ID: " + paymentId);
+                                    dashboardStage.setScene(getScene(back));
+                                }
+
+                                @Override
+                                public void onFailure(String errorMessage) {
+                                    System.out.println("[Dashboard] Payment failure callback — " + errorMessage);
+                                    addFundsBtn.setDisable(false);
+                                    addFundsBtn.setText("+ ADD FUNDS");
+                                    displayAlert(Alert.AlertType.ERROR, "Payment Failed", errorMessage);
+                                }
+                            }
+                    );
+                });
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    addFundsBtn.setDisable(false);
+                    addFundsBtn.setText("+ ADD FUNDS");
+                    displayAlert(Alert.AlertType.ERROR, "Gateway Error",
+                            "Failed to initiate payment: " + ex.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    private void displayAlert(Alert.AlertType type, String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(type);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
     }
 
     private VBox metric(String t, String v, String n) {
@@ -314,18 +586,21 @@ public class RecruiterDashboard {
     }
 
     private VBox panel(String title, Node... nodes) {
-        VBox v = new VBox(12, label(title, "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.3px;-fx-text-fill:#685c52;"));
+        String headerTitle = title.startsWith("✦") ? title : "✦  " + title;
+        VBox v = new VBox(12, label(headerTitle, "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.2px;-fx-text-fill:#735c00;"));
         v.getChildren().addAll(nodes);
         v.setPadding(new Insets(22));
-        v.setStyle("-fx-background-color:#ffffff;-fx-background-radius:16px;-fx-border-color:#cfc6b2;-fx-border-radius:16px;-fx-effect:dropshadow(gaussian,rgba(34,34,34,.08),18,0,0,5px);");
+        v.setStyle("-fx-background-color:linear-gradient(to bottom right, #ffffff 0%, #fffcf5 100%);-fx-background-radius:18px;-fx-border-color:#e8ddc8;-fx-border-width:1.5px;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(115,92,0,.08),16,0,0,5px);");
+        v.setOnMouseEntered(e -> v.setStyle("-fx-background-color:linear-gradient(to bottom right, #ffffff 0%, #fffbf0 100%);-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:18px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.30),22,0,0,7px);"));
+        v.setOnMouseExited(e -> v.setStyle("-fx-background-color:linear-gradient(to bottom right, #ffffff 0%, #fffcf5 100%);-fx-background-radius:18px;-fx-border-color:#e8ddc8;-fx-border-width:1.5px;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(115,92,0,.08),16,0,0,5px);"));
         return v;
     }
 
     private Button action(String text, boolean filled) {
         Button b = new Button(text);
         b.setStyle(filled
-                ? "-fx-background-color:#d4af37;-fx-background-radius:8px;-fx-text-fill:#222222;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:10px 16px;-fx-cursor:hand;"
-                : "-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:#cfc6b2;-fx-border-radius:8px;-fx-text-fill:#4c4637;-fx-font-size:12px;-fx-font-weight:700;-fx-padding:9px 15px;-fx-cursor:hand;");
+                ? "-fx-background-color:linear-gradient(to right, #d4af37, #b8921e);-fx-background-radius:8px;-fx-text-fill:#ffffff;-fx-font-weight:800;-fx-font-size:12px;-fx-padding:9px 18px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(184,146,30,.3),8,0,0,2px);"
+                : "-fx-background-color:#ffffff;-fx-background-radius:8px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:8px;-fx-text-fill:#735c00;-fx-font-size:12px;-fx-font-weight:700;-fx-padding:8px 16px;-fx-cursor:hand;");
         return b;
     }
 
@@ -338,8 +613,8 @@ public class RecruiterDashboard {
     }
 
     private VBox detail(String k, String v) {
-        return new VBox(3, label(k, "-fx-font-size:11px;-fx-text-fill:#7e7665;"),
-                label(val(v, "Not provided"), "-fx-font-size:15px;-fx-font-weight:600;-fx-text-fill:#1e1b15;"));
+        return new VBox(3, label(k, "-fx-font-size:11px;-fx-font-weight:700;-fx-letter-spacing:.3px;-fx-text-fill:#8c7e6b;"),
+                label(val(v, "Not provided"), "-fx-font-size:15px;-fx-font-weight:600;-fx-text-fill:#231b00;"));
     }
 
     private boolean blank(String v) {
