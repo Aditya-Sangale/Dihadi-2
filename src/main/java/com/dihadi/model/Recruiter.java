@@ -13,6 +13,7 @@ public class Recruiter {
     private String businessType;
     private String uid;
     private String password;
+    private double walletBalance;
 
     public Recruiter() {
     }
@@ -128,5 +129,13 @@ public class Recruiter {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public double getWalletBalance() {
+        return walletBalance;
+    }
+
+    public void setWalletBalance(double walletBalance) {
+        this.walletBalance = walletBalance;
     }
 }

@@ -106,4 +106,15 @@ public class RecruiterDao {
 
         return list;
     }
+
+    public void updateWalletBalance(String mobileNumber, double newBalance) {
+        try {
+            db.collection("Recruiters")
+                    .document(mobileNumber)
+                    .update("walletBalance", newBalance);
+            System.out.println("Wallet balance updated for " + mobileNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

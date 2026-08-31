@@ -2,6 +2,9 @@
 target/
 *.class
 
+# Maven build output
+target/
+
 # Log file
 *.log
 
@@ -24,5 +27,4 @@ target/
 hs_err_pid*
 replay_pid*
 
-# Firebase service-account credential (keep this local; never commit it)
 src/main/resources/assets/dihadi_fb.json
