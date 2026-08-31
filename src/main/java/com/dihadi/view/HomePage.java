@@ -1,4 +1,5 @@
 package com.dihadi.view;
+
 import com.dihadi.view.recruiter.SignUpRecruiter;
 import com.dihadi.view.recruiter.RecruiterPage;
 import com.dihadi.view.admin.AdminHomePage;
@@ -7,7 +8,6 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -60,18 +60,19 @@ public class HomePage extends Application {
     @Override
     public void start(Stage stage) {
         primaryStage = stage;
-        primaryStage.setTitle("DIHADI - Mera Haq ~ Meri Dihadi");
+        primaryStage.setTitle("DIHADI - Meri Dihadi ~ Mera Haq");
         primaryStage.setFullScreen(false);
         primaryStage.setWidth(1400);
         primaryStage.setHeight(780);
         primaryStage.setMaximized(true);
         showWelcome();
+        primaryStage.show();
     }
 
-    /** Opens the existing WelcomePage with the Stage owned by HomePage. */
+    /** Sets the WelcomePage scene on the same stage owned by HomePage. */
     private void showWelcome() {
         stopSlider();
-        new WelcomePage().show(primaryStage, this::showHome);
+        primaryStage.setScene(new WelcomePage().getWelcomeScene(this::showHome));
     }
 
     /** Used by WelcomePage after its welcome interaction. */
@@ -120,8 +121,7 @@ public class HomePage extends Application {
                 navButton("Contact Us", false, this::showContact));
         navigation.setAlignment(Pos.CENTER);
 
-        Button admin = primaryButton("Admin");
-        admin.setOnAction(event -> showAdmin());
+        Button admin = AppNavigator.createHeaderActionButton();
         BorderPane header = new BorderPane();
         header.setLeft(brand);
         header.setCenter(navigation);
@@ -249,8 +249,9 @@ public class HomePage extends Application {
                 this::showContact, "Pune, Maharashtra", this::showContact);
         HBox top = new HBox(64, identity, explore, contact);
         top.setAlignment(Pos.TOP_LEFT);
-        VBox footer = new VBox(22, top, label("© 2026 DIHADI  •  Mera Haq ~ Meri Dihadi. All rights reserved.",
-                "-fx-font-size:12px;-fx-text-fill:#f8f0e2;-fx-opacity:.65;"));
+        VBox footer = new VBox(22, top,
+                label("© 2026 DIHADI  •  Meri Dihadi ~ Mera Haq. All rights reserved.",
+                        "-fx-font-size:12px;-fx-text-fill:#f8f0e2;-fx-opacity:.65;"));
         footer.setPadding(new Insets(32, 42, 24, 42));
         footer.setMaxWidth(1180);
         footer.setStyle("-fx-background-color:#343027;-fx-background-radius:20px;");
@@ -273,10 +274,53 @@ public class HomePage extends Application {
         return button;
     }
 
-    /** Worker navigation and job discovery begin with the worker profile form. */
-    private void showWorker() {
-        stopSlider();
-        AppNavigator.signUp(primaryStage, null);
+    private Button navButton(String text, boolean active, Runnable action) {
+        Button button = new Button(text);
+        button.setOnAction(event -> action.run());
+        String activeStyle = active
+                ? "-fx-text-fill:#735c00;-fx-border-color:#735c00;-fx-border-width:0 0 2px 0;"
+                : "-fx-text-fill:#4d4635;-fx-border-color:transparent;-fx-border-width:0 0 2px 0;";
+        button.setStyle(
+                "-fx-background-color:transparent;-fx-background-radius:0;-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:8px 4px;-fx-cursor:hand;"
+                        + activeStyle);
+        return button;
+    }
+
+    private Button primaryButton(String text) {
+        Button button = new Button(text);
+        button.setStyle(
+                "-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-font-family:'Segoe UI',sans-serif;-fx-padding:10px 20px;-fx-cursor:hand;");
+        return button;
+    }
+
+    private Button outlineButton(String text) {
+        Button button = new Button(text);
+        button.setStyle(
+                "-fx-background-color:transparent;-fx-background-radius:999px;-fx-border-color:#806c47;-fx-border-radius:999px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-font-family:'Segoe UI',sans-serif;-fx-padding:9px 18px;-fx-cursor:hand;");
+        return button;
+    }
+
+    private Label label(String text, String style) {
+        Label label = new Label(text);
+        label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
+        return label;
+    }
+
+    private ImageView image(String path, double width, double height) {
+        Image image = new Image(getClass().getResource(path).toExternalForm());
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+        return imageView;
+    }
+
+    private void prepareLogo(ImageView logo) {
+        logo.setFitWidth(52);
+        logo.setFitHeight(52);
+        logo.setPreserveRatio(true);
+        logo.setSmooth(true);
     }
 
     private void showBusiness() {
@@ -284,20 +328,14 @@ public class HomePage extends Application {
         primaryStage.setScene(new BusinessPage().getBusinessScene(this::showHome, this::showWorker));
     }
 
-    private void showRecruiter() {
+    private void showWorker() {
         stopSlider();
-        primaryStage.setScene(new RecruiterPage().getRecruiterScene(this::showHome));
+        primaryStage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(this::showHome));
     }
 
     private void showRecruiterSignUp() {
         stopSlider();
-        primaryStage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(this::showRecruiter));
-    }
-
-    /** Opens the visual administration portal linked from the homepage header. */
-    private void showAdmin() {
-        stopSlider();
-        primaryStage.setScene(new AdminHomePage().getAdminHomeScene(this::showHome));
+        primaryStage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(this::showHome));
     }
 
     private void showAbout() {
@@ -307,8 +345,30 @@ public class HomePage extends Application {
 
     private void showContact() {
         stopSlider();
-        primaryStage.setScene(
-                new ContactUs().getContactScene(this::showHome, this::showBusiness, this::showWorker, this::showAbout));
+        primaryStage.setScene(new ContactUs().getContactScene(this::showHome, this::showBusiness, this::showWorker, this::showAbout));
+    }
+
+    private void showAdmin() {
+        stopSlider();
+        primaryStage.setScene(new AdminHomePage().getAdminHomeScene(this::showHome));
+    }
+
+    private void startSlider() {
+        if (imageSlider != null) {
+            imageSlider.stop();
+        }
+        imageSlider = new Timeline(new KeyFrame(Duration.seconds(4), event -> {
+            imageIndex = (imageIndex + 1) % HERO_IMAGES.length;
+            heroImage.setImage(new Image(getClass().getResource(HERO_IMAGES[imageIndex]).toExternalForm()));
+        }));
+        imageSlider.setCycleCount(Timeline.INDEFINITE);
+        imageSlider.play();
+    }
+
+    private void stopSlider() {
+        if (imageSlider != null) {
+            imageSlider.stop();
+        }
     }
 
     private void comingSoon(String title, String message) {
@@ -317,88 +377,5 @@ public class HomePage extends Application {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.show();
-    }
-
-    private void startSlider() {
-        imageSlider = new Timeline(new KeyFrame(Duration.seconds(3), event -> {
-            imageIndex = (imageIndex + 1) % HERO_IMAGES.length;
-            heroImage.setImage(loadImage(HERO_IMAGES[imageIndex]));
-        }));
-        imageSlider.setCycleCount(Timeline.INDEFINITE);
-        imageSlider.play();
-    }
-
-    private void stopSlider() {
-        if (imageSlider != null)
-            imageSlider.stop();
-    }
-
-    private Label label(String text, String style) {
-        Label label = new Label(text);
-        label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
-        return label;
-    }
-
-    private Button primaryButton(String text) {
-        Button button = new Button(text);
-        button.setStyle(
-                "-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:10px 20px;-fx-cursor:hand;");
-        return button;
-    }
-
-    private Button heroOutlineButton(String text) {
-        Button button = new Button(text);
-        button.setStyle(
-                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#f8f0e2;-fx-border-radius:18px;-fx-text-fill:#fff8f0;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:9px 18px;-fx-cursor:hand;");
-        return button;
-    }
-
-    private Button outlineButton(String text) {
-        Button button = new Button(text);
-        button.setStyle(
-                "-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:9px 18px;-fx-cursor:hand;");
-        return button;
-    }
-
-    /**
-     * Matches the transparent, underline-based navigation used by Worker and About
-     * Us.
-     */
-    private Button navButton(String text, boolean active, Runnable action) {
-        Button button = new Button(text);
-        button.setOnAction(event -> action.run());
-        String state = active
-                ? "-fx-text-fill:#735c00;-fx-border-color:#735c00;"
-                : "-fx-text-fill:#4d4635;-fx-border-color:transparent;";
-        button.setStyle("-fx-background-color:transparent;-fx-background-radius:0;"
-                + "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;"
-                + "-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;" + state);
-        return button;
-    }
-
-    private void prepareLogo(ImageView logo) {
-        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
-        logo.setFitWidth(62);
-        logo.setFitHeight(62);
-        logo.setPreserveRatio(true);
-        logo.setSmooth(true);
-    }
-
-    private ImageView image(String path, double width, double height) {
-        ImageView view = new ImageView(loadImage(path));
-        view.setFitWidth(width);
-        view.setFitHeight(height);
-        view.setPreserveRatio(false);
-        view.setSmooth(true);
-        return view;
-    }
-
-    private Image loadImage(String path) {
-        var resource = getClass().getResource(path);
-        return resource == null ? null : new Image(resource.toExternalForm());
-    }
-
-    private String surfaceCard() {
-        return "-fx-background-color:#fff8f0;-fx-background-radius:24px;-fx-border-color:#d0c5af;-fx-border-radius:24px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),18,0,0,6px);";
     }
 }

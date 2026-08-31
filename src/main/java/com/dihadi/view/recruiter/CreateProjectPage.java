@@ -51,12 +51,12 @@ public class CreateProjectPage {
         ScrollPane formScroll = new ScrollPane(form);
         formScroll.setFitToWidth(true);
         formScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        formScroll.setStyle("-fx-background:transparent;-fx-background-color:#f2f2f2;-fx-border-width:0;");
+        formScroll.setStyle("-fx-background:transparent;-fx-background-color:#f3e7ce;-fx-border-width:0;");
         HBox.setHgrow(formScroll, Priority.ALWAYS);
 
         StackPane visualPanel = visualPanel();
         HBox page = new HBox(formScroll, visualPanel);
-        page.setStyle("-fx-background-color:#f2f2f2;");
+        page.setStyle("-fx-background-color:#f3e7ce;");
         Scene scene = new Scene(page, 1400, 780);
         scene.windowProperty().addListener((observable, oldWindow, window) -> {
             if (window instanceof Stage stage) {
@@ -69,11 +69,10 @@ public class CreateProjectPage {
 
     private VBox identity() {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 86, 86);
-        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
         logo.setPreserveRatio(true);
         VBox identity = new VBox(4, logo,
                 text("DIHADI", "-fx-font-family:Georgia;-fx-font-size:31px;-fx-font-weight:800;-fx-text-fill:#27438a;"),
-                text("Mera Haq ~ Meri Dihadi",
+                text("Meri Dihadi ~ Mera Haq",
                         "-fx-font-family:Georgia;-fx-font-size:17px;-fx-font-style:italic;-fx-text-fill:#4c4637;"));
         identity.setAlignment(Pos.CENTER);
         return identity;

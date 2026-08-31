@@ -96,23 +96,22 @@ public class AddWorkersPage {
         ScrollPane scroll = new ScrollPane(formColumn);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scroll.setStyle("-fx-background:transparent;-fx-background-color:#fff8f0;-fx-border-width:0;");
+        scroll.setStyle("-fx-background:transparent;-fx-background-color:#f3e7ce;-fx-border-width:0;");
         HBox.setHgrow(scroll, Priority.ALWAYS);
 
         StackPane imagePanel = imagePanel();
         HBox page = new HBox(scroll, imagePanel);
-        page.setStyle("-fx-background-color:#fff8f0;");
+        page.setStyle("-fx-background-color:#f3e7ce;");
         Scene scene = new Scene(page, 1400, 780);
         return scene;
     }
 
     private VBox identity() {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 86, 86);
-        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
         logo.setPreserveRatio(true);
         VBox identity = new VBox(4, logo,
                 text("DIHADI", "-fx-font-family:Georgia;-fx-font-size:31px;-fx-font-weight:800;-fx-text-fill:#735c00;"),
-                text("Mera Haq ~ Meri Dihadi",
+                text("Meri Dihadi ~ Mera Haq",
                         "-fx-font-family:Georgia;-fx-font-size:17px;-fx-font-style:italic;-fx-text-fill:#4c4637;"));
         identity.setAlignment(Pos.CENTER);
         return identity;
