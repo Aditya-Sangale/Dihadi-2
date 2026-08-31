@@ -58,11 +58,12 @@ public class SignUpRecruiter {
         ScrollPane formScroll = new ScrollPane(formColumn);
         formScroll.setFitToWidth(true);
         formScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        formScroll.setStyle("-fx-background:transparent;-fx-background-color:#fff8f0;-fx-border-width:0;");
+        formScroll.setStyle("-fx-background:transparent;-fx-background-color:#f3e7ce;-fx-border-width:0;");
         HBox.setHgrow(formScroll, Priority.ALWAYS);
 
         ImageView visual = image(VISUALS[0], 520, 430);
         visual.setPreserveRatio(true);
+        visual.setSmooth(true);
         startRotation(visual);
         StackPane photo = new StackPane(visual);
         photo.setPrefSize(540, 455);
@@ -93,17 +94,16 @@ public class SignUpRecruiter {
 
         HBox layout = new HBox(formScroll, visualColumn);
         layout.setAlignment(Pos.CENTER);
-        layout.setStyle("-fx-background-color:#fff8f0;");
+        layout.setStyle("-fx-background-color:#f3e7ce;");
         return new Scene(layout, 1400, 780);
     }
 
     private VBox identity() {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 112, 112);
-        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
         logo.setPreserveRatio(true);
         VBox box = new VBox(8, logo,
                 text("DIHADI", "-fx-font-family:Georgia;-fx-font-size:43px;-fx-font-weight:800;-fx-text-fill:#1f1b13;"),
-                text("Mera Haq ~ Meri Dihadi",
+                text("Meri Dihadi ~ Mera Haq",
                         "-fx-font-family:Georgia;-fx-font-size:21px;-fx-font-style:italic;-fx-text-fill:#574d40;"));
         box.setAlignment(Pos.CENTER);
         return box;
@@ -200,6 +200,7 @@ public class SignUpRecruiter {
         Label personalDetails = text("PERSONAL DETAILS",
                 "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:11px 16px;");
         Button submit = button("CREATE RECRUITER ACCOUNT", true);
+        submit.setMaxWidth(Double.MAX_VALUE);
         submit.setOnAction(e -> submitRecruiter());
         Button loginLink = new Button("Already having account? Login");
         loginLink.setStyle(
@@ -208,15 +209,14 @@ public class SignUpRecruiter {
             Stage stage = (Stage) loginLink.getScene().getWindow();
             stage.setScene(new RecruiterLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
         });
-        VBox actionArea = new VBox(10, loginLink);
-        actionArea.setAlignment(Pos.CENTER_RIGHT);
+        VBox actionArea = new VBox(14, submit, loginLink);
+        actionArea.setAlignment(Pos.CENTER);
+        actionArea.setPadding(new Insets(10, 0, 0, 0));
         HBox formHeading = new HBox(10, sectionBack, personalDetails);
         formHeading.setAlignment(Pos.CENTER_LEFT);
-        HBox actions = new HBox(14, submit);
-        actions.setAlignment(Pos.CENTER_RIGHT);
         VBox card = new VBox(22,
                 formHeading, divider(),
-                fields, actionArea, actions);
+                fields, actionArea);
         card.setMaxWidth(600);
         card.setPadding(new Insets(32, 42, 34, 42));
         card.setStyle(

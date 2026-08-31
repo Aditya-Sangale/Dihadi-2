@@ -77,17 +77,16 @@ public class WokerSignUp {
         page.setCenter(createForm());
         page.setRight(createVisualPanel());
         StackPane root = new StackPane(page);
-        root.setBackground(new Background(new BackgroundFill(Color.web("#f4ede2"), CornerRadii.EMPTY, Insets.EMPTY)));
+        root.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
         return new Scene(root, 1400, 780);
     }
 
     private ScrollPane createForm() {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 72, 72);
-        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
         logo.setPreserveRatio(true);
         VBox identity = new VBox(3, logo,
                 label("DIHADI", "-fx-font-size:28px;-fx-font-weight:800;-fx-text-fill:#735c00;"),
-                label("Mera Haq ~ Meri Dihadi", "-fx-font-size:16px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
+                label("Meri Dihadi ~ Mera Haq", "-fx-font-size:16px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
         identity.setAlignment(Pos.CENTER);
         VBox intro = new VBox(6,
                 label("👋  Welcome to DIHADI", "-fx-font-size:30px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),

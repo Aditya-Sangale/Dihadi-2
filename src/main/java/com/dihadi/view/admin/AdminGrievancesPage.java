@@ -20,7 +20,7 @@ import javafx.scene.paint.Color;
 
 /** Native grievance resolution command center recreated from the supplied design. */
 public class AdminGrievancesPage {
-    private static final String PRIMARY="#735c00", BG="#fff8f0", SURFACE="#ffffff", BORDER="#d0c5af";
+    private static final String PRIMARY="#735c00", BG="#f3e7ce", SURFACE="#ffffff", BORDER="#d0c5af";
     private static final String[][] CASES={
             {"#GR-1024","Payment Delay","J. Doe (W-882)","Project Alpha","Critical","Investigating"},
             {"#GR-1025","Safety Breach","M. Smith (W-910)","Site Supervisor B","High","New"},

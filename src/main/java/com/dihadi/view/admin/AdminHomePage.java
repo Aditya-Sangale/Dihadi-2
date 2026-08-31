@@ -122,7 +122,7 @@ public class AdminHomePage {
         VBox pageContent = new VBox(createHero(), createWorkforceGallery(), createQuoteAndActions(), createAdministration(),
                 createPlatformFlow(), createOverview(), createFooter());
         pageContent.setAlignment(Pos.TOP_CENTER);
-        pageContent.setBackground(new Background(new BackgroundFill(Color.web("#fff8f0"), CornerRadii.EMPTY, Insets.EMPTY)));
+        pageContent.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
         ScrollPane scroll = new ScrollPane(pageContent);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -130,23 +130,26 @@ public class AdminHomePage {
         BorderPane shell = new BorderPane(scroll);
         shell.setTop(createHeader(homeAction));
         StackPane root = new StackPane(shell);
-        root.setBackground(new Background(new BackgroundFill(Color.web("#fff8f0"), CornerRadii.EMPTY, Insets.EMPTY)));
+        root.setPadding(new Insets(24));
+        root.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
         return new Scene(root, 1400, 780);
     }
 
     private BorderPane createHeader(Runnable homeAction) {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 60, 60);
-        Label name = label("DIHADI", "-fx-font-family:Georgia;-fx-font-size:24px;-fx-text-fill:#3a3027;");
+        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
+        logo.setPreserveRatio(true);
+        logo.setSmooth(true);
+        Label name = label("DIHADI", "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
         HBox brand = new HBox(10, logo, name); brand.setAlignment(Pos.CENTER_LEFT);
-        HBox nav = new HBox(27, nav("Home", true, homeAction), nav("Business", false, () -> go("Business")),
+        HBox nav = new HBox(12, nav("Home", false, homeAction), nav("Business", false, () -> go("Business")),
                 nav("Worker", false, () -> go("Worker")), nav("Recruiter", false, () -> go("Recruiter")),
                 nav("About Us", false, () -> go("About Us")), nav("Contact Us", false, () -> go("Contact Us")));
         nav.setAlignment(Pos.CENTER);
-        Button admin = new Button("Admin"); admin.setDisable(true);
-        admin.setStyle("-fx-background-color:#d4af37;-fx-background-radius:99px;-fx-text-fill:white;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:8px 22px;");
-        BorderPane header = new BorderPane(); header.setLeft(brand); header.setCenter(nav); header.setRight(admin);
-        header.setPadding(new Insets(15, 80, 15, 80));
-        header.setStyle("-fx-background-color:#fff8f0;-fx-border-color:#eee7dc;-fx-border-width:0 0 1px 0;");
+        Button admin = new Button("Admin");
+        admin.setStyle("-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:10px 20px;-fx-cursor:hand;");
+        BorderPane header = new BorderPane(); header.setLeft(brand); header.setCenter(nav); header.setRight(new HBox(10, admin));
+        header.setPadding(new Insets(16, 24, 14, 24));
+        header.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
         return header;
     }
 
@@ -351,19 +354,55 @@ public class AdminHomePage {
     private VBox statistic(String number, String name) { VBox box = new VBox(3, label(number, "-fx-font-size:29px;-fx-font-weight:800;-fx-text-fill:white;"), label(name, "-fx-font-size:10px;-fx-font-weight:700;-fx-text-fill:#f7f0e5;")); box.setAlignment(Pos.CENTER); box.setPrefWidth(155); return box; }
 
     private VBox createFooter() {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 72, 52);
-        VBox brand = new VBox(13, logo, label("Mera Haq ~ Meri Dihadi. Empowering India's skilled\nworkforce with dignity, transparency, and opportunity.", "-fx-font-size:12px;-fx-text-fill:#f7f0e5;")); brand.setPrefWidth(320);
-        VBox links = column("Links", "Company\n\nOpportunities\n\nLegal\n\nAddresses\n\nContact");
-        VBox address = column("Pune Headquarters", "⌖  Tech Park One, Yerawada, Pune, Maharashtra 411006\n\n✉  admin@dihadi.com");
-        HBox top = new HBox(75, brand, links, address); top.setAlignment(Pos.TOP_LEFT);
-        VBox footer = new VBox(44, top, label("© 2024 DIHADI. Mera Haq ~ Meri Dihadi. All Rights Reserved.", "-fx-font-size:11px;-fx-text-fill:#f7f0e5;")); footer.setAlignment(Pos.CENTER);
-        footer.setPadding(new Insets(46, 80, 28, 80)); footer.setMaxWidth(Double.MAX_VALUE); footer.setStyle("-fx-background-color:#3a3027;"); return footer;
+        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
+        logo.setPreserveRatio(true);
+        Label brand = label("DIHADI", "-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#e9c349;");
+        Label promise = label(
+                "Connecting skilled workers with verified opportunities, fair work, and a stronger future.",
+                "-fx-font-size:13px;-fx-text-fill:#f8f0e2;-fx-opacity:.82;");
+        promise.setWrapText(true);
+        promise.setMaxWidth(310);
+        VBox identity = new VBox(9, new HBox(10, logo, brand), promise);
+        identity.setPrefWidth(360);
+        VBox explore = footerColumn("Explore", "Home", () -> go("Home"), "Find Work", () -> go("Worker"), "About Us",
+                () -> go("About Us"));
+        VBox contact = footerColumn("Contact", "9561789599", () -> go("Contact Us"), "info@meridihadi.com",
+                () -> go("Contact Us"), "Pune, Maharashtra", () -> go("Contact Us"));
+        HBox top = new HBox(64, identity, explore, contact);
+        top.setAlignment(Pos.TOP_LEFT);
+        VBox footer = new VBox(22, top, label("© 2026 DIHADI  •  Meri Dihadi ~ Mera Haq. All rights reserved.",
+                "-fx-font-size:12px;-fx-text-fill:#f8f0e2;-fx-opacity:.65;"));
+        footer.setPadding(new Insets(32, 42, 24, 42));
+        footer.setMaxWidth(1180);
+        footer.setStyle("-fx-background-color:#343027;-fx-background-radius:20px;");
+        return footer;
     }
 
-    private VBox column(String heading, String body) { VBox column = new VBox(15, label(heading, "-fx-font-size:15px;-fx-font-weight:800;-fx-text-fill:#ffe085;"), label(body, "-fx-font-size:12px;-fx-text-fill:#f7f0e5;")); column.setPrefWidth(245); return column; }
-    private Button nav(String name, boolean active, Runnable action) { Button button = new Button(name); button.setOnAction(event -> action.run()); button.setStyle("-fx-background-color:transparent;-fx-text-fill:" + (active ? "#1e1b15" : "#4c4637") + ";-fx-font-size:12px;-fx-padding:6px 1px;" + (active ? "-fx-border-color:#1e1b15;-fx-border-width:0 0 1px 0;" : "")); return button; }
+    private VBox footerColumn(String heading, String textOne, Runnable actionOne, String textTwo, Runnable actionTwo,
+            String textThree, Runnable actionThree) {
+        VBox column = new VBox(7, label(heading, "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#e9c349;"),
+                footerLink(textOne, actionOne), footerLink(textTwo, actionTwo), footerLink(textThree, actionThree));
+        column.setPrefWidth(180);
+        return column;
+    }
+
+    private Button footerLink(String text, Runnable action) {
+        Button button = new Button(text);
+        button.setOnAction(event -> action.run());
+        button.setStyle(
+                "-fx-background-color:transparent;-fx-padding:2 0;-fx-text-fill:#f8f0e2;-fx-opacity:.82;-fx-font-size:13px;-fx-cursor:hand;");
+        return button;
+    }
+
+    private Button nav(String name, boolean active, Runnable action) {
+        Button button = new Button(name);
+        button.setOnAction(event -> action.run());
+        button.setStyle("-fx-background-color:transparent;-fx-background-radius:0;-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;"
+                + (active ? "-fx-text-fill:#735c00;-fx-border-color:#735c00;" : "-fx-text-fill:#4d4635;-fx-border-color:transparent;"));
+        return button;
+    }
     private Button action(String name, boolean filled) { Button button = new Button(name); button.setStyle("-fx-background-radius:99px;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:13px 42px;" + (filled ? "-fx-background-color:#3a3027;-fx-text-fill:white;" : "-fx-background-color:#fff8f0;-fx-border-color:#d4af37;-fx-border-radius:99px;-fx-text-fill:#1e1b15;")); return button; }
-    private ImageView image(String path, double width, double height) { ImageView view = new ImageView(new Image(getClass().getResource(path).toExternalForm())); view.setFitWidth(width); view.setFitHeight(height); view.setPreserveRatio(false); view.setSmooth(true); return view; }
+    private ImageView image(String path, double width, double height) { ImageView view = new ImageView(new Image(getClass().getResource(path).toExternalForm())); view.setFitWidth(width); view.setFitHeight(height); view.setPreserveRatio(path.contains("/assets/logo/")); view.setSmooth(true); return view; }
     private Label label(String text, String style) { Label label = new Label(text); label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style); return label; }
     private void go(String destination) { for (javafx.stage.Window window : javafx.stage.Window.getWindows()) if (window.isFocused() && window instanceof Stage stage) { AppNavigator.open(stage, destination); return; } }
     private void openAdminSignUp(Button source) {

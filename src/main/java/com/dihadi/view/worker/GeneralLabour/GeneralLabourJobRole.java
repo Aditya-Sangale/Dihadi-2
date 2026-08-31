@@ -118,30 +118,33 @@ public class GeneralLabourJobRole {
         ScrollPane scroll = new ScrollPane(canvas);
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
-        Button previous = outline("�? Back to skills");
+        Button previous = outline("←  Back to categories");
         previous.setOnAction(e -> {
             if (back != null)
                 back.run();
         });
         Region gap = new Region();
         HBox.setHgrow(gap, Priority.ALWAYS);
-        HBox bottom = new HBox(previous, gap,
+        HBox bottom = new HBox(16, previous, gap,
                 label("Choose an opportunity to start your next job.", "-fx-font-size:13px;-fx-text-fill:#4d4635;"));
         bottom.setAlignment(Pos.CENTER);
-        bottom.setPadding(new Insets(16, 60, 16, 60));
+        bottom.setPadding(new Insets(16, 70, 16, 70));
         bottom.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
         BorderPane page = new BorderPane(scroll);
         page.setTop(createHeader(back));
         page.setBottom(bottom);
         page.setStyle("-fx-background-color:#f3e7ce;");
-        return new Scene(page, 1400, 780);
+        StackPane root = new StackPane(page);
+        root.setPadding(new Insets(24));
+        root.setStyle("-fx-background-color:#f3e7ce;");
+        return new Scene(root, 1400, 780);
     }
 
     /** Standard DIHADI desktop header used by the main application pages. */
     private BorderPane createHeader(Runnable back) {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
-        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
         logo.setPreserveRatio(true);
+        logo.setSmooth(true);
         Label brandName = label("DIHADI",
                 "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
         HBox brand = new HBox(10, logo, brandName); brand.setAlignment(Pos.CENTER_LEFT);
@@ -154,17 +157,15 @@ public class GeneralLabourJobRole {
         Button contact = headerNav("Contact Us", false);
         home.setOnAction(e -> AppNavigator.open(stageOf(home), "Home"));
         business.setOnAction(e -> AppNavigator.open(stageOf(business), "Business"));
-        worker.setOnAction(e -> { if (back != null) back.run(); });
+        worker.setOnAction(e -> { if (back != null) back.run(); else AppNavigator.open(stageOf(worker), "Worker"); });
         recruiter.setOnAction(e -> AppNavigator.open(stageOf(recruiter), "Recruiter"));
         about.setOnAction(e -> AppNavigator.open(stageOf(about), "About Us"));
         contact.setOnAction(e -> AppNavigator.open(stageOf(contact), "Contact Us"));
         HBox navigation = new HBox(12, home, business, worker, recruiter, about, contact);
         navigation.setAlignment(Pos.CENTER);
 
-        Button login = headerOutline("Login"); login.setOnAction(e -> AppNavigator.adminLoginInProgress());
-        Button signUp = headerPrimary("Sign Up");
-        signUp.setOnAction(e -> AppNavigator.signUp(stageOf(signUp), back));
-        HBox account = new HBox(10, login, signUp); account.setAlignment(Pos.CENTER_RIGHT);
+        Button admin = AppNavigator.createHeaderActionButton();
+        HBox account = new HBox(10, admin); account.setAlignment(Pos.CENTER_RIGHT);
 
         BorderPane header = new BorderPane();
         header.setLeft(brand); header.setCenter(navigation); header.setRight(account);
@@ -219,10 +220,15 @@ public class GeneralLabourJobRole {
         Label wage = label("Daily wage  " + j[2], "-fx-font-size:15px;-fx-font-weight:800;-fx-text-fill:#735c00;");
         name.setWrapText(true);
         name.setAlignment(Pos.CENTER);
+        name.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         name.setMaxWidth(Double.MAX_VALUE);
+        role.setWrapText(true);
         role.setAlignment(Pos.CENTER);
+        role.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         role.setMaxWidth(Double.MAX_VALUE);
+        loc.setWrapText(true);
         loc.setAlignment(Pos.CENTER);
+        loc.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         loc.setMaxWidth(Double.MAX_VALUE);
         Button apply = primary("Apply now");
         apply.setMaxWidth(Double.MAX_VALUE);
@@ -251,21 +257,26 @@ public class GeneralLabourJobRole {
             }
         };
         checkAppliedStatus.run();
-
         final String detailImg = (imgPath != null && !imgPath.isBlank()) ? imgPath : "/assets/images/general-labour/skill-01.jpg";
-        apply.setOnAction(e -> { 
+        Runnable openDetails = () -> {
             javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow(); 
             javafx.scene.Scene currentScene = apply.getScene();
             stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(roleTitle, j[1], j[2], detailImg, j[4], j[5], j[6]).getScene(() -> {
                 checkAppliedStatus.run();
                 stage.setScene(currentScene);
             }, currentScene)); 
-        });
+        };
+        apply.setOnAction(e -> openDetails.run());
         VBox box = new VBox(10, pic, name, role, loc, wage, apply);
         box.setAlignment(Pos.CENTER);
-        box.setPrefSize(344, 380);
-        box.setPadding(new Insets(14));
+        box.setPrefWidth(350);
+        box.setMinHeight(410);
+        box.setPadding(new Insets(16));
         box.setStyle(cardStyle());
+        box.setOnMouseClicked(e -> openDetails.run());
+        box.setOnMouseEntered(e -> box.setStyle(
+                "-fx-background-color:#ffffff;-fx-background-radius:22px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:22px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.18),20,0,0,8px);"));
+        box.setOnMouseExited(e -> box.setStyle(cardStyle()));
         return box;
     }
 
@@ -337,7 +348,7 @@ public class GeneralLabourJobRole {
 
     private Button headerPrimary(String text) {
         Button button = new Button(text);
-        button.setStyle("-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#3a3027;"
+        button.setStyle("-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;"
                 + "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:14px;-fx-font-weight:700;"
                 + "-fx-padding:10px 20px;-fx-cursor:hand;");
         return button;

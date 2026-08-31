@@ -36,7 +36,7 @@ public class AttendancePage {
     public Scene getScene(Runnable back) {
         VBox content = new VBox(20);
         content.setPadding(new Insets(40, 72, 40, 72));
-        content.setStyle("-fx-background-color: #fff8f0;");
+        content.setStyle("-fx-background-color: #f3e7ce;");
         content.setMaxWidth(1440);
         content.setAlignment(Pos.TOP_CENTER);
         
@@ -107,7 +107,7 @@ public class AttendancePage {
         
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
-        scroll.setStyle("-fx-background:#fff8f0;-fx-background-color:#fff8f0;-fx-border-width:0;");
+        scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
         return new Scene(scroll, 1440, 900);
     }
     
