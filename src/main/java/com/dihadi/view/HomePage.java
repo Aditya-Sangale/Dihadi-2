@@ -121,7 +121,7 @@ public class HomePage extends Application {
                 navButton("Contact Us", false, this::showContact));
         navigation.setAlignment(Pos.CENTER);
 
-        Button admin = AppNavigator.createHeaderActionButton();
+        Button admin = AppNavigator.createHeaderAdminButton();
         BorderPane header = new BorderPane();
         header.setLeft(brand);
         header.setCenter(navigation);
