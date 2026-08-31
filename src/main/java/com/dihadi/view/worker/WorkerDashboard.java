@@ -15,6 +15,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
@@ -71,7 +73,7 @@ public class WorkerDashboard {
         content.setAlignment(Pos.TOP_CENTER);
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
-        scroll.setStyle("-fx-background:#fff8f0;-fx-background-color:#fff8f0;");
+        scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;");
 
         // Initial fetch
         refreshWorkerData(heroContainer);
@@ -85,12 +87,19 @@ public class WorkerDashboard {
     }
 
     private HBox header(String name) {
+        ImageView logo = new ImageView(new Image(getClass().getResource("/assets/logo/dihadi logo.jpeg").toExternalForm()));
+        logo.setFitWidth(42);
+        logo.setFitHeight(42);
+        logo.setPreserveRatio(true);
+        logo.setSmooth(true);
         Label brand = label("DIHADI",
-                "-fx-font-family:Georgia;-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+                "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
+        HBox brandLockup = new HBox(10, logo, brand);
+        brandLockup.setAlignment(Pos.CENTER_LEFT);
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Label user = label(name, "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#4c4637;");
-        HBox h = new HBox(16, brand, spacer, user);
+        HBox h = new HBox(16, brandLockup, spacer, user);
         h.setAlignment(Pos.CENTER_LEFT);
         h.setPadding(new Insets(0, 0, 16, 0));
         h.setStyle("-fx-border-color:transparent transparent #d0c5af transparent;-fx-border-width:0 0 1px 0;");

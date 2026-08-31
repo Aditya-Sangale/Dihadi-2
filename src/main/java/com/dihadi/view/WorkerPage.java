@@ -142,15 +142,16 @@ public class WorkerPage extends Application {
         page.setTop(header(backAction, aboutAction));
         StackPane root = new StackPane(page);
         root.setPadding(new Insets(24));
-        setWelcomeBackground(root);
+        root.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
         return new Scene(root, 1400, 780);
     }
 
     private BorderPane header(Runnable backAction, Runnable aboutAction) {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 54, 54);
+        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
         logo.setPreserveRatio(true);
+        logo.setSmooth(true);
         Label title = label("DIHADI",
-                "-fx-font-size: 25px; -fx-font-weight: 800; -fx-text-fill: #735c00; -fx-letter-spacing: 1px;");
+                "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
         HBox brand = new HBox(10, logo, title);
         brand.setAlignment(Pos.CENTER_LEFT);
 
@@ -169,17 +170,7 @@ public class WorkerPage extends Application {
         HBox navigation = new HBox(12, home, business, worker, recruiter, about, contact);
         navigation.setAlignment(Pos.CENTER);
 
-        Button dashboard = primaryButton("Dashboard");
-        if (loggedInWorker != null) {
-            dashboard.setOnAction(e -> {
-                Stage stage = (Stage) dashboard.getScene().getWindow();
-                stage.setScene(new com.dihadi.view.worker.WorkerDashboard(loggedInWorker).getScene(() -> {
-                    stage.setScene(new WorkerPage(loggedInWorker).getWorkerScene(backAction, aboutAction));
-                }));
-            });
-        } else {
-            dashboard.setOnAction(e -> AppNavigator.information("Worker Dashboard", "Please login as a worker to open your personalized dashboard."));
-        }
+        Button dashboard = AppNavigator.createHeaderActionButton();
         HBox accountActions = new HBox(10, dashboard);
         accountActions.setAlignment(Pos.CENTER_RIGHT);
 
@@ -205,6 +196,7 @@ public class WorkerPage extends Application {
 
     private VBox categoryCard(int i) {
         ImageView picture = image(IMAGES[i], 238, 150);
+        round(picture, 238, 150, 16);
         Label name = label(NAMES[i], "-fx-font-size: 18px; -fx-font-weight: 800; -fx-text-fill: #3a3027;");
         Label detail = label(DETAILS[i], "-fx-font-size: 13px; -fx-text-fill: #3c3c3c;");
         detail.setWrapText(true);
@@ -273,51 +265,43 @@ public class WorkerPage extends Application {
     }
 
     private VBox createDesktopFooter() {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 58, 58);
+        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
         logo.setPreserveRatio(true);
-        Label brand = label("DIHADI",
-                "-fx-font-size: 25px; -fx-font-weight: 800; -fx-text-fill: #e9c349; -fx-letter-spacing: 1px;");
+        Label brand = label("DIHADI", "-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#e9c349;");
         Label promise = label(
                 "Connecting skilled workers with verified opportunities, fair work, and a stronger future.",
-                "-fx-font-size: 13px; -fx-text-fill: #f8f0e2; -fx-opacity: 0.82;");
+                "-fx-font-size:13px;-fx-text-fill:#f8f0e2;-fx-opacity:.82;");
         promise.setWrapText(true);
-        promise.setMaxWidth(300);
-        VBox brandArea = new VBox(9, new HBox(12, logo, brand), promise);
-        brandArea.setPrefWidth(340);
-
-        VBox companyLinks = footerColumn("Company", "About Dihadi", "Contact Us");
-        VBox workLinks = footerColumn("Opportunities", "Find Work", "Worker Categories");
-        VBox supportLinks = footerColumn("Support", "Help Centre", "Privacy & Terms");
-        HBox footerMain = new HBox(58, brandArea, companyLinks, workLinks, supportLinks);
-        footerMain.setAlignment(Pos.TOP_LEFT);
-
-        Label copyright = label("© 2026 DIHADI  •  Mera Haq ~ Meri Dihadi. All rights reserved.",
-                "-fx-font-size: 12px; -fx-text-fill: #f8f0e2; -fx-opacity: 0.65;");
-        VBox footer = new VBox(24, footerMain, copyright);
-        footer.setMaxWidth(1180);
+        promise.setMaxWidth(310);
+        VBox identity = new VBox(9, new HBox(10, logo, brand), promise);
+        identity.setPrefWidth(360);
+        VBox explore = footerColumn("Explore", "Home", () -> navigate("Home"), "Find Work", () -> navigate("Worker"), "About Us",
+                () -> navigate("About Us"));
+        VBox contact = footerColumn("Contact", "9561789599", () -> navigate("Contact Us"), "info@meridihadi.com",
+                () -> navigate("Contact Us"), "Pune, Maharashtra", () -> navigate("Contact Us"));
+        HBox top = new HBox(64, identity, explore, contact);
+        top.setAlignment(Pos.TOP_LEFT);
+        VBox footer = new VBox(22, top, label("© 2026 DIHADI  •  Meri Dihadi ~ Mera Haq. All rights reserved.",
+                "-fx-font-size:12px;-fx-text-fill:#f8f0e2;-fx-opacity:.65;"));
         footer.setPadding(new Insets(32, 42, 24, 42));
-        footer.setStyle(
-                "-fx-background-color: #343027; -fx-background-radius: 20px; -fx-border-color: rgba(208,197,175,0.32); -fx-border-radius: 20px; -fx-border-width: 1px 0 0 0;");
+        footer.setMaxWidth(1180);
+        footer.setStyle("-fx-background-color:#343027;-fx-background-radius:20px;");
         return footer;
     }
 
-    private VBox footerColumn(String heading, String... links) {
-        Label title = label(heading, "-fx-font-size: 14px; -fx-font-weight: 800; -fx-text-fill: #e9c349;");
-        VBox column = new VBox(8, title);
-        column.setPrefWidth(150);
-        for (String link : links) {
-            Button button = footerLink(link);
-            button.setOnAction(event -> AppNavigator.openFooterLink(
-                    (Stage) button.getScene().getWindow(), link));
-            column.getChildren().add(button);
-        }
+    private VBox footerColumn(String heading, String textOne, Runnable actionOne, String textTwo, Runnable actionTwo,
+            String textThree, Runnable actionThree) {
+        VBox column = new VBox(7, label(heading, "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#e9c349;"),
+                footerLink(textOne, actionOne), footerLink(textTwo, actionTwo), footerLink(textThree, actionThree));
+        column.setPrefWidth(180);
         return column;
     }
 
-    private Button footerLink(String text) {
+    private Button footerLink(String text, Runnable action) {
         Button button = new Button(text);
+        button.setOnAction(event -> action.run());
         button.setStyle(
-                "-fx-background-color: transparent; -fx-padding: 2px 0; -fx-text-fill: #f8f0e2; -fx-opacity: 0.80; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif; -fx-cursor: hand;");
+                "-fx-background-color:transparent;-fx-padding:2 0;-fx-text-fill:#f8f0e2;-fx-opacity:.82;-fx-font-size:13px;-fx-cursor:hand;");
         return button;
     }
 
@@ -344,7 +328,6 @@ public class WorkerPage extends Application {
     private ImageView image(String path, double width, double height) {
         ImageView image = new ImageView(loadImage(path));
         if (path.contains("/assets/logo/")) {
-            image.setViewport(new Rectangle2D(380, 0, 840, 840));
             image.setPreserveRatio(true);
         } else {
             image.setPreserveRatio(false);
@@ -456,6 +439,7 @@ public class WorkerPage extends Application {
                     () -> stage.setScene(new BusinessPage().getBusinessScene(homeAction,
                             () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)))),
                     () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)), aboutPageAction));
+            case "Worker" -> showWorkerSignUp();
             case "Recruiter" -> stage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(
                     () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction))));
             default -> {
@@ -465,6 +449,13 @@ public class WorkerPage extends Application {
 
     private void clicked(String action) {
         System.out.println(action + " clicked");
+    }
+
+    private void round(ImageView image, double width, double height, double radius) {
+        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(width, height);
+        clip.setArcWidth(radius * 2);
+        clip.setArcHeight(radius * 2);
+        image.setClip(clip);
     }
 
     private void setWelcomeBackground(StackPane root) {

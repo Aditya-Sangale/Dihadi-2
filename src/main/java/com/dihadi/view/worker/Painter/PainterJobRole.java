@@ -147,20 +147,28 @@ public class PainterJobRole {
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
 
-        Button prev = o("← Back to categories");
+        Button prev = o("←  Back to categories");
         prev.setOnAction(e -> {
             if (back != null)
                 back.run();
         });
-        HBox bottom = new HBox(prev);
-        bottom.setAlignment(Pos.CENTER_LEFT);
-        bottom.setPadding(new Insets(14, 60, 14, 60));
+        Label hint = l("Choose an opportunity to start your next job.",
+                "-fx-font-size:13px;-fx-text-fill:#4d4635;");
+        Region space = new Region();
+        HBox.setHgrow(space, Priority.ALWAYS);
+        HBox bottom = new HBox(16, prev, space, hint);
+        bottom.setAlignment(Pos.CENTER);
+        bottom.setPadding(new Insets(16, 70, 16, 70));
         bottom.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
 
         BorderPane page = new BorderPane(scroll);
+        page.setTop(header());
         page.setBottom(bottom);
         page.setStyle("-fx-background-color:#f3e7ce;");
-        return new Scene(page, 1400, 780);
+        StackPane root = new StackPane(page);
+        root.setPadding(new Insets(24));
+        root.setStyle("-fx-background-color:#f3e7ce;");
+        return new Scene(root, 1400, 780);
     }
 
     private StackPane slider() {
@@ -193,10 +201,15 @@ public class PainterJobRole {
         Label w = l("Daily wage  " + j[2], "-fx-font-size:15px;-fx-font-weight:800;-fx-text-fill:#735c00;");
         n.setWrapText(true);
         n.setAlignment(Pos.CENTER);
+        n.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         n.setMaxWidth(Double.MAX_VALUE);
+        role.setWrapText(true);
         role.setAlignment(Pos.CENTER);
+        role.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         role.setMaxWidth(Double.MAX_VALUE);
+        loc.setWrapText(true);
         loc.setAlignment(Pos.CENTER);
+        loc.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         loc.setMaxWidth(Double.MAX_VALUE);
         Button a = p("Apply now");
         a.setMaxWidth(Double.MAX_VALUE);
@@ -227,19 +240,25 @@ public class PainterJobRole {
         checkAppliedStatus.run();
 
         final String detailImg = (imgPath != null && !imgPath.isBlank()) ? imgPath : "/assets/images/worker/painter/skill-01.jpg";
-        a.setOnAction(e -> { 
+        Runnable openDetails = () -> {
             javafx.stage.Stage stage = (javafx.stage.Stage) a.getScene().getWindow(); 
             javafx.scene.Scene currentScene = a.getScene();
             stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(roleTitle, j[1], j[2], detailImg, j[4], j[5], j[6]).getScene(() -> {
                 checkAppliedStatus.run();
                 stage.setScene(currentScene);
             }, currentScene)); 
-        });
+        };
+        a.setOnAction(e -> openDetails.run());
         VBox v = new VBox(10, im, n, role, loc, w, a);
         v.setAlignment(Pos.CENTER);
-        v.setPadding(new Insets(14));
-        v.setPrefSize(344, 380);
+        v.setPadding(new Insets(16));
+        v.setPrefWidth(350);
+        v.setMinHeight(410);
         v.setStyle(card());
+        v.setOnMouseClicked(e -> openDetails.run());
+        v.setOnMouseEntered(e -> v.setStyle(
+                "-fx-background-color:#ffffff;-fx-background-radius:22px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:22px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.18),20,0,0,8px);"));
+        v.setOnMouseExited(e -> v.setStyle(card()));
         return v;
     }
 
@@ -308,7 +327,52 @@ public class PainterJobRole {
     private Button o(String t) {
         Button b = new Button(t);
         b.setStyle(
-                "-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-padding:9px 18px;");
+                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#806c47;-fx-border-radius:18px;-fx-text-fill:#342f28;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:10px 23px;-fx-cursor:hand;");
+        return b;
+    }
+
+    private BorderPane header() {
+        ImageView logo = new ImageView(new Image(getClass().getResource("/assets/logo/dihadi logo.jpeg").toExternalForm()));
+        logo.setFitWidth(52);
+        logo.setFitHeight(52);
+        logo.setPreserveRatio(true);
+        logo.setSmooth(true);
+        Label brand = l("DIHADI",
+                "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
+        HBox brandLockup = new HBox(10, logo, brand);
+        brandLockup.setAlignment(Pos.CENTER_LEFT);
+
+        Button home = nav("Home", false);
+        home.setOnAction(e -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) home.getScene().getWindow(), "Home"));
+        Button business = nav("Business", false);
+        business.setOnAction(e -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) business.getScene().getWindow(), "Business"));
+        Button worker = nav("Worker", true);
+        worker.setOnAction(e -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) worker.getScene().getWindow(), "Worker"));
+        Button recruiter = nav("Recruiter", false);
+        recruiter.setOnAction(e -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) recruiter.getScene().getWindow(), "Recruiter"));
+        Button about = nav("About Us", false);
+        about.setOnAction(e -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) about.getScene().getWindow(), "About Us"));
+        Button contact = nav("Contact Us", false);
+        contact.setOnAction(e -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) contact.getScene().getWindow(), "Contact Us"));
+        HBox navigation = new HBox(12, home, business, worker, recruiter, about, contact);
+        navigation.setAlignment(Pos.CENTER);
+        Button admin = com.dihadi.view.AppNavigator.createHeaderActionButton();
+        HBox account = new HBox(10, admin);
+        account.setAlignment(Pos.CENTER_RIGHT);
+        BorderPane bar = new BorderPane();
+        bar.setLeft(brandLockup);
+        bar.setCenter(navigation);
+        bar.setRight(account);
+        bar.setPadding(new Insets(16, 24, 14, 24));
+        bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
+        return bar;
+    }
+
+    private Button nav(String text, boolean active) {
+        Button b = new Button(text);
+        b.setStyle("-fx-background-color:transparent;-fx-background-radius:0;-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:"
+                + (active ? "#735c00" : "#4d4635") + ";-fx-border-color:" + (active ? "#735c00" : "transparent")
+                + ";-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;");
         return b;
     }
 

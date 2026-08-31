@@ -55,13 +55,12 @@ public class AdminSignUpPage {
         BorderPane page = new BorderPane();
         page.setLeft(createFormPanel(backAction));
         page.setCenter(createVisualPanel());
-        page.setBackground(new Background(new BackgroundFill(Color.web("#fff8f0"), CornerRadii.EMPTY, Insets.EMPTY)));
+        page.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
         return new Scene(page, 1400, 780);
     }
 
     private ScrollPane createFormPanel(Runnable backAction) {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 76, 76);
-        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
         Label brand = text("DIHADI", "-fx-font-family:Georgia;-fx-font-size:36px;-fx-font-weight:800;-fx-text-fill:#27438a;");
         Label tagline = text("Meri Dihadi ~ Mera Haq", "-fx-font-family:Georgia;-fx-font-size:18px;-fx-font-style:italic;-fx-text-fill:#685c52;");
         VBox branding = new VBox(5, logo, brand, tagline); branding.setAlignment(Pos.CENTER);
@@ -205,7 +204,7 @@ public class AdminSignUpPage {
     private static ColumnConstraints copy(ColumnConstraints source) { ColumnConstraints copy = new ColumnConstraints(); copy.setPercentWidth(source.getPercentWidth()); copy.setHgrow(Priority.ALWAYS); return copy; }
     private void add(GridPane grid, int column, int row, String title, javafx.scene.Node field, int span) { VBox box = new VBox(7, text(title, "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#4c4637;"), field); GridPane.setHgrow(box, Priority.ALWAYS); grid.add(box, column, row, span, 1); }
     private Region divider() { Region line = new Region(); line.setPrefHeight(1); line.setStyle("-fx-background-color:#e9e2d7;"); return line; }
-    private Label footer() { return text("© 2024 DIHADI. Meri Dihadi ~ Mera Haq. All Rights Reserved.", "-fx-font-size:12px;-fx-text-fill:#685c52;"); }
+    private Label footer() { return text("© 2026 DIHADI  •  Meri Dihadi ~ Mera Haq. All rights reserved.", "-fx-font-size:12px;-fx-text-fill:#685c52;"); }
     private ImageView image(String path, double width, double height) { ImageView image = new ImageView(new Image(getClass().getResource(path).toExternalForm())); image.setFitWidth(width); image.setFitHeight(height); image.setPreserveRatio(true); image.setSmooth(true); return image; }
     private Label text(String value, String style) { Label label = new Label(value); label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style); return label; }
     private static String inputStyle() { return "-fx-background-color:#f4ede2;-fx-background-radius:10px;-fx-border-color:transparent;-fx-font-size:15px;-fx-padding:12px 14px;-fx-pref-height:48px;"; }

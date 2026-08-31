@@ -98,44 +98,50 @@ public class SiteSupervisorJobRolesPage {
     private ComboBox<String> role;
     private ImageView heroImage;
     private int slideIndex;
-    private final Label slideStatus = new Label();
 
     public Scene getScene(Runnable backAction) {
         BorderPane page = new BorderPane();
         page.setTop(header(backAction));
         page.setCenter(content());
         page.setBottom(bottomBar(backAction));
-        page.setStyle("-fx-background-color:#fff8f0;");
-        return new Scene(page, 1400, 780);
+        page.setStyle("-fx-background-color:#f3e7ce;");
+        StackPane root = new StackPane(page);
+        root.setPadding(new Insets(24));
+        root.setStyle("-fx-background-color:#f3e7ce;");
+        return new Scene(root, 1400, 780);
     }
 
     private Node header(Runnable backAction) {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 50, 50);
-        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
-        HBox brand = new HBox(12, logo, label("Supervisor Job Roles",
-                "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:700;-fx-text-fill:#574500;"));
+        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
+        logo.setPreserveRatio(true);
+        logo.setSmooth(true);
+        HBox brand = new HBox(10, logo, label("DIHADI",
+                "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;"));
         brand.setAlignment(Pos.CENTER_LEFT);
 
         Button home = nav("Home", false), business = nav("Business", false), worker = nav("Worker", true);
         Button recruiter = nav("Recruiter", false), about = nav("About Us", false), contact = nav("Contact Us", false);
+        home.setOnAction(e -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) home.getScene().getWindow(), "Home"));
+        business.setOnAction(e -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) business.getScene().getWindow(), "Business"));
         worker.setOnAction(e -> {
             if (backAction != null)
                 backAction.run();
+            else
+                com.dihadi.view.AppNavigator.open((javafx.stage.Stage) worker.getScene().getWindow(), "Worker");
         });
-        HBox navigation = new HBox(20, home, business, worker, recruiter, about, contact);
+        recruiter.setOnAction(e -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) recruiter.getScene().getWindow(), "Recruiter"));
+        about.setOnAction(e -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) about.getScene().getWindow(), "About Us"));
+        contact.setOnAction(e -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) contact.getScene().getWindow(), "Contact Us"));
+        HBox navigation = new HBox(12, home, business, worker, recruiter, about, contact);
         navigation.setAlignment(Pos.CENTER);
-        com.dihadi.view.AppNavigator.activateNavigation(navigation);
 
-        Button login = outline("Login"), signUp = primary("Sign Up");
-        login.setOnAction(e -> com.dihadi.view.AppNavigator.login());
-        signUp.setOnAction(e -> com.dihadi.view.AppNavigator.signUp((javafx.stage.Stage) signUp.getScene().getWindow(),
-                () -> com.dihadi.view.AppNavigator.open((javafx.stage.Stage) signUp.getScene().getWindow(), "Worker")));
+        Button admin = com.dihadi.view.AppNavigator.createHeaderActionButton();
         BorderPane header = new BorderPane();
         header.setLeft(brand);
         header.setCenter(navigation);
-        header.setRight(new HBox(12, login, signUp));
-        header.setPadding(new Insets(15, 38, 15, 38));
-        header.setStyle("-fx-background-color:#fff8f0;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;");
+        header.setRight(new HBox(10, admin));
+        header.setPadding(new Insets(16, 24, 14, 24));
+        header.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
         return header;
     }
 
@@ -146,25 +152,20 @@ public class SiteSupervisorJobRolesPage {
         layout.setPadding(new Insets(34, 58, 45, 58));
         StackPane canvas = new StackPane(layout);
         canvas.setAlignment(Pos.TOP_CENTER);
-        canvas.setStyle("-fx-background-color:#fff8f0;");
+        canvas.setStyle("-fx-background-color:#f3e7ce;");
         ScrollPane scroll = new ScrollPane(canvas);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scroll.setStyle("-fx-background:#fff8f0;-fx-background-color:#fff8f0;-fx-border-width:0;");
+        scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
         return scroll;
     }
 
     private Node hero() {
         heroImage = image("/assets/images/worker/foreman/skill-00.jpg", 590, 330);
         heroImage.setClip(roundClip(590, 330));
-        slideStatus.setStyle(
-                "-fx-background-color:rgba(30,27,21,.68);-fx-background-radius:14px;-fx-text-fill:#ffffff;-fx-font-size:12px;-fx-font-weight:700;-fx-padding:6px 11px;");
-        StackPane visual = new StackPane(heroImage, slideStatus);
-        StackPane.setAlignment(slideStatus, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(slideStatus, new Insets(0, 14, 14, 0));
+        StackPane visual = new StackPane(heroImage);
         visual.setPrefSize(590, 330);
         visual.setStyle(cardStyle("#e9e2d7"));
-        updateSlideStatus();
         startSlider();
         Label quote = label(
                 "\"Great structures rise not just from bricks and mortar, but from the clear vision, steady guidance, and unwavering dedication of a skilled supervisor.\"",
@@ -257,8 +258,13 @@ public class SiteSupervisorJobRolesPage {
 
         Label name = label(projectName, "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
         name.setWrapText(true);
+        name.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         Label roleLabel = label("Role: " + roleTitle, "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#735c00;");
+        roleLabel.setWrapText(true);
+        roleLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         Label location = label("⌖  " + job[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;");
+        location.setWrapText(true);
+        location.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         Label wageLabel = label("Daily wage", "-fx-font-size:13px;-fx-text-fill:#4d4635;");
         Label wage = label(job[2], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#735c00;");
         Region space = new Region();
@@ -290,16 +296,16 @@ public class SiteSupervisorJobRolesPage {
             }
         };
         checkAppliedStatus.run();
-
         final String detailImg = (imgPath != null && !imgPath.isBlank()) ? imgPath : "/assets/images/worker/foreman/skill-01.jpg";
-        apply.setOnAction(e -> {
+        Runnable openDetails = () -> {
             javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow();
             javafx.scene.Scene currentScene = apply.getScene();
             stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(roleTitle, job[1], job[2], detailImg, job[4], job[5], job[6]).getScene(() -> {
                 checkAppliedStatus.run();
                 stage.setScene(currentScene);
             }, currentScene));
-        });
+        };
+        apply.setOnAction(e -> openDetails.run());
         HBox pay = new HBox(wageLabel, wage);
         pay.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(wageLabel, Priority.ALWAYS);
@@ -311,9 +317,14 @@ public class SiteSupervisorJobRolesPage {
         location.setAlignment(Pos.CENTER);
         location.setMaxWidth(Double.MAX_VALUE);
         card.setAlignment(Pos.CENTER);
-        card.setPrefSize(344, 400);
-        card.setPadding(new Insets(14));
+        card.setPrefWidth(350);
+        card.setMinHeight(410);
+        card.setPadding(new Insets(16));
         card.setStyle(cardStyle("#fff8f0"));
+        card.setOnMouseClicked(e -> openDetails.run());
+        card.setOnMouseEntered(e -> card.setStyle(
+                "-fx-background-color:#ffffff;-fx-background-radius:22px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:22px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.18),20,0,0,8px);"));
+        card.setOnMouseExited(e -> card.setStyle(cardStyle("#fff8f0")));
         return card;
     }
 
@@ -322,15 +333,19 @@ public class SiteSupervisorJobRolesPage {
     }
 
     private Node bottomBar(Runnable backAction) {
-        Button back = outline("← Back to skills");
+        Button back = outline("←  Back to categories");
         back.setOnAction(e -> {
             if (backAction != null)
                 backAction.run();
         });
-        HBox bar = new HBox(back);
-        bar.setAlignment(Pos.CENTER_LEFT);
-        bar.setPadding(new Insets(13, 58, 13, 58));
-        bar.setStyle("-fx-background-color:#fff8f0;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
+        Label hint = label("Choose an opportunity to start your next job.",
+                "-fx-font-size:13px;-fx-text-fill:#4d4635;");
+        Region space = new Region();
+        HBox.setHgrow(space, Priority.ALWAYS);
+        HBox bar = new HBox(16, back, space, hint);
+        bar.setAlignment(Pos.CENTER);
+        bar.setPadding(new Insets(16, 70, 16, 70));
+        bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
         return bar;
     }
 
@@ -338,7 +353,6 @@ public class SiteSupervisorJobRolesPage {
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(4), e -> {
             slideIndex = (slideIndex + 1) % 6;
             heroImage.setImage(load(String.format("/assets/images/worker/foreman/skill-%02d.jpg", slideIndex + 1)));
-            updateSlideStatus();
         }));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
@@ -357,10 +371,6 @@ public class SiteSupervisorJobRolesPage {
         Label caption = label(title,
                 "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#685c52;-fx-letter-spacing:1px;");
         return new VBox(5, caption, field);
-    }
-
-    private void updateSlideStatus() {
-        slideStatus.setText((slideIndex + 1) + " / 6");
     }
 
     private void applyForRole(String[] job, Button apply) {
@@ -430,7 +440,7 @@ public class SiteSupervisorJobRolesPage {
 
     private Button nav(String text, boolean active) {
         Button button = new Button(text);
-        button.setStyle("-fx-background-color:transparent;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:"
+        button.setStyle("-fx-background-color:transparent;-fx-background-radius:0;-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:"
                 + (active ? "#735c00" : "#4d4635") + ";-fx-border-color:" + (active ? "#735c00" : "transparent")
                 + ";-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;");
         return button;
@@ -439,14 +449,14 @@ public class SiteSupervisorJobRolesPage {
     private Button primary(String text) {
         Button button = new Button(text);
         button.setStyle(
-                "-fx-background-color:#735c00;-fx-background-radius:10px;-fx-text-fill:white;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:11px 22px;-fx-cursor:hand;");
+                "-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:10px 20px;-fx-cursor:hand;");
         return button;
     }
 
     private Button outline(String text) {
         Button button = new Button(text);
         button.setStyle(
-                "-fx-background-color:transparent;-fx-background-radius:10px;-fx-border-color:#7e7665;-fx-border-radius:10px;-fx-text-fill:#1e1b15;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:10px 20px;-fx-cursor:hand;");
+                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#806c47;-fx-border-radius:18px;-fx-text-fill:#342f28;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:10px 23px;-fx-cursor:hand;");
         return button;
     }
 
