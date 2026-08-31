@@ -172,38 +172,59 @@ public class AboutUs {
         private VBox footer() {
                 ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
                 logo.setPreserveRatio(true);
-                VBox identity = new VBox(8,
-                                new HBox(10, logo, label("DIHADI",
-                                                "-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#e9c349;")),
-                                label("Mera Haq ~ Meri Dihadi",
-                                                "-fx-font-size:15px;-fx-font-style:italic;-fx-text-fill:#f8f0e2;"));
-                identity.setAlignment(Pos.CENTER_LEFT);
-                HBox main = new HBox(80, identity, footerCol("Explore", "Home", "Worker", "Business", "Contact Us"),
-                                footerCol("Reach us", "Pune, Maharashtra, India", "info@meridihadi.com", "9561789599"));
-                main.setAlignment(Pos.TOP_CENTER);
-                VBox out = new VBox(20, main,
-                                label("© 2026 DIHADI · Fair work. Human dignity.",
-                                                "-fx-font-size:12px;-fx-text-fill:#f8f0e2;-fx-opacity:.7;"));
-                out.setAlignment(Pos.CENTER);
-                out.setPadding(new Insets(28, 42, 22, 42));
+                Label brand = label("DIHADI", "-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#e9c349;");
+                Label promise = label(
+                                "Connecting skilled workers with verified opportunities, fair work, and a stronger future.",
+                                "-fx-font-size:13px;-fx-text-fill:#f8f0e2;-fx-opacity:.82;");
+                promise.setWrapText(true);
+                promise.setMaxWidth(310);
+                VBox identity = new VBox(9, new HBox(10, logo, brand), promise);
+                identity.setPrefWidth(360);
+                VBox explore = footerColumn("Explore", "Home", () -> navigateTo("Home"), "Find Work", () -> navigateTo("Worker"), "About Us",
+                                () -> navigateTo("About Us"));
+                VBox contact = footerColumn("Contact", "9561789599", () -> navigateTo("Contact Us"), "info@meridihadi.com",
+                                () -> navigateTo("Contact Us"), "Pune, Maharashtra", () -> navigateTo("Contact Us"));
+                HBox top = new HBox(64, identity, explore, contact);
+                top.setAlignment(Pos.TOP_LEFT);
+                VBox out = new VBox(22, top, label("© 2026 DIHADI  •  Meri Dihadi ~ Mera Haq. All rights reserved.",
+                                "-fx-font-size:12px;-fx-text-fill:#f8f0e2;-fx-opacity:.65;"));
+                out.setPadding(new Insets(32, 42, 24, 42));
                 out.setMaxWidth(1180);
-                out.setStyle("-fx-background-color:#343027;-fx-background-radius:20px;-fx-border-color:#d0c5af;-fx-border-radius:20px;");
+                out.setStyle("-fx-background-color:#343027;-fx-background-radius:20px;");
                 return out;
         }
 
-        private VBox footerCol(String title, String... items) {
-                VBox b = new VBox(7);
-                b.getChildren().add(label(title, "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#e9c349;"));
-                for (String item : items)
-                        b.getChildren().add(label(item, "-fx-font-size:13px;-fx-text-fill:#f8f0e2;-fx-opacity:.82;"));
-                return b;
+        private void navigateTo(String destination) {
+                for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
+                        if (window.isFocused() && window instanceof Stage stage) {
+                                AppNavigator.open(stage, destination);
+                                return;
+                        }
+                }
+        }
+
+        private VBox footerColumn(String heading, String textOne, Runnable actionOne, String textTwo, Runnable actionTwo,
+                        String textThree, Runnable actionThree) {
+                VBox column = new VBox(7, label(heading, "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#e9c349;"),
+                                footerLink(textOne, actionOne), footerLink(textTwo, actionTwo), footerLink(textThree, actionThree));
+                column.setPrefWidth(180);
+                return column;
+        }
+
+        private Button footerLink(String text, Runnable action) {
+                Button button = new Button(text);
+                button.setOnAction(event -> action.run());
+                button.setStyle(
+                                "-fx-background-color:transparent;-fx-padding:2 0;-fx-text-fill:#f8f0e2;-fx-opacity:.82;-fx-font-size:13px;-fx-cursor:hand;");
+                return button;
         }
 
         private BorderPane header(Runnable back, Runnable workerAction) {
-                ImageView logo = image("/assets/logo/dihadi logo.jpeg", 54, 54);
+                ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
                 logo.setPreserveRatio(true);
+                logo.setSmooth(true);
                 HBox brand = new HBox(10, logo,
-                                label("DIHADI", "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;"));
+                                label("DIHADI", "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;"));
                 brand.setAlignment(Pos.CENTER_LEFT);
                 HBox nav = new HBox(12);
                 nav.setAlignment(Pos.CENTER);
@@ -212,8 +233,7 @@ public class AboutUs {
                         b.setOnAction(e -> AppNavigator.open((Stage) b.getScene().getWindow(), n));
                         nav.getChildren().add(b);
                 }
-                Button admin = primary("Admin");
-                admin.setOnAction(e -> AppNavigator.adminLoginInProgress());
+                Button admin = AppNavigator.createHeaderActionButton();
                 BorderPane bar = new BorderPane();
                 bar.setLeft(brand);
                 bar.setCenter(nav);
@@ -256,7 +276,6 @@ public class AboutUs {
         private ImageView image(String p, double w, double h) {
                 ImageView v = new ImageView(load(p));
                 if (p.contains("/assets/logo/")) {
-                        v.setViewport(new Rectangle2D(380, 0, 840, 840));
                         v.setPreserveRatio(true);
                 }
                 v.setFitWidth(w);
