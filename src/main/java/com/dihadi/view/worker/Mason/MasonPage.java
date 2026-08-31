@@ -1,221 +1,283 @@
 package com.dihadi.view.worker.Mason;
 
-import java.util.*;
-import javafx.geometry.*;
-import javafx.scene.*;
-import javafx.scene.control.*;
-import javafx.scene.image.*;
-import javafx.scene.layout.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 
-/** Mason trade selection screen. */
+/** Mason work-skills selection screen with unified DIHADI category styling. */
 public class MasonPage {
-    private static final String[] NAMES = { "Brick Mason", "Lanter Mason", "Plastering Mason", "Stone Mason",
-            "Tiles Mason", "Cement Concrete Mason", "Bar Bender", "Shuttering", "Marbles Mason", "Flooring",
-            "Composite Mason", "Garters/Columns Mason", "Lime Concrete Mason", "Scaffolding", "Reinforcement Fitter" };
-    private static final String[] HINDI = { "ईंट मिस्त्री", "लेंटर मिस्त्री", "प्लास्टर मिस्त्री", "पत्थर मिस्त्री",
-            "टाइल्स मिस्त्री", "सीमेंट कंक्रीट मिस्त्री", "सरिया बांधने वाला", "शटरिंग", "मार्बल मिस्त्री", "फ्लोरिंग",
-            "कंपोजिट मिस्त्री", "गर्डर/कॉलम मिस्त्री", "चूना कंक्रीट मिस्त्री", "मचान बांधने वाला",
-            "रीइन्फोर्समेंट फिटर" };
+    private static final String[] NAMES = {
+            "Brick Mason", "Lanter Mason", "Plastering Mason", "Stone Mason",
+            "Tiles Mason", "Cement Concrete Mason", "Bar Bender", "Shuttering",
+            "Marbles Mason", "Flooring", "Composite Mason", "Garters/Columns Mason",
+            "Lime Concrete Mason", "Scaffolding", "Reinforcement Fitter"
+    };
+    private static final String[] HINDI = {
+            "ईंट मिस्त्री", "लेंटर मिस्त्री", "प्लास्टर मिस्त्री", "पत्थर मिस्त्री",
+            "टाइल्स मिस्त्री", "सीमेंट कंक्रीट मिस्त्री", "सरिया बांधने वाला", "शटरिंग",
+            "मार्बल मिस्त्री", "फ्लोरिंग", "कंपोजिट मिस्त्री", "गर्डर/कॉलम मिस्त्री",
+            "चूना कंक्रीट मिस्त्री", "मचान बांधने वाला", "रीइन्फोर्समेंट फिटर"
+    };
     private final Set<Integer> selected = new LinkedHashSet<>();
 
     public Scene getMasonScene(Runnable back, Runnable home, Runnable about) {
-        VBox c = new VBox(38, hero(), content());
-        c.setPrefWidth(1260);
-        c.setMaxWidth(1260);
-        StackPane s = new StackPane(c);
-        s.setAlignment(Pos.TOP_CENTER);
-        s.setPadding(new Insets(24, 24, 118, 24));
-        ScrollPane sp = new ScrollPane(s);
-        sp.setFitToWidth(true);
-        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        sp.setStyle("-fx-background-color:transparent;-fx-border-width:0;");
-        BorderPane p = new BorderPane(sp);
-        p.setTop(header(back, home, about));
-        p.setBottom(actions(back));
-        p.setStyle("-fx-background-color:#fff8f0;");
-        return new Scene(p, 1400, 780);
+        VBox content = new VBox(38, hero(), skills());
+        content.setPrefWidth(1260);
+        content.setMaxWidth(1260);
+        content.setAlignment(Pos.TOP_CENTER);
+
+        StackPane scrollContent = new StackPane(content);
+        scrollContent.setAlignment(Pos.TOP_CENTER);
+        scrollContent.setPadding(new Insets(24, 24, 118, 24));
+
+        ScrollPane scroll = new ScrollPane(scrollContent);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setStyle("-fx-background-color:transparent;-fx-border-width:0;");
+
+        BorderPane page = new BorderPane(scroll);
+        page.setTop(header(back, home, about));
+        page.setBottom(actionBar(back));
+        page.setStyle("-fx-background-color:#f3e7ce;");
+
+        StackPane root = new StackPane(page);
+        root.setPadding(new Insets(24));
+        root.setStyle("-fx-background-color:#f3e7ce;");
+        return new Scene(root, 1400, 780);
     }
 
     private HBox hero() {
-        Label q = label(
+        Label quote = label(
                 "\"The art of building tomorrow rests\nin the skilled hands and enduring\nspirit of today's craftsmen.\"",
-                "-fx-font-family:'Georgia';-fx-font-size:22px;-fx-font-style:italic;-fx-text-fill:#3a3027;-fx-line-spacing:6px;");
-        VBox words = new VBox(q);
+                "-fx-font-family:'Georgia';-fx-font-size:21px;-fx-font-style:italic;-fx-text-fill:#4d4635;-fx-line-spacing:6px;");
+        VBox words = new VBox(quote);
         words.setAlignment(Pos.CENTER_LEFT);
         words.setPrefSize(590, 310);
-        words.setPadding(new Insets(25, 35, 25, 30));
+        words.setPadding(new Insets(24, 30, 24, 30));
         words.setStyle("-fx-border-color:#d4af37;-fx-border-width:0 0 0 4px;");
-        ImageView im = image("/assets/images/worker/mason/hero.jpg", 500, 310);
-        round(im, 500, 310);
-        HBox h = new HBox(42, words, new StackPane(im));
-        h.setAlignment(Pos.CENTER);
-        h.setPrefWidth(1260);
-        return h;
+
+        ImageView photo = image("/assets/images/worker/mason/hero.jpg", 500, 310);
+        round(photo, 500, 310, 24);
+        StackPane photoFrame = new StackPane(photo);
+        photoFrame.setStyle("-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),20,0,0,6px);");
+
+        HBox hero = new HBox(42, words, photoFrame);
+        hero.setPrefWidth(1260);
+        hero.setMaxWidth(1260);
+        hero.setAlignment(Pos.CENTER);
+        return hero;
     }
 
-    private VBox content() {
-        Label t = label("Mason Work-Skills",
+    private VBox skills() {
+        Label title = label("Mason Work-Skills",
                 "-fx-font-family:'Georgia';-fx-font-size:40px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
         Label sub = label("You can select more than one sub-skill based on your expertise.",
-                "-fx-font-size:16px;-fx-text-fill:#4d4635;");
-        FlowPane g = new FlowPane(20, 20);
-        g.setPrefWrapLength(1260);
-        for (int i = 0; i < NAMES.length; i++)
-            g.getChildren().add(card(i));
-        return new VBox(26, new VBox(8, t, sub), g);
+                "-fx-font-family:'Georgia';-fx-font-size:16px;-fx-text-fill:#4d4635;");
+        FlowPane grid = new FlowPane(20, 20);
+        grid.setAlignment(Pos.CENTER_LEFT);
+        grid.setPrefWrapLength(1260);
+        for (int i = 0; i < NAMES.length; i++) {
+            grid.getChildren().add(card(i));
+        }
+        return new VBox(28, new VBox(8, title, sub), grid);
     }
 
-    private Button card(int i) {
-        String path = String.format("/assets/images/worker/mason/skill-%02d.jpg", i + 1);
-        ImageView im = image(path, 232, 145);
-        Label n = label(NAMES[i], "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#342f28;-fx-alignment:center;");
-        n.setWrapText(true);
-        n.setPrefSize(210, 32);
-        n.setAlignment(Pos.CENTER);
-        Label hi = label(HINDI[i], "-fx-font-size:13px;-fx-text-fill:#6b6255;-fx-alignment:center;");
-        hi.setWrapText(true);
-        hi.setPrefSize(210, 30);
-        hi.setAlignment(Pos.CENTER);
-        VBox v = new VBox(im, new VBox(3, n, hi));
-        v.setAlignment(Pos.CENTER);
-        Button b = new Button();
-        b.setGraphic(v);
-        b.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        b.setPadding(Insets.EMPTY);
-        b.setPrefSize(232, 221);
-        b.setMinSize(232, 221);
-        b.setMaxSize(232, 221);
-        style(b, false);
-        b.setOnAction(e -> {
-            boolean on = selected.contains(i);
-            if (on)
-                selected.remove(i);
-            else
-                selected.add(i);
-            style(b, !on);
+    private Button card(int index) {
+        ImageView photo = image(String.format("/assets/images/worker/mason/skill-%02d.jpg", index + 1), 232, 145);
+        roundTop(photo, 232, 145, 18);
+
+        Label name = label(NAMES[index],
+                "-fx-font-family:'Georgia';-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#342f28;-fx-alignment:center;");
+        name.setWrapText(true);
+        name.setAlignment(Pos.CENTER);
+        name.setPrefSize(208, 32);
+        name.setMaxSize(208, 32);
+
+        Label hindi = label(HINDI[index], "-fx-font-size:13px;-fx-text-fill:#6b6255;-fx-alignment:center;");
+        hindi.setWrapText(true);
+        hindi.setAlignment(Pos.CENTER);
+        hindi.setPrefSize(208, 30);
+        hindi.setMaxSize(208, 30);
+
+        VBox detail = new VBox(3, name, hindi);
+        detail.setAlignment(Pos.CENTER);
+        detail.setPrefHeight(76);
+
+        VBox graphic = new VBox(photo, detail);
+        graphic.setPrefSize(232, 221);
+
+        Button card = new Button();
+        card.setGraphic(graphic);
+        card.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        card.setPadding(Insets.EMPTY);
+        card.setMinSize(232, 221);
+        card.setPrefSize(232, 221);
+        card.setMaxSize(232, 221);
+        cardStyle(card, false);
+
+        card.setOnAction(e -> {
+            boolean active = selected.contains(index);
+            if (active) {
+                selected.remove(index);
+            } else {
+                selected.add(index);
+            }
+            cardStyle(card, !active);
         });
-        return b;
+        card.setOnMouseEntered(e -> {
+            if (!selected.contains(index)) {
+                card.setStyle(
+                        "-fx-background-color:#ffffff;-fx-background-radius:20px;-fx-border-radius:20px;-fx-border-width:2px;-fx-border-color:#d4af37;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.18),16,0,0,5px);-fx-cursor:hand;");
+            }
+        });
+        card.setOnMouseExited(e -> cardStyle(card, selected.contains(index)));
+        return card;
     }
 
     private BorderPane header(Runnable back, Runnable home, Runnable about) {
-        ImageView l = image("/assets/logo/dihadi logo.jpeg", 54, 54);
-        l.setViewport(new Rectangle2D(380, 0, 840, 840));
-        l.setPreserveRatio(true);
-        HBox brand = new HBox(10, l, label("DIHADI",
-                "-fx-font-family:'Georgia';-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;"));
+        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
+        logo.setPreserveRatio(true);
+        logo.setSmooth(true);
+        HBox brand = new HBox(10, logo, label("DIHADI",
+                "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;"));
         brand.setAlignment(Pos.CENTER_LEFT);
+
         Button h = nav("Home", false);
         h.setOnAction(e -> {
-            if (home != null)
-                home.run();
+            if (home != null) home.run();
+            else com.dihadi.view.AppNavigator.open((Stage) h.getScene().getWindow(), "Home");
         });
+        Button b = nav("Business", false);
+        b.setOnAction(e -> com.dihadi.view.AppNavigator.open((Stage) b.getScene().getWindow(), "Business"));
         Button w = nav("Worker", true);
         w.setOnAction(e -> {
-            if (back != null)
-                back.run();
+            if (back != null) back.run();
+            else com.dihadi.view.AppNavigator.open((Stage) w.getScene().getWindow(), "Worker");
         });
+        Button r = nav("Recruiter", false);
+        r.setOnAction(e -> com.dihadi.view.AppNavigator.open((Stage) r.getScene().getWindow(), "Recruiter"));
         Button a = nav("About Us", false);
         a.setOnAction(e -> {
-            if (about != null)
-                about.run();
+            if (about != null) about.run();
+            else com.dihadi.view.AppNavigator.open((Stage) a.getScene().getWindow(), "About Us");
         });
-        HBox nav = new HBox(20, h, nav("Business", false), w, nav("Recruiter", false), a, nav("Contact Us", false));
-        nav.setAlignment(Pos.CENTER);
-        com.dihadi.view.AppNavigator.activateNavigation(nav);
-        Button login = outline("Login"), signUp = primary("Sign Up");
-        login.setDisable(true);
-        signUp.setDisable(true);
-        BorderPane p = new BorderPane();
-        p.setLeft(brand);
-        p.setCenter(nav);
-        p.setRight(new HBox(12, login, signUp));
-        p.setPadding(new Insets(16, 24, 14, 24));
-        p.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;");
-        return p;
+        Button c = nav("Contact Us", false);
+        c.setOnAction(e -> com.dihadi.view.AppNavigator.open((Stage) c.getScene().getWindow(), "Contact Us"));
+
+        HBox navigation = new HBox(12, h, b, w, r, a, c);
+        navigation.setAlignment(Pos.CENTER);
+
+        Button admin = com.dihadi.view.AppNavigator.createHeaderActionButton();
+        HBox account = new HBox(10, admin);
+        account.setAlignment(Pos.CENTER_RIGHT);
+
+        BorderPane bar = new BorderPane();
+        bar.setLeft(brand);
+        bar.setCenter(navigation);
+        bar.setRight(account);
+        bar.setPadding(new Insets(16, 24, 14, 24));
+        bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
+        return bar;
     }
 
-    private HBox actions(Runnable back) {
-        Button b = outline("←  BACK");
-        b.setOnAction(e -> {
+    private HBox actionBar(Runnable back) {
+        Button previous = outline("←  Back to categories");
+        previous.setOnAction(e -> {
             if (back != null)
                 back.run();
         });
-        Button n = primary("SAVE & CONTINUE");
-        n.setOnAction(e -> {
-            javafx.stage.Stage stage = (javafx.stage.Stage) n.getScene().getWindow();
+        Button next = primary("Save & Next →");
+        next.setOnAction(e -> {
+            Stage stage = (Stage) next.getScene().getWindow();
             stage.setScene(new MasonJobRole().getMasonJobRoleScene(back));
         });
-        Region r = new Region();
-        HBox.setHgrow(r, Priority.ALWAYS);
-        HBox h = new HBox(b, r, n);
-        h.setAlignment(Pos.CENTER);
-        h.setPadding(new Insets(16, 70, 16, 70));
-        h.setStyle("-fx-background-color:rgba(255,248,240,.96);-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
-        return h;
+        Region gap = new Region();
+        HBox.setHgrow(gap, Priority.ALWAYS);
+
+        HBox bar = new HBox(previous, gap, next);
+        bar.setAlignment(Pos.CENTER);
+        bar.setPadding(new Insets(16, 70, 16, 70));
+        bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
+        return bar;
     }
 
-    private void save() {
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle("Mason Skills");
-        a.setHeaderText(null);
-        a.setContentText(selected.isEmpty() ? "Select at least one sub-skill to continue."
-                : selected.size() + " skills have been selected.");
-        a.show();
-    }
-
-    private void style(Button b, boolean on) {
-        b.setStyle(
+    private void cardStyle(Button card, boolean active) {
+        card.setStyle(
                 "-fx-background-color:#fffdf9;-fx-background-radius:20px;-fx-border-radius:20px;-fx-border-width:2px;-fx-border-color:"
-                        + (on ? "#d4af37" : "#d0c5af")
-                        + ";-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),16,0,0,5px);-fx-cursor:hand;");
+                        + (active ? "#d4af37" : "#d0c5af") + ";-fx-effect:dropshadow(gaussian,rgba(58,48,39,"
+                        + (active ? ".18" : ".08") + "),16,0,0,5px);-fx-cursor:hand;");
     }
 
-    private Button nav(String t, boolean on) {
-        Button b = new Button(t);
-        b.setStyle("-fx-background-color:transparent;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:"
-                + (on ? "#735c00" : "#4d4635") + ";-fx-border-color:" + (on ? "#735c00" : "transparent")
-                + ";-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;");
+    private Button nav(String text, boolean active) {
+        Button b = new Button(text);
+        b.setStyle("-fx-background-color:transparent;-fx-background-radius:0;-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:"
+                + (active ? "#735c00" : "#4d4635") + ";-fx-border-color:" + (active ? "#735c00" : "transparent")
+                + ";-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;");
         return b;
     }
 
-    private Button primary(String t) {
-        Button b = new Button(t);
+    private Button primary(String text) {
+        Button b = new Button(text);
         b.setStyle(
-                "-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#342f28;-fx-font-weight:800;-fx-padding:11px 24px;");
+                "-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#342f28;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:11px 24px;-fx-cursor:hand;");
         return b;
     }
 
-    private Button outline(String t) {
-        Button b = new Button(t);
+    private Button outline(String text) {
+        Button b = new Button(text);
         b.setStyle(
-                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#806c47;-fx-border-radius:18px;-fx-text-fill:#342f28;-fx-font-weight:700;-fx-padding:10px 23px;");
+                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#806c47;-fx-border-radius:18px;-fx-text-fill:#342f28;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:10px 23px;-fx-cursor:hand;");
         return b;
     }
 
-    private ImageView image(String p, double w, double h) {
-        ImageView v = new ImageView(load(p));
-        v.setFitWidth(w);
-        v.setFitHeight(h);
-        v.setPreserveRatio(false);
-        return v;
+    private ImageView image(String path, double width, double height) {
+        ImageView view = new ImageView(load(path));
+        view.setFitWidth(width);
+        view.setFitHeight(height);
+        view.setPreserveRatio(false);
+        view.setSmooth(true);
+        return view;
     }
 
-    private Image load(String p) {
-        var r = getClass().getResource(p);
-        return r == null ? null : new Image(r.toExternalForm());
+    private Image load(String path) {
+        var resource = getClass().getResource(path);
+        return resource == null ? null : new Image(resource.toExternalForm());
     }
 
-    private void round(ImageView i, double w, double h) {
-        Rectangle r = new Rectangle(w, h);
-        r.setArcWidth(40);
-        r.setArcHeight(40);
-        i.setClip(r);
+    private void round(ImageView image, double width, double height, double radius) {
+        Rectangle clip = new Rectangle(width, height);
+        clip.setArcWidth(radius * 2);
+        clip.setArcHeight(radius * 2);
+        image.setClip(clip);
     }
 
-    private Label label(String t, String s) {
-        Label l = new Label(t);
-        l.setStyle(s);
-        return l;
+    private void roundTop(ImageView image, double width, double height, double radius) {
+        Rectangle clip = new Rectangle(width, height);
+        clip.setArcWidth(radius * 2);
+        clip.setArcHeight(radius * 2);
+        image.setClip(clip);
+    }
+
+    private Label label(String text, String style) {
+        Label label = new Label(text);
+        label.setStyle(style);
+        return label;
     }
 }

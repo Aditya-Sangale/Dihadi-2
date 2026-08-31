@@ -19,16 +19,43 @@ public final class AppNavigator {
             case "Home" -> stage.setScene(new HomePage(stage).getHomeScene());
             case "Business" -> stage.setScene(new BusinessPage().getBusinessScene(
                     () -> open(stage, "Home"), () -> open(stage, "Worker")));
-            case "Worker" -> signUp(stage, null);
+            case "Worker" -> stage.setScene(new WokerSignUp().getSignUpScene(() -> open(stage, "Home")));
             case "About Us" -> stage.setScene(new AboutUs().getAboutScene(
                     () -> open(stage, "Home"), () -> open(stage, "Worker")));
             case "Contact Us" -> stage.setScene(new ContactUs().getContactScene(
                     () -> open(stage, "Home"), () -> open(stage, "Business"),
                     () -> open(stage, "Worker"), () -> open(stage, "About Us")));
-            case "Recruiter" -> stage.setScene(new RecruiterPage().getRecruiterScene(
+            case "Recruiter" -> stage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(
                     () -> open(stage, "Home")));
+            case "Admin" -> stage.setScene(new com.dihadi.view.admin.AdminLoginPage().getAdminLoginScene(() -> open(stage, "Home")));
+            case "Dashboard" -> openDashboard(stage);
             default -> throw new IllegalArgumentException("Unknown destination: " + destination);
         }
+    }
+
+    public static void openDashboard(Stage stage) {
+        if (SessionManager.currentWorker != null) {
+            stage.setScene(new com.dihadi.view.worker.WorkerDashboard(SessionManager.currentWorker).getScene(() -> open(stage, "Home")));
+        } else if (SessionManager.currentRecruiter != null) {
+            stage.setScene(new com.dihadi.view.recruiter.RecruiterDashboard(SessionManager.currentRecruiter).getScene(() -> open(stage, "Home")));
+        } else {
+            stage.setScene(new com.dihadi.view.admin.AdminLoginPage().getAdminLoginScene(() -> open(stage, "Home")));
+        }
+    }
+
+    public static Button createHeaderActionButton() {
+        boolean isLoggedIn = SessionManager.currentWorker != null || SessionManager.currentRecruiter != null;
+        Button btn = new Button(isLoggedIn ? "Dashboard" : "Admin");
+        btn.setStyle("-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#342f28;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:11px 24px;-fx-cursor:hand;");
+        btn.setOnAction(e -> {
+            Stage stage = (Stage) btn.getScene().getWindow();
+            if (isLoggedIn) {
+                openDashboard(stage);
+            } else {
+                open(stage, "Admin");
+            }
+        });
+        return btn;
     }
 
     public static void signUp(Stage stage, Runnable returnAction) {

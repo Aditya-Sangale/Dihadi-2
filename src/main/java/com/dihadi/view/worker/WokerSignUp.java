@@ -56,7 +56,8 @@ public class WokerSignUp {
     private final ComboBox<String> workerType = combo("Labour (General Labour)", "Mason", "Carpenter", "Electrician",
             "Plumber", "Painter", "ITI / Technician", "Site Supervisor");
     private final TextField city = field("e.g. Pune");
-    private final ComboBox<String> state = combo("Maharashtra", "Delhi", "Gujarat", "Karnataka", "Uttar Pradesh", "Rajasthan", "Tamil Nadu", "Other");
+    private final ComboBox<String> state = combo("Maharashtra", "Delhi", "Gujarat", "Karnataka", "Uttar Pradesh",
+            "Rajasthan", "Tamil Nadu", "Other");
     private final javafx.scene.control.PasswordField password = new javafx.scene.control.PasswordField();
     private final DatePicker dateOfBirth = new DatePicker();
     private final ImageView profileImage = new ImageView();
@@ -76,17 +77,16 @@ public class WokerSignUp {
         page.setCenter(createForm());
         page.setRight(createVisualPanel());
         StackPane root = new StackPane(page);
-        root.setBackground(new Background(new BackgroundFill(Color.web("#f4ede2"), CornerRadii.EMPTY, Insets.EMPTY)));
+        root.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
         return new Scene(root, 1400, 780);
     }
 
     private ScrollPane createForm() {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 72, 72);
-        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
         logo.setPreserveRatio(true);
         VBox identity = new VBox(3, logo,
                 label("DIHADI", "-fx-font-size:28px;-fx-font-weight:800;-fx-text-fill:#735c00;"),
-                label("Mera Haq ~ Meri Dihadi", "-fx-font-size:16px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
+                label("Meri Dihadi ~ Mera Haq", "-fx-font-size:16px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
         identity.setAlignment(Pos.CENTER);
         VBox intro = new VBox(6,
                 label("👋  Welcome to DIHADI", "-fx-font-size:30px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
@@ -126,7 +126,7 @@ public class WokerSignUp {
         avatar.setPrefSize(94, 94);
         avatar.setStyle(
                 "-fx-background-color:#eee7dc;-fx-background-radius:47px;-fx-border-color:#cfc6b2;-fx-border-radius:47px;-fx-border-width:2px;");
-        Button change = secondaryButton("Change Photo");
+        Button change = secondaryButton("Upload Photo");
         change.setOnAction(event -> choosePhoto());
         HBox row = new HBox(18, avatar, change);
         row.setAlignment(Pos.CENTER_LEFT);

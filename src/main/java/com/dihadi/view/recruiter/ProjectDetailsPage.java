@@ -157,9 +157,9 @@ public class ProjectDetailsPage {
 
         StackPane root = new StackPane(card);
         root.setPadding(new Insets(28));
-        root.setStyle("-fx-background-color:#e9e2d7;");
+        root.setStyle("-fx-background-color:#f3e7ce;");
 
-        Scene scene = new Scene(root, 1120, 740);
+        Scene scene = new Scene(root, 1400, 780);
         scene.windowProperty().addListener((o, a, w) -> {
             if (w instanceof Stage s) {
                 s.setMinWidth(980);
