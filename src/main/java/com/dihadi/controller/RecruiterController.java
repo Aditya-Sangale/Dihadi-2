@@ -45,4 +45,8 @@ public class RecruiterController {
     public List<Recruiter> getAllRecruiters() {
         return dao.getAllRecruiters();
     }
+
+    public void updateWalletBalance(String mobileNumber, double newBalance) {
+        dao.updateWalletBalance(mobileNumber, newBalance);
+    }
 }
