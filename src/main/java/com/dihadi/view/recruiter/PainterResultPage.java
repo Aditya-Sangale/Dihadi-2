@@ -73,29 +73,20 @@ public class PainterResultPage {
     }
 
     private HBox hero() {
-        ImageView photo = image("/assets/images/painter.jpeg", 560, 340);
+        ImageView photo = image("/assets/images/painter.jpeg", 410, 275);
         photo.setPreserveRatio(false);
         StackPane imageBox = new StackPane(photo);
-        imageBox.setPrefSize(560, 340);
-        imageBox.setStyle(
-                "-fx-background-radius:14px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.11),12,0,0,3px);");
+        imageBox.setPrefSize(410, 275);
+        imageBox.setStyle("-fx-background-radius:12px;-fx-border-radius:12px;");
         Label quote = label(
-                "\"Transform your spaces with DIHADI’s trusted professionals. Bringing color, precision, and life to your walls, one stroke at a time.\"",
-                "-fx-font-family:'Georgia';-fx-font-size:21px;-fx-font-style:italic;-fx-text-fill:" + MUTED
-                        + ";-fx-line-spacing:4px;");
-        quote.setWrapText(true);
-        quote.setMaxWidth(480);
-        Label detail = label("EXPERT PAINTERS • QUALITY FINISHES",
-                "-fx-font-size:10px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-text-fill:" + GOLD + ";");
-        VBox words = new VBox(22, quote, detail);
-        words.setPadding(new Insets(24, 26, 24, 28));
-        words.setAlignment(Pos.CENTER_LEFT);
-        words.setPrefWidth(560);
-        words.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER
-                + ";-fx-border-width:1px 1px 1px 4px;-fx-border-radius:14px;");
-        HBox row = new HBox(40, imageBox, words);
-        row.setAlignment(Pos.CENTER_LEFT);
-        return row;
+                "\"Transform your spaces with DIHADI's trusted professionals.\nBringing color, precision, and life to your walls,\none stroke at a time.\"",
+                "-fx-font-family:'Georgia';-fx-font-size:18px;-fx-text-fill:#1e1b15;-fx-line-spacing:2px;");
+        HBox box = new HBox(78, imageBox, quote);
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setPadding(new Insets(24));
+        box.setStyle(
+                "-fx-background-color:#f4ede2;-fx-background-radius:12px;-fx-border-color:#d0c5af;-fx-border-radius:12px;");
+        return box;
     }
 
     private HBox filters() {

@@ -75,33 +75,22 @@ public class ITI_TechnicianResultPage {
     }
 
     private HBox hero() {
-        ImageView heroImage = image("/assets/images/welder.jpeg", 660, 330);
-        heroImage.setPreserveRatio(false);
-        Label verified = label("✓  VERIFIED PROFESSIONALS",
-                "-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:.8px;-fx-text-fill:#231b00;-fx-background-color:#ffe085;-fx-background-radius:14px;-fx-padding:6px 11px;");
-        StackPane visual = new StackPane(heroImage, verified);
-        visual.setPrefSize(660, 330);
-        StackPane.setAlignment(verified, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(verified, new Insets(0, 0, 18, 20));
-        visual.setStyle(
-                "-fx-background-radius:24px;-fx-border-radius:24px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.11),14,0,0,3px);");
-        Label quoteMark = label("“",
-                "-fx-font-family:'Georgia';-fx-font-size:58px;-fx-text-fill:#d0c5af;-fx-opacity:.55;");
+        ImageView image = image("/assets/images/welder.jpeg", 410, 275);
+        image.setPreserveRatio(false);
         Label quote = label(
-                "Empowering industries with technical mastery. Hire verified, certified ITI technicians who bring precision, safety, and operational excellence to your most complex projects.",
-                "-fx-font-family:'Georgia';-fx-font-size:20px;-fx-font-style:italic;-fx-text-fill:" + MUTED
-                        + ";-fx-line-spacing:4px;");
-        quote.setWrapText(true);
-        quote.setMaxWidth(400);
-        VBox copy = new VBox(-16, quoteMark, quote);
-        copy.setPadding(new Insets(28, 32, 28, 34));
-        copy.setPrefWidth(500);
-        copy.setAlignment(Pos.CENTER_LEFT);
-        copy.setStyle("-fx-background-color:#ffffff;-fx-background-radius:24px;-fx-border-color:" + BORDER
-                + ";-fx-border-width:1px 1px 1px 6px;-fx-border-radius:24px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.07),11,0,0,2px);");
-        HBox row = new HBox(26, visual, copy);
-        row.setAlignment(Pos.CENTER_LEFT);
-        return row;
+                "Empowering industries with technical mastery.\nHire verified, certified ITI technicians who bring precision,\nsafety, and operational excellence to your projects.",
+                "-fx-font-family:'Georgia';-fx-font-size:18px;-fx-text-fill:#1e1b15;-fx-line-spacing:2px;");
+        quote.setWrapText(false);
+        quote.setMaxWidth(Double.MAX_VALUE);
+        StackPane picture = new StackPane(image);
+        picture.setPrefSize(410, 275);
+        picture.setStyle("-fx-background-radius:12px;-fx-border-radius:12px;");
+        HBox box = new HBox(78, picture, quote);
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setPadding(new Insets(24));
+        box.setStyle(
+                "-fx-background-color:#f4ede2;-fx-background-radius:12px;-fx-border-color:#d0c5af;-fx-border-radius:12px;");
+        return box;
     }
 
     private HBox filters() {

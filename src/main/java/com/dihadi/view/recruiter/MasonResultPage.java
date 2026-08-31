@@ -81,28 +81,20 @@ public class MasonResultPage {
     }
 
     private HBox hero() {
-        ImageView photo = image("/assets/images/worker/mason/hero.jpg", 535, 300);
+        ImageView photo = image("/assets/images/worker/mason/hero.jpg", 410, 275);
         photo.setPreserveRatio(false);
         StackPane photoBox = new StackPane(photo);
-        photoBox.setPrefSize(535, 300);
-        photoBox.setStyle("-fx-background-radius:14px;-fx-border-radius:14px;-fx-overflow:hidden;"
-                + "-fx-effect:dropshadow(gaussian,rgba(58,48,39,.12),12,0,0,3px);");
+        photoBox.setPrefSize(410, 275);
+        photoBox.setStyle("-fx-background-radius:12px;-fx-border-radius:12px;");
         Label quote = label(
                 "\"Laying the foundation of tomorrow, one brick at a time.\nHire verified, skilled masons who bring strength, precision,\nand enduring craftsmanship to every construction project.\"",
-                "-fx-font-family:'Georgia';-fx-font-size:20px;-fx-font-style:italic;-fx-text-fill:" + MUTED
-                        + ";-fx-line-spacing:4px;");
-        Label proof = label("✓  VERIFIED CRAFTSMEN",
-                "-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-text-fill:" + GOLD + ";");
-        VBox words = new VBox(22, quote, proof);
-        words.setAlignment(Pos.CENTER_LEFT);
-        words.setPadding(new Insets(24, 30, 24, 30));
-        words.setPrefWidth(580);
-        words.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER
-                + ";-fx-border-width:1px 1px 1px 5px;-fx-border-radius:14px;"
-                + "-fx-effect:dropshadow(gaussian,rgba(58,48,39,.07),10,0,0,2px);");
-        HBox row = new HBox(26, photoBox, words);
-        row.setAlignment(Pos.CENTER_LEFT);
-        return row;
+                "-fx-font-family:'Georgia';-fx-font-size:18px;-fx-text-fill:#1e1b15;-fx-line-spacing:2px;");
+        HBox box = new HBox(78, photoBox, quote);
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setPadding(new Insets(24));
+        box.setStyle(
+                "-fx-background-color:#f4ede2;-fx-background-radius:12px;-fx-border-color:#d0c5af;-fx-border-radius:12px;");
+        return box;
     }
 
     private HBox filterBar() {
