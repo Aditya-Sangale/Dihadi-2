@@ -53,7 +53,7 @@ public class ContactUs {
         BorderPane bar = new BorderPane();
         bar.setLeft(brand);
         bar.setCenter(links);
-        Button admin = AppNavigator.createHeaderActionButton();
+        Button admin = AppNavigator.createHeaderAdminButton();
         bar.setRight(new HBox(10, admin));
         bar.setPadding(new Insets(16, 24, 14, 24));
         bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;"

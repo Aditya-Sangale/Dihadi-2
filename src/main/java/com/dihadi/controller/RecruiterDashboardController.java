@@ -1,7 +1,6 @@
 package com.dihadi.controller;
 
-import com.dihadi.service.RazorpayService;
-import com.dihadi.view.recruiter.PaymentCheckoutScene;
+import com.dihadi.view.PaymentGateway.PaymentCheckoutScene;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
