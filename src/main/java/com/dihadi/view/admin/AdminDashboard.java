@@ -31,7 +31,7 @@ import javafx.util.Duration;
 
 /** Exact native layout of the supplied DIHADI Admin Command Center dashboard. */
 public class AdminDashboard {
-    private static final String DARK="#272727", GOLD="#D4AF37", MAIN="#FDFBF7", BORDER="#E0D9CE";
+    private static final String DARK="#272727", GOLD="#D4AF37", MAIN="#f3e7ce", BORDER="#E0D9CE";
     private Timeline clock;
 
     public Scene getDashboardScene(Runnable logout) {

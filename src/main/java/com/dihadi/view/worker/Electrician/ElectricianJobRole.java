@@ -62,22 +62,27 @@ public class ElectricianJobRole {
         page.setTop(header());
         page.setBottom(actionBar(back));
         page.setStyle("-fx-background-color:#f3e7ce;");
-        return new Scene(page, 1400, 780);
+        StackPane root = new StackPane(page);
+        root.setPadding(new Insets(24));
+        root.setStyle("-fx-background-color:#f3e7ce;");
+        return new Scene(root, 1400, 780);
     }
 
     private VBox hero() {
         Label title = label("Electrician Job Roles",
-                "-fx-font-family:'Georgia';-fx-font-size:42px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
+                "-fx-font-family:'Georgia';-fx-font-size:36px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
+        title.setWrapText(true);
+        title.setMaxWidth(Double.MAX_VALUE);
         Label eyebrow = label("DIHADI WORK MARKETPLACE",
                 "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#735c00;");
         heroImage = new ImageView(load(HERO_IMAGES[0]));
-        heroImage.setFitWidth(640);
-        heroImage.setFitHeight(360);
+        heroImage.setFitWidth(580);
+        heroImage.setFitHeight(340);
         heroImage.setPreserveRatio(false);
         StackPane visual = new StackPane(heroImage);
-        visual.setPrefSize(640, 360);
+        visual.setPrefSize(580, 340);
         visual.setStyle(cardStyle("#faf3e8"));
-        clip(heroImage, 640, 360, 22);
+        clip(heroImage, 580, 340, 22);
         slider = new Timeline(new KeyFrame(Duration.seconds(3.2), e -> {
             heroIndex = (heroIndex + 1) % HERO_IMAGES.length;
             heroImage.setImage(load(HERO_IMAGES[heroIndex]));
@@ -89,11 +94,12 @@ public class ElectricianJobRole {
                 "“Powering progress with safe, reliable, and expert electrical workforce solutions across India.”",
                 "-fx-font-family:'Georgia';-fx-font-size:20px;-fx-font-style:italic;-fx-text-fill:#4d4635;-fx-line-spacing:5px;");
         quote.setWrapText(true);
-        quote.setMaxWidth(390);
+        quote.setMaxWidth(480);
 
         VBox meta = new VBox(16, eyebrow, title, quote);
-        meta.setAlignment(Pos.CENTER);
-        meta.setPrefWidth(410);
+        meta.setAlignment(Pos.CENTER_LEFT);
+        meta.setPrefWidth(480);
+        meta.setMaxWidth(480);
 
         HBox wrapper = new HBox(34, visual, meta);
         wrapper.setAlignment(Pos.CENTER);
@@ -218,8 +224,13 @@ public class ElectricianJobRole {
 
         Label name = label(projectName, "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
         name.setWrapText(true);
+        name.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         Label role = label("Role: " + roleTitle, "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#735c00;");
+        role.setWrapText(true);
+        role.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         Label location = label("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;");
+        location.setWrapText(true);
+        location.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         Label wageLabel = label("Daily wage", "-fx-font-size:13px;-fx-text-fill:#4d4635;");
         Label wage = label(j[2], "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#735c00;");
         Region space = new Region();
@@ -251,16 +262,16 @@ public class ElectricianJobRole {
             }
         };
         checkAppliedStatus.run();
-
         final String detailImg = (imgPath != null && !imgPath.isBlank()) ? imgPath : "/assets/images/worker/electrician/skill-01.jpg";
-        apply.setOnAction(e -> { 
+        Runnable openDetails = () -> {
             javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow(); 
             javafx.scene.Scene currentScene = apply.getScene();
             stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(roleTitle, j[1], j[2], detailImg, j[4], j[5], j[6]).getScene(() -> {
                 checkAppliedStatus.run();
                 stage.setScene(currentScene);
             }, currentScene)); 
-        });
+        };
+        apply.setOnAction(e -> openDetails.run());
         HBox pay = new HBox(wageLabel, wage);
         pay.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(wageLabel, Priority.ALWAYS);
@@ -272,9 +283,14 @@ public class ElectricianJobRole {
         location.setAlignment(Pos.CENTER);
         location.setMaxWidth(Double.MAX_VALUE);
         card.setAlignment(Pos.CENTER);
-        card.setPrefSize(344, 400);
-        card.setPadding(new Insets(14));
+        card.setPrefWidth(350);
+        card.setMinHeight(410);
+        card.setPadding(new Insets(16));
         card.setStyle(cardStyle("#fff8f0"));
+        card.setOnMouseClicked(e -> openDetails.run());
+        card.setOnMouseEntered(e -> card.setStyle(
+                "-fx-background-color:#ffffff;-fx-background-radius:22px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:22px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.18),20,0,0,8px);"));
+        card.setOnMouseExited(e -> card.setStyle(cardStyle("#fff8f0")));
         return card;
     }
 
@@ -283,29 +299,31 @@ public class ElectricianJobRole {
     }
 
     private BorderPane header() {
+        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
+        logo.setPreserveRatio(true);
+        logo.setSmooth(true);
         Label brand = label("DIHADI",
-                "-fx-font-family:'Georgia';-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+                "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
+        HBox brandLockup = new HBox(10, logo, brand);
+        brandLockup.setAlignment(Pos.CENTER_LEFT);
         HBox navigation = new HBox(12, nav("Home", false), nav("Business", false), nav("Worker", true),
                 nav("Recruiter", false), nav("About Us", false), nav("Contact Us", false));
         navigation.setAlignment(Pos.CENTER);
         AppNavigator.activateNavigation(navigation);
-        Button login = outline("Login"), signup = primary("Sign Up");
-        login.setOnAction(e -> AppNavigator.login());
-        signup.setOnAction(e -> AppNavigator.signUp((Stage) signup.getScene().getWindow(),
-                () -> AppNavigator.open((Stage) signup.getScene().getWindow(), "Worker")));
-        HBox account = new HBox(10, login, signup);
+        Button admin = AppNavigator.createHeaderActionButton();
+        HBox account = new HBox(10, admin);
         account.setAlignment(Pos.CENTER_RIGHT);
         BorderPane bar = new BorderPane();
-        bar.setLeft(brand);
+        bar.setLeft(brandLockup);
         bar.setCenter(navigation);
         bar.setRight(account);
         bar.setPadding(new Insets(16, 24, 14, 24));
-        bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;");
+        bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
         return bar;
     }
 
     private HBox actionBar(Runnable back) {
-        Button previous = outline("? Back to skills");
+        Button previous = outline("←  Back to categories");
         previous.setOnAction(e -> {
             stopSlider();
             if (back != null)
@@ -317,7 +335,7 @@ public class ElectricianJobRole {
         HBox.setHgrow(space, Priority.ALWAYS);
         HBox bar = new HBox(16, previous, space, hint);
         bar.setAlignment(Pos.CENTER);
-        bar.setPadding(new Insets(14, 60, 14, 60));
+        bar.setPadding(new Insets(16, 70, 16, 70));
         bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
         return bar;
     }
@@ -334,7 +352,7 @@ public class ElectricianJobRole {
 
     private Button nav(String t, boolean a) {
         Button b = new Button(t);
-        b.setStyle("-fx-background-color:transparent;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:"
+        b.setStyle("-fx-background-color:transparent;-fx-background-radius:0;-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:"
                 + (a ? "#735c00" : "#4d4635") + ";-fx-border-color:" + (a ? "#735c00" : "transparent")
                 + ";-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;");
         return b;
@@ -350,7 +368,7 @@ public class ElectricianJobRole {
     private Button outline(String t) {
         Button b = new Button(t);
         b.setStyle(
-                "-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:9px 18px;-fx-cursor:hand;");
+                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#806c47;-fx-border-radius:18px;-fx-text-fill:#342f28;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:10px 23px;-fx-cursor:hand;");
         return b;
     }
 

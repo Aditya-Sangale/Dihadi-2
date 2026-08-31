@@ -21,6 +21,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -53,7 +55,14 @@ public class RecruiterDashboard {
         String name = (first + (blank(currentR.getLastName()) ? "" : " " + currentR.getLastName())).trim();
         String company = val(currentR.getCompanyName(), "Organisation not provided");
 
-        Label logo = label("DIHADI", "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        ImageView logoImg = new ImageView(new Image(getClass().getResource("/assets/logo/dihadi logo.jpeg").toExternalForm()));
+        logoImg.setFitWidth(42);
+        logoImg.setFitHeight(42);
+        logoImg.setPreserveRatio(true);
+        logoImg.setSmooth(true);
+        Label logo = label("DIHADI", "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
+        HBox brand = new HBox(10, logoImg, logo);
+        brand.setAlignment(Pos.CENTER_LEFT);
         Button overview = nav("Overview", true), projects = nav("My Projects", false),
                 attendance = nav("Attendance", false), wallet = nav("Wallet", false);
         attendance.setOnAction(e -> {
@@ -66,7 +75,7 @@ public class RecruiterDashboard {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Label profileBadge = label(name, "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#4c4637;-fx-background-color:#faf3e8;-fx-background-radius:999px;-fx-border-color:#cfc6b2;-fx-border-radius:999px;-fx-padding:9px 15px;");
-        HBox headerBar = new HBox(30, logo, nav, spacer, profileBadge);
+        HBox headerBar = new HBox(30, brand, nav, spacer, profileBadge);
         headerBar.setAlignment(Pos.CENTER_LEFT);
         headerBar.setPadding(new Insets(0, 0, 15, 0));
         headerBar.setStyle("-fx-border-color:transparent transparent #cfc6b2 transparent;-fx-border-width:0 0 1px 0;");
@@ -129,7 +138,7 @@ public class RecruiterDashboard {
         content.setAlignment(Pos.TOP_CENTER);
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
-        scroll.setStyle("-fx-background:#fff8f0;-fx-background-color:#fff8f0;-fx-border-width:0;");
+        scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
 
         // Initial Fetch
         refreshRecruiterData(currentR, welcomeLabel, companyLabel, profileBadge, workersMetric, projectsMetric, reqCountLabel, back);

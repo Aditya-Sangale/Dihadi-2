@@ -47,13 +47,12 @@ public class AdminLoginPage {
         BorderPane page = new BorderPane();
         page.setLeft(form(backAction));
         page.setCenter(visual());
-        page.setBackground(new Background(new BackgroundFill(Color.web("#fff8f0"), CornerRadii.EMPTY, Insets.EMPTY)));
+        page.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
         return new Scene(page, 1400, 780);
     }
 
     private VBox form(Runnable backAction) {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 76, 76);
-        logo.setViewport(new Rectangle2D(380, 0, 840, 840));
         VBox brand = new VBox(5, logo,
                 label("DIHADI", "-fx-font-family:Georgia;-fx-font-size:36px;-fx-font-weight:800;-fx-text-fill:#27438a;"),
                 label("Meri Dihadi ~ Mera Haq", "-fx-font-family:Georgia;-fx-font-size:18px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
