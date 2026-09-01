@@ -20,6 +20,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 /** Recruiter results screen shown when the Carpenter category is selected. */
@@ -80,17 +81,27 @@ public class CarpenterResultsPage {
         }
 
         private HBox hero() {
-                ImageView image = image("/assets/images/carpenter.jpeg", 410, 275);
-                image.setPreserveRatio(false);
+                // The source photograph is 16:9, so retain that ratio instead of stretching it.
+                ImageView image = image("/assets/images/carpenter.jpeg", 480, 268);
+                image.setPreserveRatio(true);
+                Rectangle imageClip = new Rectangle(480, 268);
+                imageClip.setArcWidth(20);
+                imageClip.setArcHeight(20);
                 StackPane picture = new StackPane(image);
-                picture.setPrefSize(410, 275);
-                picture.setStyle("-fx-background-radius:12px;-fx-border-radius:12px;");
+                picture.setPrefSize(480, 268);
+                picture.setMinSize(480, 268);
+                picture.setMaxSize(480, 268);
+                picture.setClip(imageClip);
+                picture.setStyle("-fx-background-radius:10px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.14),12,.18,0,3px);");
                 Label quote = label(
-                                "\"Crafting excellence through precision and passion.\nHire verified, skilled, and experienced carpenters\nwho turn your vision into masterpieces.\"",
-                                "-fx-font-family:'Georgia';-fx-font-size:18px;-fx-text-fill:#1e1b15;-fx-line-spacing:2px;");
-                HBox box = new HBox(78, picture, quote);
+                                "\"Crafting excellence through precision and passion. Hire verified, skilled, and experienced carpenters who turn your vision into masterpieces.\"",
+                                "-fx-font-family:'Georgia',serif;-fx-font-size:24px;-fx-font-weight:700;-fx-text-fill:#272119;-fx-line-spacing:4px;");
+                quote.setWrapText(true);
+                quote.setPrefWidth(510);
+                quote.setMaxWidth(510);
+                HBox box = new HBox(82, picture, quote);
                 box.setAlignment(Pos.CENTER_LEFT);
-                box.setPadding(new Insets(24));
+                box.setPadding(new Insets(32));
                 box.setStyle(
                                 "-fx-background-color:#f4ede2;-fx-background-radius:12px;-fx-border-color:#d0c5af;-fx-border-radius:12px;");
                 return box;

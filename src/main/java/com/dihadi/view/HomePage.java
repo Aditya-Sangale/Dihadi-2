@@ -179,8 +179,7 @@ public class HomePage extends Application {
                 actionCard("TEAM", "Hire Workers", "Connect with a verified, skilled, and reliable workforce.",
                         "Start hiring", this::showRecruiterSignUp),
                 actionCard("BUILD", "Find Projects", "Explore contracting opportunities and build stronger teams.",
-                        "Explore projects",
-                        () -> comingSoon("Find Projects", "Business project listings are coming soon.")));
+                        "Explore projects", this::showExploreProjects));
         VBox section = new VBox(10, title, subtitle, cards);
         section.setAlignment(Pos.CENTER);
         section.setPadding(new Insets(34, 28, 38, 28));
@@ -326,6 +325,11 @@ public class HomePage extends Application {
     private void showBusiness() {
         stopSlider();
         primaryStage.setScene(new BusinessPage().getBusinessScene(this::showHome, this::showWorker));
+    }
+
+    private void showExploreProjects() {
+        stopSlider();
+        primaryStage.setScene(new ExploreProjectsPage(this::showHome).getExploreProjectsScene());
     }
 
     private void showWorker() {

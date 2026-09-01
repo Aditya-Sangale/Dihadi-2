@@ -20,6 +20,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 /** A recruiter-facing directory for finding and hiring verified masons. */
@@ -81,17 +82,26 @@ public class MasonResultPage {
     }
 
     private HBox hero() {
-        ImageView photo = image("/assets/images/worker/mason/hero.jpg", 410, 275);
-        photo.setPreserveRatio(false);
+        ImageView photo = image("/assets/images/worker/mason/hero.jpg", 480, 343);
+        photo.setPreserveRatio(true);
+        Rectangle imageClip = new Rectangle(480, 268);
+        imageClip.setArcWidth(20);
+        imageClip.setArcHeight(20);
         StackPane photoBox = new StackPane(photo);
-        photoBox.setPrefSize(410, 275);
-        photoBox.setStyle("-fx-background-radius:12px;-fx-border-radius:12px;");
+        photoBox.setPrefSize(480, 268);
+        photoBox.setMinSize(480, 268);
+        photoBox.setMaxSize(480, 268);
+        photoBox.setClip(imageClip);
+        photoBox.setStyle("-fx-background-radius:10px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.14),12,.18,0,3px);");
         Label quote = label(
-                "\"Laying the foundation of tomorrow, one brick at a time.\nHire verified, skilled masons who bring strength, precision,\nand enduring craftsmanship to every construction project.\"",
-                "-fx-font-family:'Georgia';-fx-font-size:18px;-fx-text-fill:#1e1b15;-fx-line-spacing:2px;");
-        HBox box = new HBox(78, photoBox, quote);
+                "\"Laying the foundation of tomorrow, one brick at a time. Hire verified, skilled masons who bring strength, precision, and enduring craftsmanship to every construction project.\"",
+                "-fx-font-family:'Georgia',serif;-fx-font-size:24px;-fx-font-weight:700;-fx-text-fill:#272119;-fx-line-spacing:4px;");
+        quote.setWrapText(true);
+        quote.setPrefWidth(510);
+        quote.setMaxWidth(510);
+        HBox box = new HBox(82, photoBox, quote);
         box.setAlignment(Pos.CENTER_LEFT);
-        box.setPadding(new Insets(24));
+        box.setPadding(new Insets(32));
         box.setStyle(
                 "-fx-background-color:#f4ede2;-fx-background-radius:12px;-fx-border-color:#d0c5af;-fx-border-radius:12px;");
         return box;

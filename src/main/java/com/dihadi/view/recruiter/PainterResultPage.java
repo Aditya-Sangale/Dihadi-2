@@ -19,6 +19,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 /** Recruiter search results for verified painting professionals. */
@@ -73,17 +74,27 @@ public class PainterResultPage {
     }
 
     private HBox hero() {
-        ImageView photo = image("/assets/images/painter.jpeg", 410, 275);
-        photo.setPreserveRatio(false);
+        // The source photograph is 16:9, so retain that ratio instead of stretching it.
+        ImageView photo = image("/assets/images/painter.jpeg", 480, 268);
+        photo.setPreserveRatio(true);
+        Rectangle imageClip = new Rectangle(480, 268);
+        imageClip.setArcWidth(20);
+        imageClip.setArcHeight(20);
         StackPane imageBox = new StackPane(photo);
-        imageBox.setPrefSize(410, 275);
-        imageBox.setStyle("-fx-background-radius:12px;-fx-border-radius:12px;");
+        imageBox.setPrefSize(480, 268);
+        imageBox.setMinSize(480, 268);
+        imageBox.setMaxSize(480, 268);
+        imageBox.setClip(imageClip);
+        imageBox.setStyle("-fx-background-radius:10px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.14),12,.18,0,3px);");
         Label quote = label(
-                "\"Transform your spaces with DIHADI's trusted professionals.\nBringing color, precision, and life to your walls,\none stroke at a time.\"",
-                "-fx-font-family:'Georgia';-fx-font-size:18px;-fx-text-fill:#1e1b15;-fx-line-spacing:2px;");
-        HBox box = new HBox(78, imageBox, quote);
+                "\"Transform your spaces with DIHADI's trusted professionals. Bringing color, precision, and life to your walls, one stroke at a time.\"",
+                "-fx-font-family:'Georgia',serif;-fx-font-size:24px;-fx-font-weight:700;-fx-text-fill:#272119;-fx-line-spacing:4px;");
+        quote.setWrapText(true);
+        quote.setPrefWidth(510);
+        quote.setMaxWidth(510);
+        HBox box = new HBox(82, imageBox, quote);
         box.setAlignment(Pos.CENTER_LEFT);
-        box.setPadding(new Insets(24));
+        box.setPadding(new Insets(32));
         box.setStyle(
                 "-fx-background-color:#f4ede2;-fx-background-radius:12px;-fx-border-color:#d0c5af;-fx-border-radius:12px;");
         return box;
