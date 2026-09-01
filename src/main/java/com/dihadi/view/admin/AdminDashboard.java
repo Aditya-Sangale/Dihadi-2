@@ -45,11 +45,40 @@ public class AdminDashboard {
         identity.setAlignment(Pos.CENTER); identity.setPadding(new Insets(28,10,35,10));
         Button grievances = nav("Grievances", false);
         grievances.setOnAction(e -> {
+            if (clock != null) clock.stop();
             javafx.stage.Stage stage = (javafx.stage.Stage) grievances.getScene().getWindow();
             stage.setScene(new AdminGrievancesPage().getGrievancesScene(
                     () -> stage.setScene(getDashboardScene(logout))));
         });
-        VBox links=new VBox(4,nav("Command Center",true),nav("Workers",false),nav("Recruiters",false),nav("Projects",false),nav("Financials",false),nav("Verification",false),grievances);
+
+        Button workersNav = nav("Workers", false);
+        workersNav.setOnAction(e -> {
+            if (clock != null) clock.stop();
+            javafx.stage.Stage stage = (javafx.stage.Stage) workersNav.getScene().getWindow();
+            stage.setScene(new AdminWorkersPage().getWorkersScene(
+                    () -> stage.setScene(getDashboardScene(logout)),
+                    logout));
+        });
+
+        Button recruitersNav = nav("Recruiters", false);
+        recruitersNav.setOnAction(e -> {
+            if (clock != null) clock.stop();
+            javafx.stage.Stage stage = (javafx.stage.Stage) recruitersNav.getScene().getWindow();
+            stage.setScene(new AdminRecruitersPage().getRecruitersScene(
+                    () -> stage.setScene(getDashboardScene(logout)),
+                    logout));
+        });
+
+        Button projectsNav = nav("Projects", false);
+        projectsNav.setOnAction(e -> {
+            if (clock != null) clock.stop();
+            javafx.stage.Stage stage = (javafx.stage.Stage) projectsNav.getScene().getWindow();
+            stage.setScene(new AdminProjectsPage().getProjectsScene(
+                    () -> stage.setScene(getDashboardScene(logout)),
+                    logout));
+        });
+
+        VBox links=new VBox(4,nav("Command Center",true),workersNav,recruitersNav,projectsNav,nav("Financials",false),nav("Verification",false),grievances);
         VBox.setVgrow(links,Priority.ALWAYS);
         Button profile=nav("Admin User\nSystem Administrator",false); profile.setOnAction(e->logout.run());
         VBox bottom=new VBox(4,nav("Support",false),nav("Compliance",false),profile); bottom.setPadding(new Insets(14,0,14,0)); bottom.setStyle("-fx-border-color:#ffffff1a;-fx-border-width:1px 0 0 0;");
