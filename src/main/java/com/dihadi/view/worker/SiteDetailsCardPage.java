@@ -39,6 +39,10 @@ public class SiteDetailsCardPage {
         this.requirementId = requirementId;
     }
 
+    public Scene getScene(Runnable back) {
+        return getScene(back, null);
+    }
+
     public Scene getScene(Runnable back, Scene currentScene) {
         // UI Labels for Project Overview
         Label projNameVal = label(title, "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
