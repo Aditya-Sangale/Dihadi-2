@@ -63,4 +63,21 @@ public class ProjectDao {
         }
         return list;
     }
+
+    public boolean deleteProject(String projectId) {
+        try {
+            if (projectId == null || projectId.isBlank()) return false;
+            db.collection("Projects").document(projectId).delete().get();
+            ApiFuture<QuerySnapshot> future = db.collection("Projects").whereEqualTo("projectId", projectId).get();
+            QuerySnapshot snapshot = future.get();
+            for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                doc.getReference().delete().get();
+            }
+            System.out.println("Project deleted successfully: " + projectId);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

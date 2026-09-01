@@ -18,4 +18,8 @@ public class ProjectController {
     public List<Project> getAllProjects() {
         return dao.getAllProjects();
     }
+
+    public boolean deleteProject(String projectId) {
+        return dao.deleteProject(projectId);
+    }
 }

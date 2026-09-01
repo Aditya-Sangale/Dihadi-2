@@ -6,9 +6,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -20,8 +18,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -29,9 +27,16 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-/** Full desktop Admin Control Center, based on the supplied DIHADI design. */
+/**
+ * Enterprise Admin Portal Home Page.
+ * Features executive administration architecture, live ecosystem metrics,
+ * dynamic workforce showcase, and direct command center access.
+ */
 public class AdminHomePage {
     private static final double CONTENT_WIDTH = 1180;
+    private static final String GOLD = "#735c00";
+    private static final String ACCENT_GOLD = "#d4af37";
+
     private static class SlideItem {
         final String imagePath;
         final String badge;
@@ -51,67 +56,37 @@ public class AdminHomePage {
                     "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_site_supervisor_in_a_reflective_jacket_and_helmet_with_dihadi/screen.png",
                     "SITE SUPERVISOR",
                     "Site Operations & Workforce Coordination",
-                    "Field-tested leaders managing construction workflows, on-site safety, and project compliance."
+                    "Field-tested leadership overseeing site safety, attendance verification, and contractor compliance."
             ),
             new SlideItem(
                     "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_electrician_repairing_a_complex_electrical_panel_in_a_corporate/screen.png",
                     "INDUSTRIAL ELECTRICIAN",
                     "Certified Industrial & Commercial Electricians",
-                    "Specialized in high-voltage panels, three-phase power grids, switchgears, and building automation."
+                    "Specialized in three-phase power grids, high-voltage substations, and automated industrial panels."
             ),
             new SlideItem(
                     "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_high_quality_photograph_of_a_professional_indian_construction_mason/screen.png",
                     "MASTER MASON",
                     "Structural Masonry & Concrete Construction",
-                    "Master craftsmen in foundation laying, reinforced brickwork, stone masonry, and precision finish."
+                    "Precision craftsmen commanding foundation casting, reinforced concrete, and industrial brickwork."
             ),
             new SlideItem(
                     "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_crane_operator_inside_a_high_tech_cabin_overlooking_a_large_bridge/screen.png",
                     "CRANE & HEAVY MACHINERY",
                     "Heavy Machinery & Tower Crane Operators",
-                    "Certified equipment operators commanding bridge construction, tower cranes, and site earthmovers."
+                    "Certified operators managing tower cranes, bridge girders, and large-scale site earthmovers."
             ),
             new SlideItem(
                     "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_professional_indian_welder_working_in_an_industrial_workshop_wearing/screen.png",
                     "PRECISION WELDER",
-                    "Precision Arc, TIG & MIG Welders",
-                    "High-tolerance structural steel fabricators, pipeline welders, and industrial fabrication specialists."
+                    "Precision Arc, TIG & MIG Structural Welders",
+                    "High-tolerance pipeline fabricators, pressure vessel welders, and industrial framework specialists."
             ),
             new SlideItem(
                     "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_professional_indian_plumber_working_on_industrial_piping._he_is_wearing_a/screen.png",
                     "PLUMBING & PIPING",
                     "Industrial & Commercial Piping Engineers",
-                    "Experts in high-pressure supply systems, drainage infrastructure, and commercial fluid conduits."
-            ),
-            new SlideItem(
-                    "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_photo_of_an_indian_carpenter_in_a_woodworking_shop_wearing_a_dihadi/screen.png",
-                    "JOINERY & CARPENTRY",
-                    "Architectural Framework & Finish Joinery",
-                    "Master formwork carpenters, interior joiners, custom framework builders, and shuttering specialists."
-            ),
-            new SlideItem(
-                    "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_professional_indian_female_factory_worker_at_a_high_precision_assembly_line/screen.png",
-                    "PRECISION MANUFACTURING",
-                    "Advanced Manufacturing & Assembly Workforce",
-                    "Skilled line technicians driving precision assembly, testing protocols, and industrial manufacturing."
-            ),
-            new SlideItem(
-                    "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_professional_indian_hvac_technician_servicing_a_large_air_conditioning_unit/screen.png",
-                    "HVAC & CLIMATE SYSTEMS",
-                    "Commercial HVAC & Industrial Cooling",
-                    "Trained technicians servicing centralized air handling units, chillers, and industrial ventilation."
-            ),
-            new SlideItem(
-                    "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_photo_of_an_indian_warehouse_worker_operating_a_forklift_in_a/screen.png",
-                    "LOGISTICS & WAREHOUSE",
-                    "Warehouse Logistics & Material Handlers",
-                    "Forklift operators and inventory crews maintaining smooth dispatch and supply chain mobility."
-            ),
-            new SlideItem(
-                    "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_high_quality_photograph_of_an_indian_female_civil_engineer_on_a/screen.png",
-                    "CIVIL ENGINEERING",
-                    "Civil Architecture & Quality Assurance",
-                    "Technical engineers supervising structural integrity, quality testing, and architectural blueprints."
+                    "Specialists in high-pressure fluid networks, industrial drainage, and municipal conduit infrastructure."
             )
     };
 
@@ -119,16 +94,26 @@ public class AdminHomePage {
     private int currentSlideIndex = 0;
 
     public Scene getAdminHomeScene(Runnable homeAction) {
-        VBox pageContent = new VBox(createHero(), createWorkforceGallery(), createQuoteAndActions(), createAdministration(),
-                createPlatformFlow(), createOverview(), createFooter());
+        VBox pageContent = new VBox(32,
+                createHero(),
+                createWorkforceGallery(),
+                createCorePillars(),
+                createCommandPortals(),
+                createPlatformWorkflow(),
+                createOverviewMetrics(),
+                createFooter()
+        );
         pageContent.setAlignment(Pos.TOP_CENTER);
         pageContent.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
+
         ScrollPane scroll = new ScrollPane(pageContent);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
+
         BorderPane shell = new BorderPane(scroll);
         shell.setTop(createHeader(homeAction));
+
         StackPane root = new StackPane(shell);
         root.setPadding(new Insets(24));
         root.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
@@ -140,55 +125,87 @@ public class AdminHomePage {
         logo.setPreserveRatio(true);
         logo.setSmooth(true);
         Label name = label("DIHADI", "-fx-font-size:25px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1px;");
-        HBox brand = new HBox(10, logo, name); brand.setAlignment(Pos.CENTER_LEFT);
-        HBox nav = new HBox(12, nav("Home", false, homeAction), nav("Business", false, () -> go("Business")),
-                nav("Worker", false, () -> go("Worker")), nav("Recruiter", false, () -> go("Recruiter")),
-                nav("About Us", false, () -> go("About Us")), nav("Contact Us", false, () -> go("Contact Us")));
+        HBox brand = new HBox(10, logo, name);
+        brand.setAlignment(Pos.CENTER_LEFT);
+
+        HBox nav = new HBox(12,
+                nav("Home", false, homeAction),
+                nav("Business", false, () -> go("Business")),
+                nav("Worker", false, () -> go("Worker")),
+                nav("Recruiter", false, () -> go("Recruiter")),
+                nav("About Us", false, () -> go("About Us")),
+                nav("Contact Us", false, () -> go("Contact Us"))
+        );
         nav.setAlignment(Pos.CENTER);
-        Button admin = new Button("Admin");
-        admin.setStyle("-fx-background-color:#d8c39d;-fx-background-radius:18px;-fx-text-fill:#3a3027;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:10px 20px;-fx-cursor:hand;");
-        BorderPane header = new BorderPane(); header.setLeft(brand); header.setCenter(nav); header.setRight(new HBox(10, admin));
+
+        Button admin = new Button("Admin Control");
+        admin.setStyle("-fx-background-color:#735c00;-fx-background-radius:18px;-fx-text-fill:#ffffff;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:9px 20px;-fx-cursor:hand;");
+        admin.setOnAction(e -> openAdminLogin(admin));
+
+        BorderPane header = new BorderPane();
+        header.setLeft(brand);
+        header.setCenter(nav);
+        header.setRight(new HBox(10, admin));
         header.setPadding(new Insets(16, 24, 14, 24));
         header.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
         return header;
     }
 
     private VBox createHero() {
-        Label title = label("ADMIN CONTROL CENTER", "-fx-font-family:Georgia;-fx-font-size:46px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
-        Label subtitle = label("Empowering trusted workforce management through transparency, technology and dignity.",
-                "-fx-font-size:17px;-fx-text-fill:#4c4637;");
-        VBox hero = new VBox(18, title, subtitle); hero.setAlignment(Pos.CENTER);
-        hero.setPadding(new Insets(60, 24, 40, 24)); hero.setMaxWidth(CONTENT_WIDTH);
+        Label eyebrow = label("ENTERPRISE GOVERNANCE & CONTROL",
+                "-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:1.8px;-fx-text-fill:" + GOLD + ";-fx-background-color:#faf0dd;-fx-background-radius:20px;-fx-padding:6px 14px;-fx-border-color:#e2d4bd;-fx-border-radius:20px;");
+
+        Label title = label("DIHADI Admin Command Center",
+                "-fx-font-family:Georgia;-fx-font-size:44px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+
+        Label subtitle = label(
+                "Centralized governance platform for pan-India skilled workforce management, verified enterprise projects, automated escrow security, and dispute resolution.",
+                "-fx-font-size:16px;-fx-text-fill:#4c4637;-fx-line-spacing:3px;-fx-text-alignment:center;");
+        subtitle.setWrapText(true);
+        subtitle.setMaxWidth(820);
+
+        Button loginBtn = action("Admin Login", true);
+        loginBtn.setOnAction(e -> openAdminLogin(loginBtn));
+
+        Button signupBtn = action("Admin Sign Up", false);
+        signupBtn.setOnAction(e -> openAdminSignUp(signupBtn));
+
+        HBox actions = new HBox(16, loginBtn, signupBtn);
+        actions.setAlignment(Pos.CENTER);
+
+        VBox hero = new VBox(16, eyebrow, title, subtitle, actions);
+        hero.setAlignment(Pos.CENTER);
+        hero.setPadding(new Insets(42, 24, 20, 24));
+        hero.setMaxWidth(CONTENT_WIDTH);
         return hero;
     }
 
     private VBox createWorkforceGallery() {
         ImageView slideImageView = new ImageView();
         slideImageView.setFitWidth(CONTENT_WIDTH);
-        slideImageView.setFitHeight(480);
+        slideImageView.setFitHeight(460);
         slideImageView.setPreserveRatio(false);
         slideImageView.setSmooth(true);
 
         Label badgeLbl = new Label();
-        badgeLbl.setStyle("-fx-background-color:rgba(212,175,55,0.22);-fx-border-color:#d4af37;-fx-border-radius:999px;-fx-background-radius:999px;-fx-text-fill:#ffd54f;-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-padding:6px 14px;");
+        badgeLbl.setStyle("-fx-background-color:rgba(212,175,55,0.25);-fx-border-color:#d4af37;-fx-border-radius:999px;-fx-background-radius:999px;-fx-text-fill:#ffd54f;-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-padding:6px 14px;");
 
         Label titleLbl = new Label();
-        titleLbl.setStyle("-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#ffffff;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.6),8,0,0,2px);");
+        titleLbl.setStyle("-fx-font-family:Georgia;-fx-font-size:28px;-fx-font-weight:800;-fx-text-fill:#ffffff;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.6),8,0,0,2px);");
 
         Label descLbl = new Label();
-        descLbl.setStyle("-fx-font-size:15px;-fx-text-fill:#f5eedf;-fx-line-spacing:3px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.6),6,0,0,1px);");
+        descLbl.setStyle("-fx-font-size:14px;-fx-text-fill:#f5eedf;-fx-line-spacing:3px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.6),6,0,0,1px);");
         descLbl.setWrapText(true);
-        descLbl.setMaxWidth(800);
+        descLbl.setMaxWidth(780);
 
         VBox textOverlay = new VBox(8, badgeLbl, titleLbl, descLbl);
         textOverlay.setAlignment(Pos.BOTTOM_LEFT);
-        textOverlay.setPadding(new Insets(32, 42, 32, 42));
+        textOverlay.setPadding(new Insets(30, 38, 30, 38));
         textOverlay.setMaxWidth(CONTENT_WIDTH);
 
-        // Bottom gradient scrim
         StackPane gradientScrim = new StackPane();
-        gradientScrim.setPrefSize(CONTENT_WIDTH, 480);
-        gradientScrim.setStyle("-fx-background-color:linear-gradient(to top, rgba(16,13,9,0.92) 0%, rgba(16,13,9,0.60) 40%, rgba(16,13,9,0.15) 75%, transparent 100%);");
+        gradientScrim.setPrefSize(CONTENT_WIDTH, 460);
+        gradientScrim.setStyle("-fx-background-color:linear-gradient(to top, rgba(16,13,9,0.92) 0%, rgba(16,13,9,0.55) 45%, rgba(16,13,9,0.12) 75%, transparent 100%);");
 
         Runnable[] updateSlide = new Runnable[1];
         updateSlide[0] = () -> {
@@ -197,7 +214,7 @@ public class AdminHomePage {
             if (img != null) {
                 slideImageView.setImage(img);
             }
-            badgeLbl.setText("✦ " + item.badge);
+            badgeLbl.setText(item.badge);
             titleLbl.setText(item.role);
             descLbl.setText(item.tagline);
         };
@@ -209,18 +226,17 @@ public class AdminHomePage {
         bottomBar.setPickOnBounds(false);
 
         StackPane card = new StackPane(slideImageView, gradientScrim, bottomBar);
-        card.setPrefSize(CONTENT_WIDTH, 480);
-        card.setMinSize(CONTENT_WIDTH, 480);
-        card.setMaxSize(CONTENT_WIDTH, 480);
-        Rectangle clip = new Rectangle(CONTENT_WIDTH, 480);
-        clip.setArcWidth(28);
-        clip.setArcHeight(28);
+        card.setPrefSize(CONTENT_WIDTH, 460);
+        card.setMinSize(CONTENT_WIDTH, 460);
+        card.setMaxSize(CONTENT_WIDTH, 460);
+        Rectangle clip = new Rectangle(CONTENT_WIDTH, 460);
+        clip.setArcWidth(24);
+        clip.setArcHeight(24);
         card.setClip(clip);
-        card.setStyle("-fx-background-color:#1e1b15;-fx-background-radius:28px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:28px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.22),24,0,0,8px);");
+        card.setStyle("-fx-background-color:#1e1b15;-fx-background-radius:24px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:24px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.22),24,0,0,8px);");
 
-        // Autoplay Timeline with fast, dynamic image transitions
         if (workforceSlider != null) workforceSlider.stop();
-        workforceSlider = new Timeline(new KeyFrame(Duration.millis(1800), event -> {
+        workforceSlider = new Timeline(new KeyFrame(Duration.millis(2400), event -> {
             currentSlideIndex = (currentSlideIndex + 1) % WORKFORCE_SLIDES.length;
             updateSlide[0].run();
         }));
@@ -230,128 +246,145 @@ public class AdminHomePage {
         card.setOnMouseEntered(e -> workforceSlider.pause());
         card.setOnMouseExited(e -> workforceSlider.play());
 
-        // 4 trust pillars below the showcase
-        HBox trustPillars = new HBox(18,
-                pillarBadge("🛡️", "100% KYC Verified", "Background-checked workers"),
-                pillarBadge("⚡", "Live Attendance Tracking", "Automated daily logging"),
-                pillarBadge("📍", "Pan-India Coverage", "Skilled workforce across states"),
-                pillarBadge("💳", "Escrow Wage Security", "Protected daily wage payouts")
-        );
-        trustPillars.setAlignment(Pos.CENTER);
-        trustPillars.setMaxWidth(CONTENT_WIDTH);
-        for (javafx.scene.Node n : trustPillars.getChildren()) HBox.setHgrow(n, Priority.ALWAYS);
-
-        VBox gallerySection = new VBox(22, card, trustPillars);
+        VBox gallerySection = new VBox(card);
         gallerySection.setAlignment(Pos.CENTER);
         gallerySection.setMaxWidth(CONTENT_WIDTH);
         return gallerySection;
     }
 
-    private Image loadImage(String path) {
-        try {
-            java.net.URL url = getClass().getResource(path);
-            if (url != null) return new Image(url.toExternalForm());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+    private HBox createCorePillars() {
+        HBox trustPillars = new HBox(16,
+                pillarBadge("100% KYC Verified", "Multi-tier identity and background authentication across all registered trades."),
+                pillarBadge("Live Attendance", "Automated biometric and geo-fenced daily shifts and work verification."),
+                pillarBadge("Pan-India Sites", "Strategic deployment spanning commercial, residential, and mega infrastructure."),
+                pillarBadge("Escrow Security", "Protected daily wage payouts with zero leakage and guaranteed settlements.")
+        );
+        trustPillars.setAlignment(Pos.CENTER);
+        trustPillars.setMaxWidth(CONTENT_WIDTH);
+        for (javafx.scene.Node n : trustPillars.getChildren()) HBox.setHgrow(n, Priority.ALWAYS);
+        return trustPillars;
     }
 
-    private VBox pillarBadge(String icon, String title, String subtitle) {
-        Label iconLbl = label(icon, "-fx-font-size:20px;");
+    private VBox pillarBadge(String title, String subtitle) {
         Label titleLbl = label(title, "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
-        Label subLbl = label(subtitle, "-fx-font-size:12px;-fx-text-fill:#685c52;");
-        VBox box = new VBox(4, iconLbl, titleLbl, subLbl);
-        box.setAlignment(Pos.CENTER_LEFT);
-        box.setPadding(new Insets(14, 18, 14, 18));
+        Label subLbl = label(subtitle, "-fx-font-size:12px;-fx-text-fill:#685c52;-fx-line-spacing:2px;");
+        subLbl.setWrapText(true);
+        VBox box = new VBox(5, titleLbl, subLbl);
+        box.setAlignment(Pos.TOP_LEFT);
+        box.setPadding(new Insets(16, 18, 16, 18));
         box.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:#e5d9c7;-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),10,0,0,2px);");
         return box;
     }
 
-    private VBox createQuoteAndActions() {
-        Label marks = label("“”,", "-fx-font-family:Georgia;-fx-font-size:105px;-fx-text-fill:#eee7dc;");
-        Label quote = label("\"Value for Time. Skill. Money. A trusted portal that gives labourers the right to\nwork, the value of their skill, and the dignity they deserve.\"",
-                "-fx-font-family:Georgia;-fx-font-size:18px;-fx-font-style:italic;-fx-text-fill:#1e1b15;-fx-text-alignment:center;");
-        StackPane quoteBox = new StackPane(marks, quote); quoteBox.setPrefHeight(205);
-        Button login = action("ADMIN LOGIN", true);
-        login.setOnAction(event -> openAdminLogin(login));
-        Button signup = action("ADMIN SIGN UP", false);
-        signup.setOnAction(event -> openAdminSignUp(signup));
-        HBox actions = new HBox(20, login, signup); actions.setAlignment(Pos.CENTER);
-        VBox block = new VBox(quoteBox, actions); block.setAlignment(Pos.CENTER);
-        block.setPadding(new Insets(35, 24, 90, 24)); block.setMaxWidth(CONTENT_WIDTH);
-        return block;
-    }
+    private VBox createCommandPortals() {
+        Label heading = label("Core Administration Modules",
+                "-fx-font-family:Georgia;-fx-font-size:32px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
 
-    private VBox createAdministration() {
-        Label title = label("DIHADI ADMINISTRATION", "-fx-font-family:Georgia;-fx-font-size:38px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
-        Label goldLine = new Label(); goldLine.setPrefSize(70, 3); goldLine.setStyle("-fx-background-color:#d4af37;");
-        FlowPane cards = new FlowPane(20, 20, managementCard("WORKFORCE", "Workforce Management", "Onboard and verify skilled workers safely."),
-                managementCard("DEMAND", "Labour Demand", "Track geographic requirements and project needs."),
-                managementCard("MATCH", "Smart Matching", "Connect verified skills with active requirements."),
-                managementCard("TRUST", "Trust & Transparency", "Ensure compliance and secure payments."));
+        FlowPane cards = new FlowPane(20, 20,
+                adminPortalCard("WORKFORCE", "Workforce Governance", "Manage onboarding, verify Aadhaar KYC, audit trade certifications, and regulate active worker pools.", "Access Workforce"),
+                adminPortalCard("PROJECTS", "Enterprise Projects", "Track live site requirements, monitor contractor daily wages, and audit active infrastructure projects.", "Access Projects"),
+                adminPortalCard("ESCROW", "Financial & Payouts", "Oversee daily transaction volume, escrow deposits, wage settlements, and contractor billing.", "Access Financials"),
+                adminPortalCard("DISPUTES", "Grievance Resolution", "Investigate workplace safety breaches, payment escalations, and contractor compliance cases.", "Access Grievances")
+        );
         cards.setAlignment(Pos.CENTER);
-        VBox section = new VBox(15, title, goldLine, new VBox(45, cards)); section.setAlignment(Pos.CENTER);
-        section.setPadding(new Insets(0, 24, 92, 24)); section.setMaxWidth(CONTENT_WIDTH);
+
+        VBox section = new VBox(24, heading, cards);
+        section.setAlignment(Pos.CENTER);
+        section.setPadding(new Insets(10, 24, 30, 24));
+        section.setMaxWidth(CONTENT_WIDTH);
         return section;
     }
 
-    private VBox managementCard(String tag, String title, String text) {
-        Button badge = new Button(tag); badge.setOnAction(event -> showAction(title));
-        badge.setStyle("-fx-background-color:#f4ede2;-fx-background-radius:99px;-fx-text-fill:#a77f00;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:12px 15px;");
-        Label heading = label(title, "-fx-font-size:18px;-fx-font-weight:700;-fx-text-fill:#1e1b15;-fx-text-alignment:center;");
-        Label copy = label(text, "-fx-font-size:13px;-fx-text-fill:#4c4637;-fx-text-alignment:center;"); copy.setWrapText(true); copy.setMaxWidth(225);
-        VBox card = new VBox(17, badge, heading, copy); card.setAlignment(Pos.CENTER); card.setPrefSize(265, 205);
-        card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:12px;-fx-border-color:#e9e2d7;-fx-border-radius:12px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),12,.15,0,3px);");
+    private VBox adminPortalCard(String tag, String title, String text, String cta) {
+        Label badge = label(tag,
+                "-fx-background-color:#faf0dd;-fx-background-radius:6px;-fx-text-fill:#735c00;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:4px 10px;-fx-border-color:#ebdccb;-fx-border-radius:6px;");
+
+        Label heading = label(title, "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+        Label copy = label(text, "-fx-font-size:12px;-fx-text-fill:#4c4637;-fx-line-spacing:2px;");
+        copy.setWrapText(true);
+        copy.setMaxWidth(235);
+
+        Button ctaBtn = new Button(cta + " ->");
+        ctaBtn.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:4px 0;-fx-cursor:hand;");
+        ctaBtn.setOnAction(e -> openAdminLogin(ctaBtn));
+
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        VBox card = new VBox(10, badge, heading, copy, spacer, ctaBtn);
+        card.setAlignment(Pos.TOP_LEFT);
+        card.setPrefSize(275, 205);
+        card.setPadding(new Insets(20, 22, 18, 22));
+        card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:#e5d9c7;-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),12,0,0,3px);-fx-cursor:hand;");
+
+        card.setOnMouseEntered(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.25),16,0,0,5px);-fx-cursor:hand;"));
+        card.setOnMouseExited(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:#e5d9c7;-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),12,0,0,3px);"));
+        card.setOnMouseClicked(e -> openAdminLogin(ctaBtn));
+
         return card;
     }
 
-    private VBox createPlatformFlow() {
-        Label title = label("ONE PLATFORM. COMPLETE CONTROL.", "-fx-font-family:Georgia;-fx-font-size:38px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
-        HBox steps = new HBox(42,
-                step(icon("M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"), "Supply"),
-                step(icon("M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8 14-4-4 1.41-1.41L11 14.17l4.59-4.59L17 11l-6 6z"), "Verify"),
-                step(icon("M7 7l-4 4 4 4v-3h7v-2H7V7zm10 2h-7v2h7v3l4-4-4-4v3z"), "Match"),
-                step(icon("M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10-2h4v2h-4V4zm10 14H4v-5h6v1h4v-1h6v5z"), "Demand"),
-                step(icon("M3 3h18v18H3V3zm2 2v14h14V5H5zm3 10h2v2H8v-2zm3-4h2v6h-2v-6zm3-3h2v9h-2V8z"), "Deploy"));
+    private VBox createPlatformWorkflow() {
+        Label title = label("Unified Ecosystem Architecture",
+                "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+
+        HBox steps = new HBox(32,
+                workflowStep("1. Supply", "Workforce Sourcing"),
+                workflowStep("2. Verify", "KYC & Skill Audit"),
+                workflowStep("3. Match", "Project Placement"),
+                workflowStep("4. Demand", "Live Contractor Quota"),
+                workflowStep("5. Escrow", "Guaranteed Settlement")
+        );
         steps.setAlignment(Pos.CENTER);
-        VBox section = new VBox(48, title, steps); section.setAlignment(Pos.CENTER); section.setPadding(new Insets(76, 24, 76, 24));
-        section.setMaxWidth(Double.MAX_VALUE); section.setStyle("-fx-background-color:#faf3e8;"); return section;
+
+        VBox section = new VBox(28, title, steps);
+        section.setAlignment(Pos.CENTER);
+        section.setPadding(new Insets(42, 24, 42, 24));
+        section.setMaxWidth(CONTENT_WIDTH);
+        section.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:20px;-fx-border-color:#ebdccb;-fx-border-radius:20px;");
+        return section;
     }
 
-    private VBox step(javafx.scene.Node icon, String title) {
-        Label name = label(title, "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#3a3027;");
-        VBox circle = new VBox(13, icon, name);
-        circle.setAlignment(Pos.CENTER);
-        circle.setPrefSize(160, 160);
-        circle.setMinSize(160, 160);
-        circle.setMaxSize(160, 160);
-        circle.setStyle("-fx-background-color:#fffdf9;-fx-background-radius:100px;"
-                + "-fx-border-color:#d4af37;-fx-border-radius:100px;-fx-border-width:1.25px;"
-                + "-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),10,.12,0,2px);");
-        return circle;
+    private VBox workflowStep(String stepTitle, String subtitle) {
+        Label stepNum = label(stepTitle, "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        Label desc = label(subtitle, "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#4c4637;");
+        VBox box = new VBox(4, stepNum, desc);
+        box.setAlignment(Pos.CENTER);
+        box.setPrefSize(185, 75);
+        box.setPadding(new Insets(10));
+        box.setStyle("-fx-background-color:#ffffff;-fx-background-radius:12px;-fx-border-color:#d4af37;-fx-border-width:1.25px;-fx-border-radius:12px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.04),8,0,0,2px);");
+        return box;
     }
 
-    private StackPane icon(String svgPath) {
-        javafx.scene.shape.SVGPath path = new javafx.scene.shape.SVGPath();
-        path.setContent(svgPath);
-        path.setFill(Color.web("#c79b16"));
-        path.setScaleX(1.18);
-        path.setScaleY(1.18);
-        StackPane icon = new StackPane(path);
-        icon.setPrefSize(32, 32);
-        return icon;
+    private VBox createOverviewMetrics() {
+        Label heading = label("Ecosystem Overview", "-fx-font-family:Georgia;-fx-font-size:22px;-fx-font-weight:800;-fx-text-fill:#e9c349;");
+        HBox stats = new HBox(60,
+                statistic("25,000+", "REGISTERED WORKERS"),
+                statistic("1,840+", "VERIFIED CONTRACTORS"),
+                statistic("740+", "ACTIVE PROJECTS"),
+                statistic("99.4%", "ESCROW SETTLEMENT")
+        );
+        stats.setAlignment(Pos.CENTER);
+
+        VBox panel = new VBox(20, heading, stats);
+        panel.setPadding(new Insets(28, 36, 28, 36));
+        panel.setMaxWidth(CONTENT_WIDTH);
+        panel.setStyle("-fx-background-color:#272727;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.25),16,0,0,6px);");
+
+        VBox section = new VBox(panel);
+        section.setAlignment(Pos.CENTER);
+        section.setPadding(new Insets(20, 24, 35, 24));
+        return section;
     }
 
-    private VBox createOverview() {
-        Label heading = label("System Overview", "-fx-font-size:20px;-fx-text-fill:#e3c466;");
-        HBox stats = new HBox(78, statistic("25K+", "TOTAL WORKERS"), statistic("12K", "AVAILABLE NOW"), statistic("850", "ACTIVE PROJECTS"), statistic("99%", "MATCH RATE")); stats.setAlignment(Pos.CENTER);
-        VBox panel = new VBox(30, heading, stats); panel.setPadding(new Insets(30, 42, 30, 42)); panel.setMaxWidth(CONTENT_WIDTH);
-        panel.setStyle("-fx-background-color:#3a3027;-fx-background-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.18),12,.18,0,4px);");
-        VBox section = new VBox(panel); section.setAlignment(Pos.CENTER); section.setPadding(new Insets(55, 24, 55, 24)); return section;
+    private VBox statistic(String number, String name) {
+        Label numLbl = label(number, "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:#ffffff;");
+        Label nameLbl = label(name, "-fx-font-size:10px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-text-fill:#e9c349;");
+        VBox box = new VBox(4, numLbl, nameLbl);
+        box.setAlignment(Pos.CENTER);
+        box.setPrefWidth(180);
+        return box;
     }
-
-    private VBox statistic(String number, String name) { VBox box = new VBox(3, label(number, "-fx-font-size:29px;-fx-font-weight:800;-fx-text-fill:white;"), label(name, "-fx-font-size:10px;-fx-font-weight:700;-fx-text-fill:#f7f0e5;")); box.setAlignment(Pos.CENTER); box.setPrefWidth(155); return box; }
 
     private VBox createFooter() {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
@@ -396,24 +429,75 @@ public class AdminHomePage {
 
     private Button nav(String name, boolean active, Runnable action) {
         Button button = new Button(name);
-        button.setOnAction(event -> action.run());
+        button.setOnAction(event -> {
+            if (workforceSlider != null) workforceSlider.stop();
+            action.run();
+        });
         button.setStyle("-fx-background-color:transparent;-fx-background-radius:0;-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-border-width:0 0 2px 0;-fx-padding:8px 4px;-fx-cursor:hand;"
                 + (active ? "-fx-text-fill:#735c00;-fx-border-color:#735c00;" : "-fx-text-fill:#4d4635;-fx-border-color:transparent;"));
         return button;
     }
-    private Button action(String name, boolean filled) { Button button = new Button(name); button.setStyle("-fx-background-radius:99px;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:13px 42px;" + (filled ? "-fx-background-color:#3a3027;-fx-text-fill:white;" : "-fx-background-color:#fff8f0;-fx-border-color:#d4af37;-fx-border-radius:99px;-fx-text-fill:#1e1b15;")); return button; }
-    private ImageView image(String path, double width, double height) { ImageView view = new ImageView(new Image(getClass().getResource(path).toExternalForm())); view.setFitWidth(width); view.setFitHeight(height); view.setPreserveRatio(path.contains("/assets/logo/")); view.setSmooth(true); return view; }
-    private Label label(String text, String style) { Label label = new Label(text); label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style); return label; }
-    private void go(String destination) { for (javafx.stage.Window window : javafx.stage.Window.getWindows()) if (window.isFocused() && window instanceof Stage stage) { AppNavigator.open(stage, destination); return; } }
+
+    private Button action(String name, boolean filled) {
+        Button button = new Button(name);
+        button.setStyle("-fx-background-radius:99px;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:12px 36px;-fx-cursor:hand;"
+                + (filled ? "-fx-background-color:linear-gradient(to right, #735c00, #5a4800);-fx-text-fill:white;-fx-effect:dropshadow(gaussian,rgba(115,92,0,.35),10,0,0,2px);"
+                        : "-fx-background-color:#ffffff;-fx-border-color:#735c00;-fx-border-width:1.5px;-fx-border-radius:99px;-fx-text-fill:#735c00;"));
+        return button;
+    }
+
+    private ImageView image(String path, double width, double height) {
+        try {
+            var r = getClass().getResource(path);
+            if (r == null) return new ImageView();
+            ImageView view = new ImageView(new Image(r.toExternalForm()));
+            view.setFitWidth(width);
+            view.setFitHeight(height);
+            view.setPreserveRatio(path.contains("/assets/logo/"));
+            view.setSmooth(true);
+            return view;
+        } catch (Exception e) {
+            return new ImageView();
+        }
+    }
+
+    private Image loadImage(String path) {
+        try {
+            var r = getClass().getResource(path);
+            if (r != null) return new Image(r.toExternalForm());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Label label(String text, String style) {
+        Label label = new Label(text);
+        label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
+        return label;
+    }
+
+    private void go(String destination) {
+        if (workforceSlider != null) workforceSlider.stop();
+        for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
+            if (window.isFocused() && window instanceof Stage stage) {
+                AppNavigator.open(stage, destination);
+                return;
+            }
+        }
+    }
+
     private void openAdminSignUp(Button source) {
+        if (workforceSlider != null) workforceSlider.stop();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.setScene(new AdminSignUpPage().getAdminSignUpScene(
                 () -> stage.setScene(getAdminHomeScene(() -> AppNavigator.open(stage, "Home")))));
     }
+
     private void openAdminLogin(Button source) {
+        if (workforceSlider != null) workforceSlider.stop();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.setScene(new AdminLoginPage().getAdminLoginScene(
                 () -> stage.setScene(getAdminHomeScene(() -> AppNavigator.open(stage, "Home")))));
     }
-    private void showAction(String action) { Alert alert = new Alert(Alert.AlertType.INFORMATION); alert.setTitle(action); alert.setHeaderText(action); alert.setContentText("This admin action is ready to connect to the corresponding administration workflow."); alert.show(); }
 }
