@@ -249,21 +249,59 @@ public class ContactUs {
                 send.setOnAction(e -> {
                         String name = nameField.getText().trim();
                         String mobile = mobileField.getText().trim();
+                        String email = emailField.getText().trim();
+                        String subject = subjectField.getText().trim();
+                        String message = messageArea.getText().trim();
+
                         if (name.isEmpty() || mobile.isEmpty()) {
                                 feedbackLabel.setText("Please provide both your name and mobile number.");
                                 feedbackLabel.setStyle(
                                                 "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#b03525;");
                                 feedbackLabel.setVisible(true);
                         } else {
-                                feedbackLabel.setText("Thank you, " + name + "! Your inquiry has been received.");
+                                feedbackLabel.setText("Submitting inquiry...");
                                 feedbackLabel.setStyle(
-                                                "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#2a7e3b;");
+                                                "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#735c00;");
                                 feedbackLabel.setVisible(true);
-                                nameField.clear();
-                                emailField.clear();
-                                mobileField.clear();
-                                subjectField.clear();
-                                messageArea.clear();
+
+                                String sub = subject.isBlank() ? "Online Portal Inquiry" : subject;
+                                String desc = message.isBlank() ? "General inquiry submitted from DIHADI contact page." : message;
+                                String timeStr = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a"));
+
+                                com.dihadi.model.Grievance g = new com.dihadi.model.Grievance(
+                                        "GR-" + System.currentTimeMillis(),
+                                        sub,
+                                        name + " (" + mobile + ")",
+                                        mobile,
+                                        email.isBlank() ? "Not provided" : email,
+                                        "Contact Us Portal",
+                                        "Pune, Maharashtra",
+                                        "Medium",
+                                        "New",
+                                        "Online Inquiry",
+                                        "General Inquiry",
+                                        timeStr,
+                                        desc,
+                                        "Received via Contact Us Page. Awaiting support review."
+                                );
+
+                                new Thread(() -> {
+                                        try {
+                                                new com.dihadi.controller.GrievanceController().saveGrievance(g);
+                                        } catch (Exception ex) {
+                                                ex.printStackTrace();
+                                        }
+                                        javafx.application.Platform.runLater(() -> {
+                                                feedbackLabel.setText("Thank you, " + name + "! Your inquiry has been submitted and registered.");
+                                                feedbackLabel.setStyle(
+                                                                "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#2a7e3b;");
+                                                nameField.clear();
+                                                emailField.clear();
+                                                mobileField.clear();
+                                                subjectField.clear();
+                                                messageArea.clear();
+                                        });
+                                }).start();
                         }
                 });
 
