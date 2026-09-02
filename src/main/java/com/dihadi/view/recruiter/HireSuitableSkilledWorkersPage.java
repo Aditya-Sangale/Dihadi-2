@@ -89,12 +89,15 @@ public class HireSuitableSkilledWorkersPage {
                 startCarousel();
 
                 Label quote = label(
-                                "\"True strength lies in\nhumility and honest labor.\nDiscover professionals who\nbuild the future with pride.\"",
-                                "-fx-font-family:'Georgia';-fx-font-size:20px;-fx-font-style:italic;-fx-text-fill:"
+                                "\"True strength lies in humility and honest labor. Discover professionals who build the future with pride.\"",
+                                "-fx-font-family:'Georgia',serif;-fx-font-size:24px;-fx-font-weight:700;-fx-text-fill:"
                                                 + INK
-                                                + ";-fx-line-spacing:3px;");
+                                                + ";-fx-line-spacing:4px;");
+                quote.setWrapText(true);
+                quote.setPrefWidth(298);
+                quote.setMaxWidth(298);
                 Label verified = label("✧  DIHADI Verified Professionals",
-                                "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:" + MUTED + ";");
+                                "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:" + MUTED + ";");
                 VBox words = new VBox(29, quote, verified);
                 words.setAlignment(Pos.CENTER_LEFT);
                 words.setPadding(new Insets(30, 34, 30, 38));
