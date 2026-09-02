@@ -204,19 +204,23 @@ public class PainterResultPage {
     }
 
     private VBox card(WorkerCardData painter) {
-        ImageView portrait = image(painter.photo, 64, 64);
+        ImageView portrait = image(painter.photo, 52, 52);
         portrait.setPreserveRatio(false);
-        portrait.setClip(new Circle(32, 32, 32));
+        portrait.setClip(new Circle(26, 26, 26));
         StackPane avatar = new StackPane(portrait);
         avatar.setPrefSize(64, 64);
+        avatar.setMinSize(64, 64);
+        avatar.setMaxSize(64, 64);
         avatar.setStyle(
-                "-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-background-radius:999px;");
+                "-fx-background-color:#ffffff;-fx-background-radius:999px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-padding:4px;");
         Label name = label(painter.name, "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
         Label age = label(painter.age, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
         Label skill = label(painter.skill, "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:" + GOLD
                 + ";-fx-background-color:#f4ede2;-fx-background-radius:5px;-fx-padding:4px 7px;");
-        Label location = label("⌖  " + painter.location, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
-        VBox details = new VBox(4, name, age, skill, location);
+        Label location = label("•  Based in " + painter.location, "-fx-font-size:11px;-fx-text-fill:" + MUTED + ";");
+        Label availability = label("•  Available for new projects",
+                "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#477044;");
+        VBox details = new VBox(4, name, age, skill, location, availability);
         HBox top = new HBox(14, avatar, details);
         top.setAlignment(Pos.TOP_LEFT);
         Region divider = new Region();
@@ -229,25 +233,31 @@ public class PainterResultPage {
         Button hire = new Button("HIRE NOW");
         hire.setStyle(
                 "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-radius:18px;-fx-text-fill:#b48700;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;");
-        hire.setOnAction(e -> AppNavigator.information("Hire " + painter.name,
-                "Your hiring request for " + painter.name + " has been initiated. We will connect you shortly."));
         Region gap = new Region();
         HBox.setHgrow(gap, Priority.ALWAYS);
         HBox bottom = new HBox(wage, gap, hire);
         bottom.setAlignment(Pos.CENTER_LEFT);
         VBox card = new VBox(16, top, divider, bottom);
-        card.setPrefSize(360, 194);
+        card.setPrefSize(360, 220);
         card.setPadding(new Insets(20));
         card.setStyle(cardStyle(false));
         card.setOnMouseEntered(e -> card.setStyle(cardStyle(true)));
         card.setOnMouseExited(e -> card.setStyle(cardStyle(false)));
-        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); javafx.scene.Scene currentScene = card.getScene(); stage.setScene(new RecruiterWorkerProfilePage(painter.name, "Painter", painter.age, painter.location, painter.wage, painter.photo).getProfileScene(() -> stage.setScene(currentScene), currentScene)); });
+        hire.setOnAction(e -> openPainterProfile(card, painter));
+        card.setOnMouseClicked(e -> openPainterProfile(card, painter));
         return card;
+    }
+
+    private void openPainterProfile(VBox card, WorkerCardData painter) {
+        Stage stage = (Stage) card.getScene().getWindow();
+        Scene currentScene = card.getScene();
+        stage.setScene(new RecruiterWorkerProfilePage(painter.name, "Painter", painter.age, painter.location,
+                painter.wage, painter.photo, "", () -> RecruiterWorkerProfilePage.markResultCardHired(card)).getProfileScene(() -> stage.setScene(currentScene), currentScene));
     }
 
     private String cardStyle(boolean active) {
         return "-fx-background-color:#ffffff;-fx-background-radius:13px;-fx-border-color:"
-                + (active ? "#d4af37" : "transparent") + ";-fx-border-width:" + (active ? "2px" : "1px")
+                + (active ? "#d4af37" : "#e9e2d7") + ";-fx-border-width:" + (active ? "2px" : "1px")
                 + ";-fx-border-radius:13px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,"
                 + (active ? ".14" : ".06") + ")," + (active ? "17" : "8") + ",0,0," + (active ? "4" : "2") + "px);";
     }
