@@ -31,4 +31,8 @@ public class JobApplicationController {
     public List<JobApplication> getAllApplications() {
         return dao.getAllApplications();
     }
+
+    public void updateWorkerApplicationsForProject(String workerMobile, String projectId, String newStatus) {
+        dao.updateWorkerApplicationsForProject(workerMobile, projectId, newStatus);
+    }
 }

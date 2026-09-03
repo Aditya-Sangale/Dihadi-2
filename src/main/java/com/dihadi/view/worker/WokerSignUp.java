@@ -63,8 +63,6 @@ public class WokerSignUp {
     private final ImageView profileImage = new ImageView();
     private String profilePhotoUrl;
     private File selectedPhotoFile;
-    private final String[] showcaseImages = { "/assets/images/worker 5.jpeg", "/assets/images/worker 2.jpeg",
-            "/assets/images/sitesuperviser.jpeg", "/assets/images/welder.jpeg" };
     private Runnable backAction;
 
     public Scene getSignUpScene(Runnable onBack) {
@@ -73,11 +71,17 @@ public class WokerSignUp {
                 change -> change.getControlNewText().matches("\\d{0,6}") ? change : null));
         dateOfBirth.setPromptText("DD/MM/YYYY");
         dateOfBirth.setStyle(inputStyle());
-        BorderPane page = new BorderPane();
-        page.setCenter(createForm());
-        page.setRight(createVisualPanel());
-        StackPane root = new StackPane(page);
-        root.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
+
+        Region bg = new Region();
+        var res = getClass().getResource("/assets/images/worker_auth_bg.jpg");
+        String bgUrl = (res != null) ? res.toExternalForm() : "";
+        bg.setStyle("-fx-background-image: url('" + bgUrl + "');" +
+                "-fx-background-size: cover;" +
+                "-fx-background-position: center center;" +
+                "-fx-background-repeat: no-repeat;");
+
+        ScrollPane scroll = createForm();
+        StackPane root = new StackPane(bg, scroll);
         return new Scene(root, 1400, 780);
     }
 
@@ -85,36 +89,42 @@ public class WokerSignUp {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 72, 72);
         logo.setPreserveRatio(true);
         VBox identity = new VBox(3, logo,
-                label("DIHADI", "-fx-font-size:28px;-fx-font-weight:800;-fx-text-fill:#735c00;"),
-                label("Meri Dihadi ~ Mera Haq", "-fx-font-size:16px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
+                label("DIHADI", "-fx-font-family:'Georgia';-fx-font-size:28px;-fx-font-weight:800;-fx-text-fill:#735c00;"),
+                label("Meri Dihadi ~ Mera Haq", "-fx-font-family:'Georgia';-fx-font-size:16px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
         identity.setAlignment(Pos.CENTER);
         VBox intro = new VBox(6,
-                label("👋  Welcome to DIHADI", "-fx-font-size:30px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
-                label("Sign In or Create a New Account", "-fx-font-size:18px;-fx-text-fill:#4c4637;"),
-                label("Enter your personal details to proceed ahead.", "-fx-font-size:15px;-fx-text-fill:#685c52;"));
+                label("Create Worker Account", "-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#1e1b15;"),
+                label("Enter your personal details to register your profile.", "-fx-font-size:14px;-fx-text-fill:#594f42;"));
         intro.setAlignment(Pos.CENTER);
-        Button back = new Button("←  PERSONAL DETAILS");
-        back.setText("<");
+        Button back = new Button("<");
         back.setStyle(
-                "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:18px;-fx-font-weight:800;-fx-padding:7px 14px;-fx-cursor:hand;");
-        back.setOnAction(event -> AppNavigator.open((Stage) back.getScene().getWindow(), "Home"));
+                "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:10px;-fx-border-color:rgba(212,175,55,0.4);-fx-border-radius:10px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:16px;-fx-font-weight:800;-fx-padding:6px 12px;-fx-cursor:hand;");
+        back.setOnAction(event -> {
+            Stage stage = (Stage) back.getScene().getWindow();
+            if (backAction != null) backAction.run();
+            else AppNavigator.open(stage, "Home");
+        });
         Label personalDetails = label("PERSONAL DETAILS",
-                "-fx-background-color:#e8d7b6;-fx-background-radius:12px;-fx-text-fill:#4d4635;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:11px 16px;");
+                "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:10px;-fx-border-color:rgba(212,175,55,0.4);-fx-border-radius:10px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:9px 14px;");
         HBox formHeading = new HBox(10, back, personalDetails);
         formHeading.setAlignment(Pos.CENTER_LEFT);
-        VBox card = new VBox(22, formHeading, createPhotoPicker(), createFields(), createActions());
-        card.setMaxWidth(560);
-        card.setPadding(new Insets(30));
+        VBox card = new VBox(20, formHeading, identity, intro, createPhotoPicker(), createFields(), createActions());
+        card.setMaxWidth(600);
+        card.setPadding(new Insets(32, 36, 36, 36));
         card.setStyle(
-                "-fx-background-color:#fffdf9;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.09),20,0,0,5px);");
-        VBox content = new VBox(22, identity, intro, card);
-        content.setAlignment(Pos.TOP_CENTER);
-        content.setPadding(new Insets(34, 30, 48, 30));
+                "-fx-background-color:rgba(255,253,248,0.84);" +
+                "-fx-background-radius:22px;" +
+                "-fx-border-color:rgba(212,175,55,0.45);" +
+                "-fx-border-radius:22px;" +
+                "-fx-border-width:1.5px;" +
+                "-fx-effect:dropshadow(gaussian,rgba(30,24,16,0.18),28,0,0,10px);");
+        VBox content = new VBox(card);
+        content.setAlignment(Pos.TOP_LEFT);
+        content.setPadding(new Insets(24, 20, 48, 70));
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
-        scroll.setPrefViewportWidth(700);
         return scroll;
     }
 
@@ -122,11 +132,16 @@ public class WokerSignUp {
         profileImage.setFitWidth(90);
         profileImage.setFitHeight(90);
         profileImage.setPreserveRatio(false);
-        StackPane avatar = new StackPane(profileImage, label("👤", "-fx-font-size:36px;-fx-text-fill:#685c52;"));
+        javafx.scene.shape.SVGPath userIcon = new javafx.scene.shape.SVGPath();
+        userIcon.setContent("M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z");
+        userIcon.setFill(Color.web("#735c00"));
+        StackPane avatar = new StackPane(userIcon, profileImage);
         avatar.setPrefSize(94, 94);
         avatar.setStyle(
-                "-fx-background-color:#eee7dc;-fx-background-radius:47px;-fx-border-color:#cfc6b2;-fx-border-radius:47px;-fx-border-width:2px;");
+                "-fx-background-color:rgba(212,175,55,0.12);-fx-background-radius:47px;-fx-border-color:rgba(212,175,55,0.45);-fx-border-radius:47px;-fx-border-width:2px;");
         Button change = secondaryButton("Upload Photo");
+        change.setStyle(
+                "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:999px;-fx-border-color:rgba(212,175,55,0.45);-fx-border-radius:999px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-weight:800;-fx-padding:9px 18px;-fx-cursor:hand;");
         change.setOnAction(event -> choosePhoto());
         HBox row = new HBox(18, avatar, change);
         row.setAlignment(Pos.CENTER_LEFT);
@@ -151,8 +166,8 @@ public class WokerSignUp {
         add(grid, 1, 2, "Date of birth *", dateOfBirth, 1);
         HBox phone = new HBox();
         Label code = label("+91",
-                "-fx-background-color:#eee7dc;-fx-padding:12px 14px;-fx-text-fill:#1e1b15;-fx-background-radius:8px 0 0 8px;");
-        mobile.setStyle(inputStyle() + "-fx-background-radius:0 8px 8px 0;");
+                "-fx-background-color:rgba(212,175,55,0.15);-fx-padding:10px 14px;-fx-text-fill:#735c00;-fx-font-weight:800;-fx-border-color:rgba(200,185,165,0.6);-fx-border-width:1.2px 0 1.2px 1.2px;-fx-background-radius:10px 0 0 10px;-fx-border-radius:10px 0 0 10px;");
+        mobile.setStyle(inputStyle() + "-fx-background-radius:0 10px 10px 0;-fx-border-radius:0 10px 10px 0;");
         HBox.setHgrow(mobile, Priority.ALWAYS);
         phone.getChildren().addAll(code, mobile);
         add(grid, 0, 3, "Mobile number *", phone, 2);
@@ -166,8 +181,8 @@ public class WokerSignUp {
         password.setPromptText("Create Dihadi Password");
         password.setStyle(inputStyle());
         add(grid, 0, 9, "Create Dihadi Password *", password, 2);
-        Label expectedDay = label("", "-fx-font-size:14px;-fx-text-fill:#685c52;");
-        Label expectedMonth = label("", "-fx-font-size:14px;-fx-text-fill:#685c52;");
+        Label expectedDay = label("", "-fx-font-size:14px;-fx-text-fill:#735c00;-fx-font-weight:800;");
+        Label expectedMonth = label("", "-fx-font-size:14px;-fx-text-fill:#056a48;-fx-font-weight:800;");
         expectedDay.textProperty().bind(Bindings.createStringBinding(() -> "Your expected daily wages: ₹" + wageValue(),
                 dailyWage.textProperty()));
         expectedMonth.textProperty().bind(Bindings.createStringBinding(
@@ -175,7 +190,7 @@ public class WokerSignUp {
         VBox wages = new VBox(8, label("Daily wages *", labelStyle()), dailyWage, expectedDay, expectedMonth);
         wages.setPadding(new Insets(18));
         wages.setStyle(
-                "-fx-background-color:#f4ede2;-fx-background-radius:12px;-fx-border-color:#e9e2d7;-fx-border-radius:12px;");
+                "-fx-background-color:rgba(212,175,55,0.14);-fx-background-radius:12px;-fx-border-color:rgba(212,175,55,0.35);-fx-border-radius:12px;-fx-border-width:1px;");
         grid.add(wages, 0, 10, 2, 1);
         return grid;
     }
@@ -188,10 +203,10 @@ public class WokerSignUp {
         Button submit = new Button("Continue");
         submit.setMaxWidth(Double.MAX_VALUE);
         submit.setStyle(
-                "-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#231b00;-fx-font-size:18px;-fx-font-weight:700;-fx-padding:13px;-fx-cursor:hand;");
+                "-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#1e1b15;-fx-font-size:17px;-fx-font-weight:800;-fx-padding:13px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.18),10,0,0,3px);");
         submit.setOnAction(event -> submit(consent.isSelected()));
         Button login = new Button("Already having account? Login");
-        login.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+        login.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-weight:800;-fx-font-size:14px;-fx-cursor:hand;");
         login.setOnAction(event -> {
             Stage stage = (Stage) login.getScene().getWindow();
             stage.setScene(new WorkerLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
@@ -200,47 +215,6 @@ public class WokerSignUp {
         actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(22, 0, 0, 0));
         return actions;
-    }
-
-    private StackPane createVisualPanel() {
-        ImageView visual = image(showcaseImages[0], 520, 430);
-        visual.setPreserveRatio(true);
-        StackPane photo = new StackPane(visual);
-        photo.setPrefSize(540, 455);
-        photo.setMaxSize(540, 455);
-        photo.setPadding(new Insets(12));
-        photo.setStyle(
-                "-fx-background-color:#fff8f0;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.16),18,0,0,7px);");
-        startShowcaseRotation(visual);
-        Label eyebrow = label("DIHADI WORKER COMMUNITY",
-                "-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:#d4af37;-fx-letter-spacing:1.5px;");
-        Label headline = label("Build a profile\nthat works for you.",
-                "-fx-font-size:32px;-fx-font-weight:800;-fx-text-fill:#fff8f0;-fx-line-spacing:4px;");
-        Label copy = label(
-                "Your work, skills and wage expectations stay clear, professional and ready for the right opportunity.",
-                "-fx-font-size:15px;-fx-text-fill:#f8f0e2;-fx-opacity:.86;");
-        copy.setWrapText(true);
-        copy.setMaxWidth(500);
-        VBox words = new VBox(12, eyebrow, headline, copy);
-        words.setAlignment(Pos.CENTER_LEFT);
-        VBox content = new VBox(24, photo, words);
-        content.setAlignment(Pos.CENTER);
-        content.setPadding(new Insets(38));
-        StackPane panel = new StackPane(content);
-        panel.setPrefWidth(650);
-        panel.setMinWidth(400);
-        panel.setStyle("-fx-background-color:linear-gradient(to bottom right,#343027,#4c4233);");
-        return panel;
-    }
-
-    private void startShowcaseRotation(ImageView visual) {
-        final int[] index = { 0 };
-        Timeline rotation = new Timeline(new KeyFrame(Duration.seconds(4), event -> {
-            index[0] = (index[0] + 1) % showcaseImages.length;
-            visual.setImage(loadImage(showcaseImages[index[0]]));
-        }));
-        rotation.setCycleCount(Timeline.INDEFINITE);
-        rotation.play();
     }
 
     private void add(GridPane grid, int column, int row, String text, javafx.scene.Node input, int span) {
@@ -341,11 +315,21 @@ public class WokerSignUp {
     }
 
     private static String inputStyle() {
-        return "-fx-background-color:#faf3e8;-fx-background-radius:8px;-fx-border-color:transparent;-fx-padding:10px 12px;-fx-font-size:14px;-fx-pref-height:42px;";
+        return "-fx-background-color: rgba(255, 255, 255, 0.85);" +
+                "-fx-background-radius: 10px;" +
+                "-fx-border-color: rgba(200, 185, 165, 0.6);" +
+                "-fx-border-radius: 10px;" +
+                "-fx-border-width: 1.2px;" +
+                "-fx-text-fill: #1e1b15;" +
+                "-fx-font-weight: 600;" +
+                "-fx-prompt-text-fill: #7d7263;" +
+                "-fx-padding: 10px 14px;" +
+                "-fx-font-size: 14px;" +
+                "-fx-pref-height: 44px;";
     }
 
     private static String labelStyle() {
-        return "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#1e1b15;";
+        return "-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #2c251d;";
     }
 
     private static Label label(String text, String style) {

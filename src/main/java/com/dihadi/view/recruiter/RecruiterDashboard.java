@@ -2,6 +2,7 @@ package com.dihadi.view.recruiter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -327,23 +328,25 @@ public class RecruiterDashboard {
 
                 String rMobDigits = currentR.getMobileNumber() != null ? currentR.getMobileNumber().replaceAll("\\D", "") : "";
 
-                List<JobApplication> pendingList = new ArrayList<>();
+                Map<String, JobApplication> deduplicatedPending = new java.util.LinkedHashMap<>();
                 if (allApps != null) {
                     for (JobApplication a : allApps) {
                         if ("Pending".equalsIgnoreCase(a.getStatus())) {
                             if (a.getProjectId() != null && recruiterProjIds.contains(a.getProjectId())) {
-                                pendingList.add(a);
+                                String key = (a.getWorkerMobile() != null ? a.getWorkerMobile().replaceAll("\\D", "") : "") + "_" + a.getProjectId();
+                                deduplicatedPending.putIfAbsent(key, a);
                             } else {
                                 String appRMob = a.getRecruiterMobile() != null ? a.getRecruiterMobile().replaceAll("\\D", "") : "";
                                 if (!rMobDigits.isEmpty() && !appRMob.isEmpty() && (appRMob.equals(rMobDigits) || appRMob.endsWith(rMobDigits) || rMobDigits.endsWith(appRMob))) {
-                                    pendingList.add(a);
+                                    String key = (a.getWorkerMobile() != null ? a.getWorkerMobile().replaceAll("\\D", "") : "") + "_" + (a.getProjectId() != null ? a.getProjectId() : "");
+                                    deduplicatedPending.putIfAbsent(key, a);
                                 }
                             }
                         }
                     }
                 }
 
-                final List<JobApplication> finalPendingList = pendingList;
+                final List<JobApplication> finalPendingList = new ArrayList<>(deduplicatedPending.values());
 
                 Platform.runLater(() -> {
                     if (walletBalanceLabel != null) {
@@ -368,9 +371,9 @@ public class RecruiterDashboard {
                         Label tag = label("ACTIVE PROJECT", "-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:#735c00;");
 
                         if (finalActiveProj == null) {
-                            Label noProj = label("No active project assigned currently", "-fx-font-family:Georgia;-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
-                            VBox compDetail = detail("Organization", company);
-                            VBox statusDetail = detail("Status", "Ready to create project");
+                            Label noProj = label("No Active Project Running", "-fx-font-family:Georgia;-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+                            VBox compDetail = detail("Company", company);
+                            VBox statusDetail = detail("Status", "Idle");
 
                             Button createProjBtn = new Button("+ Create New Project");
                             createProjBtn.setStyle("-fx-background-color:#272727;-fx-background-radius:8px;-fx-text-fill:#ffd54f;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;");
@@ -427,20 +430,23 @@ public class RecruiterDashboard {
                     if (activeProjPanel != null) {
                         activeProjPanel.getChildren().clear();
                         activeProjPanel.getChildren().add(panelHeader("Active Projects"));
-                        if (finalActiveProj == null) {
+                        List<Project> activeList = recruiterProjects.stream().filter(p -> "Active".equalsIgnoreCase(p.getStatus())).toList();
+                        if (activeList.isEmpty()) {
                             activeProjPanel.getChildren().add(label("No active projects currently.", "-fx-font-size:13px;-fx-text-fill:#685c52;"));
                         } else {
-                            String locStr = (val(finalActiveProj.getCity(), "") + ", " + val(finalActiveProj.getState(), "")).replaceAll("^, |, $", "");
-                            VBox activeCard = new VBox(4,
-                                    label(finalActiveProj.getProjectName(), "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#1e1b15;"),
-                                    label("Location: " + (locStr.isBlank() ? "Pune" : locStr), "-fx-font-size:12px;-fx-text-fill:#4d4635;"),
-                                    label("Status: Active", "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#2e7d32;")
-                            );
-                            activeCard.setPadding(new Insets(10, 12, 10, 12));
-                            activeCard.setStyle("-fx-background-color:#faf5eb;-fx-background-radius:8px;-fx-border-color:#ebdccb;-fx-border-width:1px;-fx-border-radius:8px;");
-                            activeCard.setOnMouseEntered(e -> activeCard.setStyle("-fx-background-color:#ffffff;-fx-background-radius:8px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:8px;-fx-cursor:hand;"));
-                            activeCard.setOnMouseExited(e -> activeCard.setStyle("-fx-background-color:#faf5eb;-fx-background-radius:8px;-fx-border-color:#ebdccb;-fx-border-width:1px;-fx-border-radius:8px;"));
-                            activeProjPanel.getChildren().add(activeCard);
+                            for (Project actP : activeList) {
+                                String locStr = (val(actP.getCity(), "") + ", " + val(actP.getState(), "")).replaceAll("^, |, $", "");
+                                VBox activeCard = new VBox(4,
+                                        label(actP.getProjectName(), "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#1e1b15;"),
+                                        label("Location: " + (locStr.isBlank() ? "Pune" : locStr), "-fx-font-size:12px;-fx-text-fill:#4d4635;"),
+                                        label("Status: Active", "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#2e7d32;")
+                                );
+                                activeCard.setPadding(new Insets(10, 12, 10, 12));
+                                activeCard.setStyle("-fx-background-color:#faf5eb;-fx-background-radius:8px;-fx-border-color:#ebdccb;-fx-border-width:1px;-fx-border-radius:8px;");
+                                activeCard.setOnMouseEntered(e -> activeCard.setStyle("-fx-background-color:#ffffff;-fx-background-radius:8px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:8px;-fx-cursor:hand;"));
+                                activeCard.setOnMouseExited(e -> activeCard.setStyle("-fx-background-color:#faf5eb;-fx-background-radius:8px;-fx-border-color:#ebdccb;-fx-border-width:1px;-fx-border-radius:8px;"));
+                                activeProjPanel.getChildren().add(activeCard);
+                            }
                         }
                     }
 
