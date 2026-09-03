@@ -132,6 +132,10 @@ public class AdminLoginPage {
     }
 
     private void authenticate(TextField email, PasswordField password, Button login, Runnable backAction) {
+        if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.ADMIN)) {
+            return;
+        }
+
         String emailText = email.getText().trim();
         String passText = password.getText().trim();
 
@@ -151,9 +155,10 @@ public class AdminLoginPage {
                     if (admin != null) {
                         com.dihadi.view.SessionManager.currentAdmin = admin;
                         Stage stage = (Stage) login.getScene().getWindow();
+                        com.dihadi.view.NotificationToast.show(stage, "Login Successful", "Welcome back, " + admin.getFullName() + "!", com.dihadi.view.NotificationToast.ToastType.SUCCESS);
                         stage.setScene(new AdminDashboard().getDashboardScene(
                                 () -> {
-                                    com.dihadi.view.SessionManager.currentAdmin = null;
+                                    com.dihadi.view.SessionManager.clearAllSessions();
                                     stage.setScene(getAdminLoginScene(backAction));
                                 }));
                     } else {
@@ -177,5 +182,5 @@ public class AdminLoginPage {
     private Label label(String text, String style) { Label label = new Label(text); label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style); return label; }
     private Button link(String text) { Button button = new Button(text); button.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:700;-fx-cursor:hand;"); return button; }
     private String inputStyle() { return "-fx-background-color:#eee7dc;-fx-background-radius:12px;-fx-border-color:#cfc6b2;-fx-border-radius:12px;-fx-font-size:16px;-fx-padding:13px 16px;-fx-pref-height:56px;"; }
-    private void notice(String title, String message) { Alert alert = new Alert(Alert.AlertType.INFORMATION); alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(message); alert.show(); }
+    private void notice(String title, String message) { com.dihadi.view.NotificationToast.show(title, message, com.dihadi.view.NotificationToast.ToastType.ALERT); }
 }

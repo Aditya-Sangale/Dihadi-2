@@ -96,13 +96,37 @@ public class WokerSignUp {
                 label("Create Worker Account", "-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#1e1b15;"),
                 label("Enter your personal details to register your profile.", "-fx-font-size:14px;-fx-text-fill:#594f42;"));
         intro.setAlignment(Pos.CENTER);
-        Button back = new Button("<");
+        Button back = new Button("← Back");
         back.setStyle(
-                "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:10px;-fx-border-color:rgba(212,175,55,0.4);-fx-border-radius:10px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:16px;-fx-font-weight:800;-fx-padding:6px 12px;-fx-cursor:hand;");
+                "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:10px;-fx-border-color:rgba(212,175,55,0.4);-fx-border-radius:10px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
         back.setOnAction(event -> {
-            Stage stage = (Stage) back.getScene().getWindow();
-            if (backAction != null) backAction.run();
-            else AppNavigator.open(stage, "Home");
+            Stage stage = null;
+            try {
+                if (back.getScene() != null && back.getScene().getWindow() instanceof Stage s) {
+                    stage = s;
+                }
+            } catch (Exception ignored) {}
+
+            if (stage == null) {
+                for (javafx.stage.Window w : javafx.stage.Window.getWindows()) {
+                    if (w instanceof Stage s && s.isShowing()) {
+                        stage = s;
+                        break;
+                    }
+                }
+            }
+
+            if (backAction != null) {
+                try {
+                    backAction.run();
+                    return;
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (stage != null) {
+                AppNavigator.open(stage, "Home");
+            }
         });
         Label personalDetails = label("PERSONAL DETAILS",
                 "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:10px;-fx-border-color:rgba(212,175,55,0.4);-fx-border-radius:10px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:9px 14px;");
@@ -208,8 +232,9 @@ public class WokerSignUp {
         Button login = new Button("Already having account? Login");
         login.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-weight:800;-fx-font-size:14px;-fx-cursor:hand;");
         login.setOnAction(event -> {
+            if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.WORKER)) return;
             Stage stage = (Stage) login.getScene().getWindow();
-            stage.setScene(new WorkerLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
+            stage.setScene(new WorkerLoginPage(() -> stage.setScene(getSignUpScene(backAction))).getLoginScene());
         });
         VBox actions = new VBox(18, consent, submit, login);
         actions.setAlignment(Pos.CENTER);
@@ -242,6 +267,9 @@ public class WokerSignUp {
     }
 
     private void submit(boolean consent) {
+        if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.WORKER)) {
+            return;
+        }
         if (firstName.getText().isBlank() || gender.getValue().equals("Select") || dateOfBirth.getValue() == null
                 || !mobile.getText().matches("\\d{10}") || education.getValue().equals("Select")
                 || experience.getValue().equals("Select") || wageValue() <= 0 || password.getText().isBlank()) {
@@ -280,13 +308,16 @@ public class WokerSignUp {
                     state.getValue());
             newWorker.setPassword(password.getText().trim());
             controller.addWorker(newWorker);
+            com.dihadi.view.SessionManager.clearAllSessions();
 
             Stage stage = (Stage) firstName.getScene().getWindow();
+            com.dihadi.view.NotificationToast.show(stage, "Account Created", "Your worker profile has been registered. Please login to continue.", com.dihadi.view.NotificationToast.ToastType.SUCCESS);
             stage.setScene(new WorkerLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
         } catch (Exception e) {
             e.printStackTrace();
-            message(Alert.AlertType.ERROR, "Error",
-                    "Failed to save profile. Please check your internet connection and try again.");
+            com.dihadi.view.NotificationToast.show("Registration Failed",
+                    "Failed to save profile. Please check your internet connection and try again.",
+                    com.dihadi.view.NotificationToast.ToastType.ERROR);
         }
     }
 
@@ -359,10 +390,9 @@ public class WokerSignUp {
     }
 
     private void message(Alert.AlertType type, String title, String text) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(text);
-        alert.show();
+        com.dihadi.view.NotificationToast.ToastType toastType = com.dihadi.view.NotificationToast.ToastType.INFO;
+        if (type == Alert.AlertType.ERROR) toastType = com.dihadi.view.NotificationToast.ToastType.ERROR;
+        else if (type == Alert.AlertType.WARNING) toastType = com.dihadi.view.NotificationToast.ToastType.ALERT;
+        com.dihadi.view.NotificationToast.show(title, text, toastType);
     }
 }

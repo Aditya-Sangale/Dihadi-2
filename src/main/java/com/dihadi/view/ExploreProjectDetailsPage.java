@@ -541,19 +541,34 @@ public class ExploreProjectDetailsPage {
     private Image load(String path) {
         try {
             if (path == null || path.isBlank()) {
-                var r = getClass().getResource("/assets/images/explore/explore_slide_1.jpg");
-                return r == null ? null : new Image(r.toExternalForm());
+                return loadResource("/assets/images/explore/explore_slide_1.jpg");
             }
-            if (path.startsWith("http://") || path.startsWith("https://")) {
-                return new Image(path, true);
+            String clean = path.trim();
+            if (clean.startsWith("http://") || clean.startsWith("https://")) {
+                return new Image(clean, true);
             }
-            if (new java.io.File(path).exists()) {
-                return new Image(new java.io.File(path).toURI().toString());
+            if (clean.startsWith("file:")) {
+                return new Image(clean, true);
             }
+            java.io.File file = new java.io.File(clean);
+            if (file.exists()) {
+                return new Image(file.toURI().toString(), true);
+            }
+            var r = getClass().getResource(clean);
+            if (r != null) {
+                return new Image(r.toExternalForm());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return loadResource("/assets/images/explore/explore_slide_1.jpg");
+    }
+
+    private Image loadResource(String path) {
+        try {
             var r = getClass().getResource(path);
             return r == null ? null : new Image(r.toExternalForm());
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }

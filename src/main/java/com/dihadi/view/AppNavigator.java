@@ -19,7 +19,6 @@ public final class AppNavigator {
             case "Home" -> stage.setScene(new HomePage(stage).getHomeScene());
             case "Business" -> stage.setScene(new BusinessPage().getBusinessScene(
                     () -> open(stage, "Home"), () -> open(stage, "Worker")));
-            case "Worker" -> stage.setScene(new WokerSignUp().getSignUpScene(() -> open(stage, "Home")));
             case "About Us" -> stage.setScene(new AboutUs().getAboutScene(
                     () -> open(stage, "Home"), () -> open(stage, "Worker")));
             case "Contact Us" -> stage.setScene(new ContactUs().getContactScene(
@@ -35,6 +34,52 @@ public final class AppNavigator {
                 } else {
                     openDashboard(stage);
                 }
+            case "Worker" -> {
+                if (SessionManager.currentWorker != null) {
+                    stage.setScene(new com.dihadi.view.worker.WorkerDashboard(SessionManager.currentWorker).getScene(() -> open(stage, "Home")));
+                    return;
+                }
+                if (!SessionManager.checkAccessAllowed(SessionManager.Role.WORKER)) {
+                    return;
+                }
+                stage.setScene(new WokerSignUp().getSignUpScene(() -> open(stage, "Home")));
+            }
+            case "Recruiter" -> {
+                if (SessionManager.currentRecruiter != null) {
+                    stage.setScene(new com.dihadi.view.recruiter.RecruiterDashboard(SessionManager.currentRecruiter).getScene(() -> open(stage, "Home")));
+                    return;
+                }
+                if (!SessionManager.checkAccessAllowed(SessionManager.Role.RECRUITER)) {
+                    return;
+                }
+                stage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(
+                        () -> open(stage, "Home")));
+            }
+            case "Admin" -> {
+                if (SessionManager.currentAdmin != null) {
+                    stage.setScene(new com.dihadi.view.admin.AdminDashboard().getDashboardScene(() -> {
+                        SessionManager.clearAllSessions();
+                        open(stage, "Home");
+                    }));
+                    return;
+                }
+                if (!SessionManager.checkAccessAllowed(SessionManager.Role.ADMIN)) {
+                    return;
+                }
+                stage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(() -> open(stage, "Home")));
+            }
+            case "AdminLogin" -> {
+                if (SessionManager.currentAdmin != null) {
+                    stage.setScene(new com.dihadi.view.admin.AdminDashboard().getDashboardScene(() -> {
+                        SessionManager.clearAllSessions();
+                        open(stage, "Home");
+                    }));
+                    return;
+                }
+                if (!SessionManager.checkAccessAllowed(SessionManager.Role.ADMIN)) {
+                    return;
+                }
+                stage.setScene(new com.dihadi.view.admin.AdminLoginPage().getAdminLoginScene(() -> open(stage, "Home")));
             }
             case "Dashboard" -> openDashboard(stage);
             default -> throw new IllegalArgumentException("Unknown destination: " + destination);
@@ -46,6 +91,11 @@ public final class AppNavigator {
             stage.setScene(new com.dihadi.view.worker.WorkerDashboard(SessionManager.currentWorker).getScene(() -> open(stage, "Home")));
         } else if (SessionManager.currentRecruiter != null) {
             stage.setScene(new com.dihadi.view.recruiter.RecruiterDashboard(SessionManager.currentRecruiter).getScene(() -> open(stage, "Home")));
+        } else if (SessionManager.currentAdmin != null) {
+            stage.setScene(new com.dihadi.view.admin.AdminDashboard().getDashboardScene(() -> {
+                SessionManager.clearAllSessions();
+                open(stage, "Home");
+            }));
         } else {
             stage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(() -> open(stage, "Home")));
         }
@@ -56,20 +106,33 @@ public final class AppNavigator {
         btn.setStyle("-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#342f28;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:11px 24px;-fx-cursor:hand;");
         btn.setOnAction(e -> {
             Stage stage = (Stage) btn.getScene().getWindow();
+            if (SessionManager.currentAdmin != null) {
+                stage.setScene(new com.dihadi.view.admin.AdminDashboard().getDashboardScene(() -> {
+                    SessionManager.clearAllSessions();
+                    open(stage, "Home");
+                }));
+                return;
+            }
+            if (!SessionManager.checkAccessAllowed(SessionManager.Role.ADMIN)) {
+                return;
+            }
             open(stage, "Admin");
         });
         return btn;
     }
 
     public static Button createHeaderActionButton() {
-        boolean isLoggedIn = SessionManager.currentWorker != null || SessionManager.currentRecruiter != null;
+        boolean isLoggedIn = SessionManager.isLoggedIn();
         Button btn = new Button(isLoggedIn ? "Dashboard" : "Admin");
         btn.setStyle("-fx-background-color:#d4af37;-fx-background-radius:18px;-fx-text-fill:#342f28;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:11px 24px;-fx-cursor:hand;");
         btn.setOnAction(e -> {
             Stage stage = (Stage) btn.getScene().getWindow();
-            if (isLoggedIn) {
+            if (SessionManager.isLoggedIn()) {
                 openDashboard(stage);
             } else {
+                if (!SessionManager.checkAccessAllowed(SessionManager.Role.ADMIN)) {
+                    return;
+                }
                 open(stage, "Admin");
             }
         });
@@ -77,11 +140,17 @@ public final class AppNavigator {
     }
 
     public static void signUp(Stage stage, Runnable returnAction) {
+        if (!SessionManager.checkAccessAllowed(SessionManager.Role.WORKER)) {
+            return;
+        }
         javafx.scene.Scene sourceScene = stage.getScene();
         stage.setScene(new WokerSignUp().getSignUpScene(() -> stage.setScene(sourceScene)));
     }
 
     public static void login() {
+        if (!SessionManager.checkAccessAllowed(SessionManager.Role.WORKER)) {
+            return;
+        }
         for (Window window : Window.getWindows()) {
             if (window.isFocused() && window instanceof Stage stage) {
                 stage.setScene(new com.dihadi.view.worker.WorkerLoginPage(() -> open(stage, "Home")).getLoginScene());
@@ -103,11 +172,7 @@ public final class AppNavigator {
     }
 
     public static void information(String title, String text) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(text);
-        alert.show();
+        NotificationToast.show(title, text, NotificationToast.ToastType.INFO);
     }
 
     /** Header account controls are reserved for the upcoming admin portal. */

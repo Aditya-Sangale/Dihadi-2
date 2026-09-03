@@ -206,6 +206,7 @@ public class SignUpRecruiter {
         loginLink.setStyle(
                 "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:700;-fx-cursor:hand;");
         loginLink.setOnAction(e -> {
+            if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.RECRUITER)) return;
             Stage stage = (Stage) loginLink.getScene().getWindow();
             stage.setScene(new RecruiterLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
         });
@@ -225,15 +226,16 @@ public class SignUpRecruiter {
     }
 
     private void submitRecruiter() {
+        if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.RECRUITER)) {
+            return;
+        }
+
         if (firstNameField.getText().isBlank() || mobileField.getText().isBlank()
                 || emailField.getText().isBlank() || companyNameField.getText().isBlank()
                 || passwordField.getText().isBlank()) {
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                    javafx.scene.control.Alert.AlertType.WARNING);
-            alert.setTitle("Complete your details");
-            alert.setHeaderText(null);
-            alert.setContentText("Please fill in all required fields (First Name, Mobile, Email, Company Name).");
-            alert.show();
+            com.dihadi.view.NotificationToast.show("Complete Your Details",
+                    "Please fill in all required fields (First Name, Mobile, Email, Company Name, Password).",
+                    com.dihadi.view.NotificationToast.ToastType.ALERT);
             return;
         }
 
@@ -252,16 +254,18 @@ public class SignUpRecruiter {
                     businessTypeField.getValue() != null ? businessTypeField.getValue() : "",
                     passwordField.getText().trim());
 
+            com.dihadi.view.SessionManager.clearAllSessions();
+
             Stage stage = (Stage) firstNameField.getScene().getWindow();
+            com.dihadi.view.NotificationToast.show(stage, "Account Created",
+                    "Your recruiter account has been registered. Please login to continue.",
+                    com.dihadi.view.NotificationToast.ToastType.SUCCESS);
             stage.setScene(new RecruiterLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
         } catch (Exception ex) {
             ex.printStackTrace();
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                    javafx.scene.control.Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText("Failed to create account. Please check your internet connection and try again.");
-            alert.show();
+            com.dihadi.view.NotificationToast.show("Registration Failed",
+                    "Failed to create account. Please check your internet connection and try again.",
+                    com.dihadi.view.NotificationToast.ToastType.ERROR);
         }
     }
 

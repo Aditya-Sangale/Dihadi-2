@@ -13,6 +13,7 @@ import com.dihadi.controller.RazorpayService;
 import com.dihadi.controller.RecruiterController;
 import com.dihadi.model.JobApplication;
 import com.dihadi.model.Notification;
+import com.dihadi.view.NotificationToast;
 import com.dihadi.model.Project;
 import com.dihadi.model.Recruiter;
 import com.dihadi.view.PaymentGateway.PaymentCheckoutScene;
@@ -132,6 +133,8 @@ public class RecruiterDashboard {
         logoutBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:20px;-fx-border-color:#ffcdd2;-fx-border-radius:20px;-fx-text-fill:#ba1a1a;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;");
         logoutBtn.setOnAction(e -> {
             if (livePoller != null) livePoller.stop();
+            SessionManager.clearAllSessions();
+            NotificationToast.show("Signed Out", "You have signed out of your recruiter session.", NotificationToast.ToastType.INFO);
             back.run();
         });
 
@@ -659,13 +662,10 @@ public class RecruiterDashboard {
     }
 
     private void displayAlert(Alert.AlertType type, String title, String message) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(type);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-            alert.showAndWait();
-        });
+        NotificationToast.ToastType toastType = NotificationToast.ToastType.INFO;
+        if (type == Alert.AlertType.ERROR) toastType = NotificationToast.ToastType.ERROR;
+        else if (type == Alert.AlertType.WARNING) toastType = NotificationToast.ToastType.ALERT;
+        NotificationToast.show(title, message, toastType);
     }
 
     private VBox executivePanel(String heading, Node... nodes) {

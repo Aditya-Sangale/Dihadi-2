@@ -83,7 +83,17 @@ public class HomePage extends Application {
 
     public void showHome() {
         stopSlider();
-        primaryStage.setScene(createHomeScene());
+        if (primaryStage == null) {
+            for (javafx.stage.Window w : javafx.stage.Window.getWindows()) {
+                if (w instanceof Stage s && s.isShowing()) {
+                    primaryStage = s;
+                    break;
+                }
+            }
+        }
+        if (primaryStage != null) {
+            primaryStage.setScene(createHomeScene());
+        }
     }
 
     private Scene createHomeScene() {
@@ -121,7 +131,7 @@ public class HomePage extends Application {
                 navButton("Contact Us", false, this::showContact));
         navigation.setAlignment(Pos.CENTER);
 
-        Button admin = AppNavigator.createHeaderAdminButton();
+        Button admin = AppNavigator.createHeaderActionButton();
         BorderPane header = new BorderPane();
         header.setLeft(brand);
         header.setCenter(navigation);
@@ -334,11 +344,25 @@ public class HomePage extends Application {
 
     private void showWorker() {
         stopSlider();
+        if (SessionManager.currentWorker != null) {
+            primaryStage.setScene(new com.dihadi.view.worker.WorkerDashboard(SessionManager.currentWorker).getScene(this::showHome));
+            return;
+        }
+        if (!SessionManager.checkAccessAllowed(SessionManager.Role.WORKER)) {
+            return;
+        }
         primaryStage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(this::showHome));
     }
 
     private void showRecruiterSignUp() {
         stopSlider();
+        if (SessionManager.currentRecruiter != null) {
+            primaryStage.setScene(new com.dihadi.view.recruiter.RecruiterDashboard(SessionManager.currentRecruiter).getScene(this::showHome));
+            return;
+        }
+        if (!SessionManager.checkAccessAllowed(SessionManager.Role.RECRUITER)) {
+            return;
+        }
         primaryStage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(this::showHome));
     }
 
@@ -354,6 +378,16 @@ public class HomePage extends Application {
 
     private void showAdmin() {
         stopSlider();
+        if (SessionManager.currentAdmin != null) {
+            primaryStage.setScene(new com.dihadi.view.admin.AdminDashboard().getDashboardScene(() -> {
+                SessionManager.clearAllSessions();
+                showHome();
+            }));
+            return;
+        }
+        if (!SessionManager.checkAccessAllowed(SessionManager.Role.ADMIN)) {
+            return;
+        }
         primaryStage.setScene(new AdminHomePage().getAdminHomeScene(this::showHome));
     }
 
@@ -376,10 +410,6 @@ public class HomePage extends Application {
     }
 
     private void comingSoon(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.show();
+        NotificationToast.show(title, message, NotificationToast.ToastType.INFO);
     }
 }
