@@ -140,7 +140,7 @@ public class ExploreProjectsPage {
     private ScrollPane body() {
         HBox backRow = new HBox(homeBackButton());
         backRow.setAlignment(Pos.CENTER_LEFT);
-        VBox content = new VBox(26, backRow, hero(), featuredBannerBox(), filterBar(), projectGridSection(), footer());
+        VBox content = new VBox(34, hero(), featuredBannerBox(), filterBar(), projectGridSection(), backRow, footer());
         content.setMaxWidth(1180);
         content.setPadding(new Insets(30, 20, 36, 20));
         content.setAlignment(Pos.TOP_CENTER);
@@ -158,12 +158,9 @@ public class ExploreProjectsPage {
 
     /** Compact return control positioned above the Explore Projects hero. */
     private Button homeBackButton() {
-        Button back = new Button("<");
-        back.setPrefSize(54, 52);
-        back.setMinSize(54, 52);
-        back.setMaxSize(54, 52);
+        Button back = new Button("←  Back to Home");
         back.setStyle(
-                "-fx-background-color:#ead7ad;-fx-background-radius:16px;-fx-text-fill:#4c4637;-fx-font-size:24px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:0 0 3px 0;-fx-cursor:hand;");
+                "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;");
         back.setOnAction(e -> {
             if (heroTimeline != null) heroTimeline.stop();
             if (showHome != null) showHome.run();

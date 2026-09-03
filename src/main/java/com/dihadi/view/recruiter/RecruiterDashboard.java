@@ -126,21 +126,23 @@ public class RecruiterDashboard {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Label profileBadge = label(name + " (" + company + ")",
-                "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#4c4637;-fx-background-color:#faf3e8;-fx-background-radius:20px;-fx-border-color:#d0c5af;-fx-border-radius:20px;-fx-padding:7px 16px;");
+                "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#3f392e;-fx-background-color:#fffaf0;-fx-background-radius:16px;-fx-border-color:#d0c5af;-fx-border-radius:16px;-fx-padding:0 20px;");
+        profileBadge.setMinHeight(54);
+        profileBadge.setPrefHeight(54);
+        profileBadge.setAlignment(Pos.CENTER);
 
         Button logoutBtn = new Button("Sign Out");
-        logoutBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:20px;-fx-border-color:#ffcdd2;-fx-border-radius:20px;-fx-text-fill:#ba1a1a;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;");
+        logoutBtn.setMinHeight(54);
+        logoutBtn.setPrefHeight(54);
+        logoutBtn.setStyle("-fx-background-color:#fff1f1;-fx-background-radius:16px;-fx-border-color:#f1bcbc;-fx-border-radius:16px;-fx-text-fill:#a51d1d;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:0 20px;-fx-cursor:hand;");
         logoutBtn.setOnAction(e -> {
             if (livePoller != null) livePoller.stop();
             back.run();
         });
 
-        Button hireWorkersBtn = new Button("<");
-        hireWorkersBtn.setPrefSize(54, 52);
-        hireWorkersBtn.setMinSize(54, 52);
-        hireWorkersBtn.setMaxSize(54, 52);
+        Button hireWorkersBtn = new Button("←  Back");
         hireWorkersBtn.setStyle(
-                "-fx-background-color:#ead7ad;-fx-background-radius:16px;-fx-text-fill:#4c4637;-fx-font-size:24px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:0 0 3px 0;-fx-cursor:hand;");
+                "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;");
         hireWorkersBtn.setOnAction(e -> {
             if (livePoller != null) livePoller.stop();
             Stage stage = (Stage) hireWorkersBtn.getScene().getWindow();
@@ -149,7 +151,9 @@ public class RecruiterDashboard {
                             () -> com.dihadi.view.AppNavigator.open(stage, "Home")))));
         });
 
-        HBox headerBar = new HBox(20, brand, navBar, spacer, profileBadge, hireWorkersBtn, logoutBtn);
+        HBox accountActions = new HBox(10, hireWorkersBtn, profileBadge, logoutBtn);
+        accountActions.setAlignment(Pos.CENTER_RIGHT);
+        HBox headerBar = new HBox(20, brand, navBar, spacer, accountActions);
         headerBar.setAlignment(Pos.CENTER_LEFT);
         headerBar.setPadding(new Insets(0, 0, 14, 0));
         headerBar.setStyle("-fx-border-color:transparent transparent #d0c5af transparent;-fx-border-width:0 0 1px 0;");
