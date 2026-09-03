@@ -77,6 +77,8 @@ public class SessionManager {
             }
         }
         return "WRK_DEFAULT";
+    }
+
     /**
      * Checks if navigation/action for targetRole is allowed.
      * If a conflicting role session is currently active, a modal popup is shown
