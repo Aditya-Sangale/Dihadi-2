@@ -16,6 +16,7 @@
     </properties>
 
     <dependencies>
+        <!-- JavaFX Modules (Unified to 17.0.10) -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -26,48 +27,44 @@
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
         </dependency>
-        
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-media</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
 
-        <!-- Source: https://mvnrepository.com/artifact/com.google.firebase/firebase-admin -->
+        <!-- Firebase Admin SDK -->
         <dependency>
             <groupId>com.google.firebase</groupId>
             <artifactId>firebase-admin</artifactId>
             <version>9.1.1</version>
-            <scope>compile</scope>
         </dependency>
 
+        <!-- Cloudinary SDK -->
         <dependency>
             <groupId>com.cloudinary</groupId>
             <artifactId>cloudinary-http5</artifactId>
             <version>2.3.2</version>
         </dependency>
 
+        <!-- Razorpay Java SDK -->
         <dependency>
-        <groupId>com.razorpay</groupId>
-        <artifactId>razorpay-java</artifactId>
-        <version>1.4.3</version>
-    </dependency>
+            <groupId>com.razorpay</groupId>
+            <artifactId>razorpay-java</artifactId>
+            <version>1.4.3</version>
+        </dependency>
 
-    <!-- JavaFX Web Module for embedding Razorpay Standard Checkout -->
-    <dependency>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-web</artifactId>
-        <version>21.0.2</version>
-    </dependency>
-
-    <!-- JSON parsing utility -->
-    <dependency>
-        <groupId>org.json</groupId>
-        <artifactId>json</artifactId>
-        <version>20231013</version>
-    </dependency>
-    
-    <dependency>
-    <groupId>org.openjfx</groupId>
-    <artifactId>javafx-media</artifactId>
-    <version>17.0.10</version>
-    </dependency>
-
+        <!-- JSON Utility -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20231013</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -90,5 +87,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

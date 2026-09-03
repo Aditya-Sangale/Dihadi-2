@@ -10,6 +10,13 @@ public class Attendance {
     private String status; // Present, Absent, Half-day
     private Date timestamp;
 
+    private String transactionId;
+    private double paidAmount;
+    private String recruiterId;
+    private String workerId;
+    private String paymentStatus;
+    private String paymentTransactionId;
+
     public Attendance() {}
 
     public Attendance(String attendanceId, String projectId, String workerMobile, String date, String status) {
@@ -18,6 +25,17 @@ public class Attendance {
         this.workerMobile = workerMobile;
         this.date = date;
         this.status = status;
+        this.timestamp = new Date();
+    }
+
+    public Attendance(String attendanceId, String projectId, String workerMobile, String date, String status, String transactionId, double paidAmount) {
+        this.attendanceId = attendanceId;
+        this.projectId = projectId;
+        this.workerMobile = workerMobile;
+        this.date = date;
+        this.status = status;
+        this.transactionId = transactionId;
+        this.paidAmount = paidAmount;
         this.timestamp = new Date();
     }
 
@@ -38,4 +56,22 @@ public class Attendance {
 
     public Date getTimestamp() { return timestamp; }
     public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
+
+    public String getTransactionId() { return transactionId; }
+    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
+
+    public double getPaidAmount() { return paidAmount; }
+    public void setPaidAmount(double paidAmount) { this.paidAmount = paidAmount; }
+
+    public String getRecruiterId() { return recruiterId; }
+    public void setRecruiterId(String recruiterId) { this.recruiterId = recruiterId; }
+
+    public String getWorkerId() { return workerId; }
+    public void setWorkerId(String workerId) { this.workerId = workerId; }
+
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public String getPaymentTransactionId() { return paymentTransactionId; }
+    public void setPaymentTransactionId(String paymentTransactionId) { this.paymentTransactionId = paymentTransactionId; }
 }

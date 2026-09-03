@@ -29,6 +29,13 @@ public final class AppNavigator {
                     () -> open(stage, "Home")));
             case "Admin" -> stage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(() -> open(stage, "Home")));
             case "AdminLogin" -> stage.setScene(new com.dihadi.view.admin.AdminLoginPage().getAdminLoginScene(() -> open(stage, "Home")));
+            case "Attendance" -> {
+                if (SessionManager.currentRecruiter != null) {
+                    stage.setScene(new com.dihadi.view.recruiter.AttendancePage(SessionManager.currentRecruiter).getScene(() -> openDashboard(stage)));
+                } else {
+                    openDashboard(stage);
+                }
+            }
             case "Dashboard" -> openDashboard(stage);
             default -> throw new IllegalArgumentException("Unknown destination: " + destination);
         }

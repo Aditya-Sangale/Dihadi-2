@@ -162,4 +162,17 @@ public class Project {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public String getId() {
+        return projectId != null ? projectId : "";
+    }
+
+    public String getTitle() {
+        return projectName != null ? projectName : "Untitled Project";
+    }
+
+    @Override
+    public String toString() {
+        return projectName != null && !projectName.isBlank() ? projectName : (projectId != null ? projectId : "Project");
+    }
 }
