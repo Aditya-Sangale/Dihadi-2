@@ -11,6 +11,7 @@ import com.dihadi.controller.AttendanceController;
 import com.dihadi.controller.JobApplicationController;
 import com.dihadi.controller.NotificationController;
 import com.dihadi.controller.ProjectController;
+import com.dihadi.controller.WorkerDashboardController;
 import com.dihadi.model.Attendance;
 import com.dihadi.model.JobApplication;
 import com.dihadi.model.Notification;
@@ -69,12 +70,17 @@ public class WorkerDashboard {
     private final java.util.Set<String> seenNotifIds = new java.util.HashSet<>();
     private boolean isUpdating = false;
 
+    public WorkerDashboard() {
+        this(SessionManager.currentWorker != null ? SessionManager.currentWorker : new Worker());
+    }
+
     public WorkerDashboard(Worker worker) {
-        this.worker = worker;
+        this.worker = (worker != null) ? worker : (SessionManager.currentWorker != null ? SessionManager.currentWorker : new Worker());
     }
 
     public Scene getScene(Runnable back) {
         String name = value(worker.getFirstName()) + (worker.getLastName() == null ? "" : " " + worker.getLastName());
+        if (name.trim().isEmpty()) name = "Worker";
         String category = value(worker.getWorkerType(), "Skilled Worker");
         String location = (value(worker.getCity()) + ", " + value(worker.getState()))
                 .replace("Not provided, Not provided", "Pune, Maharashtra");
@@ -105,6 +111,10 @@ public class WorkerDashboard {
         return new Scene(scroll, 1400, 850);
     }
 
+    public Scene getWorkerDashboardScene(Runnable back) {
+        return getScene(back);
+    }
+
     private HBox header(String name, String category, Runnable back) {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 44, 44);
         Label brand = label("DIHADI", "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";-fx-letter-spacing:1px;");
@@ -128,6 +138,10 @@ public class WorkerDashboard {
         logoutBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:20px;-fx-border-color:#ffcdd2;-fx-border-radius:20px;-fx-text-fill:#ba1a1a;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;");
         logoutBtn.setOnAction(e -> {
             if (liveRefresher != null) liveRefresher.stop();
+            SessionManager.currentWorker = null;
+            if (back != null) {
+                back.run();
+            }
             SessionManager.clearAllSessions();
             NotificationToast.show("Signed Out", "You have signed out of your worker session.", NotificationToast.ToastType.INFO);
             back.run();
@@ -153,53 +167,56 @@ public class WorkerDashboard {
         return h;
     }
 
+    private Button navLink(String text, boolean active) {
+        Button b = new Button(text);
+        b.setStyle("-fx-background-color:transparent;-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:"
+                + (active ? GOLD : "#4c4637") + ";-fx-padding:6px 12px;-fx-cursor:hand;");
+        return b;
+    }
+
     private VBox hero(String name, String category, String location, Runnable back) {
-        Label title = label("Namaste, " + name,
-                "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
-
-        Label role = label(category + "  |  " + location,
+        Label greeting = label("Namaste, " + name,
+                "-fx-font-family:Georgia;-fx-font-size:32px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+        Label meta = label(category + "  |  " + location,
                 "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:" + GOLD + ";");
+        Label desc = label("View your daily attendance records, total wages earned, assigned project site, and pending recruiter invitations below.",
+                "-fx-font-size:13px;-fx-text-fill:#4d4635;");
 
-        Label copy = label("View your daily attendance records, total wages earned, assigned project site, and pending recruiter invitations below.",
-                "-fx-font-size:14px;-fx-text-fill:#4c4637;-fx-line-spacing:2px;");
-        copy.setMaxWidth(440);
-        copy.setWrapText(true);
+        VBox left = new VBox(6, greeting, meta, desc);
+        left.setAlignment(Pos.CENTER_LEFT);
 
-        VBox welcome = new VBox(8, title, role, copy);
-        welcome.setPrefWidth(480);
-
-        Label activeProjTag = label("ASSIGNED PROJECT", "-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:#1565c0;");
-        Label activeProjTitle = label("No active project assigned currently",
-                "-fx-font-family:Georgia;-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
-        activeProjTitle.setWrapText(true);
+        Label badge = label("ASSIGNED PROJECT",
+                "-fx-font-size:10px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-text-fill:#1565c0;");
+        Label activeProjTitle = label(category,
+                "-fx-font-family:Georgia;-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
 
         VBox roleDetail = detail("Role", category);
         VBox locationDetail = detail("Site Location", location);
-        VBox wageDetail = detail("Daily Wage", "Rs. " + worker.getDailyWage() + " / day");
-        VBox siteStatusDetail = detail("Status", "Available for work");
+        VBox wageDetail = detail("Daily Wage", "Rs. " + String.format("%,d", worker.getDailyWage() > 0 ? worker.getDailyWage() : 950) + " / day");
+        VBox siteStatusDetail = detail("Status", "Active");
 
-        HBox gridDetails = new HBox(16, roleDetail, locationDetail, wageDetail, siteStatusDetail);
-        gridDetails.setAlignment(Pos.CENTER_LEFT);
+        HBox projDetails = new HBox(20, roleDetail, locationDetail, wageDetail, siteStatusDetail);
 
-        Button exploreBtn = new Button("Browse Open Projects");
-        exploreBtn.setStyle("-fx-background-color:#272727;-fx-background-radius:8px;-fx-text-fill:#ffd54f;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;");
-        exploreBtn.setOnAction(e -> {
+        Button browseProjectsBtn = new Button("Browse Open Projects");
+        browseProjectsBtn.setStyle("-fx-background-color:#1e1b15;-fx-background-radius:8px;-fx-text-fill:#ffffff;-fx-font-weight:800;-fx-font-size:12px;-fx-padding:9px 18px;-fx-cursor:hand;");
+        browseProjectsBtn.setOnAction(e -> {
             if (liveRefresher != null) liveRefresher.stop();
-            Stage stage = (Stage) exploreBtn.getScene().getWindow();
+            Stage stage = (Stage) browseProjectsBtn.getScene().getWindow();
             stage.setScene(new ExploreProjectsPage(() -> stage.setScene(getScene(back))).getExploreProjectsScene());
         });
 
-        HBox projectFooter = new HBox(exploreBtn);
-        projectFooter.setAlignment(Pos.CENTER_RIGHT);
+        HBox btnRow = new HBox(browseProjectsBtn);
+        btnRow.setAlignment(Pos.CENTER_RIGHT);
 
-        VBox project = new VBox(10, activeProjTag, activeProjTitle, gridDetails, projectFooter);
-        project.setPadding(new Insets(18, 22, 16, 22));
-        project.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.05),10,0,0,2px);");
-        project.setOnMouseEntered(e -> project.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.25),14,0,0,4px);-fx-cursor:hand;"));
-        project.setOnMouseExited(e -> project.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.05),10,0,0,2px);"));
-        HBox.setHgrow(project, Priority.ALWAYS);
+        VBox right = new VBox(10, badge, activeProjTitle, projDetails, btnRow);
+        right.setPadding(new Insets(14, 18, 14, 18));
+        right.setStyle("-fx-background-color:#faf5eb;-fx-background-radius:12px;-fx-border-color:#ebdccb;-fx-border-width:1.5px;-fx-border-radius:12px;");
+        right.setPrefWidth(480);
 
-        HBox h = new HBox(28, welcome, project);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox h = new HBox(20, left, spacer, right);
         h.setAlignment(Pos.CENTER_LEFT);
         h.setUserData(new Node[] { activeProjTitle, roleDetail, locationDetail, wageDetail, siteStatusDetail });
 
@@ -287,7 +304,12 @@ public class WorkerDashboard {
 
         new Thread(() -> {
             try {
-                String workerMob = worker.getMobileNumber();
+                String workerId = worker.getId() != null && !worker.getId().isBlank()
+                        ? worker.getId()
+                        : (worker.getMobileNumber() != null ? worker.getMobileNumber() : SessionManager.getCurrentWorkerId());
+
+                String workerMob = worker.getMobileNumber() != null ? worker.getMobileNumber() : workerId;
+
                 List<JobApplication> apps = new JobApplicationController().getApplicationsByWorker(workerMob);
                 List<Attendance> attendances = new AttendanceController().getAttendanceByWorker(workerMob);
                 List<Project> allProjects = new ProjectController().getAllProjects();
@@ -296,12 +318,13 @@ public class WorkerDashboard {
                 if (allProjects != null) {
                     for (Project p : allProjects) {
                         if (p.getProjectId() != null) projectMap.put(p.getProjectId(), p);
+                        if (p.getId() != null) projectMap.put(p.getId(), p);
                     }
                 }
 
                 int daysPresent = 0;
                 int daysAbsent = 0;
-                double effectiveDailyWage = worker.getDailyWage() > 0 ? worker.getDailyWage() : 950;
+                double effectiveDailyWage = worker.getDailyWage() > 0 ? worker.getDailyWage() : 800;
                 String todayStr = LocalDate.now().toString();
                 String todayStatus = "Pending";
 
@@ -328,15 +351,35 @@ public class WorkerDashboard {
                     }
                 }
 
-                double totalEarned = daysPresent * effectiveDailyWage;
-                final int finalDaysPresent = daysPresent;
-                final double finalTotalEarned = totalEarned;
+                // Check live wallet balance and verified days worked from Worker model / controller
+                double liveBalance = worker.getWalletBalance() > 0 ? worker.getWalletBalance() : (daysPresent * effectiveDailyWage);
+                int liveDaysWorked = worker.getTotalDaysWorked() > 0 ? worker.getTotalDaysWorked() : daysPresent;
+
+                final int finalDaysPresent = liveDaysWorked;
+                final double finalTotalEarned = liveBalance;
                 final double finalDailyWage = effectiveDailyWage;
                 final String finalTodayStatus = todayStatus;
 
                 List<Notification> notifications = new NotificationController().getNotifications(workerMob);
 
                 Platform.runLater(() -> {
+                    // 1. Dynamic Metric Values (TOTAL WAGES EARNED & DAYS WORKED)
+                    walletMetricValue.setText("Rs. " + String.format("%,.0f", finalTotalEarned));
+                    walletMetricSub.setText("Rs. " + String.format("%,.0f", finalDailyWage) + "/day rate (" + finalDaysPresent + " days)");
+
+                    attendanceMetricValue.setText(finalDaysPresent + " Days");
+                    if ("Present".equalsIgnoreCase(finalTodayStatus)) {
+                        attendanceMetricSub.setText("Marked Present Today");
+                        attendanceMetricSub.setStyle("-fx-font-size:12px;-fx-text-fill:#2e7d32;-fx-font-weight:800;");
+                    } else if ("Absent".equalsIgnoreCase(finalTodayStatus)) {
+                        attendanceMetricSub.setText("Marked Absent Today");
+                        attendanceMetricSub.setStyle("-fx-font-size:12px;-fx-text-fill:#ba1a1a;-fx-font-weight:800;");
+                    } else {
+                        attendanceMetricSub.setText("Today's attendance pending");
+                        attendanceMetricSub.setStyle("-fx-font-size:12px;-fx-text-fill:#735c00;");
+                    }
+
+                    // 2. Notifications Panel
                     if (notificationsPanel != null) {
                         notificationsPanel.getChildren().clear();
                         notificationsPanel.getChildren().add(panelHeader("Notifications"));
@@ -370,21 +413,7 @@ public class WorkerDashboard {
                         }
                     }
 
-                    walletMetricValue.setText("Rs. " + String.format("%,.0f", finalTotalEarned));
-                    walletMetricSub.setText("Rs. " + String.format("%,.0f", finalDailyWage) + "/day rate (" + finalDaysPresent + " days)");
-
-                    attendanceMetricValue.setText(finalDaysPresent + " Days");
-                    if ("Present".equalsIgnoreCase(finalTodayStatus)) {
-                        attendanceMetricSub.setText("Marked Present Today");
-                        attendanceMetricSub.setStyle("-fx-font-size:12px;-fx-text-fill:#2e7d32;-fx-font-weight:800;");
-                    } else if ("Absent".equalsIgnoreCase(finalTodayStatus)) {
-                        attendanceMetricSub.setText("Marked Absent Today");
-                        attendanceMetricSub.setStyle("-fx-font-size:12px;-fx-text-fill:#ba1a1a;-fx-font-weight:800;");
-                    } else {
-                        attendanceMetricSub.setText("Today's attendance pending");
-                        attendanceMetricSub.setStyle("-fx-font-size:12px;-fx-text-fill:#735c00;");
-                    }
-
+                    // 3. Daily Attendance & Wages Panel
                     if (liveAttendancePanel != null) {
                         liveAttendancePanel.getChildren().clear();
                         liveAttendancePanel.getChildren().add(panelHeader("Daily Attendance & Wages"));
@@ -408,13 +437,15 @@ public class WorkerDashboard {
                                 String siteName = "DIHADI Project Site";
                                 if (att.getProjectId() != null && projectMap.containsKey(att.getProjectId())) {
                                     Project p = projectMap.get(att.getProjectId());
-                                    if (p.getProjectName() != null && !p.getProjectName().isBlank()) {
+                                    if (p.getTitle() != null && !p.getTitle().isBlank()) {
+                                        siteName = p.getTitle();
+                                    } else if (p.getProjectName() != null && !p.getProjectName().isBlank()) {
                                         siteName = p.getProjectName();
                                     }
                                 }
                                 Label siteLabel = label("Site: " + siteName, "-fx-font-size:12px;-fx-text-fill:#4c4637;");
 
-                                Label wageBadge = new Label(isPresent ? "+ Rs. " + String.format("%,.0f", finalDailyWage) : "Rs. 0");
+                                Label wageBadge = new Label(isPresent ? "+ Rs. " + String.format("%,.0f", (att.getPaidAmount() > 0 ? att.getPaidAmount() : finalDailyWage)) : "Rs. 0");
                                 wageBadge.setStyle(isPresent
                                         ? "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#2e7d32;"
                                         : "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#ba1a1a;");
@@ -439,6 +470,7 @@ public class WorkerDashboard {
                         }
                     }
 
+                    // 4. Job Invitations & Applications Panels
                     if (recruiterRequestsPanel != null && pendingApplicationsPanel != null && historyPanel != null) {
                         recruiterRequestsPanel.getChildren().clear();
                         recruiterRequestsPanel.getChildren().add(panelHeader("Job Invitations"));
@@ -598,70 +630,70 @@ public class WorkerDashboard {
     }
 
     private Label panelHeader(String text) {
-        return label(text, "-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:0.8px;-fx-text-fill:" + PRIMARY + ";");
+        Label l = label(text, "-fx-font-family:Georgia;-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+        l.setPadding(new Insets(0, 0, 6, 0));
+        return l;
     }
 
-    private VBox detail(String title, String val) {
-        Label t = label(title, "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#685c52;");
-        Label v = label(val, "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
-        return new VBox(2, t, v);
+    private VBox detail(String k, String v) {
+        Label kl = label(k, "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#685c52;");
+        Label vl = label(v, "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+        return new VBox(2, kl, vl);
     }
 
     private void setDetailValue(VBox detailBox, String value) {
-        if (detailBox.getChildren().size() > 1 && detailBox.getChildren().get(1) instanceof Label valLabel) {
-            valLabel.setText(value);
-        }
-    }
-
-    private Button navLink(String text, boolean active) {
-        Button b = new Button(text);
-        b.setStyle("-fx-background-color:" + (active ? "#faf3e8" : "transparent") + ";-fx-text-fill:" + GOLD + ";-fx-font-size:13px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-background-radius:8px;-fx-cursor:hand;");
-        return b;
-    }
-
-    private ImageView image(String path, double width, double height) {
-        try {
-            var r = getClass().getResource(path);
-            if (r == null) return new ImageView();
-            ImageView view = new ImageView(new Image(r.toExternalForm()));
-            view.setFitWidth(width);
-            view.setFitHeight(height);
-            view.setPreserveRatio(true);
-            return view;
-        } catch (Exception e) {
-            return new ImageView();
-        }
-    }
-
-    private Label label(String value, String style) {
-        Label label = new Label(value);
-        label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
-        return label;
-    }
-
-    private String value(String str, String fallback) {
-        return (str != null && !str.isBlank()) ? str : fallback;
-    }
-
-    private String value(String str) {
-        return value(str, "Not provided");
-    }
-
-    private String formatDate(String rawDate) {
-        if (rawDate == null || rawDate.isBlank()) return "Today";
-        try {
-            LocalDate d = LocalDate.parse(rawDate);
-            return d.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
-        } catch (Exception e) {
-            return rawDate;
+        if (detailBox != null && detailBox.getChildren().size() > 1) {
+            Label vl = (Label) detailBox.getChildren().get(1);
+            vl.setText(value);
         }
     }
 
     private HBox footer() {
-        Label info = label("© 2026 DIHADI. All rights reserved.", "-fx-font-size:12px;-fx-text-fill:#8c7e6b;");
-        HBox f = new HBox(info);
-        f.setAlignment(Pos.CENTER);
-        f.setPadding(new Insets(16, 0, 8, 0));
-        return f;
+        Label f = label("DIHADI ~ Meri Dihadi Mera Haq  |  Secure Direct Payments Powered by Razorpay",
+                "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#685c52;");
+        HBox h = new HBox(f);
+        h.setAlignment(Pos.CENTER);
+        h.setPadding(new Insets(16, 0, 0, 0));
+        return h;
+    }
+
+    private Label label(String text, String style) {
+        Label l = new Label(text);
+        l.setStyle(style);
+        return l;
+    }
+
+    private ImageView image(String path, double w, double h) {
+        try {
+            Image img = new Image(getClass().getResourceAsStream(path));
+            ImageView iv = new ImageView(img);
+            iv.setFitWidth(w);
+            iv.setFitHeight(h);
+            iv.setPreserveRatio(true);
+            return iv;
+        } catch (Exception e) {
+            ImageView iv = new ImageView();
+            iv.setFitWidth(w);
+            iv.setFitHeight(h);
+            return iv;
+        }
+    }
+
+    private String value(String s) {
+        return value(s, "Not provided");
+    }
+
+    private String value(String s, String fallback) {
+        return (s == null || s.trim().isEmpty()) ? fallback : s.trim();
+    }
+
+    private String formatDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) return "Today";
+        try {
+            LocalDate d = LocalDate.parse(dateStr);
+            return d.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+        } catch (Exception e) {
+            return dateStr;
+        }
     }
 }

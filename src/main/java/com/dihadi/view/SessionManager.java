@@ -55,6 +55,28 @@ public class SessionManager {
         return "Admin";
     }
 
+    public static String getCurrentRecruiterId() {
+        if (currentRecruiter != null) {
+            if (currentRecruiter.getUid() != null && !currentRecruiter.getUid().isBlank()) {
+                return currentRecruiter.getUid();
+            }
+            if (currentRecruiter.getMobileNumber() != null && !currentRecruiter.getMobileNumber().isBlank()) {
+                return currentRecruiter.getMobileNumber();
+            }
+        }
+        return "REC_DEFAULT";
+    }
+
+    public static String getCurrentWorkerId() {
+        if (currentWorker != null) {
+            if (currentWorker.getUid() != null && !currentWorker.getUid().isBlank()) {
+                return currentWorker.getUid();
+            }
+            if (currentWorker.getMobileNumber() != null && !currentWorker.getMobileNumber().isBlank()) {
+                return currentWorker.getMobileNumber();
+            }
+        }
+        return "WRK_DEFAULT";
     /**
      * Checks if navigation/action for targetRole is allowed.
      * If a conflicting role session is currently active, a modal popup is shown

@@ -111,4 +111,22 @@ public class ProjectDao {
             return false;
         }
     }
+
+    public List<Project> getProjectsByRecruiterId(String recruiterId) {
+        List<Project> all = getAllProjects();
+        if (recruiterId == null || recruiterId.isBlank() || "REC_DEFAULT".equalsIgnoreCase(recruiterId)) {
+            return all;
+        }
+        String cleanId = recruiterId.replaceAll("\\D", "");
+        List<Project> matched = new ArrayList<>();
+        for (Project p : all) {
+            String pMob = p.getMobile() != null ? p.getMobile().replaceAll("\\D", "") : "";
+            if (recruiterId.equalsIgnoreCase(p.getMobile()) || recruiterId.equalsIgnoreCase(p.getEmail()) ||
+                (!cleanId.isEmpty() && !pMob.isEmpty() && (cleanId.equals(pMob) || cleanId.endsWith(pMob) || pMob.endsWith(cleanId)))) {
+                matched.add(p);
+            }
+        }
+        // If no strict match, fallback to all projects so recruiter isn't blocked
+        return !matched.isEmpty() ? matched : all;
+    }
 }

@@ -24,6 +24,16 @@ public final class AppNavigator {
             case "Contact Us" -> stage.setScene(new ContactUs().getContactScene(
                     () -> open(stage, "Home"), () -> open(stage, "Business"),
                     () -> open(stage, "Worker"), () -> open(stage, "About Us")));
+            case "Recruiter" -> stage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(
+                    () -> open(stage, "Home")));
+            case "Admin" -> stage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(() -> open(stage, "Home")));
+            case "AdminLogin" -> stage.setScene(new com.dihadi.view.admin.AdminLoginPage().getAdminLoginScene(() -> open(stage, "Home")));
+            case "Attendance" -> {
+                if (SessionManager.currentRecruiter != null) {
+                    stage.setScene(new com.dihadi.view.recruiter.AttendancePage(SessionManager.currentRecruiter).getScene(() -> openDashboard(stage)));
+                } else {
+                    openDashboard(stage);
+                }
             case "Worker" -> {
                 if (SessionManager.currentWorker != null) {
                     stage.setScene(new com.dihadi.view.worker.WorkerDashboard(SessionManager.currentWorker).getScene(() -> open(stage, "Home")));

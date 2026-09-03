@@ -127,4 +127,79 @@ public class WorkerDao {
 
         return list;
     }
+
+    public List<Worker> getWorkersByProjectId(String projectId) {
+        List<Worker> list = new ArrayList<>();
+        if (projectId == null || projectId.isBlank()) {
+            return getAllWorkers();
+        }
+
+        try {
+            // Find all accepted applications for this project
+            JobApplicationDao jobAppDao = new JobApplicationDao();
+            List<com.dihadi.model.JobApplication> allApps = jobAppDao.getAllApplications();
+            
+            java.util.Set<String> workerMobiles = new java.util.HashSet<>();
+            if (allApps != null) {
+                for (com.dihadi.model.JobApplication app : allApps) {
+                    if (projectId.equals(app.getProjectId()) && "Accepted".equalsIgnoreCase(app.getStatus())) {
+                        if (app.getWorkerMobile() != null && !app.getWorkerMobile().isBlank()) {
+                            workerMobiles.add(app.getWorkerMobile());
+                        }
+                    }
+                }
+                // If no accepted applications, check all applications for this project
+                if (workerMobiles.isEmpty()) {
+                    for (com.dihadi.model.JobApplication app : allApps) {
+                        if (projectId.equals(app.getProjectId())) {
+                            if (app.getWorkerMobile() != null && !app.getWorkerMobile().isBlank()) {
+                                workerMobiles.add(app.getWorkerMobile());
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (String mobile : workerMobiles) {
+                Worker w = getWorkerByEmailOrMobile(mobile);
+                if (w != null && list.stream().noneMatch(existing -> mobile.equals(existing.getMobileNumber()))) {
+                    list.add(w);
+                } else if (w == null) {
+                    // Create minimal worker from mobile
+                    Worker fallback = new Worker();
+                    fallback.setMobileNumber(mobile);
+                    fallback.setFirstName("Worker (" + mobile + ")");
+                    fallback.setDailyWage(500);
+                    list.add(fallback);
+                }
+            }
+
+            // If still empty, return all workers as fallback for testing
+            if (list.isEmpty()) {
+                list = getAllWorkers();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            list = getAllWorkers();
+        }
+
+        return list;
+    }
+
+    public void updateWalletBalance(String mobileNumberOrId, double newBalance) {
+        try {
+            db.collection("Workers")
+                    .document(mobileNumberOrId)
+                    .update("walletBalance", newBalance);
+            System.out.println("Worker wallet balance updated for " + mobileNumberOrId);
+        } catch (Exception e) {
+            try {
+                db.collection("workers")
+                        .document(mobileNumberOrId)
+                        .update("walletBalance", newBalance);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
 }

@@ -78,29 +78,131 @@ public class AttendanceDao {
         String digits = cleanMob.replaceAll("\\D", "");
 
         for (Attendance att : LOCAL_ATTENDANCE_MAP.values()) {
-            if (att.getWorkerMobile() != null) {
+            boolean match = false;
+            if (att.getWorkerId() != null && (att.getWorkerId().equalsIgnoreCase(workerMobile) || (!cleanMob.isEmpty() && att.getWorkerId().contains(cleanMob)))) {
+                match = true;
+            }
+            if (!match && att.getWorkerMobile() != null) {
                 String aMob = att.getWorkerMobile().replaceAll("[\\s\\-\\(\\)]", "");
                 String aDigits = aMob.replaceAll("\\D", "");
                 if (cleanMob.equals(aMob) || (!digits.isEmpty() && digits.equals(aDigits))) {
-                    attendances.add(att);
+                    match = true;
                 }
+            }
+            if (match) {
+                attendances.add(att);
             }
         }
 
         try {
-            ApiFuture<QuerySnapshot> future = db.collection("Attendance").get();
-            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-            for (QueryDocumentSnapshot document : documents) {
+            // 1. Query "attendance" collection
+            ApiFuture<QuerySnapshot> future1 = db.collection("attendance").get();
+            for (QueryDocumentSnapshot document : future1.get().getDocuments()) {
                 Attendance att = document.toObject(Attendance.class);
-                if (att != null && att.getWorkerMobile() != null) {
+                if (att != null) {
                     if (att.getAttendanceId() == null || att.getAttendanceId().isBlank()) att.setAttendanceId(document.getId());
                     LOCAL_ATTENDANCE_MAP.put(att.getAttendanceId(), att);
-                    String aMob = att.getWorkerMobile().replaceAll("[\\s\\-\\(\\)]", "");
-                    String aDigits = aMob.replaceAll("\\D", "");
-                    if (cleanMob.equals(aMob) || (digits.length() >= 10 && aDigits.endsWith(digits.substring(digits.length() - 10))) || (aDigits.length() >= 10 && digits.endsWith(aDigits.substring(aDigits.length() - 10)))) {
-                        if (attendances.stream().noneMatch(a -> att.getAttendanceId().equals(a.getAttendanceId()))) {
-                            attendances.add(att);
+
+                    boolean match = false;
+                    if (att.getWorkerId() != null && (att.getWorkerId().equalsIgnoreCase(workerMobile) || (!cleanMob.isEmpty() && att.getWorkerId().contains(cleanMob)))) {
+                        match = true;
+                    }
+                    if (!match && att.getWorkerMobile() != null) {
+                        String aMob = att.getWorkerMobile().replaceAll("[\\s\\-\\(\\)]", "");
+                        String aDigits = aMob.replaceAll("\\D", "");
+                        if (cleanMob.equals(aMob) || (!digits.isEmpty() && digits.equals(aDigits)) || (digits.length() >= 10 && aDigits.endsWith(digits.substring(digits.length() - 10)))) {
+                            match = true;
                         }
+                    }
+                    if (match && attendances.stream().noneMatch(a -> att.getAttendanceId().equals(a.getAttendanceId()))) {
+                        attendances.add(att);
+                    }
+                }
+            }
+
+            // 2. Query "Attendance" collection
+            ApiFuture<QuerySnapshot> future2 = db.collection("Attendance").get();
+            for (QueryDocumentSnapshot document : future2.get().getDocuments()) {
+                Attendance att = document.toObject(Attendance.class);
+                if (att != null) {
+                    if (att.getAttendanceId() == null || att.getAttendanceId().isBlank()) att.setAttendanceId(document.getId());
+                    LOCAL_ATTENDANCE_MAP.put(att.getAttendanceId(), att);
+
+                    boolean match = false;
+                    if (att.getWorkerId() != null && (att.getWorkerId().equalsIgnoreCase(workerMobile) || (!cleanMob.isEmpty() && att.getWorkerId().contains(cleanMob)))) {
+                        match = true;
+                    }
+                    if (!match && att.getWorkerMobile() != null) {
+                        String aMob = att.getWorkerMobile().replaceAll("[\\s\\-\\(\\)]", "");
+                        String aDigits = aMob.replaceAll("\\D", "");
+                        if (cleanMob.equals(aMob) || (!digits.isEmpty() && digits.equals(aDigits)) || (digits.length() >= 10 && aDigits.endsWith(digits.substring(digits.length() - 10)))) {
+                            match = true;
+                        }
+                    }
+                    if (match && attendances.stream().noneMatch(a -> att.getAttendanceId().equals(a.getAttendanceId()))) {
+                        attendances.add(att);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return attendances;
+    }
+
+    public Attendance getAttendanceRecord(String attendanceId) {
+        if (attendanceId == null || attendanceId.isBlank()) return null;
+        if (LOCAL_ATTENDANCE_MAP.containsKey(attendanceId)) {
+            return LOCAL_ATTENDANCE_MAP.get(attendanceId);
+        }
+        try {
+            // First try "attendance" collection
+            var docSnap = db.collection("attendance").document(attendanceId).get().get();
+            if (docSnap.exists()) {
+                Attendance att = docSnap.toObject(Attendance.class);
+                if (att != null) {
+                    if (att.getAttendanceId() == null) att.setAttendanceId(docSnap.getId());
+                    LOCAL_ATTENDANCE_MAP.put(att.getAttendanceId(), att);
+                    return att;
+                }
+            }
+            // Fallback to "Attendance" collection
+            var docSnap2 = db.collection("Attendance").document(attendanceId).get().get();
+            if (docSnap2.exists()) {
+                Attendance att = docSnap2.toObject(Attendance.class);
+                if (att != null) {
+                    if (att.getAttendanceId() == null) att.setAttendanceId(docSnap2.getId());
+                    LOCAL_ATTENDANCE_MAP.put(att.getAttendanceId(), att);
+                    return att;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Attendance getAttendance(String attendanceId) {
+        return getAttendanceRecord(attendanceId);
+    }
+
+    public List<Attendance> getAttendanceByRecruiter(String recruiterId) {
+        List<Attendance> attendances = new ArrayList<>();
+        if (recruiterId == null || recruiterId.isBlank()) return attendances;
+        for (Attendance att : LOCAL_ATTENDANCE_MAP.values()) {
+            if (recruiterId.equals(att.getRecruiterId())) {
+                attendances.add(att);
+            }
+        }
+        try {
+            ApiFuture<QuerySnapshot> future = db.collection("attendance").whereEqualTo("recruiterId", recruiterId).get();
+            for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+                Attendance att = document.toObject(Attendance.class);
+                if (att != null) {
+                    if (att.getAttendanceId() == null) att.setAttendanceId(document.getId());
+                    LOCAL_ATTENDANCE_MAP.put(att.getAttendanceId(), att);
+                    if (attendances.stream().noneMatch(a -> att.getAttendanceId().equals(a.getAttendanceId()))) {
+                        attendances.add(att);
                     }
                 }
             }

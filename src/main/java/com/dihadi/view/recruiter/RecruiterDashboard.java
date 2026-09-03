@@ -220,12 +220,22 @@ public class RecruiterDashboard {
         workersMetricLabel = label("0", "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
         workersMetricSub = label("Workers on active project", "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#685c52;");
         VBox workersMetric = kpiCard("ASSIGNED WORKERS", workersMetricLabel, workersMetricSub);
+        workersMetric.setOnMouseClicked(e -> {
+            if (livePoller != null) livePoller.stop();
+            Stage stage = (Stage) workersMetric.getScene().getWindow();
+            stage.setScene(new AttendancePage(currentR).getScene(() -> stage.setScene(getScene(back))));
+        });
 
         projectsMetricLabel = label("0", "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:#1565c0;");
         VBox projectsMetric = kpiCard("TOTAL PROJECTS", projectsMetricLabel, label("Created projects", "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#1565c0;"));
 
         reqCountLabel = label("0", "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:#ba1a1a;");
         VBox approvalsMetric = kpiCard("PENDING APPROVALS", reqCountLabel, label("Worker applications", "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#ba1a1a;"));
+        approvalsMetric.setOnMouseClicked(e -> {
+            if (livePoller != null) livePoller.stop();
+            Stage stage = (Stage) approvalsMetric.getScene().getWindow();
+            stage.setScene(new PendingApprovalsPage(currentR).getScene(() -> stage.setScene(getScene(back))));
+        });
 
         HBox metricsRow = new HBox(18, walletMetric, workersMetric, projectsMetric, approvalsMetric);
         for (Node n : metricsRow.getChildren()) HBox.setHgrow(n, Priority.ALWAYS);
