@@ -41,11 +41,117 @@ public class LoginPage {
     }
 
     public Scene getLoginScene() {
+        if (!recruiter) {
+            return getWorkerLoginScene();
+        }
         BorderPane page = new BorderPane();
         page.setLeft(form());
         page.setCenter(visual());
         page.setStyle("-fx-background-color:#f3e7ce;");
         return new Scene(page, 1400, 780);
+    }
+
+    private Scene getWorkerLoginScene() {
+        Region bg = new Region();
+        var res = getClass().getResource("/assets/images/worker_auth_bg.jpg");
+        String bgUrl = (res != null) ? res.toExternalForm() : "";
+        bg.setStyle("-fx-background-image: url('" + bgUrl + "');" +
+                "-fx-background-size: cover;" +
+                "-fx-background-position: center center;" +
+                "-fx-background-repeat: no-repeat;");
+
+        VBox formCard = workerLoginForm();
+        StackPane root = new StackPane(bg, formCard);
+        return new Scene(root, 1400, 780);
+    }
+
+    private VBox workerLoginForm() {
+        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 72, 72);
+        logo.setPreserveRatio(true);
+        VBox brand = new VBox(4, logo,
+                label("DIHADI",
+                        "-fx-font-family:'Georgia';-fx-font-size:32px;-fx-font-weight:800;-fx-text-fill:#735c00;"),
+                label("Meri Dihadi ~ Mera Haq",
+                        "-fx-font-family:'Georgia';-fx-font-size:16px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
+        brand.setAlignment(Pos.CENTER);
+
+        Label welcome = label("Worker Login", "-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+        Label intro = label("Enter your mobile number or email to access your worker account.",
+                "-fx-font-size:14px;-fx-text-fill:#594f42;");
+        intro.setWrapText(true);
+        intro.setMaxWidth(400);
+        intro.setAlignment(Pos.CENTER);
+        VBox introBox = new VBox(6, welcome, intro);
+        introBox.setAlignment(Pos.CENTER);
+
+        TextField account = new TextField();
+        account.setPromptText("Mobile Number or Email");
+        account.setStyle(transparentInputStyle());
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Enter Password");
+        passwordField.setStyle(transparentInputStyle());
+
+        VBox credentials = new VBox(12,
+                label("Mobile Number or Email", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#2c251d;"),
+                account,
+                label("Password", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#2c251d;"),
+                passwordField);
+
+        Button continueButton = new Button("Login");
+        continueButton.setMaxWidth(Double.MAX_VALUE);
+        continueButton.setStyle(
+                "-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#1e1b15;-fx-font-size:17px;-fx-font-weight:800;-fx-padding:13px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.18),10,0,0,3px);");
+        continueButton.setOnAction(e -> handleLogin(account, passwordField, continueButton));
+
+        Button create = link("New worker? Create an account");
+        create.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:700;-fx-cursor:hand;");
+        create.setOnAction(e -> {
+            Stage stage = (Stage) create.getScene().getWindow();
+            stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(back));
+        });
+
+        Button backBtn = new Button("<");
+        backBtn.setStyle(
+                "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:10px;-fx-border-color:rgba(212,175,55,0.4);-fx-border-radius:10px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:16px;-fx-font-weight:800;-fx-padding:6px 12px;-fx-cursor:hand;");
+        backBtn.setOnAction(e -> {
+            Stage stage = (Stage) backBtn.getScene().getWindow();
+            if (back != null) back.run();
+            else AppNavigator.open(stage, "Home");
+        });
+        HBox topRow = new HBox(backBtn);
+        topRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox card = new VBox(20, topRow, brand, introBox, credentials, continueButton, create);
+        card.setAlignment(Pos.CENTER);
+        card.setMaxWidth(460);
+        card.setPadding(new Insets(34, 38, 34, 38));
+        card.setStyle(
+                "-fx-background-color:rgba(255,253,248,0.84);" +
+                "-fx-background-radius:22px;" +
+                "-fx-border-color:rgba(212,175,55,0.45);" +
+                "-fx-border-radius:22px;" +
+                "-fx-border-width:1.5px;" +
+                "-fx-effect:dropshadow(gaussian,rgba(30,24,16,0.18),28,0,0,10px);");
+
+        VBox wrapper = new VBox(card);
+        wrapper.setAlignment(Pos.CENTER_LEFT);
+        wrapper.setPadding(new Insets(30, 20, 30, 80));
+        return wrapper;
+    }
+
+    private String transparentInputStyle() {
+        return "-fx-background-color: rgba(255, 255, 255, 0.85);" +
+               "-fx-background-radius: 10px;" +
+               "-fx-border-color: rgba(200, 185, 165, 0.6);" +
+               "-fx-border-radius: 10px;" +
+               "-fx-border-width: 1.2px;" +
+               "-fx-text-fill: #1e1b15;" +
+               "-fx-font-weight: 600;" +
+               "-fx-prompt-text-fill: #7d7263;" +
+               "-fx-font-size: 14px;" +
+               "-fx-padding: 12px 14px;" +
+               "-fx-pref-height: 48px;";
     }
 
     private VBox form() {

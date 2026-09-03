@@ -85,7 +85,7 @@ public class PendingApprovalsPage {
                         : "";
                 
                 Platform.runLater(() -> {
-                    boolean found = false;
+                    Map<String, JobApplication> deduplicatedPending = new java.util.LinkedHashMap<>();
                     for (JobApplication app : allApps) {
                         if ("Pending".equalsIgnoreCase(app.getStatus())) {
                             boolean matchesRecruiter = false;
@@ -99,22 +99,27 @@ public class PendingApprovalsPage {
                             }
                             
                             if (matchesRecruiter) {
-                                String mob = app.getWorkerMobile() != null ? app.getWorkerMobile() : "";
-                                String cleanMob = mob.replaceAll("[\\s\\-\\(\\)]", "");
-                                String digits = cleanMob.replaceAll("\\D", "");
-                                Worker matchedWorker = workerMap.get(cleanMob);
-                                if (matchedWorker == null && digits.length() >= 10) {
-                                    matchedWorker = workerMap.get(digits.substring(digits.length() - 10));
-                                }
-                                listContainer.getChildren().add(createCard(app, matchedWorker, c, listContainer));
-                                found = true;
+                                String workerKey = (app.getWorkerMobile() != null ? app.getWorkerMobile().replaceAll("\\D", "") : "") + "_" + (app.getProjectId() != null ? app.getProjectId() : "");
+                                deduplicatedPending.putIfAbsent(workerKey, app);
                             }
                         }
                     }
-                    if (!found) {
+
+                    if (deduplicatedPending.isEmpty()) {
                         Label lbl = new Label("No pending applications at this time.");
                         lbl.setStyle("-fx-font-size: 16px; -fx-text-fill: #4c4637;");
                         listContainer.getChildren().add(lbl);
+                    } else {
+                        for (JobApplication app : deduplicatedPending.values()) {
+                            String mob = app.getWorkerMobile() != null ? app.getWorkerMobile() : "";
+                            String cleanMob = mob.replaceAll("[\\s\\-\\(\\)]", "");
+                            String digits = cleanMob.replaceAll("\\D", "");
+                            Worker matchedWorker = workerMap.get(cleanMob);
+                            if (matchedWorker == null && digits.length() >= 10) {
+                                matchedWorker = workerMap.get(digits.substring(digits.length() - 10));
+                            }
+                            listContainer.getChildren().add(createCard(app, matchedWorker, c, listContainer));
+                        }
                     }
                 });
             } catch (Exception ex) {
@@ -138,7 +143,6 @@ public class PendingApprovalsPage {
         card.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 12px; -fx-border-color: #cfc6b2; -fx-border-radius: 12px; -fx-effect: dropshadow(gaussian, rgba(34,34,34,0.05), 10, 0, 0, 4px);");
         
         String name = "Worker";
-        String locationStr = "";
         if (worker != null) {
             String fn = worker.getFirstName() != null ? worker.getFirstName().trim() : "";
             String mn = worker.getMiddleName() != null ? worker.getMiddleName().trim() : "";
@@ -147,55 +151,35 @@ public class PendingApprovalsPage {
             if (!full.isEmpty()) {
                 name = full;
             }
-            String city = worker.getCity() != null ? worker.getCity().trim() : "";
-            String state = worker.getState() != null ? worker.getState().trim() : "";
-            if (!city.isEmpty() && !state.isEmpty()) {
-                locationStr = city + ", " + state;
-            } else if (!city.isEmpty()) {
-                locationStr = city;
-            } else if (!state.isEmpty()) {
-                locationStr = state;
-            }
         }
         
-        if (locationStr.isEmpty() && app.getJobLocation() != null && !app.getJobLocation().isBlank()) {
-            locationStr = app.getJobLocation().trim();
-        }
-        final String finalWorkerName = name;
-        
-        Label nameLabel = new Label("👤  " + name);
+        Label nameLabel = new Label(name);
         nameLabel.setStyle("-fx-font-family: Georgia; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e1b15;");
         
-        String role = (app.getJobTitle() != null && !app.getJobTitle().isBlank()) 
-                ? app.getJobTitle() 
-                : (worker != null && worker.getWorkerType() != null ? worker.getWorkerType() : "Worker");
-        String subtext = "Role: " + role + (locationStr.isEmpty() ? "" : "  •  Location: " + locationStr);
+        String subtext = "Applied for: " + (app.getJobTitle() != null ? app.getJobTitle() : "General Worker");
         Label subtextLabel = new Label(subtext);
-        subtextLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #735c00;");
+        subtextLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #4c4637; -fx-font-weight: 600;");
         
-        String mobileVal = app.getWorkerMobile() != null && !app.getWorkerMobile().isBlank()
-                ? app.getWorkerMobile()
-                : (worker != null && worker.getMobileNumber() != null ? worker.getMobileNumber() : "Not provided");
-        Label workerLabel = new Label("Worker Mobile: " + mobileVal);
-        workerLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #4c4637;");
+        Label workerLabel = new Label("Mobile: " + (app.getWorkerMobile() != null ? app.getWorkerMobile() : "Not provided"));
+        workerLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #685c52;");
         
-        String wageVal = app.getJobWage() != null && !app.getJobWage().isBlank()
-                ? app.getJobWage()
-                : (worker != null && worker.getDailyWage() > 0 ? "₹" + worker.getDailyWage() + "/day" : "Standard project wage");
-        Label wageLabel = new Label("Expected Wage: " + wageVal);
-        wageLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #4c4637;");
+        Label wageLabel = new Label("Daily Wage Rate: " + (app.getJobWage() != null ? app.getJobWage() : "Standard Rate"));
+        wageLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #735c00; -fx-font-weight: bold;");
         
-        Button accept = new Button("Accept");
+        Button accept = new Button("Accept Application");
         accept.setStyle("-fx-background-color: #2a7e3b; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8px 16px; -fx-background-radius: 6px; -fx-cursor: hand;");
+        
         Button reject = new Button("Reject");
         reject.setStyle("-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8px 16px; -fx-background-radius: 6px; -fx-cursor: hand;");
         
+        final String finalWorkerName = name;
         accept.setOnAction(e -> {
             app.setStatus("Accepted");
             accept.setDisable(true);
             reject.setDisable(true);
             new Thread(() -> {
                 c.saveApplication(app);
+                c.updateWorkerApplicationsForProject(app.getWorkerMobile(), app.getProjectId(), "Accepted");
                 String recName = (recruiter != null && recruiter.getFirstName() != null)
                         ? (recruiter.getFirstName() + " " + (recruiter.getLastName() != null ? recruiter.getLastName() : "")).trim()
                         : "Site Recruiter";
@@ -210,7 +194,7 @@ public class PendingApprovalsPage {
                 }
                 new com.dihadi.controller.NotificationController().notifyWorkerApplicationAccepted(app, recName, projName);
                 Platform.runLater(() -> {
-                    com.dihadi.view.NotificationToast.show(accept, "Worker Accepted! 🎉", "Your approval for " + finalWorkerName + " has been recorded and a notification was sent to the worker.", com.dihadi.view.NotificationToast.ToastType.SUCCESS);
+                    com.dihadi.view.NotificationToast.show(accept, "Worker Accepted!", "Your approval for " + finalWorkerName + " has been recorded and a notification was sent to the worker.", com.dihadi.view.NotificationToast.ToastType.SUCCESS);
                     listContainer.getChildren().remove(card);
                     if (listContainer.getChildren().isEmpty()) {
                         Label lbl = new Label("No pending applications at this time.");
@@ -227,6 +211,7 @@ public class PendingApprovalsPage {
             reject.setDisable(true);
             new Thread(() -> {
                 c.saveApplication(app);
+                c.updateWorkerApplicationsForProject(app.getWorkerMobile(), app.getProjectId(), "Rejected");
                 Platform.runLater(() -> {
                     com.dihadi.view.NotificationToast.show(reject, "Application Declined", "The application for " + finalWorkerName + " has been rejected.", com.dihadi.view.NotificationToast.ToastType.INFO);
                     listContainer.getChildren().remove(card);
@@ -250,11 +235,12 @@ public class PendingApprovalsPage {
         String rMob = r.getMobileNumber() != null ? r.getMobileNumber().replaceAll("\\D", "") : "";
         String pEmail = p.getEmail() != null ? p.getEmail().trim().toLowerCase() : "";
         String rEmail = r.getEmail() != null ? r.getEmail().trim().toLowerCase() : "";
+        String rComp = r.getCompanyName() != null ? r.getCompanyName().trim().toLowerCase() : "";
+        String pComp = p.getContactName() != null ? p.getContactName().trim().toLowerCase() : "";
         
         if (!pMob.isEmpty() && !rMob.isEmpty() && (pMob.equals(rMob) || pMob.endsWith(rMob) || rMob.endsWith(pMob))) return true;
         if (!pEmail.isEmpty() && !rEmail.isEmpty() && pEmail.equals(rEmail)) return true;
+        if (!rComp.isEmpty() && !pComp.isEmpty() && (pComp.contains(rComp) || rComp.contains(pComp))) return true;
         return false;
     }
 }
-
-
