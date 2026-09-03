@@ -61,8 +61,12 @@ public class AdminGrievancesPage {
     private final List<AdminGrievanceData> allGrievancesList = new ArrayList<>();
 
     public Scene getGrievancesScene(Runnable dashboardAction) {
+        return getGrievancesScene(dashboardAction, dashboardAction);
+    }
+
+    public Scene getGrievancesScene(Runnable dashboardAction, Runnable logout) {
         BorderPane layout = new BorderPane();
-        layout.setLeft(sidebar(dashboardAction));
+        layout.setLeft(sidebar(dashboardAction, logout));
         layout.setCenter(mainContent());
 
         modalContainer = new StackPane();
@@ -74,7 +78,7 @@ public class AdminGrievancesPage {
         return new Scene(rootStack, 1400, 780);
     }
 
-    private VBox sidebar(Runnable dashboardAction) {
+    private VBox sidebar(Runnable dashboardAction, Runnable logout) {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 82, 82);
         VBox identity = new VBox(10, logo,
                 label("DIHADI", "-fx-font-family:Georgia;-fx-font-size:28px;-fx-text-fill:" + GOLD + ";"),
@@ -91,34 +95,22 @@ public class AdminGrievancesPage {
         Button workersNav = nav("Workers", false);
         workersNav.setOnAction(e -> {
             if (clock != null) clock.stop();
-            for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
-                if (window.isFocused() && window instanceof Stage stage) {
-                    stage.setScene(new AdminWorkersPage().getWorkersScene(dashboardAction, dashboardAction));
-                    return;
-                }
-            }
+            Stage stage = (Stage) workersNav.getScene().getWindow();
+            stage.setScene(new AdminWorkersPage().getWorkersScene(dashboardAction, logout));
         });
 
         Button recruitersNav = nav("Recruiters", false);
         recruitersNav.setOnAction(e -> {
             if (clock != null) clock.stop();
-            for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
-                if (window.isFocused() && window instanceof Stage stage) {
-                    stage.setScene(new AdminRecruitersPage().getRecruitersScene(dashboardAction, dashboardAction));
-                    return;
-                }
-            }
+            Stage stage = (Stage) recruitersNav.getScene().getWindow();
+            stage.setScene(new AdminRecruitersPage().getRecruitersScene(dashboardAction, logout));
         });
 
         Button projectsNav = nav("Projects", false);
         projectsNav.setOnAction(e -> {
             if (clock != null) clock.stop();
-            for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
-                if (window.isFocused() && window instanceof Stage stage) {
-                    stage.setScene(new AdminProjectsPage().getProjectsScene(dashboardAction, dashboardAction));
-                    return;
-                }
-            }
+            Stage stage = (Stage) projectsNav.getScene().getWindow();
+            stage.setScene(new AdminProjectsPage().getProjectsScene(dashboardAction, logout));
         });
 
         Button grievances = nav("Grievances", true);
@@ -127,12 +119,13 @@ public class AdminGrievancesPage {
                 nav("Financials", false), nav("Verification", false), grievances);
         VBox.setVgrow(links, Priority.ALWAYS);
 
-        Button profile = nav("Admin User\nSystem Administrator", false);
+        String adminName = com.dihadi.view.SessionManager.getAdminDisplayName();
+        Button profile = nav(adminName + "\nSystem Administrator", false);
         profile.setOnAction(e -> {
             if (clock != null) clock.stop();
-            dashboardAction.run();
+            logout.run();
         });
-        VBox bottom = new VBox(4, nav("Support", false), nav("Compliance", false), profile);
+        VBox bottom = new VBox(4, profile);
         bottom.setPadding(new Insets(14, 0, 14, 0));
         bottom.setStyle("-fx-border-color:#ffffff1a;-fx-border-width:1px 0 0 0;");
 
@@ -144,8 +137,9 @@ public class AdminGrievancesPage {
     }
 
     private BorderPane mainContent() {
+        String adminName = com.dihadi.view.SessionManager.getAdminDisplayName();
         HBox breadcrumb = new HBox(
-                label("Admin", "-fx-font-size:16px;-fx-text-fill:#1A1A1A;"),
+                label(adminName, "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#1A1A1A;"),
                 label("   >   ", "-fx-font-size:16px;-fx-text-fill:#4A4A4A;"),
                 label("Grievance Resolution Center", "-fx-font-size:16px;-fx-text-fill:" + GOLD + ";")
         );
@@ -270,21 +264,48 @@ public class AdminGrievancesPage {
 
     private void loadRealtimeGrievances() {
         allGrievancesList.clear();
-        allGrievancesList.addAll(List.of(
-                new AdminGrievanceData("GR-1024", "Unpaid Overtime & Daily Wage Delay", "J. Doe (Worker #882 - Mason)", "Hiranandani Business Towers", "Mumbai, Maharashtra", "Critical", "Investigating", "Payment Delay", "₹14,500 Overdue", "2 Days Ago", "Worker reported that 14 days of overtime wage settlement is delayed by site contractor despite biometric log verification.", "Subcontractor requested bank statement reconciliations."),
-                new AdminGrievanceData("GR-1025", "Inadequate High-Altitude Safety Harness", "M. Smith (Worker #910 - Fitter)", "LODHAA Grand Expressway", "Mumbai, Maharashtra", "High", "New", "Safety Breach", "Site Safety Audit", "4 Hours Ago", "Missing secondary safety lanyard cables on elevated bridge pillar casting scaffolding.", "Safety compliance team assigned to inspect scaffolding."),
-                new AdminGrievanceData("GR-1026", "Damaged Heavy Crane Hoist Rigging", "R. Chen (Worker #112 - Crane Op)", "Pune Metro Rail Underground Depot", "Pune, Maharashtra", "Medium", "New", "Equipment Damage", "Machinery Audit", "1 Day Ago", "Worn cable sling rigging reported during heavy pre-cast girder lifting operations.", "Replacement rigging dispatched to Range Hills Depot site."),
-                new AdminGrievanceData("GR-1027", "Daily Wage Discrepancy Against Work Slip", "L. Thompson (Worker #554 - Plumber)", "BASIL Tech Habitat Smart Park", "Bengaluru, Karnataka", "High", "Investigating", "Wage Mismatch", "₹4,200 Difference", "1 Day Ago", "Daily wage recorded at ₹850 instead of committed escrow rate of ₹1,050 for high-pressure valve assembly.", "Contractor payroll team reviewing task master voucher."),
-                new AdminGrievanceData("GR-1028", "Wrongful Site Dismissal Without Notice", "K. Patel (Worker #229 - Mason)", "BHRAMHA Horizon Residential Complex", "Pune, Maharashtra", "Critical", "Escalated", "Unfair Dismissal", "Reinstatement Claim", "3 Days Ago", "Site supervisor summarily terminated worker without 48-hour notice required under DIHADI terms.", "Admin mediation initiated with BHRAMHA site leadership."),
-                new AdminGrievanceData("GR-1029", "Verbal Misconduct by Subcontractor", "S. Miller (Worker #881 - Electrician)", "Prestige Tech Cloud IT Park", "Bangalore, Karnataka", "Medium", "New", "Site Conduct", "HR Intervention", "6 Hours Ago", "Subcontractor foreman used abusive language regarding shift completion times.", "Notice issued to contractor HR representative."),
-                new AdminGrievanceData("GR-1030", "16-Hour Double Shift Dispute", "B. Wilson (Worker #332 - Welder)", "Mumbai Coastal Road Sea Link", "Mumbai, Maharashtra", "Medium", "Investigating", "Overtime Dispute", "8 Hours Premium", "2 Days Ago", "Worker was required to perform back-to-back night shifts exceeding statutory safety limits.", "Site shift supervisor scheduled for hearing."),
-                new AdminGrievanceData("GR-1031", "PPE Helmet & Safety Shoes Not Provided", "C. Lee (Worker #309 - Labour)", "Ramoji Film City Mega Studio", "Hyderabad, Telangana", "High", "New", "Safety Violation", "PPE Non-Compliance", "5 Hours Ago", "Contractor failed to provide mandatory steel-toe safety footwear to newly onboarded foundation workers.", "Immediate kit delivery mandated by DIHADI audit."),
-                new AdminGrievanceData("GR-1032", "Contract Quota Breach", "D. Martin (Worker #432 - Painter)", "Hiranandani Business Towers", "Mumbai, Maharashtra", "Medium", "Investigating", "Contract Dispute", "Quota Violation", "2 Days Ago", "Contractor reduced guaranteed minimum working days from 24 to 12 days without prior agreement.", "Escrow quota compliance review underway."),
-                new AdminGrievanceData("GR-1033", "Severe Workplace Heat Hazard", "H. Clark (Worker #663 - Mason)", "Afcons Coastal Infrastructure", "Mumbai, Maharashtra", "Critical", "Investigating", "Workplace Hazard", "Medical Protocol", "1 Day Ago", "Site lacked potable drinking water coolers and shaded rest canopies during afternoon shift.", "Immediate hydration station installation ordered.")
-        ));
 
-        updateKpis();
-        applyFilters();
+        new Thread(() -> {
+            List<AdminGrievanceData> loaded = new ArrayList<>();
+            try {
+                List<com.dihadi.model.Grievance> dbList = new com.dihadi.controller.GrievanceController().getAllGrievances();
+                if (dbList != null && !dbList.isEmpty()) {
+                    for (com.dihadi.model.Grievance g : dbList) {
+                        String cid = val(g.getGrievanceId(), "GR-" + System.currentTimeMillis());
+                        String sub = val(g.getSubject(), "Inquiry / Grievance");
+                        String comp = val(g.getComplainant(), "Citizen User");
+                        String proj = val(g.getProject(), "Contact Us Portal");
+                        String loc = val(g.getLocation(), "Pune, Maharashtra");
+                        String prio = val(g.getPriority(), "High");
+                        String st = val(g.getStatus(), "New");
+                        String cat = val(g.getCategory(), "Online Inquiry");
+                        String amt = val(g.getDisputeAmount(), "General Inquiry");
+                        String time = val(g.getTimestamp(), "Recent");
+                        String desc = val(g.getIncidentDescription(), "Inquiry submitted via online contact form.");
+                        String res = val(g.getResolutionNotes(), "Pending administrative review.");
+
+                        loaded.add(new AdminGrievanceData(cid, sub, comp, proj, loc, prio, st, cat, amt, time, desc, res));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            loaded.addAll(List.of(
+                    new AdminGrievanceData("GR-1024", "Unpaid Overtime & Daily Wage Delay", "J. Doe (Worker #882 - Mason)", "Hiranandani Business Towers", "Mumbai, Maharashtra", "Critical", "Investigating", "Payment Delay", "₹14,500 Overdue", "2 Days Ago", "Worker reported that 14 days of overtime wage settlement is delayed by site contractor despite biometric log verification.", "Subcontractor requested bank statement reconciliations."),
+                    new AdminGrievanceData("GR-1025", "Inadequate High-Altitude Safety Harness", "M. Smith (Worker #910 - Fitter)", "LODHAA Grand Expressway", "Mumbai, Maharashtra", "High", "New", "Safety Breach", "Site Safety Audit", "4 Hours Ago", "Missing secondary safety lanyard cables on elevated bridge pillar casting scaffolding.", "Safety compliance team assigned to inspect scaffolding."),
+                    new AdminGrievanceData("GR-1026", "Damaged Heavy Crane Hoist Rigging", "R. Chen (Worker #112 - Crane Op)", "Pune Metro Rail Underground Depot", "Pune, Maharashtra", "Medium", "New", "Equipment Damage", "Machinery Audit", "1 Day Ago", "Worn cable sling rigging reported during heavy pre-cast girder lifting operations.", "Replacement rigging dispatched to Range Hills Depot site."),
+                    new AdminGrievanceData("GR-1027", "Daily Wage Discrepancy Against Work Slip", "L. Thompson (Worker #554 - Plumber)", "BASIL Tech Habitat Smart Park", "Bengaluru, Karnataka", "High", "Investigating", "Wage Mismatch", "₹4,200 Difference", "1 Day Ago", "Daily wage recorded at ₹850 instead of committed escrow rate of ₹1,050 for high-pressure valve assembly.", "Contractor payroll team reviewing task master voucher."),
+                    new AdminGrievanceData("GR-1028", "Wrongful Site Dismissal Without Notice", "K. Patel (Worker #229 - Mason)", "BHRAMHA Horizon Residential Complex", "Pune, Maharashtra", "Critical", "Escalated", "Unfair Dismissal", "Reinstatement Claim", "3 Days Ago", "Site supervisor summarily terminated worker without 48-hour notice required under DIHADI terms.", "Admin mediation initiated with BHRAMHA site leadership.")
+            ));
+
+            javafx.application.Platform.runLater(() -> {
+                allGrievancesList.clear();
+                allGrievancesList.addAll(loaded);
+                updateKpis();
+                applyFilters();
+            });
+        }).start();
     }
 
     private void updateKpis() {
@@ -574,6 +595,13 @@ public class AdminGrievancesPage {
 
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
+                new Thread(() -> {
+                    try {
+                        new com.dihadi.controller.GrievanceController().resolveGrievance(g.caseId(), "Resolved by System Administrator");
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }).start();
                 allGrievancesList.removeIf(item -> item.caseId().equals(g.caseId()));
                 updateKpis();
                 applyFilters();
@@ -584,6 +612,10 @@ public class AdminGrievancesPage {
                 alert.show();
             }
         });
+    }
+
+    private String val(String s, String def) {
+        return (s != null && !s.isBlank()) ? s : def;
     }
 
     private void closeModal() {
@@ -597,7 +629,7 @@ public class AdminGrievancesPage {
         clock = new Timeline(new KeyFrame(Duration.ZERO, e -> time.setText("System Time: " + ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).format(DateTimeFormatter.ofPattern("hh:mm:ss a 'IST'")))), new KeyFrame(Duration.seconds(1)));
         clock.setCycleCount(Timeline.INDEFINITE);
         clock.play();
-        HBox footer = new HBox(28, health("Dispute Gateway: OK"), health("Arbitration Matrix: Realtime"), health("Escrow Vault Lock: ACTIVE"), spacer(), time);
+        HBox footer = new HBox(28, health("Database: OK"), health("Dispute Center: OK"), health("Payments: OK"), spacer(), time);
         footer.setAlignment(Pos.CENTER_LEFT);
         footer.setPadding(new Insets(0, 28, 0, 28));
         footer.setPrefHeight(36);

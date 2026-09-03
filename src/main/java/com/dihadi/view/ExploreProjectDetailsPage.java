@@ -207,7 +207,7 @@ public class ExploreProjectDetailsPage {
     }
 
     private VBox heroProjectHeader() {
-        Label eyebrow = label("✦  VERIFIED ENTERPRISE PROJECT SITE",
+        Label eyebrow = label("VERIFIED ENTERPRISE PROJECT SITE",
                 "-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1.5px;");
 
         Label title = label(projectName,
@@ -215,16 +215,16 @@ public class ExploreProjectDetailsPage {
         title.setWrapText(true);
         title.setMaxWidth(1100);
 
-        Label locBadge = label("📍 " + location, "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#735c00;-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-padding:4px 12px;-fx-border-color:#d0c5af;-fx-border-radius:10px;");
-        Label devBadge = label("🏢 " + company + " (Verified Developer)", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#1565c0;-fx-background-color:#e3f2fd;-fx-background-radius:10px;-fx-padding:4px 12px;");
+        Label locBadge = label(location, "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#735c00;-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-padding:4px 12px;-fx-border-color:#d0c5af;-fx-border-radius:10px;");
+        Label devBadge = label(company + " (Verified Developer)", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#1565c0;-fx-background-color:#e3f2fd;-fx-background-radius:10px;-fx-padding:4px 12px;");
         
         boolean isUrgent = status != null && status.toLowerCase().contains("urgent");
-        Label statusBadge = label(isUrgent ? "🔥 URGENT HIRING" : "● ACTIVE PROJECT SITE",
+        Label statusBadge = label(isUrgent ? "URGENT HIRING" : "ACTIVE PROJECT SITE",
                 "-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:" + (isUrgent ? "#ffffff" : "#2e7d32") + ";"
                         + "-fx-background-color:" + (isUrgent ? "#c62828" : "#e8f5e9") + ";"
                         + "-fx-background-radius:10px;-fx-padding:4px 12px;");
 
-        Label sectorBadge = label("🏗 " + sector, "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#4c4637;-fx-background-color:#f4ede2;-fx-background-radius:10px;-fx-padding:4px 12px;");
+        Label sectorBadge = label(sector, "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#4c4637;-fx-background-color:#f4ede2;-fx-background-radius:10px;-fx-padding:4px 12px;");
 
         HBox badges = new HBox(12, locBadge, devBadge, statusBadge, sectorBadge);
         badges.setAlignment(Pos.CENTER_LEFT);
@@ -237,9 +237,9 @@ public class ExploreProjectDetailsPage {
     }
 
     private HBox metricsRow() {
-        HBox wageCard = highlightMetricCard("💰 Daily Wage Rate", wage, "Guaranteed Direct Escrow Protected", "#735c00", "rgba(115,92,0,0.06)");
-        HBox openingsCard = highlightMetricCard("👷 Openings / Workforce", workersNeeded, "Active Daily Requirement", "#1e1b15", "rgba(30,27,21,0.05)");
-        HBox tradeCard = highlightMetricCard("🛠 Primary Trade Skill", trade, "Certified Skill Requirement", "#1565c0", "rgba(21,101,192,0.06)");
+        HBox wageCard = highlightMetricCard("Daily Wage Rate", wage, "Guaranteed Direct Escrow Protected", "#735c00", "rgba(115,92,0,0.06)");
+        HBox openingsCard = highlightMetricCard("Openings / Workforce", workersNeeded, "Active Daily Requirement", "#1e1b15", "rgba(30,27,21,0.05)");
+        HBox tradeCard = highlightMetricCard("Primary Trade Skill", trade, "Certified Skill Requirement", "#1565c0", "rgba(21,101,192,0.06)");
 
         HBox row = new HBox(20, wageCard, openingsCard, tradeCard);
         row.setAlignment(Pos.CENTER);
@@ -250,7 +250,7 @@ public class ExploreProjectDetailsPage {
     private HBox highlightMetricCard(String title, String val, String sub, String valColor, String bg) {
         Label t = label(title, "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#685c52;");
         Label v = label(val, "-fx-font-family:'Georgia';-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:" + valColor + ";");
-        Label s = label("✓ " + sub, "-fx-font-size:11px;-fx-font-weight:600;-fx-text-fill:#2e7d32;");
+        Label s = label("Verified " + sub, "-fx-font-size:11px;-fx-font-weight:600;-fx-text-fill:#2e7d32;");
 
         VBox box = new VBox(6, t, v, s);
         box.setAlignment(Pos.CENTER_LEFT);
@@ -271,7 +271,7 @@ public class ExploreProjectDetailsPage {
         supervisorLabel = label(recruiterPhone != null && !recruiterPhone.isBlank() ? "Site Project Lead (PoC: " + recruiterPhone + ")" : "Project Supervisor (Verified PoC)", "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
 
         VBox specBox = new VBox(14,
-                sectionHeading("📋 Project Specifications"),
+                sectionHeading("Project Specifications"),
                 specItem("Project Title", projectName),
                 specItem("Developer / Enterprise", company),
                 specItem("Project Sector", sector),
@@ -287,7 +287,7 @@ public class ExploreProjectDetailsPage {
         landmarkLabel = label("Landmark: Arterial Infrastructure Corridor", "-fx-font-size:13px;-fx-font-weight:600;-fx-text-fill:#735c00;");
 
         VBox addressBox = new VBox(14,
-                sectionHeading("📍 Site Location & Access"),
+                sectionHeading("Site Location & Access"),
                 specItem("City & State", location),
                 specItemNode("Main Address", addressLine1Label),
                 specItemNode("Staging Area", addressLine2Label),
@@ -305,13 +305,13 @@ public class ExploreProjectDetailsPage {
         rightCol.setPrefWidth(570);
 
         VBox amenitiesBox = new VBox(14,
-                sectionHeading("🏢 Site Amenities & Facilities"),
-                facilityStatusCard("💧 Clean Drinking Water Facility", hasWater, "RO filtered drinking water stations across work areas."),
-                facilityStatusCard("⚡ 24x7 Electricity & Power", hasPower, "Dedicated generator power backup for power tools."),
-                facilityStatusCard("🏠 Worker Accommodation / Stay", hasStay, "On-site barracks or nearby authorized worker lodging."),
-                facilityStatusCard("🚌 Site Transportation", hasTransport, "Daily shuttle service from major transit junctions."),
-                facilityStatusCard("🛡 Mandatory Safety Gear (PPE)", true, "Helmets, safety vests, gloves & boots provided at check-in."),
-                facilityStatusCard("🍽 Canteen & Rest Zone", true, "Covered dining and shaded rest areas on site premises.")
+                sectionHeading("Site Amenities & Facilities"),
+                facilityStatusCard("Clean Drinking Water Facility", hasWater, "RO filtered drinking water stations across work areas."),
+                facilityStatusCard("24x7 Electricity & Power", hasPower, "Dedicated generator power backup for power tools."),
+                facilityStatusCard("Worker Accommodation / Stay", hasStay, "On-site barracks or nearby authorized worker lodging."),
+                facilityStatusCard("Site Transportation", hasTransport, "Daily shuttle service from major transit junctions."),
+                facilityStatusCard("Mandatory Safety Gear (PPE)", true, "Helmets, safety vests, gloves & boots provided at check-in."),
+                facilityStatusCard("Canteen & Rest Zone", true, "Covered dining and shaded rest areas on site premises.")
         );
         amenitiesBox.setPadding(new Insets(22));
         amenitiesBox.setStyle("-fx-background-color:#ffffff;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-width:1.5px;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),14,0,0,4px);");
@@ -331,7 +331,7 @@ public class ExploreProjectDetailsPage {
         imgFrame.setStyle("-fx-background-color:#161311;-fx-background-radius:20px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:20px;");
 
         VBox imgBox = new VBox(12,
-                sectionHeading("📸 Real Site Infrastructure Visual"),
+                sectionHeading("Site Infrastructure Visual"),
                 imgFrame
         );
         imgBox.setPadding(new Insets(22));

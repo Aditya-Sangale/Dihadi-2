@@ -428,19 +428,23 @@ public class ExploreProjectsPage {
                 Map<String, List<WorkforceRequirement>> reqMap = new HashMap<>();
                 if (allReqs != null) {
                     for (WorkforceRequirement r : allReqs) {
-                        if (r.getProjectId() != null) {
+                        if (r.getProjectId() != null && !r.getProjectId().isBlank()) {
                             reqMap.computeIfAbsent(r.getProjectId(), k -> new ArrayList<>()).add(r);
                         }
                     }
                 }
 
-                // Convert DB Projects into display cards
+                // Convert real created DB Projects into display cards
                 if (allDbProjects != null && !allDbProjects.isEmpty()) {
                     for (Project p : allDbProjects) {
                         List<WorkforceRequirement> pReqs = reqMap.get(p.getProjectId());
+                        if (pReqs == null && p.getMobile() != null) {
+                            pReqs = reqMap.get(p.getMobile());
+                        }
+
                         double wage = 850;
                         int workers = 25;
-                        String trade = "General Workforce";
+                        String trade = "General Labour";
                         boolean water = true, power = true, stay = false, transport = false;
                         String reqId = "";
 
@@ -448,7 +452,8 @@ public class ExploreProjectsPage {
                             WorkforceRequirement firstReq = pReqs.get(0);
                             wage = firstReq.getDailyWages() > 0 ? firstReq.getDailyWages() : 850;
                             workers = firstReq.getQuantity() > 0 ? firstReq.getQuantity() : 25;
-                            trade = firstReq.getWorkerType() != null ? firstReq.getWorkerType() : "General Labour";
+                            trade = (firstReq.getWorkerType() != null && !firstReq.getWorkerType().isBlank())
+                                    ? firstReq.getWorkerType() : "General Labour";
                             water = firstReq.isWaterFacility();
                             power = firstReq.isElectricityFacility();
                             stay = firstReq.isAccommodationFacility();
@@ -485,8 +490,10 @@ public class ExploreProjectsPage {
                 ex.printStackTrace();
             }
 
-            // Include curated top real benchmark landmark projects with distinct real images
-            list.addAll(getBenchmarkRealProjects());
+            // Only fallback to benchmark projects if zero real projects exist in the database
+            if (list.isEmpty()) {
+                list.addAll(getBenchmarkRealProjects());
+            }
 
             Platform.runLater(() -> {
                 loadedProjects.clear();
@@ -539,7 +546,7 @@ public class ExploreProjectsPage {
         if (filtered.isEmpty()) {
             VBox emptyBox = new VBox(12,
                     label("No matching project roles found for this filter selection.", "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#3a3027;"),
-                    label("Try clearing filters to view all active mega project opportunities.", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
+                    label("Try clearing filters to view all active project opportunities.", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
             emptyBox.setAlignment(Pos.CENTER);
             emptyBox.setPadding(new Insets(50));
             cardsContainer.getChildren().add(emptyBox);
@@ -551,13 +558,39 @@ public class ExploreProjectsPage {
         }
     }
 
-    /** Builds an effective, beautiful, and rich project card with complete real metrics and amenities. */
+    /** Builds an effective, beautiful, and rich project card with complete real metrics and site image. */
     private VBox renderRealProjectCard(ProjectCardModel p) {
-        // Location Badge & Status Pill
-        Label locLabel = label("📍 " + p.location(), "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#735c00;-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-padding:3px 10px;-fx-border-color:#e8ddcb;-fx-border-radius:10px;");
+        // Real Site Image Card Banner
+        ImageView siteImg = new ImageView();
+        Image img = load(p.imagePath());
+        if (img == null && p.imageUrls() != null && !p.imageUrls().isEmpty()) {
+            try {
+                img = new Image(p.imageUrls().get(0), 515, 175, false, true);
+            } catch (Exception ignored) {}
+        }
+        if (img == null) {
+            img = load("/assets/images/explore/explore_slide_1.jpg");
+        }
+        siteImg.setImage(img);
+        siteImg.setFitWidth(515);
+        siteImg.setFitHeight(175);
+        siteImg.setPreserveRatio(false);
+        siteImg.setSmooth(true);
+
+        Rectangle imgClip = new Rectangle(515, 175);
+        imgClip.setArcWidth(14);
+        imgClip.setArcHeight(14);
+        siteImg.setClip(imgClip);
+
+        StackPane imgWrapper = new StackPane(siteImg);
+        imgWrapper.setMaxSize(515, 175);
+        imgWrapper.setStyle("-fx-background-color: #1e1b15; -fx-background-radius: 14px;");
+
+        // Location Badge & Status Pill (Clean badges without emojis)
+        Label locLabel = label(p.location(), "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#735c00;-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-padding:3px 10px;-fx-border-color:#e8ddcb;-fx-border-radius:10px;");
 
         boolean isUrgent = p.status() != null && p.status().toLowerCase().contains("urgent");
-        Label statusBadge = label(isUrgent ? "🔥 URGENT HIRING" : "● ACTIVE SITE",
+        Label statusBadge = label(isUrgent ? "URGENT HIRING" : "ACTIVE SITE",
                 "-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:" + (isUrgent ? "#ffffff" : "#2e7d32") + ";"
                         + "-fx-background-color:" + (isUrgent ? "#c62828" : "#e8f5e9") + ";"
                         + "-fx-background-radius:10px;-fx-padding:4px 10px;");
@@ -572,22 +605,22 @@ public class ExploreProjectsPage {
         titleLabel.setWrapText(true);
         titleLabel.setMaxWidth(515);
 
-        Label companyLabel = label("🏢 " + p.company() + "  •  " + p.sector(), "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
+        Label companyLabel = label(p.company() + "  •  " + p.sector(), "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
 
         // Wage, Workforce Openings, and Trade Role Metrics Bar
-        HBox wagePill = statPill("💰 Rate", p.wage(), "#735c00", "rgba(115,92,0,0.08)");
-        HBox countPill = statPill("👷 Needed", p.workersNeeded(), "#1e1b15", "rgba(30,27,21,0.06)");
-        HBox tradePill = statPill("🛠 Trade", p.trade(), "#1565c0", "rgba(21,101,192,0.08)");
+        HBox wagePill = statPill("Rate", p.wage(), "#735c00", "rgba(115,92,0,0.08)");
+        HBox countPill = statPill("Openings", p.workersNeeded(), "#1e1b15", "rgba(30,27,21,0.06)");
+        HBox tradePill = statPill("Trade", p.trade(), "#1565c0", "rgba(21,101,192,0.08)");
         HBox statsRow = new HBox(10, wagePill, countPill, tradePill);
         statsRow.setAlignment(Pos.CENTER_LEFT);
 
         // Real Site Amenities & Facilities Row
         HBox facilitiesRow = new HBox(6);
         facilitiesRow.setAlignment(Pos.CENTER_LEFT);
-        if (p.hasWater()) facilitiesRow.getChildren().add(facilityTag("💧 Water"));
-        if (p.hasPower()) facilitiesRow.getChildren().add(facilityTag("⚡ Power"));
-        if (p.hasStay()) facilitiesRow.getChildren().add(facilityTag("🏠 Stay"));
-        if (p.hasTransport()) facilitiesRow.getChildren().add(facilityTag("🚌 Transport"));
+        if (p.hasWater()) facilitiesRow.getChildren().add(facilityTag("Water Facility"));
+        if (p.hasPower()) facilitiesRow.getChildren().add(facilityTag("Electricity"));
+        if (p.hasStay()) facilitiesRow.getChildren().add(facilityTag("Accommodation"));
+        if (p.hasTransport()) facilitiesRow.getChildren().add(facilityTag("Transportation"));
 
         // Bottom Action Bar
         Region btmSpacer = new Region();
@@ -631,11 +664,11 @@ public class ExploreProjectsPage {
         btmRow.setAlignment(Pos.CENTER_LEFT);
         btmRow.setPadding(new Insets(4, 0, 0, 0));
 
-        VBox card = new VBox(11, topRow, titleLabel, companyLabel, statsRow, btmRow);
+        VBox card = new VBox(11, imgWrapper, topRow, titleLabel, companyLabel, statsRow, btmRow);
         card.setPrefWidth(555);
         card.setMaxWidth(555);
         card.setMinWidth(555);
-        card.setPadding(new Insets(20, 22, 20, 22));
+        card.setPadding(new Insets(18, 20, 18, 20));
         card.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 18px; -fx-border-color: #d0c5af; -fx-border-width: 1.5px; -fx-border-radius: 18px; -fx-effect: dropshadow(gaussian, rgba(58,48,39,.08), 16, 0, 0, 4); -fx-cursor: hand;");
 
         card.setOnMouseEntered(e -> card.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 18px; -fx-border-color: #d4af37; -fx-border-width: 2px; -fx-border-radius: 18px; -fx-effect: dropshadow(gaussian, rgba(212,175,55,.30), 20, 0, 0, 6px); -fx-cursor: hand;"));

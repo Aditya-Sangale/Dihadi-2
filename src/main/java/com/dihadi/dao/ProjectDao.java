@@ -2,6 +2,8 @@ package com.dihadi.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.dihadi.config.FirebaseConfig;
 import com.dihadi.model.Project;
@@ -12,14 +14,21 @@ import com.google.cloud.firestore.QuerySnapshot;
 
 public class ProjectDao {
     private Firestore db = FirebaseConfig.getFirestore();
+    private static final Map<String, Project> LOCAL_PROJECT_MAP = new ConcurrentHashMap<>();
 
     public void saveProject(Project project) {
+        if (project == null) return;
         try {
             String docId = (project.getProjectId() != null && !project.getProjectId().isBlank())
                     ? project.getProjectId()
                     : (project.getMobile() != null && !project.getMobile().isBlank()
                             ? project.getMobile() + "_" + System.currentTimeMillis()
                             : String.valueOf(System.currentTimeMillis()));
+            if (project.getProjectId() == null || project.getProjectId().isBlank()) {
+                project.setProjectId(docId);
+            }
+            LOCAL_PROJECT_MAP.put(docId, project);
+
             db.collection("Projects")
                     .document(docId)
                     .set(project);
@@ -30,12 +39,21 @@ public class ProjectDao {
     }
 
     public Project getProject(String idOrMobile) {
+        if (idOrMobile == null) return null;
+        if (LOCAL_PROJECT_MAP.containsKey(idOrMobile)) {
+            return LOCAL_PROJECT_MAP.get(idOrMobile);
+        }
         try {
             ApiFuture<DocumentSnapshot> future = db.collection("Projects")
                     .document(idOrMobile).get();
             DocumentSnapshot document = future.get();
             if (document.exists()) {
-                return document.toObject(Project.class);
+                Project p = document.toObject(Project.class);
+                if (p != null) {
+                    if (p.getProjectId() == null || p.getProjectId().isBlank()) p.setProjectId(document.getId());
+                    LOCAL_PROJECT_MAP.put(p.getProjectId(), p);
+                    return p;
+                }
             }
             List<Project> all = getAllProjects();
             for (Project p : all) {
@@ -56,10 +74,22 @@ public class ProjectDao {
             QuerySnapshot snapshot = future.get();
             for (DocumentSnapshot doc : snapshot.getDocuments()) {
                 Project project = doc.toObject(Project.class);
-                list.add(project);
+                if (project != null) {
+                    if (project.getProjectId() == null || project.getProjectId().isBlank()) {
+                        project.setProjectId(doc.getId());
+                    }
+                    LOCAL_PROJECT_MAP.put(project.getProjectId(), project);
+                    list.add(project);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        for (Map.Entry<String, Project> entry : LOCAL_PROJECT_MAP.entrySet()) {
+            boolean exists = list.stream().anyMatch(p -> entry.getKey().equals(p.getProjectId()));
+            if (!exists) {
+                list.add(0, entry.getValue());
+            }
         }
         return list;
     }
@@ -67,6 +97,7 @@ public class ProjectDao {
     public boolean deleteProject(String projectId) {
         try {
             if (projectId == null || projectId.isBlank()) return false;
+            LOCAL_PROJECT_MAP.remove(projectId);
             db.collection("Projects").document(projectId).delete().get();
             ApiFuture<QuerySnapshot> future = db.collection("Projects").whereEqualTo("projectId", projectId).get();
             QuerySnapshot snapshot = future.get();

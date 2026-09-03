@@ -1,6 +1,5 @@
 package com.dihadi.view.admin;
 
-import com.dihadi.view.NotificationToast;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -65,7 +64,7 @@ public class AdminSignUpPage {
         Label tagline = text("Meri Dihadi ~ Mera Haq", "-fx-font-family:Georgia;-fx-font-size:18px;-fx-font-style:italic;-fx-text-fill:#685c52;");
         VBox branding = new VBox(5, logo, brand, tagline); branding.setAlignment(Pos.CENTER);
 
-        Label welcome = text("👋  Welcome to DIHADI", "-fx-font-family:Georgia;-fx-font-size:29px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
+        Label welcome = text("Welcome to DIHADI", "-fx-font-family:Georgia;-fx-font-size:29px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
         Label title = text("Sign In to Create an Admin Account", "-fx-font-size:19px;-fx-text-fill:#4c4637;");
         Label note = text("Remember to enter your DIHADI Admin Code to complete the sign-up process.", "-fx-font-size:15px;-fx-text-fill:#685c52;-fx-text-alignment:center;");
         note.setWrapText(true);
@@ -165,12 +164,10 @@ public class AdminSignUpPage {
 
         if (nameStr.isBlank() || officialEmailStr.isBlank() || passwordStr.isBlank()
                 || personalEmailStr.isBlank() || mobileStr.isBlank() || adminCodeStr.isBlank()) {
-            NotificationToast.show(submitBtn, "Incomplete Form ⚠️", "Please fill in every required field.", NotificationToast.ToastType.ALERT);
             info("Complete your details", "Please fill in every required field.");
             return;
         }
         if (!passwordStr.equals(confirmStr)) {
-            NotificationToast.show(submitBtn, "Password Mismatch ⚠️", "Re-enter the same password in both fields.", NotificationToast.ToastType.ERROR);
             info("Passwords do not match", "Re-enter the same password in both password fields.");
             return;
         }
@@ -187,12 +184,10 @@ public class AdminSignUpPage {
                 submitBtn.setDisable(false);
                 submitBtn.setText("CREATE ADMIN ACCOUNT");
                 if (success) {
-                    NotificationToast.show(submitBtn, "Account Created! 🎉", "Admin registered successfully! Redirecting to login...", NotificationToast.ToastType.SUCCESS);
                     info("Admin account created", "Your DIHADI admin account has been registered successfully. Please login to proceed.");
                     Stage stage = (Stage) submitBtn.getScene().getWindow();
                     stage.setScene(new AdminLoginPage().getAdminLoginScene(backAction));
                 } else {
-                    NotificationToast.show(submitBtn, "Registration Failed ⚠️", "Unable to create admin account. Please try again.", NotificationToast.ToastType.ERROR);
                     info("Registration failed", "Unable to save admin record to Firebase. Please check your network connection.");
                 }
             });
