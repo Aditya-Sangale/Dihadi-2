@@ -17,14 +17,21 @@ import javafx.stage.Stage;
 /** Compact profile card shown when a recruiter selects a worker. */
 public class RecruiterWorkerProfilePage {
     private final String name, category, demographic, location, wage, photo, workerMobile;
+    private final Runnable onWorkerHired;
 
     public RecruiterWorkerProfilePage(String name, String category, String demographic, String location, String wage,
             String photo) {
-        this(name, category, demographic, location, wage, photo, "");
+        this(name, category, demographic, location, wage, photo, "", null);
     }
 
     public RecruiterWorkerProfilePage(String name, String category, String demographic, String location, String wage,
             String photo, String workerMobile) {
+        this(name, category, demographic, location, wage, photo, workerMobile, null);
+    }
+
+    /** Optional callback lets a source result card reflect a completed hire immediately. */
+    public RecruiterWorkerProfilePage(String name, String category, String demographic, String location, String wage,
+            String photo, String workerMobile, Runnable onWorkerHired) {
         this.name = name;
         this.category = category;
         this.demographic = demographic;
@@ -32,6 +39,19 @@ public class RecruiterWorkerProfilePage {
         this.wage = wage;
         this.photo = photo;
         this.workerMobile = workerMobile;
+        this.onWorkerHired = onWorkerHired;
+    }
+
+    /** Updates the originating recruiter-result card after a hire is confirmed. */
+    public static void markResultCardHired(VBox card) {
+        if (card.getChildren().size() < 3 || !(card.getChildren().get(2) instanceof HBox actions)
+                || actions.getChildren().size() < 3 || !(actions.getChildren().get(2) instanceof Button hire)) {
+            return;
+        }
+        hire.setText("WORKER HIRED ✓");
+        hire.setDisable(true);
+        hire.setStyle(
+                "-fx-background-color:#e8f3e7;-fx-background-radius:18px;-fx-border-color:#477044;-fx-border-radius:18px;-fx-text-fill:#477044;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;");
     }
 
     public Scene getProfileScene(Runnable back, javafx.scene.Scene currentScene) {
@@ -70,6 +90,9 @@ public class RecruiterWorkerProfilePage {
         hire.setOnAction(e -> {
             hire.setText("HIRING REQUEST SENT ✓");
             hire.setDisable(true);
+            if (onWorkerHired != null) {
+                onWorkerHired.run();
+            }
             new Thread(() -> {
                 try {
                     String recruiterMobile = (com.dihadi.view.SessionManager.currentRecruiter != null && com.dihadi.view.SessionManager.currentRecruiter.getMobileNumber() != null)
@@ -120,12 +143,6 @@ public class RecruiterWorkerProfilePage {
                             category + " Deployment"
                     );
                     System.out.println("Hiring request sent successfully to worker: " + targetMobile);
-                    final String finalTargetMob = targetMobile;
-                    javafx.application.Platform.runLater(() -> {
-                        com.dihadi.view.NotificationToast.show(hire, "Hiring Offer Dispatched! 📋",
-                                "Direct hiring offer for " + category + " sent to " + name + " (" + finalTargetMob + ").",
-                                com.dihadi.view.NotificationToast.ToastType.ACTION);
-                    });
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

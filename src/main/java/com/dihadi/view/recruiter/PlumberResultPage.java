@@ -19,6 +19,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 /** Recruiter marketplace screen for hiring verified plumbers. */
@@ -72,26 +73,30 @@ public class PlumberResultPage {
     }
 
     private HBox hero() {
-        ImageView image = img("/assets/images/plumber.jpeg", 555, 335);
-        image.setPreserveRatio(false);
+        // The source photograph is 16:9, so retain that ratio instead of stretching it.
+        ImageView image = img("/assets/images/plumber.jpeg", 480, 268);
+        image.setPreserveRatio(true);
+        Rectangle imageClip = new Rectangle(480, 268);
+        imageClip.setArcWidth(20);
+        imageClip.setArcHeight(20);
         StackPane photo = new StackPane(image);
-        photo.setPrefSize(555, 335);
-        photo.setStyle(
-                "-fx-background-radius:14px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.13),15,0,0,3px);");
+        photo.setPrefSize(480, 268);
+        photo.setMinSize(480, 268);
+        photo.setMaxSize(480, 268);
+        photo.setClip(imageClip);
+        photo.setStyle("-fx-background-radius:10px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.14),12,.18,0,3px);");
         Label quote = l(
                 "\"Ensuring flawless flow and lasting infrastructure. Hire verified, skilled plumbers who bring expertise, reliability, and precision to your plumbing and sanitation projects.\"",
-                "-fx-font-family:'Georgia';-fx-font-size:21px;-fx-font-style:italic;-fx-text-fill:" + MUTED
-                        + ";-fx-line-spacing:4px;");
+                "-fx-font-family:'Georgia',serif;-fx-font-size:24px;-fx-font-weight:700;-fx-text-fill:#272119;-fx-line-spacing:4px;");
         quote.setWrapText(true);
-        quote.setMaxWidth(490);
-        VBox copy = new VBox(quote);
-        copy.setAlignment(Pos.CENTER_LEFT);
-        copy.setPadding(new Insets(22, 20, 22, 27));
-        copy.setPrefWidth(565);
-        copy.setStyle("-fx-border-color:#d4af37;-fx-border-width:0 0 0 7px;");
-        HBox row = new HBox(44, photo, copy);
-        row.setAlignment(Pos.CENTER_LEFT);
-        return row;
+        quote.setPrefWidth(510);
+        quote.setMaxWidth(510);
+        HBox box = new HBox(82, photo, quote);
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setPadding(new Insets(32));
+        box.setStyle(
+                "-fx-background-color:#f4ede2;-fx-background-radius:12px;-fx-border-color:#d0c5af;-fx-border-radius:12px;");
+        return box;
     }
 
     private HBox filters() {
@@ -183,19 +188,23 @@ public class PlumberResultPage {
     }
 
     private VBox card(WorkerCardData p) {
-        ImageView portrait = img(p.photo, 64, 64);
+        ImageView portrait = img(p.photo, 52, 52);
         portrait.setPreserveRatio(false);
-        portrait.setClip(new Circle(32, 32, 32));
+        portrait.setClip(new Circle(26, 26, 26));
         StackPane avatar = new StackPane(portrait);
         avatar.setPrefSize(64, 64);
+        avatar.setMinSize(64, 64);
+        avatar.setMaxSize(64, 64);
         avatar.setStyle(
-                "-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-background-radius:999px;");
+                "-fx-background-color:#ffffff;-fx-background-radius:999px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-padding:4px;");
         Label name = l(p.name, "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
         Label age = l(p.age, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
         Label skill = l(p.skill,
                 "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#b48700;-fx-background-color:#f4ede2;-fx-background-radius:5px;-fx-padding:4px 7px;");
-        Label location = l("⌖  " + p.location, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
-        VBox details = new VBox(4, name, age, skill, location);
+        Label location = l("•  Based in " + p.location, "-fx-font-size:11px;-fx-text-fill:" + MUTED + ";");
+        Label availability = l("•  Available for new projects",
+                "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#477044;");
+        VBox details = new VBox(4, name, age, skill, location, availability);
         HBox top = new HBox(14, avatar, details);
         top.setAlignment(Pos.TOP_LEFT);
         Region divider = new Region();
@@ -208,25 +217,31 @@ public class PlumberResultPage {
         Button hire = new Button("HIRE NOW");
         hire.setStyle(
                 "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-radius:18px;-fx-text-fill:#b48700;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;");
-        hire.setOnAction(e -> AppNavigator.information("Hire " + p.name,
-                "Your hiring request for " + p.name + " has been initiated. We will connect you shortly."));
         Region gap = new Region();
         HBox.setHgrow(gap, Priority.ALWAYS);
         HBox bottom = new HBox(wage, gap, hire);
         bottom.setAlignment(Pos.CENTER_LEFT);
         VBox card = new VBox(16, top, divider, bottom);
-        card.setPrefSize(360, 194);
+        card.setPrefSize(360, 220);
         card.setPadding(new Insets(20));
         card.setStyle(cardStyle(false));
         card.setOnMouseEntered(e -> card.setStyle(cardStyle(true)));
         card.setOnMouseExited(e -> card.setStyle(cardStyle(false)));
-        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); javafx.scene.Scene currentScene = card.getScene(); stage.setScene(new RecruiterWorkerProfilePage(p.name, "Plumber", p.age, p.location, p.wage, p.photo).getProfileScene(() -> stage.setScene(currentScene), currentScene)); });
+        hire.setOnAction(e -> openPlumberProfile(card, p));
+        card.setOnMouseClicked(e -> openPlumberProfile(card, p));
         return card;
+    }
+
+    private void openPlumberProfile(VBox card, WorkerCardData plumber) {
+        Stage stage = (Stage) card.getScene().getWindow();
+        Scene currentScene = card.getScene();
+        stage.setScene(new RecruiterWorkerProfilePage(plumber.name, "Plumber", plumber.age, plumber.location,
+                plumber.wage, plumber.photo, "", () -> RecruiterWorkerProfilePage.markResultCardHired(card)).getProfileScene(() -> stage.setScene(currentScene), currentScene));
     }
 
     private String cardStyle(boolean active) {
         return "-fx-background-color:#ffffff;-fx-background-radius:15px;-fx-border-color:"
-                + (active ? "#d4af37" : "transparent") + ";-fx-border-width:" + (active ? "2px" : "1px")
+                + (active ? "#d4af37" : "#e9e2d7") + ";-fx-border-width:" + (active ? "2px" : "1px")
                 + ";-fx-border-radius:15px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(58,48,39,"
                 + (active ? ".13" : ".08") + ")," + (active ? "18" : "11") + ",0,0," + (active ? "4" : "2") + "px);";
     }

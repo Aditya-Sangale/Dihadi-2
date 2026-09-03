@@ -23,6 +23,7 @@ import javafx.stage.Stage;
 
 /** Painter work-skills selection screen with unified DIHADI category styling. */
 public class PainterPage {
+    private static final String PAPER = "#f7ebd2";
     private static final String[] NAMES = {
             "Enamel Painting", "Roller Painting", "POP Work", "Wall Putty",
             "Stencil Work", "Texture Painting", "Waterproofing", "Wood Polish"
@@ -46,42 +47,57 @@ public class PainterPage {
         StackPane scrollContent = new StackPane(content);
         scrollContent.setAlignment(Pos.TOP_CENTER);
         scrollContent.setPadding(new Insets(24, 24, 118, 24));
+        scrollContent.setStyle("-fx-background-color:" + PAPER + ";");
 
         ScrollPane scroll = new ScrollPane(scrollContent);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scroll.setStyle("-fx-background-color:transparent;-fx-border-width:0;");
+        scroll.setStyle("-fx-background:transparent;-fx-background-color:" + PAPER + ";-fx-border-width:0;");
 
         BorderPane page = new BorderPane(scroll);
         page.setTop(header(back, home, about));
         page.setBottom(actionBar(back));
-        page.setStyle("-fx-background-color:#f3e7ce;");
+        page.setStyle("-fx-background-color:" + PAPER + ";");
 
         StackPane root = new StackPane(page);
         root.setPadding(new Insets(24));
-        root.setStyle("-fx-background-color:#f3e7ce;");
+        root.setStyle("-fx-background-color:" + PAPER + ";");
         return new Scene(root, 1400, 780);
     }
 
     private HBox hero() {
         Label quote = label(
-                "\"Colour brings spaces to life—\nevery careful stroke reflects craft and care.\"",
-                "-fx-font-family:'Georgia';-fx-font-size:21px;-fx-font-style:italic;-fx-text-fill:#4d4635;-fx-line-spacing:6px;");
+                "\"Colour brings spaces to life—every careful stroke reflects craft and care. Professional painters combine precise preparation, lasting finishes, and thoughtful detail to transform every space.\"",
+                "-fx-font-family:'Georgia',serif;-fx-font-size:25px;-fx-font-weight:700;-fx-text-fill:#272119;-fx-line-spacing:4px;");
+        quote.setWrapText(true);
+        quote.setPrefWidth(548);
+        quote.setMaxWidth(548);
         VBox words = new VBox(quote);
         words.setAlignment(Pos.CENTER_LEFT);
-        words.setPrefSize(590, 310);
-        words.setPadding(new Insets(24, 30, 24, 30));
-        words.setStyle("-fx-border-color:#d4af37;-fx-border-width:0 0 0 4px;");
+        words.setPrefSize(548, 362);
 
-        ImageView photo = image("/assets/images/worker/painter/skill-00.jpg", 500, 310);
-        round(photo, 500, 310, 24);
+        ImageView photo = image("/assets/images/worker/painter/skill-00.jpg", 540, 362);
+        photo.setPreserveRatio(true);
+        // Fill the wide hero frame and center-crop the square source image vertically.
+        photo.setFitWidth(540);
+        photo.setFitHeight(0);
+        Rectangle imageClip = new Rectangle(540, 362);
+        imageClip.setArcWidth(36);
+        imageClip.setArcHeight(36);
         StackPane photoFrame = new StackPane(photo);
-        photoFrame.setStyle("-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),20,0,0,6px);");
+        photoFrame.setPrefSize(540, 362);
+        photoFrame.setMinSize(540, 362);
+        photoFrame.setMaxSize(540, 362);
+        photoFrame.setClip(imageClip);
+        photoFrame.setStyle("-fx-effect:dropshadow(gaussian,rgba(58,48,39,.12),16,.16,0,3px);");
 
-        HBox hero = new HBox(42, words, photoFrame);
+        HBox hero = new HBox(72, photoFrame, words);
         hero.setPrefWidth(1260);
         hero.setMaxWidth(1260);
-        hero.setAlignment(Pos.CENTER);
+        hero.setMinHeight(442);
+        hero.setAlignment(Pos.CENTER_LEFT);
+        hero.setPadding(new Insets(40));
+        hero.setStyle("-fx-background-color:#f8f3eb;-fx-background-radius:15px;-fx-border-color:#d0c5af;-fx-border-radius:15px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.05),10,0,0,2px);");
         return hero;
     }
 
@@ -193,7 +209,7 @@ public class PainterPage {
         bar.setCenter(navigation);
         bar.setRight(account);
         bar.setPadding(new Insets(16, 24, 14, 24));
-        bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
+        bar.setStyle("-fx-background-color:" + PAPER + ";-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),10,.28,0,1.5px);");
         return bar;
     }
 
@@ -214,7 +230,7 @@ public class PainterPage {
         HBox bar = new HBox(previous, gap, next);
         bar.setAlignment(Pos.CENTER);
         bar.setPadding(new Insets(16, 70, 16, 70));
-        bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
+        bar.setStyle("-fx-background-color:" + PAPER + ";-fx-border-color:#d0c5af;-fx-border-width:1px 0 0 0;");
         return bar;
     }
 
