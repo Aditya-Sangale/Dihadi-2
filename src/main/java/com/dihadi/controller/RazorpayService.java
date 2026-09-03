@@ -26,18 +26,47 @@ public class RazorpayService {
         }
     }
 
+    public String getKeyId() {
+        return KEY_ID;
+    }
+
+    public String getKeySecret() {
+        return KEY_SECRET;
+    }
+
     /**
      * Creates an order with Razorpay in INR subunits (Paise).
      */
     public String createOrder(double amountInINR, String receiptId) throws RazorpayException {
-        JSONObject orderRequest = new JSONObject();
-        orderRequest.put("amount", (int) (amountInINR * 100)); // convert INR to paise
-        orderRequest.put("currency", "INR");
-        orderRequest.put("receipt", receiptId);
-        orderRequest.put("payment_capture", 1);
+        return createWagePaymentOrder(amountInINR, receiptId, "Wallet Topup");
+    }
 
-        Order order = client.orders.create(orderRequest);
+    /**
+     * Creates an official Razorpay Order for the wage amount.
+     */
+    public String createWagePaymentOrder(double amountInInr, String receiptId, String notes) throws RazorpayException {
+        JSONObject orderReq = new JSONObject();
+        // Razorpay accepts amount in sub-units (paise): 1 INR = 100 paise
+        orderReq.put("amount", Math.round(amountInInr * 100));
+        orderReq.put("currency", "INR");
+        orderReq.put("receipt", receiptId);
+        orderReq.put("payment_capture", 1);
+
+        if (notes != null && !notes.isBlank()) {
+            JSONObject notesObj = new JSONObject();
+            notesObj.put("purpose", notes);
+            orderReq.put("notes", notesObj);
+        }
+
+        Order order = client.orders.create(orderReq);
         return order.get("id").toString();
+    }
+
+    /**
+     * Cryptographically verifies the payment signature returned by the gateway.
+     */
+    public boolean verifyPaymentSignature(String orderId, String paymentId, String signature) {
+        return verifySignature(orderId, paymentId, signature);
     }
 
     /**

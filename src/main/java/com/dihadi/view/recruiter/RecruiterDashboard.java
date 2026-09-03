@@ -13,6 +13,7 @@ import com.dihadi.controller.RazorpayService;
 import com.dihadi.controller.RecruiterController;
 import com.dihadi.model.JobApplication;
 import com.dihadi.model.Notification;
+import com.dihadi.view.NotificationToast;
 import com.dihadi.model.Project;
 import com.dihadi.model.Recruiter;
 import com.dihadi.view.PaymentGateway.PaymentCheckoutScene;
@@ -137,6 +138,8 @@ public class RecruiterDashboard {
         logoutBtn.setStyle("-fx-background-color:#fff1f1;-fx-background-radius:16px;-fx-border-color:#f1bcbc;-fx-border-radius:16px;-fx-text-fill:#a51d1d;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:0 20px;-fx-cursor:hand;");
         logoutBtn.setOnAction(e -> {
             if (livePoller != null) livePoller.stop();
+            SessionManager.clearAllSessions();
+            NotificationToast.show("Signed Out", "You have signed out of your recruiter session.", NotificationToast.ToastType.INFO);
             back.run();
         });
 
@@ -221,12 +224,22 @@ public class RecruiterDashboard {
         workersMetricLabel = label("0", "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
         workersMetricSub = label("Workers on active project", "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#685c52;");
         VBox workersMetric = kpiCard("ASSIGNED WORKERS", workersMetricLabel, workersMetricSub);
+        workersMetric.setOnMouseClicked(e -> {
+            if (livePoller != null) livePoller.stop();
+            Stage stage = (Stage) workersMetric.getScene().getWindow();
+            stage.setScene(new AttendancePage(currentR).getScene(() -> stage.setScene(getScene(back))));
+        });
 
         projectsMetricLabel = label("0", "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:#1565c0;");
         VBox projectsMetric = kpiCard("TOTAL PROJECTS", projectsMetricLabel, label("Created projects", "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#1565c0;"));
 
         reqCountLabel = label("0", "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:#ba1a1a;");
         VBox approvalsMetric = kpiCard("PENDING APPROVALS", reqCountLabel, label("Worker applications", "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#ba1a1a;"));
+        approvalsMetric.setOnMouseClicked(e -> {
+            if (livePoller != null) livePoller.stop();
+            Stage stage = (Stage) approvalsMetric.getScene().getWindow();
+            stage.setScene(new PendingApprovalsPage(currentR).getScene(() -> stage.setScene(getScene(back))));
+        });
 
         HBox metricsRow = new HBox(18, walletMetric, workersMetric, projectsMetric, approvalsMetric);
         for (Node n : metricsRow.getChildren()) HBox.setHgrow(n, Priority.ALWAYS);
@@ -653,13 +666,10 @@ public class RecruiterDashboard {
     }
 
     private void displayAlert(Alert.AlertType type, String title, String message) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(type);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-            alert.showAndWait();
-        });
+        NotificationToast.ToastType toastType = NotificationToast.ToastType.INFO;
+        if (type == Alert.AlertType.ERROR) toastType = NotificationToast.ToastType.ERROR;
+        else if (type == Alert.AlertType.WARNING) toastType = NotificationToast.ToastType.ALERT;
+        NotificationToast.show(title, message, toastType);
     }
 
     private VBox executivePanel(String heading, Node... nodes) {

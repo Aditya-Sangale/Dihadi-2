@@ -92,7 +92,11 @@ public class AdminSignUpPage {
         submit.setOnAction(event -> register(submit, backAction));
 
         Button login = new Button("Already have an admin account? Login");
-        login.setOnAction(event -> { Stage stage = (Stage) login.getScene().getWindow(); stage.setScene(new AdminLoginPage().getAdminLoginScene(backAction)); });
+        login.setOnAction(event -> {
+            if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.ADMIN)) return;
+            Stage stage = (Stage) login.getScene().getWindow();
+            stage.setScene(new AdminLoginPage().getAdminLoginScene(backAction));
+        });
         login.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:700;-fx-cursor:hand;");
         VBox actions = new VBox(13, submit, login); actions.setAlignment(Pos.CENTER);
         actions.setPadding(new Insets(24, 0, 0, 0));
@@ -154,6 +158,9 @@ public class AdminSignUpPage {
     }
 
     private void register(Button submitBtn, Runnable backAction) {
+        if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.ADMIN)) {
+            return;
+        }
         String nameStr = name.getText().trim();
         String personalEmailStr = personalEmail.getText().trim();
         String officialEmailStr = officialEmail.getText().trim();
@@ -184,8 +191,11 @@ public class AdminSignUpPage {
                 submitBtn.setDisable(false);
                 submitBtn.setText("CREATE ADMIN ACCOUNT");
                 if (success) {
-                    info("Admin account created", "Your DIHADI admin account has been registered successfully. Please login to proceed.");
+                    com.dihadi.view.SessionManager.clearAllSessions();
                     Stage stage = (Stage) submitBtn.getScene().getWindow();
+                    com.dihadi.view.NotificationToast.show(stage, "Admin Account Created",
+                            "Your DIHADI admin account has been registered successfully. Please login to proceed.",
+                            com.dihadi.view.NotificationToast.ToastType.SUCCESS);
                     stage.setScene(new AdminLoginPage().getAdminLoginScene(backAction));
                 } else {
                     info("Registration failed", "Unable to save admin record to Firebase. Please check your network connection.");
@@ -203,5 +213,5 @@ public class AdminSignUpPage {
     private ImageView image(String path, double width, double height) { ImageView image = new ImageView(new Image(getClass().getResource(path).toExternalForm())); image.setFitWidth(width); image.setFitHeight(height); image.setPreserveRatio(true); image.setSmooth(true); return image; }
     private Label text(String value, String style) { Label label = new Label(value); label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style); return label; }
     private static String inputStyle() { return "-fx-background-color:#f4ede2;-fx-background-radius:10px;-fx-border-color:transparent;-fx-font-size:15px;-fx-padding:12px 14px;-fx-pref-height:48px;"; }
-    private void info(String title, String message) { Alert alert = new Alert(Alert.AlertType.INFORMATION); alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(message); alert.show(); }
+    private void info(String title, String message) { com.dihadi.view.NotificationToast.show(title, message, com.dihadi.view.NotificationToast.ToastType.INFO); }
 }

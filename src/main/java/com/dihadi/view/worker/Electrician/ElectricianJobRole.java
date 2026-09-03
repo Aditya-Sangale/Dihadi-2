@@ -32,12 +32,12 @@ public class ElectricianJobRole {
             "/assets/images/worker/electrician/skill-02.jpg", "/assets/images/worker/electrician/skill-04.jpg",
             "/assets/images/worker/electrician/skill-06.jpg" };
     private static final String[][] JOBS = {
-            {"Lodha Park Electrification", "Pune, Maharashtra", "₹1,000", "01", null, null, null, "Residential Electrician"},
-            {"World Trade Center High Voltage", "Mumbai, Maharashtra", "₹1,200", "02", null, null, null, "Commercial Electrician"},
-            {"MIDC Plant Power Grid", "Nashik, Maharashtra", "₹1,150", "03", null, null, null, "Industrial Electrician"},
-            {"Infosys Campus Substation", "Bangalore, Karnataka", "₹1,100", "04", null, null, null, "Maintenance Electrician"},
-            {"Delhi Airport Terminal Grid", "New Delhi, Delhi", "₹1,300", "05", null, null, null, "Installation Electrician"},
-            {"Marina Metro Electrification", "Chennai, Tamil Nadu", "₹1,050", "06", null, null, null, "Construction Electrician"}
+            {"Lodha Park Electrification", "Pune, Maharashtra", "₹1,000", "01", "CURATED_EL_01", null, null, "Residential Electrician"},
+            {"World Trade Center High Voltage", "Mumbai, Maharashtra", "₹1,200", "02", "CURATED_EL_02", null, null, "Commercial Electrician"},
+            {"MIDC Plant Power Grid", "Nashik, Maharashtra", "₹1,150", "03", "CURATED_EL_03", null, null, "Industrial Electrician"},
+            {"Infosys Campus Substation", "Bangalore, Karnataka", "₹1,100", "04", "CURATED_EL_04", null, null, "Maintenance Electrician"},
+            {"Delhi Airport Terminal Grid", "New Delhi, Delhi", "₹1,300", "05", "CURATED_EL_05", null, null, "Installation Electrician"},
+            {"Marina Metro Electrification", "Chennai, Tamil Nadu", "₹1,050", "06", "CURATED_EL_06", null, null, "Construction Electrician"}
     };
     private final FlowPane jobs = new FlowPane(24, 24);
     private ImageView heroImage;
@@ -242,23 +242,34 @@ public class ElectricianJobRole {
             if (com.dihadi.view.SessionManager.currentWorker != null) {
                 new Thread(() -> {
                     try {
-                        java.util.List<com.dihadi.model.JobApplication> apps = new com.dihadi.controller.JobApplicationController().getApplicationsByWorker(com.dihadi.view.SessionManager.currentWorker.getMobileNumber());
-                        boolean hasApplied = false;
-                        for (com.dihadi.model.JobApplication app : apps) {
-                            if ((app.getJobTitle() != null && app.getJobTitle().equalsIgnoreCase(roleTitle)) || (j[4] != null && j[4].equals(app.getProjectId()))) {
-                                hasApplied = true;
-                                break;
-                            }
-                        }
+                        boolean hasApplied = new com.dihadi.controller.JobApplicationController().hasWorkerApplied(
+                                com.dihadi.view.SessionManager.currentWorker.getMobileNumber(),
+                                j[4],
+                                j.length > 6 ? j[6] : null,
+                                roleTitle,
+                                j[1]
+                        );
                         if (hasApplied) {
                             javafx.application.Platform.runLater(() -> {
                                 apply.setText("Already applied ✓");
                                 apply.setStyle("-fx-background-color:#2a7e3b;-fx-background-radius:12px;-fx-text-fill:#ffffff;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;");
                                 apply.setDisable(true);
                             });
+                        } else {
+                            javafx.application.Platform.runLater(() -> {
+                                apply.setText("Apply now");
+                                apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                                apply.setDisable(false);
+                            });
                         }
                     } catch (Exception ignored) {}
                 }).start();
+            } else {
+                javafx.application.Platform.runLater(() -> {
+                    apply.setText("Apply now");
+                    apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                    apply.setDisable(false);
+                });
             }
         };
         checkAppliedStatus.run();

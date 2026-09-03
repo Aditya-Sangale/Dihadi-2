@@ -13,6 +13,7 @@ import com.dihadi.model.Grievance;
 import com.dihadi.model.Project;
 import com.dihadi.model.Recruiter;
 import com.dihadi.model.Worker;
+import com.dihadi.view.NotificationToast;
 import com.dihadi.view.SessionManager;
 
 import javafx.animation.KeyFrame;
@@ -155,6 +156,9 @@ public class AdminDashboard {
             stopTimers();
             Stage stage = (Stage) backToAdmin.getScene().getWindow();
             stage.setScene(new AdminHomePage().getAdminHomeScene(() -> stage.setScene(getDashboardScene(logout))));
+            SessionManager.clearAllSessions();
+            NotificationToast.show("Signed Out", "You have signed out of your administrator session.", NotificationToast.ToastType.INFO);
+            logout.run();
         });
         Button signOut = new Button("Sign Out");
         signOut.setStyle("-fx-background-color:#3a3027;-fx-background-radius:16px;-fx-border-color:#ffffff26;-fx-border-radius:16px;-fx-text-fill:#f8f0e2;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:12px 15px;-fx-cursor:hand;");
@@ -185,7 +189,18 @@ public class AdminDashboard {
         Label sep = label("   >   ", "-fx-font-size:15px;-fx-text-fill:#8c7b6d;");
         Label dashLbl = label("Dashboard", "-fx-font-size:15px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
 
-        HBox breadcrumb = new HBox(12, nameLbl, sep, dashLbl);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Button signOutBtn = new Button("Sign Out");
+        signOutBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:20px;-fx-border-color:#ffcdd2;-fx-border-radius:20px;-fx-text-fill:#ba1a1a;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;");
+        signOutBtn.setOnAction(e -> {
+            stopTimers();
+            SessionManager.clearAllSessions();
+            NotificationToast.show("Signed Out", "You have signed out of your administrator session.", NotificationToast.ToastType.INFO);
+            if (logout != null) logout.run();
+        });
+
+        HBox breadcrumb = new HBox(12, nameLbl, sep, dashLbl, spacer, signOutBtn);
         breadcrumb.setAlignment(Pos.CENTER_LEFT);
         breadcrumb.setPadding(new Insets(0, 40, 0, 40));
         breadcrumb.setPrefHeight(75);

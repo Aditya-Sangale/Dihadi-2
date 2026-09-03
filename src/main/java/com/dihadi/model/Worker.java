@@ -19,6 +19,8 @@ public class Worker {
     private String city;
     private String state;
     private String password;
+    private double walletBalance;
+    private int totalDaysWorked;
 
     public Worker() {
     }
@@ -204,5 +206,49 @@ public class Worker {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public double getWalletBalance() {
+        return walletBalance;
+    }
+
+    public void setWalletBalance(double walletBalance) {
+        this.walletBalance = walletBalance;
+    }
+
+    public int getTotalDaysWorked() {
+        return totalDaysWorked;
+    }
+
+    public void setTotalDaysWorked(int totalDaysWorked) {
+        this.totalDaysWorked = totalDaysWorked;
+    }
+
+    public String getId() {
+        if (uid != null && !uid.isBlank()) return uid;
+        if (mobileNumber != null && !mobileNumber.isBlank()) return mobileNumber;
+        return "";
+    }
+
+    public void setId(String id) {
+        this.uid = id;
+    }
+
+    public String getName() {
+        String fn = firstName != null ? firstName.trim() : "";
+        String mn = middleName != null ? middleName.trim() : "";
+        String ln = lastName != null ? lastName.trim() : "";
+        String full = (fn + (mn.isEmpty() ? "" : " " + mn) + (ln.isEmpty() ? "" : " " + ln)).trim();
+        return !full.isEmpty() ? full : "Worker";
+    }
+
+    public String getPhone() {
+        return mobileNumber != null ? mobileNumber : "";
+    }
+
+    public String getSkill() {
+        if (workerType != null && !workerType.isBlank()) return workerType;
+        if (subSkill != null && !subSkill.isBlank()) return subSkill;
+        return "General Worker";
     }
 }

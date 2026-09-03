@@ -61,14 +61,16 @@ public class ExploreProjectsPage {
     };
 
     private static final String[] HERO_SLIDER_IMAGES = {
-            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_crane_operator_inside_a_high_tech_cabin_overlooking_a_large_bridge/screen.png",
-            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_site_supervisor_in_a_reflective_jacket_and_helmet_with_dihadi/screen.png",
-            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_high_quality_photograph_of_a_professional_indian_construction_mason/screen.png",
-            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_electrician_repairing_a_complex_electrical_panel_in_a_corporate/screen.png",
-            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_professional_indian_welder_working_in_an_industrial_workshop_wearing/screen.png",
-            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_photo_of_an_indian_carpenter_in_a_woodworking_shop_wearing_a_dihadi/screen.png",
-            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_realistic_photo_of_an_indian_warehouse_worker_operating_a_forklift_in_a/screen.png",
-            "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/a_professional_indian_plumber_working_on_industrial_piping._he_is_wearing_a/screen.png"
+            "/assets/images/explore/explore_slide_1.jpg",
+            "/assets/images/explore/explore_slide_2.jpg",
+            "/assets/images/explore/explore_slide_3.jpg",
+            "/assets/images/explore/explore_slide_4.jpg",
+            "/assets/images/explore/explore_slide_5.jpg",
+            "/assets/images/recruiter/slide-01.jpeg",
+            "/assets/images/recruiter/slide-02.jpeg",
+            "/assets/images/recruiter/slide-03.jpeg",
+            "/assets/images/recruiter/slide-04.jpeg",
+            "/assets/images/recruiter/slide-05.jpeg"
     };
 
     private final Runnable showHome;
@@ -508,9 +510,9 @@ public class ExploreProjectsPage {
                 new ProjectCardModel("P-BENCH-03", "LODHAA Grand Central Urban Expressway", "Mumbai, Maharashtra", "LODHAA Group", "Civil Engineer / Foreman", "₹1,450 / day", "60 Workers Needed", "Urgent Hiring", "Infrastructure", "9822012343", "R-03", "/assets/images/explore/explore_slide_3.jpg", List.of("/assets/images/explore/explore_slide_3.jpg"), true, true, false, true),
                 new ProjectCardModel("P-BENCH-04", "Ramoji Film City Mega Studio Infrastructure", "Hyderabad, Telangana", "Ramoji Film City", "Painter & Welder", "₹1,050 / day", "95 Workers Needed", "Active Site", "Commercial", "9822012344", "R-04", "/assets/images/explore/explore_slide_4.jpg", List.of("/assets/images/explore/explore_slide_4.jpg"), true, true, true, true),
                 new ProjectCardModel("P-BENCH-05", "BASIL Tech Habitat Smart Residential Park", "Bengaluru, Karnataka", "BASIL Group", "General Labour / Mason", "₹880 / day", "150 Workers Needed", "Active Site", "Residential", "9822012345", "R-05", "/assets/images/explore/explore_slide_5.jpg", List.of("/assets/images/explore/explore_slide_5.jpg"), true, true, true, true),
-                new ProjectCardModel("P-BENCH-06", "Pune Metro Rail Underground Depot - Phase 2", "Pune, Maharashtra", "L&T Heavy Infrastructure", "Mason", "₹950 / day", "140 Workers Needed", "Active Site", "Infrastructure", "9822012346", "R-06", "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_crane_operator_inside_a_high_tech_cabin_overlooking_a_large_bridge/screen.png", List.of("/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_crane_operator_inside_a_high_tech_cabin_overlooking_a_large_bridge/screen.png"), true, true, true, true),
-                new ProjectCardModel("P-BENCH-07", "Mumbai Coastal Road Expressway & Sea Bridge", "Mumbai, Maharashtra", "Afcons Infrastructure", "Structural Fitter", "₹1,250 / day", "95 Workers Needed", "Urgent Hiring", "Infrastructure", "9822012347", "R-07", "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_site_supervisor_in_a_reflective_jacket_and_helmet_with_dihadi/screen.png", List.of("/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_site_supervisor_in_a_reflective_jacket_and_helmet_with_dihadi/screen.png"), true, true, false, true),
-                new ProjectCardModel("P-BENCH-08", "Prestige Tech Cloud IT Park - Phase 4 Towers", "Bangalore, Karnataka", "Prestige Group", "Electrician", "₹1,100 / day", "60 Workers Needed", "Active Site", "Commercial", "9822012348", "R-08", "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_electrician_repairing_a_complex_electrical_panel_in_a_corporate/screen.png", List.of("/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_electrician_repairing_a_complex_electrical_panel_in_a_corporate/screen.png"), true, true, true, false)
+                new ProjectCardModel("P-BENCH-06", "Pune Metro Rail Underground Depot - Phase 2", "Pune, Maharashtra", "L&T Heavy Infrastructure", "Mason", "₹950 / day", "140 Workers Needed", "Active Site", "Infrastructure", "9822012346", "R-06", "/assets/images/recruiter/slide-01.jpeg", List.of("/assets/images/recruiter/slide-01.jpeg"), true, true, true, true),
+                new ProjectCardModel("P-BENCH-07", "Mumbai Coastal Road Expressway & Sea Bridge", "Mumbai, Maharashtra", "Afcons Infrastructure", "Structural Fitter", "₹1,250 / day", "95 Workers Needed", "Urgent Hiring", "Infrastructure", "9822012347", "R-07", "/assets/images/recruiter/slide-03.jpeg", List.of("/assets/images/recruiter/slide-03.jpeg"), true, true, false, true),
+                new ProjectCardModel("P-BENCH-08", "Prestige Tech Cloud IT Park - Phase 4 Towers", "Bangalore, Karnataka", "Prestige Group", "Electrician", "₹1,100 / day", "60 Workers Needed", "Active Site", "Commercial", "9822012348", "R-08", "/assets/images/recruiter/slide-05.jpeg", List.of("/assets/images/recruiter/slide-05.jpeg"), true, true, true, false)
         );
     }
 
@@ -519,9 +521,10 @@ public class ExploreProjectsPage {
         String t = trade.toLowerCase();
         if (t.contains("carpenter")) return "/assets/images/explore/explore_slide_2.jpg";
         if (t.contains("plumber")) return "/assets/images/explore/explore_slide_2.jpg";
-        if (t.contains("engineer") || t.contains("foreman")) return "/assets/images/explore/explore_slide_3.jpg";
+        if (t.contains("engineer") || t.contains("foreman") || t.contains("supervisor")) return "/assets/images/recruiter/slide-04.jpeg";
         if (t.contains("paint") || t.contains("weld")) return "/assets/images/explore/explore_slide_4.jpg";
         if (t.contains("labour") || t.contains("mason") || t.contains("helper")) return "/assets/images/explore/explore_slide_5.jpg";
+        if (t.contains("electric")) return "/assets/images/recruiter/slide-03.jpeg";
         return "/assets/images/explore/explore_slide_1.jpg";
     }
 
@@ -559,20 +562,45 @@ public class ExploreProjectsPage {
     private VBox renderRealProjectCard(ProjectCardModel p) {
         // Real Site Image Card Banner
         ImageView siteImg = new ImageView();
-        Image img = load(p.imagePath());
-        if (img == null && p.imageUrls() != null && !p.imageUrls().isEmpty()) {
-            try {
-                img = new Image(p.imageUrls().get(0), 515, 175, false, true);
-            } catch (Exception ignored) {}
+        Image img = null;
+
+        // 1. Highest priority: real uploaded photo URLs from Firestore
+        if (p.imageUrls() != null && !p.imageUrls().isEmpty()) {
+            for (String u : p.imageUrls()) {
+                if (u != null && !u.isBlank()) {
+                    img = load(u);
+                    if (img != null) break;
+                }
+            }
         }
+        // 2. Second priority: imagePath
+        if (img == null && p.imagePath() != null && !p.imagePath().isBlank()) {
+            img = load(p.imagePath());
+        }
+        // 3. Fallback: genuine working site image
         if (img == null) {
-            img = load("/assets/images/explore/explore_slide_1.jpg");
+            img = load(getFallbackImageForTrade(p.trade()));
         }
+
         siteImg.setImage(img);
         siteImg.setFitWidth(515);
         siteImg.setFitHeight(175);
         siteImg.setPreserveRatio(false);
         siteImg.setSmooth(true);
+
+        // Fail-safe error listener so it never shows broken image
+        Image siteFallback = load(getFallbackImageForTrade(p.trade()));
+        if (img != null) {
+            if (img.isError()) {
+                siteImg.setImage(siteFallback);
+            } else {
+                img.errorProperty().addListener((obs, oldV, isErr) -> {
+                    if (Boolean.TRUE.equals(isErr)) {
+                        siteImg.setImage(siteFallback);
+                    }
+                });
+            }
+        }
 
         Rectangle imgClip = new Rectangle(515, 175);
         imgClip.setArcWidth(14);
@@ -779,19 +807,35 @@ public class ExploreProjectsPage {
     private Image load(String path) {
         try {
             if (path == null || path.isBlank()) {
-                var r = getClass().getResource("/assets/images/explore/explore_slide_1.jpg");
-                return r == null ? null : new Image(r.toExternalForm());
+                return loadResource("/assets/images/explore/explore_slide_1.jpg");
             }
-            if (path.startsWith("http://") || path.startsWith("https://")) {
-                return new Image(path, true);
+            String clean = path.trim();
+            if (clean.startsWith("http://") || clean.startsWith("https://")) {
+                // Real uploaded Cloudinary or remote image URL
+                return new Image(clean, 515, 175, false, true, true);
             }
-            if (new java.io.File(path).exists()) {
-                return new Image(new java.io.File(path).toURI().toString());
+            if (clean.startsWith("file:")) {
+                return new Image(clean, 515, 175, false, true, true);
             }
+            java.io.File file = new java.io.File(clean);
+            if (file.exists()) {
+                return new Image(file.toURI().toString(), 515, 175, false, true, true);
+            }
+            var r = getClass().getResource(clean);
+            if (r != null) {
+                return new Image(r.toExternalForm());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return loadResource("/assets/images/explore/explore_slide_1.jpg");
+    }
+
+    private Image loadResource(String path) {
+        try {
             var r = getClass().getResource(path);
             return r == null ? null : new Image(r.toExternalForm());
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }

@@ -32,14 +32,14 @@ public class GeneralLabourJobRole {
             "/assets/images/general-labour/skill-02.jpg", "/assets/images/general-labour/skill-03.jpg"
     };
     private static final String[][] JOBS = {
-            { "Skyline Tower Civil Works", "Pune, Maharashtra", "₹700", "01", null, null, null, "Construction General Labour" },
-            { "Bhiwandi Logistics Hub", "Bhiwandi, Maharashtra", "₹750", "02", null, null, null, "Material Shifting Helper" },
-            { "Ambad MIDC Plant", "Nashik, Maharashtra", "₹800", "03", null, null, null, "Factory Worker Helper" },
-            { "Outer Ring Road Extension", "Chennai, Tamil Nadu", "₹850", "06", null, null, null, "Road Construction Labour" },
-            { "Cargo Terminal Phase 1", "New Delhi, Delhi", "₹750", "10", null, null, null, "Loading & Unloading Helper" },
-            { "Whitefield IT SEZ", "Bangalore South, Karnataka", "₹900", "08", null, null, null, "Concrete Mixer Labour" },
-            { "Cyber City Flyover", "Gurgaon, Haryana", "₹950", "15", null, null, null, "Shuttering Helper" },
-            { "Worli Sea View Tower", "Mumbai, Maharashtra", "₹850", "09", null, null, null, "Mason Helper" }
+            { "Skyline Tower Civil Works", "Pune, Maharashtra", "₹700", "01", "CURATED_GL_01", null, null, "Construction General Labour" },
+            { "Bhiwandi Logistics Hub", "Bhiwandi, Maharashtra", "₹750", "02", "CURATED_GL_02", null, null, "Material Shifting Helper" },
+            { "Ambad MIDC Plant", "Nashik, Maharashtra", "₹800", "03", "CURATED_GL_03", null, null, "Factory Worker Helper" },
+            { "Outer Ring Road Extension", "Chennai, Tamil Nadu", "₹850", "06", "CURATED_GL_04", null, null, "Road Construction Labour" },
+            { "Cargo Terminal Phase 1", "New Delhi, Delhi", "₹750", "10", "CURATED_GL_05", null, null, "Loading & Unloading Helper" },
+            { "Whitefield IT SEZ", "Bangalore South, Karnataka", "₹900", "08", "CURATED_GL_06", null, null, "Concrete Mixer Labour" },
+            { "Cyber City Flyover", "Gurgaon, Haryana", "₹950", "15", "CURATED_GL_07", null, null, "Shuttering Helper" },
+            { "Worli Sea View Tower", "Mumbai, Maharashtra", "₹850", "09", "CURATED_GL_08", null, null, "Mason Helper" }
     };
 
     private final FlowPane jobs = new FlowPane(24, 24);
@@ -243,23 +243,34 @@ public class GeneralLabourJobRole {
             if (com.dihadi.view.SessionManager.currentWorker != null) {
                 new Thread(() -> {
                     try {
-                        List<com.dihadi.model.JobApplication> apps = new com.dihadi.controller.JobApplicationController().getApplicationsByWorker(com.dihadi.view.SessionManager.currentWorker.getMobileNumber());
-                        boolean hasApplied = false;
-                        for (com.dihadi.model.JobApplication app : apps) {
-                            if ((app.getJobTitle() != null && app.getJobTitle().equalsIgnoreCase(roleTitle)) || (j[4] != null && j[4].equals(app.getProjectId()))) {
-                                hasApplied = true;
-                                break;
-                            }
-                        }
+                        boolean hasApplied = new com.dihadi.controller.JobApplicationController().hasWorkerApplied(
+                                com.dihadi.view.SessionManager.currentWorker.getMobileNumber(),
+                                j[4],
+                                j.length > 6 ? j[6] : null,
+                                roleTitle,
+                                j[1]
+                        );
                         if (hasApplied) {
                             javafx.application.Platform.runLater(() -> {
                                 apply.setText("Already applied ✓");
                                 apply.setStyle("-fx-background-color:#2a7e3b;-fx-background-radius:12px;-fx-text-fill:#ffffff;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;");
                                 apply.setDisable(true);
                             });
+                        } else {
+                            javafx.application.Platform.runLater(() -> {
+                                apply.setText("Apply now");
+                                apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                                apply.setDisable(false);
+                            });
                         }
                     } catch (Exception ignored) {}
                 }).start();
+            } else {
+                javafx.application.Platform.runLater(() -> {
+                    apply.setText("Apply now");
+                    apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                    apply.setDisable(false);
+                });
             }
         };
         checkAppliedStatus.run();

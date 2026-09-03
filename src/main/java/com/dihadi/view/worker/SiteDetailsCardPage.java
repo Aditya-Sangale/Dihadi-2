@@ -264,62 +264,87 @@ public class SiteDetailsCardPage {
             apply.setText("CHECKING STATUS...");
             apply.setDisable(true);
             new Thread(() -> {
-                boolean hasApplied = false;
-                List<JobApplication> apps = new JobApplicationController().getApplicationsByWorker(SessionManager.currentWorker.getMobileNumber());
-                for (JobApplication app : apps) {
-                    if ((app.getJobTitle() != null && app.getJobTitle().equals(title)) || (projectId != null && projectId.equals(app.getProjectId()))) {
-                        hasApplied = true;
-                        break;
-                    }
-                }
-                final boolean finalHasApplied = hasApplied;
+                boolean hasApplied = new JobApplicationController().hasWorkerApplied(
+                        SessionManager.currentWorker.getMobileNumber(),
+                        projectId,
+                        requirementId,
+                        title,
+                        location
+                );
                 Platform.runLater(() -> {
-                    if (finalHasApplied) {
+                    if (hasApplied) {
                         apply.setText("ALREADY APPLIED ✓");
+                        apply.setStyle("-fx-background-color:#2a7e3b;-fx-text-fill:#ffffff;-fx-font-size:16px;-fx-font-weight:700;-fx-padding:14px 28px;-fx-background-radius:8px;");
                         apply.setDisable(true);
                     } else {
                         apply.setText("APPLY FOR THIS JOB");
+                        apply.setStyle("-fx-background-color:#d4af37;-fx-text-fill:#1e1b15;-fx-font-size:16px;-fx-font-weight:800;-fx-padding:14px 28px;-fx-background-radius:8px;-fx-cursor:hand;");
                         apply.setDisable(false);
                     }
                 });
             }).start();
+        } else {
+            apply.setText("APPLY FOR THIS JOB");
+            apply.setStyle("-fx-background-color:#d4af37;-fx-text-fill:#1e1b15;-fx-font-size:16px;-fx-font-weight:800;-fx-padding:14px 28px;-fx-background-radius:8px;-fx-cursor:hand;");
+            apply.setDisable(false);
         }
 
         apply.setOnAction(e -> {
+            if (SessionManager.currentWorker == null) {
+                javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow();
+                javafx.scene.Scene returnScene = (currentScene != null) ? currentScene : apply.getScene();
+                
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Worker Account Required");
+                alert.setHeaderText("Please log in or sign up to apply");
+                alert.setContentText("You need an active worker profile to apply for " + title + ".\n\nChoose an option to continue:");
+                
+                javafx.scene.control.ButtonType loginBtnType = new javafx.scene.control.ButtonType("Login");
+                javafx.scene.control.ButtonType signUpBtnType = new javafx.scene.control.ButtonType("Create Account");
+                javafx.scene.control.ButtonType cancelBtnType = new javafx.scene.control.ButtonType("Cancel", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+                alert.getButtonTypes().setAll(loginBtnType, signUpBtnType, cancelBtnType);
+
+                var result = alert.showAndWait();
+                if (result.isPresent() && result.get() == loginBtnType) {
+                    stage.setScene(new com.dihadi.view.worker.WorkerLoginPage(() -> stage.setScene(returnScene)).getLoginScene());
+                } else if (result.isPresent() && result.get() == signUpBtnType) {
+                    stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(() -> stage.setScene(returnScene)));
+                }
+                return;
+            }
+
             apply.setText("Applied ✓");
             apply.setStyle("-fx-background-color:#2a7e3b;-fx-text-fill:#ffffff;-fx-font-size:16px;-fx-font-weight:700;-fx-padding:14px 28px;-fx-background-radius:8px;");
             apply.setDisable(true);
-            if (SessionManager.currentWorker != null) {
-                new Thread(() -> {
-                    JobApplication app = new JobApplication(
-                            String.valueOf(System.currentTimeMillis()) + String.format("%03d", (int) (Math.random() * 1000)),
-                            SessionManager.currentWorker.getMobileNumber(),
-                            title,
-                            location,
-                            wage,
-                            "Pending",
-                            projectId,
-                            recruiterMobile,
-                            requirementId
-                    );
-                    new JobApplicationController().saveApplication(app);
-                    String workerName = (SessionManager.currentWorker.getFirstName() != null ? SessionManager.currentWorker.getFirstName() : "") + " " +
-                            (SessionManager.currentWorker.getLastName() != null ? SessionManager.currentWorker.getLastName() : "");
-                    workerName = workerName.trim();
-                    if (workerName.isEmpty()) workerName = "Worker (" + SessionManager.currentWorker.getMobileNumber() + ")";
-                    new com.dihadi.controller.NotificationController().notifyRecruiterApplicationReceived(
-                            app,
-                            workerName,
-                            SessionManager.currentWorker.getMobileNumber(),
-                            title
-                    );
-                    javafx.application.Platform.runLater(() -> {
-                        com.dihadi.view.NotificationToast.show(apply, "Application Submitted! 📥",
-                                "Your application for " + title + " has been successfully submitted to the recruiter.",
-                                com.dihadi.view.NotificationToast.ToastType.SUCCESS);
-                    });
-                }).start();
-            }
+            new Thread(() -> {
+                JobApplication app = new JobApplication(
+                        String.valueOf(System.currentTimeMillis()) + String.format("%03d", (int) (Math.random() * 1000)),
+                        SessionManager.currentWorker.getMobileNumber(),
+                        title,
+                        location,
+                        wage,
+                        "Pending",
+                        projectId,
+                        recruiterMobile,
+                        requirementId
+                );
+                new JobApplicationController().saveApplication(app);
+                String workerName = (SessionManager.currentWorker.getFirstName() != null ? SessionManager.currentWorker.getFirstName() : "") + " " +
+                        (SessionManager.currentWorker.getLastName() != null ? SessionManager.currentWorker.getLastName() : "");
+                workerName = workerName.trim();
+                if (workerName.isEmpty()) workerName = "Worker (" + SessionManager.currentWorker.getMobileNumber() + ")";
+                new com.dihadi.controller.NotificationController().notifyRecruiterApplicationReceived(
+                        app,
+                        workerName,
+                        SessionManager.currentWorker.getMobileNumber(),
+                        title
+                );
+                javafx.application.Platform.runLater(() -> {
+                    com.dihadi.view.NotificationToast.show(apply, "Application Submitted",
+                            "Your application for " + title + " has been successfully submitted to the recruiter.",
+                            com.dihadi.view.NotificationToast.ToastType.SUCCESS);
+                });
+            }).start();
         });
 
         Button close = new Button("←  BACK TO PROJECT");

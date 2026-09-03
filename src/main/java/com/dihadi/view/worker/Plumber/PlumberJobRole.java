@@ -32,14 +32,14 @@ public class PlumberJobRole {
             "/assets/images/worker/plumber/skill-02.jpg", "/assets/images/worker/plumber/skill-03.jpg"
     };
     private static final String[][] JOBS = {
-            { "Lodha Crown Pipeline Network", "Pune, Maharashtra", "₹950", "01", null, null, null, "Residential Plumber" },
-            { "Oberoi Sky City Water Mains", "Mumbai, Maharashtra", "₹1,100", "03", null, null, null, "Pipe Fitting Plumber" },
-            { "Nashik Smart City Drainage", "Nashik, Maharashtra", "₹1,050", "04", null, null, null, "Waterline Technician" },
-            { "Brigade Tech Gardens Sanitary", "Bangalore, Karnataka", "₹1,150", "05", null, null, null, "Sanitary Plumber" },
-            { "NTPC Plant High Pressure Lines", "New Delhi, Delhi", "₹1,300", "07", null, null, null, "Industrial Plumber" },
-            { "Chennai Port Storm Water System", "Chennai, Tamil Nadu", "₹1,000", "09", null, null, null, "Drainage Specialist" },
-            { "Hitec City Luxury Residency", "Hyderabad, Telangana", "₹1,100", "11", null, null, null, "Bathroom Fitter" },
-            { "Bhiwandi Warehousing Sewerage", "Bhiwandi, Maharashtra", "₹800", "13", null, null, null, "Plumbing Helper" }
+            { "Lodha Crown Pipeline Network", "Pune, Maharashtra", "₹950", "01", "CURATED_PL_01", null, null, "Residential Plumber" },
+            { "Oberoi Sky City Water Mains", "Mumbai, Maharashtra", "₹1,100", "03", "CURATED_PL_02", null, null, "Pipe Fitting Plumber" },
+            { "Nashik Smart City Drainage", "Nashik, Maharashtra", "₹1,050", "04", "CURATED_PL_03", null, null, "Waterline Technician" },
+            { "Brigade Tech Gardens Sanitary", "Bangalore, Karnataka", "₹1,150", "05", "CURATED_PL_04", null, null, "Sanitary Plumber" },
+            { "NTPC Plant High Pressure Lines", "New Delhi, Delhi", "₹1,300", "07", "CURATED_PL_05", null, null, "Industrial Plumber" },
+            { "Chennai Port Storm Water System", "Chennai, Tamil Nadu", "₹1,000", "09", "CURATED_PL_06", null, null, "Drainage Specialist" },
+            { "Hitec City Luxury Residency", "Hyderabad, Telangana", "₹1,100", "11", "CURATED_PL_07", null, null, "Bathroom Fitter" },
+            { "Bhiwandi Warehousing Sewerage", "Bhiwandi, Maharashtra", "₹800", "13", "CURATED_PL_08", null, null, "Plumbing Helper" }
     };
 
     private final FlowPane jobs = new FlowPane(24, 24);
@@ -243,23 +243,34 @@ public class PlumberJobRole {
             if (com.dihadi.view.SessionManager.currentWorker != null) {
                 new Thread(() -> {
                     try {
-                        List<com.dihadi.model.JobApplication> apps = new com.dihadi.controller.JobApplicationController().getApplicationsByWorker(com.dihadi.view.SessionManager.currentWorker.getMobileNumber());
-                        boolean hasApplied = false;
-                        for (com.dihadi.model.JobApplication app : apps) {
-                            if ((app.getJobTitle() != null && app.getJobTitle().equalsIgnoreCase(roleTitle)) || (j[4] != null && j[4].equals(app.getProjectId()))) {
-                                hasApplied = true;
-                                break;
-                            }
-                        }
+                        boolean hasApplied = new com.dihadi.controller.JobApplicationController().hasWorkerApplied(
+                                com.dihadi.view.SessionManager.currentWorker.getMobileNumber(),
+                                j[4],
+                                j.length > 6 ? j[6] : null,
+                                roleTitle,
+                                j[1]
+                        );
                         if (hasApplied) {
                             javafx.application.Platform.runLater(() -> {
                                 apply.setText("Already applied ✓");
                                 apply.setStyle("-fx-background-color:#2a7e3b;-fx-background-radius:12px;-fx-text-fill:#ffffff;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;");
                                 apply.setDisable(true);
                             });
+                        } else {
+                            javafx.application.Platform.runLater(() -> {
+                                apply.setText("Apply now");
+                                apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                                apply.setDisable(false);
+                            });
                         }
                     } catch (Exception ignored) {}
                 }).start();
+            } else {
+                javafx.application.Platform.runLater(() -> {
+                    apply.setText("Apply now");
+                    apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                    apply.setDisable(false);
+                });
             }
         };
         checkAppliedStatus.run();

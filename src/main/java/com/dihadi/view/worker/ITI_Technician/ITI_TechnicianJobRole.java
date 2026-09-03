@@ -32,12 +32,12 @@ public class ITI_TechnicianJobRole {
             "/assets/images/worker/iti/skill-03.jpg", "/assets/images/worker/iti/skill-04.jpg"
     };
     private static final String[][] JOBS = {
-            { "Tata Motors Line Setup", "Pune, Maharashtra", "₹1,200", "01", null, null, null, "Fitter" },
-            { "L&T Heavy Engineering Unit", "Mumbai, Maharashtra", "₹1,300", "02", null, null, null, "Machinist" },
-            { "Mahindra Auto Assembly", "Nashik, Maharashtra", "₹1,150", "03", null, null, null, "Turner" },
-            { "BHEL Turbine Assembly", "Bangalore, Karnataka", "₹1,250", "04", null, null, null, "Welder" },
-            { "Delhi Transport Depot", "New Delhi, Delhi", "₹1,400", "05", null, null, null, "Mechanic Motor Vehicle" },
-            { "Integral Coach Factory", "Chennai, Tamil Nadu", "₹1,350", "06", null, null, null, "Electrician (ITI)" }
+            { "Tata Motors Line Setup", "Pune, Maharashtra", "₹1,200", "01", "CURATED_IT_01", null, null, "Fitter" },
+            { "L&T Heavy Engineering Unit", "Mumbai, Maharashtra", "₹1,300", "02", "CURATED_IT_02", null, null, "Machinist" },
+            { "Mahindra Auto Assembly", "Nashik, Maharashtra", "₹1,150", "03", "CURATED_IT_03", null, null, "Turner" },
+            { "BHEL Turbine Assembly", "Bangalore, Karnataka", "₹1,250", "04", "CURATED_IT_04", null, null, "Welder" },
+            { "Delhi Transport Depot", "New Delhi, Delhi", "₹1,400", "05", "CURATED_IT_05", null, null, "Mechanic Motor Vehicle" },
+            { "Integral Coach Factory", "Chennai, Tamil Nadu", "₹1,350", "06", "CURATED_IT_06", null, null, "Electrician (ITI)" }
     };
 
     private final FlowPane jobs = new FlowPane(24, 24);
@@ -245,23 +245,34 @@ public class ITI_TechnicianJobRole {
             if (com.dihadi.view.SessionManager.currentWorker != null) {
                 new Thread(() -> {
                     try {
-                        List<com.dihadi.model.JobApplication> apps = new com.dihadi.controller.JobApplicationController().getApplicationsByWorker(com.dihadi.view.SessionManager.currentWorker.getMobileNumber());
-                        boolean hasApplied = false;
-                        for (com.dihadi.model.JobApplication app : apps) {
-                            if ((app.getJobTitle() != null && app.getJobTitle().equalsIgnoreCase(roleTitle)) || (j[4] != null && j[4].equals(app.getProjectId()))) {
-                                hasApplied = true;
-                                break;
-                            }
-                        }
+                        boolean hasApplied = new com.dihadi.controller.JobApplicationController().hasWorkerApplied(
+                                com.dihadi.view.SessionManager.currentWorker.getMobileNumber(),
+                                j[4],
+                                j.length > 6 ? j[6] : null,
+                                roleTitle,
+                                j[1]
+                        );
                         if (hasApplied) {
                             javafx.application.Platform.runLater(() -> {
                                 apply.setText("Already applied ✓");
                                 apply.setStyle("-fx-background-color:#2a7e3b;-fx-background-radius:12px;-fx-text-fill:#ffffff;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;");
                                 apply.setDisable(true);
                             });
+                        } else {
+                            javafx.application.Platform.runLater(() -> {
+                                apply.setText("Apply now");
+                                apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                                apply.setDisable(false);
+                            });
                         }
                     } catch (Exception ignored) {}
                 }).start();
+            } else {
+                javafx.application.Platform.runLater(() -> {
+                    apply.setText("Apply now");
+                    apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                    apply.setDisable(false);
+                });
             }
         };
         checkAppliedStatus.run();
