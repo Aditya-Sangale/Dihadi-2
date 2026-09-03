@@ -1,6 +1,7 @@
 package com.dihadi.view;
 
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -21,6 +22,7 @@ import com.dihadi.model.Worker;
 import com.dihadi.model.Recruiter;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Shared DIHADI login layout with worker and recruiter visual variants. */
 public class LoginPage {
@@ -184,41 +186,68 @@ public class LoginPage {
 
         continueButton.setDisable(true);
         continueButton.setText("Verifying...");
+        AtomicBoolean loginCompleted = new AtomicBoolean(false);
+        PauseTransition loginTimeout = new PauseTransition(Duration.seconds(25));
+        loginTimeout.setOnFinished(e -> {
+            if (loginCompleted.compareAndSet(false, true)) {
+                continueButton.setDisable(false);
+                continueButton.setText("Login");
+                AppNavigator.information("Login Timed Out",
+                        "The account service did not respond. Please check your internet connection and try again.");
+            }
+        });
+        loginTimeout.play();
 
         new Thread(() -> {
-            if (recruiter) {
-                com.dihadi.controller.RecruiterController recruiterController = new com.dihadi.controller.RecruiterController();
-                Recruiter r = recruiterController.getRecruiterByEmailOrMobile(identifierInput);
+            try {
+                if (recruiter) {
+                    com.dihadi.controller.RecruiterController recruiterController = new com.dihadi.controller.RecruiterController();
+                    Recruiter r = recruiterController.getRecruiterByEmailOrMobile(identifierInput);
 
+                    javafx.application.Platform.runLater(() -> {
+                        if (!loginCompleted.compareAndSet(false, true)) return;
+                        loginTimeout.stop();
+                        continueButton.setDisable(false);
+                        continueButton.setText("Login");
+
+                        if (r == null || r.getPassword() == null || !r.getPassword().equals(password)) {
+                            AppNavigator.information("Login Failed", "Invalid credentials. Please try again.");
+                        } else {
+                            com.dihadi.view.SessionManager.currentRecruiter = r;
+                            Stage stage = (Stage) continueButton.getScene().getWindow();
+                            Runnable homeNav = (back != null) ? back : () -> AppNavigator.open(stage, "Home");
+                            stage.setScene(new com.dihadi.view.recruiter.RecruiterPage().getRecruiterScene(homeNav));
+                        }
+                    });
+                } else {
+                    com.dihadi.controller.WorkerController workerController = new com.dihadi.controller.WorkerController();
+                    Worker worker = workerController.getWorkerByEmailOrMobile(identifierInput);
+
+                    javafx.application.Platform.runLater(() -> {
+                        if (!loginCompleted.compareAndSet(false, true)) return;
+                        loginTimeout.stop();
+                        continueButton.setDisable(false);
+                        continueButton.setText("Login");
+
+                        if (worker == null || worker.getPassword() == null || !worker.getPassword().equals(password)) {
+                            AppNavigator.information("Login Failed", "Invalid credentials. Please try again.");
+                        } else {
+                            com.dihadi.view.SessionManager.currentWorker = worker;
+                            Stage stage = (Stage) continueButton.getScene().getWindow();
+                            Runnable homeNav = (back != null) ? back : () -> AppNavigator.open(stage, "Home");
+                            stage.setScene(new com.dihadi.view.WorkerPage(worker).getWorkerScene(homeNav));
+                        }
+                    });
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
                 javafx.application.Platform.runLater(() -> {
+                    if (!loginCompleted.compareAndSet(false, true)) return;
+                    loginTimeout.stop();
                     continueButton.setDisable(false);
                     continueButton.setText("Login");
-
-                    if (r == null || r.getPassword() == null || !r.getPassword().equals(password)) {
-                        AppNavigator.information("Login Failed", "Invalid credentials. Please try again.");
-                    } else {
-                        com.dihadi.view.SessionManager.currentRecruiter = r;
-                        Stage stage = (Stage) continueButton.getScene().getWindow();
-                        Runnable homeNav = (back != null) ? back : () -> AppNavigator.open(stage, "Home");
-                        stage.setScene(new com.dihadi.view.recruiter.RecruiterPage().getRecruiterScene(homeNav));
-                    }
-                });
-            } else {
-                com.dihadi.controller.WorkerController workerController = new com.dihadi.controller.WorkerController();
-                Worker worker = workerController.getWorkerByEmailOrMobile(identifierInput);
-
-                javafx.application.Platform.runLater(() -> {
-                    continueButton.setDisable(false);
-                    continueButton.setText("Login");
-
-                    if (worker == null || worker.getPassword() == null || !worker.getPassword().equals(password)) {
-                        AppNavigator.information("Login Failed", "Invalid credentials. Please try again.");
-                    } else {
-                        com.dihadi.view.SessionManager.currentWorker = worker;
-                        Stage stage = (Stage) continueButton.getScene().getWindow();
-                        Runnable homeNav = (back != null) ? back : () -> AppNavigator.open(stage, "Home");
-                        stage.setScene(new com.dihadi.view.WorkerPage(worker).getWorkerScene(homeNav));
-                    }
+                    AppNavigator.information("Login Unavailable",
+                            "Unable to connect to the account service. Configure DIHADI_FIREBASE_CREDENTIALS and try again.");
                 });
             }
         }).start();

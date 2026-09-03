@@ -19,6 +19,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 /** Recruiter directory for verified ITI-qualified technicians. */
@@ -75,33 +76,30 @@ public class ITI_TechnicianResultPage {
     }
 
     private HBox hero() {
-        ImageView heroImage = image("/assets/images/welder.jpeg", 660, 330);
-        heroImage.setPreserveRatio(false);
-        Label verified = label("✓  VERIFIED PROFESSIONALS",
-                "-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:.8px;-fx-text-fill:#231b00;-fx-background-color:#ffe085;-fx-background-radius:14px;-fx-padding:6px 11px;");
-        StackPane visual = new StackPane(heroImage, verified);
-        visual.setPrefSize(660, 330);
-        StackPane.setAlignment(verified, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(verified, new Insets(0, 0, 18, 20));
-        visual.setStyle(
-                "-fx-background-radius:24px;-fx-border-radius:24px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.11),14,0,0,3px);");
-        Label quoteMark = label("“",
-                "-fx-font-family:'Georgia';-fx-font-size:58px;-fx-text-fill:#d0c5af;-fx-opacity:.55;");
+        // The source photograph is 16:9, so retain that ratio instead of stretching it.
+        ImageView image = image("/assets/images/welder.jpeg", 480, 268);
+        image.setPreserveRatio(true);
+        Rectangle imageClip = new Rectangle(480, 268);
+        imageClip.setArcWidth(20);
+        imageClip.setArcHeight(20);
         Label quote = label(
-                "Empowering industries with technical mastery. Hire verified, certified ITI technicians who bring precision, safety, and operational excellence to your most complex projects.",
-                "-fx-font-family:'Georgia';-fx-font-size:20px;-fx-font-style:italic;-fx-text-fill:" + MUTED
-                        + ";-fx-line-spacing:4px;");
+                "Empowering industries with technical mastery. Hire verified, certified ITI technicians who bring precision, safety, and operational excellence to your projects.",
+                "-fx-font-family:'Georgia',serif;-fx-font-size:24px;-fx-font-weight:700;-fx-text-fill:#272119;-fx-line-spacing:4px;");
         quote.setWrapText(true);
-        quote.setMaxWidth(400);
-        VBox copy = new VBox(-16, quoteMark, quote);
-        copy.setPadding(new Insets(28, 32, 28, 34));
-        copy.setPrefWidth(500);
-        copy.setAlignment(Pos.CENTER_LEFT);
-        copy.setStyle("-fx-background-color:#ffffff;-fx-background-radius:24px;-fx-border-color:" + BORDER
-                + ";-fx-border-width:1px 1px 1px 6px;-fx-border-radius:24px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.07),11,0,0,2px);");
-        HBox row = new HBox(26, visual, copy);
-        row.setAlignment(Pos.CENTER_LEFT);
-        return row;
+        quote.setPrefWidth(510);
+        quote.setMaxWidth(510);
+        StackPane picture = new StackPane(image);
+        picture.setPrefSize(480, 268);
+        picture.setMinSize(480, 268);
+        picture.setMaxSize(480, 268);
+        picture.setClip(imageClip);
+        picture.setStyle("-fx-background-radius:10px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.14),12,.18,0,3px);");
+        HBox box = new HBox(82, picture, quote);
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setPadding(new Insets(32));
+        box.setStyle(
+                "-fx-background-color:#f4ede2;-fx-background-radius:12px;-fx-border-color:#d0c5af;-fx-border-radius:12px;");
+        return box;
     }
 
     private HBox filters() {
@@ -205,19 +203,23 @@ public class ITI_TechnicianResultPage {
     }
 
     private VBox card(WorkerCardData technician) {
-        ImageView portrait = image(technician.photo, 64, 64);
+        ImageView portrait = image(technician.photo, 52, 52);
         portrait.setPreserveRatio(false);
-        portrait.setClip(new Circle(32, 32, 32));
+        portrait.setClip(new Circle(26, 26, 26));
         StackPane avatar = new StackPane(portrait);
         avatar.setPrefSize(64, 64);
+        avatar.setMinSize(64, 64);
+        avatar.setMaxSize(64, 64);
         avatar.setStyle(
-                "-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-background-radius:999px;");
+                "-fx-background-color:#ffffff;-fx-background-radius:999px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:999px;-fx-padding:4px;");
         Label name = label(technician.name, "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
         Label age = label(technician.age, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
         Label skill = label(technician.trade,
                 "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#b48700;-fx-background-color:#f4ede2;-fx-background-radius:5px;-fx-padding:4px 7px;");
-        Label location = label("⌖  " + technician.location, "-fx-font-size:12px;-fx-text-fill:" + MUTED + ";");
-        VBox details = new VBox(4, name, age, skill, location);
+        Label location = label("•  Based in " + technician.location, "-fx-font-size:11px;-fx-text-fill:" + MUTED + ";");
+        Label availability = label("•  Available for new projects",
+                "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#477044;");
+        VBox details = new VBox(4, name, age, skill, location, availability);
         HBox top = new HBox(14, avatar, details);
         top.setAlignment(Pos.TOP_LEFT);
         Region divider = new Region();
@@ -230,20 +232,27 @@ public class ITI_TechnicianResultPage {
         Button hire = new Button("HIRE NOW");
         hire.setStyle(
                 "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-radius:18px;-fx-text-fill:#b48700;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;");
-        hire.setOnAction(e -> AppNavigator.information("Hire " + technician.name,
-                "Your hiring request for " + technician.name + " has been initiated. We will connect you shortly."));
         Region gap = new Region();
         HBox.setHgrow(gap, Priority.ALWAYS);
         HBox bottom = new HBox(wage, gap, hire);
         bottom.setAlignment(Pos.CENTER_LEFT);
         VBox card = new VBox(16, top, divider, bottom);
-        card.setPrefSize(360, 194);
+        card.setPrefSize(360, 220);
         card.setPadding(new Insets(20));
         card.setStyle(cardStyle(false));
         card.setOnMouseEntered(e -> card.setStyle(cardStyle(true)));
         card.setOnMouseExited(e -> card.setStyle(cardStyle(false)));
-        card.setOnMouseClicked(e -> { javafx.stage.Stage stage = (javafx.stage.Stage) card.getScene().getWindow(); javafx.scene.Scene currentScene = card.getScene(); stage.setScene(new RecruiterWorkerProfilePage(technician.name, "ITI / Technician", technician.age, technician.location, technician.wage, technician.photo).getProfileScene(() -> stage.setScene(currentScene), currentScene)); });
+        hire.setOnAction(e -> openTechnicianProfile(card, technician));
+        card.setOnMouseClicked(e -> openTechnicianProfile(card, technician));
         return card;
+    }
+
+    private void openTechnicianProfile(VBox card, WorkerCardData technician) {
+        Stage stage = (Stage) card.getScene().getWindow();
+        Scene currentScene = card.getScene();
+        stage.setScene(new RecruiterWorkerProfilePage(technician.name, "ITI / Technician", technician.age,
+                technician.location, technician.wage, technician.photo, "", () -> RecruiterWorkerProfilePage.markResultCardHired(card)).getProfileScene(
+                        () -> stage.setScene(currentScene), currentScene));
     }
 
     private String cardStyle(boolean active) {

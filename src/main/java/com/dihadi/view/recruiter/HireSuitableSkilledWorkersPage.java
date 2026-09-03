@@ -44,7 +44,7 @@ public class HireSuitableSkilledWorkersPage {
         public Scene getHireWorkersScene(Runnable homeAction) {
                 BorderPane page = new BorderPane();
                 page.setTop(header());
-                page.setCenter(content());
+                page.setCenter(content(homeAction));
                 page.setStyle("-fx-background-color:" + PAPER + ";");
                 StackPane root = new StackPane(page);
                 root.setPadding(new Insets(24));
@@ -52,7 +52,7 @@ public class HireSuitableSkilledWorkersPage {
                 return new Scene(root, 1400, 780);
         }
 
-        private ScrollPane content() {
+        private ScrollPane content(Runnable returnToRecruiter) {
                 Label title = label("Hire Suitable Skilled Workers",
                                 "-fx-font-family:'Georgia';-fx-font-size:42px;-fx-font-weight:800;-fx-text-fill:" + INK
                                                 + ";");
@@ -62,7 +62,11 @@ public class HireSuitableSkilledWorkersPage {
                 subtitle.setWrapText(true);
                 subtitle.setMaxWidth(760);
 
-                VBox body = new VBox(44, new VBox(9, title, subtitle), hero(), filters(), workerGrid(), footer());
+                VBox heading = new VBox(9, title, subtitle);
+                HBox backRow = new HBox(recruiterBackButton(returnToRecruiter));
+                backRow.setAlignment(Pos.CENTER_LEFT);
+
+                VBox body = new VBox(44, heading, hero(), hiringQuote(), workerGrid(), backRow, footer());
                 body.setMaxWidth(1240);
                 body.setPadding(new Insets(28, 0, 0, 0));
                 body.setStyle("-fx-background-color:" + PAPER + ";");
@@ -78,6 +82,26 @@ public class HireSuitableSkilledWorkersPage {
                 return scroll;
         }
 
+        /** Returns to the already-open recruiter page without resetting the login session. */
+        private Button recruiterBackButton(Runnable returnToRecruiter) {
+                Button back = new Button("<");
+                back.setPrefSize(54, 52);
+                back.setMinSize(54, 52);
+                back.setMaxSize(54, 52);
+                back.setStyle(
+                                "-fx-background-color:#ead7ad;-fx-background-radius:16px;-fx-text-fill:#4c4637;-fx-font-size:24px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:0 0 3px 0;-fx-cursor:hand;");
+                back.setOnAction(e -> {
+                        if (returnToRecruiter != null) {
+                                returnToRecruiter.run();
+                        }
+                });
+                back.setOnMouseEntered(e -> back.setStyle(
+                                "-fx-background-color:#d8bd7a;-fx-background-radius:16px;-fx-text-fill:#302b22;-fx-font-size:24px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:0 0 3px 0;-fx-cursor:hand;"));
+                back.setOnMouseExited(e -> back.setStyle(
+                                "-fx-background-color:#ead7ad;-fx-background-radius:16px;-fx-text-fill:#4c4637;-fx-font-size:24px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:0 0 3px 0;-fx-cursor:hand;"));
+                return back;
+        }
+
         private HBox hero() {
                 heroImage = image(HERO_IMAGES[0], 780, 400);
                 heroImage.setPreserveRatio(false);
@@ -89,12 +113,15 @@ public class HireSuitableSkilledWorkersPage {
                 startCarousel();
 
                 Label quote = label(
-                                "\"True strength lies in\nhumility and honest labor.\nDiscover professionals who\nbuild the future with pride.\"",
-                                "-fx-font-family:'Georgia';-fx-font-size:20px;-fx-font-style:italic;-fx-text-fill:"
+                                "\"True strength lies in humility and honest labor. Discover professionals who build the future with pride.\"",
+                                "-fx-font-family:'Georgia',serif;-fx-font-size:24px;-fx-font-weight:700;-fx-text-fill:"
                                                 + INK
-                                                + ";-fx-line-spacing:3px;");
+                                                + ";-fx-line-spacing:4px;");
+                quote.setWrapText(true);
+                quote.setPrefWidth(298);
+                quote.setMaxWidth(298);
                 Label verified = label("✧  DIHADI Verified Professionals",
-                                "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:" + MUTED + ";");
+                                "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:" + MUTED + ";");
                 VBox words = new VBox(29, quote, verified);
                 words.setAlignment(Pos.CENTER_LEFT);
                 words.setPadding(new Insets(30, 34, 30, 38));
@@ -107,23 +134,25 @@ public class HireSuitableSkilledWorkersPage {
                 return hero;
         }
 
-        private VBox filters() {
-                Label title = label("Find a Suitable Worker for you",
-                                "-fx-font-size:17px;-fx-font-weight:700;-fx-text-fill:" + INK + ";");
-                ComboBox<String> profession = combo("Profession", "General Labour", "Mason", "Plumber", "Painter",
-                                "Electrician", "Carpenter", "Engineer", "Foreman");
-                ComboBox<String> country = combo("Country", "India");
-                ComboBox<String> state = combo("State", "Maharashtra", "Madhya Pradesh", "Karnataka", "Delhi");
-                ComboBox<String> city = combo("City", "Pune", "Mumbai", "Indore", "Bengaluru");
-                TextField pincode = new TextField();
-                pincode.setPromptText("Pincode");
-                pincode.setPrefHeight(38);
-                pincode.setPrefWidth(150);
-                pincode.setStyle(fieldStyle());
-                FlowPane fields = new FlowPane(12, 10, profession, country, state, city, pincode);
-                VBox box = new VBox(12, title, fields);
-                box.setPadding(new Insets(21));
-                box.setStyle(cardStyle(12));
+        private HBox hiringQuote() {
+                Label quoteMark = label("“",
+                                "-fx-font-family:'Georgia';-fx-font-size:54px;-fx-font-weight:800;-fx-text-fill:#d4af37;");
+                quoteMark.setTranslateY(-7);
+                Label quote = label(
+                                "Every successful project depends on a workforce you can trust. Connect with verified skilled professionals who deliver craftsmanship, accountability, and dependable performance from day one.",
+                                "-fx-font-family:'Georgia';-fx-font-size:21px;-fx-font-weight:700;-fx-text-fill:" + INK
+                                                + ";-fx-line-spacing:3px;");
+                quote.setWrapText(true);
+                quote.setMaxWidth(900);
+                Label signature = label("DIHADI — YOUR TRUSTED WORKFORCE PARTNER",
+                                "-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-text-fill:#9b7500;");
+                VBox words = new VBox(9, quote, signature);
+                words.setAlignment(Pos.CENTER_LEFT);
+                HBox box = new HBox(18, quoteMark, words);
+                box.setAlignment(Pos.CENTER_LEFT);
+                box.setPadding(new Insets(24, 34, 24, 28));
+                box.setStyle(
+                                "-fx-background-color:#fffaf0;-fx-background-radius:14px;-fx-border-color:#d0c5af;-fx-border-width:1px 1px 1px 6px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.07),10,0,0,2px);");
                 return box;
         }
 

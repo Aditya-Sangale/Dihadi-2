@@ -2,6 +2,7 @@ package com.dihadi.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.dihadi.config.FirebaseConfig;
 import com.dihadi.model.Recruiter;
@@ -30,7 +31,7 @@ public class RecruiterDao {
             ApiFuture<DocumentSnapshot> future = db.collection("Recruiters")
                     .document(mobileNumber).get();
 
-            DocumentSnapshot document = future.get();
+            DocumentSnapshot document = future.get(10, TimeUnit.SECONDS);
             if (document.exists()) {
                 return document.toObject(Recruiter.class);
             }
@@ -42,18 +43,25 @@ public class RecruiterDao {
 
     public Recruiter getRecruiterByEmailOrMobile(String identifier) {
         try {
-            // First check by document ID (which is mobile number)
-            Recruiter r = getRecruiter(identifier);
-            if (r != null) return r;
-            
-            // If not found, check by email field
-            ApiFuture<QuerySnapshot> future = db.collection("Recruiters")
-                    .whereEqualTo("email", identifier)
-                    .get();
-            java.util.List<com.google.cloud.firestore.QueryDocumentSnapshot> documents = future.get().getDocuments();
-            if (!documents.isEmpty()) {
-                return documents.get(0).toObject(Recruiter.class);
+            String value = identifier == null ? "" : identifier.trim();
+            boolean emailLogin = value.contains("@");
+
+            // Recruiter records use the mobile number as their document ID. Email
+            // sign-in should query the email field first, avoiding an unnecessary
+            // document request and making the login screen respond promptly.
+            if (!emailLogin) {
+                Recruiter recruiter = getRecruiter(value);
+                if (recruiter != null) return recruiter;
             }
+
+            ApiFuture<QuerySnapshot> future = db.collection("Recruiters")
+                    .whereEqualTo("email", value)
+                    .get();
+            java.util.List<com.google.cloud.firestore.QueryDocumentSnapshot> documents = future
+                    .get(10, TimeUnit.SECONDS).getDocuments();
+            if (!documents.isEmpty()) return documents.get(0).toObject(Recruiter.class);
+
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
         }
