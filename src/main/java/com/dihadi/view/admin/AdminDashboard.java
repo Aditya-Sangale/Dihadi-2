@@ -80,8 +80,20 @@ public class AdminDashboard {
 
         VBox links=new VBox(4,nav("Command Center",true),workersNav,recruitersNav,projectsNav,nav("Financials",false),nav("Verification",false),grievances);
         VBox.setVgrow(links,Priority.ALWAYS);
-        Button profile=nav("Admin User\nSystem Administrator",false); profile.setOnAction(e->logout.run());
-        VBox bottom=new VBox(4,nav("Support",false),nav("Compliance",false),profile); bottom.setPadding(new Insets(14,0,14,0)); bottom.setStyle("-fx-border-color:#ffffff1a;-fx-border-width:1px 0 0 0;");
+        Button backToAdmin = new Button("<");
+        backToAdmin.setPrefSize(54, 52); backToAdmin.setMinSize(54, 52); backToAdmin.setMaxSize(54, 52);
+        backToAdmin.setStyle("-fx-background-color:#ead7ad;-fx-background-radius:16px;-fx-text-fill:#4c4637;-fx-font-size:24px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:0 0 3px 0;-fx-cursor:hand;");
+        backToAdmin.setOnAction(e -> {
+            if (clock != null) clock.stop();
+            javafx.stage.Stage stage = (javafx.stage.Stage) backToAdmin.getScene().getWindow();
+            stage.setScene(new AdminHomePage().getAdminHomeScene(() -> stage.setScene(getDashboardScene(logout))));
+        });
+        Button signOut = new Button("Sign Out");
+        signOut.setStyle("-fx-background-color:#3a3027;-fx-background-radius:16px;-fx-border-color:#ffffff26;-fx-border-radius:16px;-fx-text-fill:#f8f0e2;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:12px 15px;-fx-cursor:hand;");
+        signOut.setOnAction(e -> { if (clock != null) clock.stop(); logout.run(); });
+        HBox accountActions = new HBox(8, backToAdmin, signOut);
+        accountActions.setAlignment(Pos.CENTER);
+        VBox bottom=new VBox(8,nav("Support",false),nav("Compliance",false),accountActions); bottom.setPadding(new Insets(14,12,14,12)); bottom.setStyle("-fx-border-color:#ffffff1a;-fx-border-width:1px 0 0 0;");
         VBox bar=new VBox(identity,links,bottom); bar.setPrefWidth(312); bar.setMinWidth(312); bar.setStyle("-fx-background-color:"+DARK+";"); return bar;
     }
 
