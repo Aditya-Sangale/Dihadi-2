@@ -17,6 +17,8 @@ import com.dihadi.model.Notification;
 import com.dihadi.model.Project;
 import com.dihadi.model.Worker;
 import com.dihadi.view.ExploreProjectsPage;
+import com.dihadi.view.SessionManager;
+import com.dihadi.view.WorkerPage;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -128,7 +130,20 @@ public class WorkerDashboard {
             back.run();
         });
 
-        HBox h = new HBox(16, brandLockup, navHome, spacer, userPill, logoutBtn);
+        Button workerPageBtn = new Button("<");
+        workerPageBtn.setPrefSize(54, 52);
+        workerPageBtn.setMinSize(54, 52);
+        workerPageBtn.setMaxSize(54, 52);
+        workerPageBtn.setStyle(
+                "-fx-background-color:#ead7ad;-fx-background-radius:16px;-fx-text-fill:#4c4637;-fx-font-size:24px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:0 0 3px 0;-fx-cursor:hand;");
+        workerPageBtn.setOnAction(e -> {
+            if (liveRefresher != null) liveRefresher.stop();
+            Stage stage = (Stage) workerPageBtn.getScene().getWindow();
+            Worker currentWorker = SessionManager.currentWorker != null ? SessionManager.currentWorker : worker;
+            stage.setScene(new WorkerPage(currentWorker).getWorkerScene(back));
+        });
+
+        HBox h = new HBox(16, brandLockup, navHome, spacer, userPill, workerPageBtn, logoutBtn);
         h.setAlignment(Pos.CENTER_LEFT);
         h.setPadding(new Insets(0, 0, 14, 0));
         h.setStyle("-fx-border-color:transparent transparent #d0c5af transparent;-fx-border-width:0 0 1px 0;");

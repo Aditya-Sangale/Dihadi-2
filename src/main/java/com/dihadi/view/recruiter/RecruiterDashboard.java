@@ -134,7 +134,21 @@ public class RecruiterDashboard {
             back.run();
         });
 
-        HBox headerBar = new HBox(20, brand, navBar, spacer, profileBadge, logoutBtn);
+        Button hireWorkersBtn = new Button("<");
+        hireWorkersBtn.setPrefSize(54, 52);
+        hireWorkersBtn.setMinSize(54, 52);
+        hireWorkersBtn.setMaxSize(54, 52);
+        hireWorkersBtn.setStyle(
+                "-fx-background-color:#ead7ad;-fx-background-radius:16px;-fx-text-fill:#4c4637;-fx-font-size:24px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:0 0 3px 0;-fx-cursor:hand;");
+        hireWorkersBtn.setOnAction(e -> {
+            if (livePoller != null) livePoller.stop();
+            Stage stage = (Stage) hireWorkersBtn.getScene().getWindow();
+            stage.setScene(new HireSuitableSkilledWorkersPage().getHireWorkersScene(
+                    () -> stage.setScene(new RecruiterPage().getRecruiterScene(
+                            () -> com.dihadi.view.AppNavigator.open(stage, "Home")))));
+        });
+
+        HBox headerBar = new HBox(20, brand, navBar, spacer, profileBadge, hireWorkersBtn, logoutBtn);
         headerBar.setAlignment(Pos.CENTER_LEFT);
         headerBar.setPadding(new Insets(0, 0, 14, 0));
         headerBar.setStyle("-fx-border-color:transparent transparent #d0c5af transparent;-fx-border-width:0 0 1px 0;");
