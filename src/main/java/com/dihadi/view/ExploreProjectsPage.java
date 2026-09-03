@@ -140,7 +140,9 @@ public class ExploreProjectsPage {
 
     /** Body with Hero as 1st card, Multi-card Sliding Banner Marquee as 2nd card */
     private ScrollPane body() {
-        VBox content = new VBox(34, hero(), featuredBannerBox(), filterBar(), projectGridSection(), footer());
+        HBox backRow = new HBox(homeBackButton());
+        backRow.setAlignment(Pos.CENTER_LEFT);
+        VBox content = new VBox(34, hero(), featuredBannerBox(), filterBar(), projectGridSection(), backRow, footer());
         content.setMaxWidth(1180);
         content.setPadding(new Insets(30, 20, 36, 20));
         content.setAlignment(Pos.TOP_CENTER);
@@ -154,6 +156,18 @@ public class ExploreProjectsPage {
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setStyle("-fx-background: " + SURFACE + "; -fx-background-color: " + SURFACE + "; -fx-border-width: 0;");
         return scroll;
+    }
+
+    /** Compact return control positioned above the Explore Projects hero. */
+    private Button homeBackButton() {
+        Button back = new Button("←  Back to Home");
+        back.setStyle(
+                "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;");
+        back.setOnAction(e -> {
+            if (heroTimeline != null) heroTimeline.stop();
+            if (showHome != null) showHome.run();
+        });
+        return back;
     }
 
     /** 1st Box: Attractive Hero card with smooth multi-image auto-slider and premium typography */

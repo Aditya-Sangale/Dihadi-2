@@ -150,16 +150,24 @@ public class AdminDashboard {
         VBox.setVgrow(links, Priority.ALWAYS);
 
         String adminName = SessionManager.getAdminDisplayName();
-        Button profile = nav(adminName + "\nSystem Administrator", false);
-        profile.setOnAction(e -> {
+        Button backToAdmin = new Button("←  Back");
+        backToAdmin.setStyle("-fx-background-color:transparent;-fx-text-fill:#ead7ad;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;");
+        backToAdmin.setOnAction(e -> {
             stopTimers();
+            Stage stage = (Stage) backToAdmin.getScene().getWindow();
+            stage.setScene(new AdminHomePage().getAdminHomeScene(() -> stage.setScene(getDashboardScene(logout))));
             SessionManager.clearAllSessions();
             NotificationToast.show("Signed Out", "You have signed out of your administrator session.", NotificationToast.ToastType.INFO);
             logout.run();
         });
+        Button signOut = new Button("Sign Out");
+        signOut.setStyle("-fx-background-color:#3a3027;-fx-background-radius:16px;-fx-border-color:#ffffff26;-fx-border-radius:16px;-fx-text-fill:#f8f0e2;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:12px 15px;-fx-cursor:hand;");
+        signOut.setOnAction(e -> { stopTimers(); logout.run(); });
+        HBox accountActions = new HBox(8, backToAdmin, signOut);
+        accountActions.setAlignment(Pos.CENTER);
 
-        VBox bottom = new VBox(4, profile);
-        bottom.setPadding(new Insets(14, 0, 14, 0));
+        VBox bottom = new VBox(8, label(adminName + "  •  System Administrator", "-fx-font-size:11px;-fx-text-fill:#dcdad4;"), accountActions);
+        bottom.setPadding(new Insets(14, 12, 14, 12));
         bottom.setStyle("-fx-border-color:#ffffff1a;-fx-border-width:1px 0 0 0;");
 
         VBox bar = new VBox(identity, links, bottom);
