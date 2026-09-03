@@ -489,6 +489,7 @@ public class AdminHomePage {
 
     private void openAdminSignUp(Button source) {
         if (workforceSlider != null) workforceSlider.stop();
+        if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.ADMIN)) return;
         Stage stage = (Stage) source.getScene().getWindow();
         stage.setScene(new AdminSignUpPage().getAdminSignUpScene(
                 () -> stage.setScene(getAdminHomeScene(() -> AppNavigator.open(stage, "Home")))));
@@ -496,6 +497,15 @@ public class AdminHomePage {
 
     private void openAdminLogin(Button source) {
         if (workforceSlider != null) workforceSlider.stop();
+        if (com.dihadi.view.SessionManager.currentAdmin != null) {
+            Stage stage = (Stage) source.getScene().getWindow();
+            stage.setScene(new AdminDashboard().getDashboardScene(() -> {
+                com.dihadi.view.SessionManager.clearAllSessions();
+                AppNavigator.open(stage, "Home");
+            }));
+            return;
+        }
+        if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.ADMIN)) return;
         Stage stage = (Stage) source.getScene().getWindow();
         stage.setScene(new AdminLoginPage().getAdminLoginScene(
                 () -> stage.setScene(getAdminHomeScene(() -> AppNavigator.open(stage, "Home")))));

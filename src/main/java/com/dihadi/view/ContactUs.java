@@ -67,7 +67,7 @@ public class ContactUs {
                 BorderPane bar = new BorderPane();
                 bar.setLeft(brand);
                 bar.setCenter(links);
-                Button admin = AppNavigator.createHeaderAdminButton();
+                Button admin = AppNavigator.createHeaderActionButton();
                 bar.setRight(new HBox(10, admin));
                 bar.setPadding(new Insets(16, 24, 14, 24));
                 bar.setStyle("-fx-background-color:#f3e7ce;-fx-border-color:#d0c5af;-fx-border-width:0 0 1px 0;"
@@ -77,28 +77,7 @@ public class ContactUs {
 
         private void navigate(Button source, String destination) {
                 javafx.stage.Stage stage = (javafx.stage.Stage) source.getScene().getWindow();
-                switch (destination) {
-                        case "Home" -> stage.setScene(new HomePage(stage).getHomeScene());
-                        case "Business" -> stage.setScene(new BusinessPage().getBusinessScene(
-                                        () -> stage.setScene(new HomePage(stage).getHomeScene()),
-                                        () -> stage.setScene(new WorkerPage()
-                                                        .getWorkerScene(() -> stage
-                                                                        .setScene(new HomePage(stage).getHomeScene()),
-                                                                        null))));
-                        case "Worker" -> AppNavigator.signUp(stage, null);
-                        case "Recruiter" -> stage.setScene(new com.dihadi.view.recruiter.SignUpRecruiter()
-                                        .getRecruiterSignUpScene(
-                                                        () -> stage.setScene(getContactScene(null, null, null, null))));
-                        case "About Us" ->
-                                stage.setScene(new AboutUs().getAboutScene(
-                                                () -> stage.setScene(new HomePage(stage).getHomeScene()),
-                                                () -> stage.setScene(new WorkerPage()
-                                                                .getWorkerScene(() -> stage.setScene(
-                                                                                new HomePage(stage).getHomeScene()),
-                                                                                null))));
-                        default -> {
-                        }
-                }
+                AppNavigator.open(stage, destination);
         }
 
         private VBox contactHero() {

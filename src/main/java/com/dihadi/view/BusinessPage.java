@@ -75,7 +75,7 @@ public class BusinessPage {
                 contact.setOnAction(e -> navigate(contact, "Contact Us"));
                 HBox navigation = new HBox(12, home, business, worker, recruiter, about, contact);
                 navigation.setAlignment(Pos.CENTER);
-                Button admin = AppNavigator.createHeaderAdminButton();
+                Button admin = AppNavigator.createHeaderActionButton();
                 HBox account = new HBox(10, admin);
                 account.setAlignment(Pos.CENTER_RIGHT);
 
@@ -91,36 +91,12 @@ public class BusinessPage {
 
         private void navigate(Button source, String destination) {
                 javafx.stage.Stage stage = (javafx.stage.Stage) source.getScene().getWindow();
-                switch (destination) {
-                        case "Home" -> stage.setScene(new HomePage(stage).getHomeScene());
-                        case "Worker" -> AppNavigator.signUp(stage, null);
-                        case "Recruiter" -> stage.setScene(new com.dihadi.view.recruiter.SignUpRecruiter()
-                                        .getRecruiterSignUpScene(() -> stage.setScene(getBusinessScene(null, null))));
-                        case "About Us" ->
-                                stage.setScene(new AboutUs().getAboutScene(
-                                                () -> stage.setScene(new HomePage(stage).getHomeScene()),
-                                                () -> stage.setScene(new WorkerPage()
-                                                                .getWorkerScene(() -> stage.setScene(
-                                                                                new HomePage(stage).getHomeScene()),
-                                                                                null))));
-                        case "Contact Us" ->
-                                stage.setScene(new ContactUs().getContactScene(
-                                                () -> stage.setScene(new HomePage(stage).getHomeScene()),
-                                                () -> stage.setScene(getBusinessScene(null, null)),
-                                                () -> stage.setScene(new WorkerPage()
-                                                                .getWorkerScene(() -> stage.setScene(
-                                                                                new HomePage(stage).getHomeScene()),
-                                                                                null)),
-                                                null));
-                        default -> {
-                        }
-                }
+                AppNavigator.open(stage, destination);
         }
 
         private void openSignUp(Button source) {
                 javafx.stage.Stage stage = (javafx.stage.Stage) source.getScene().getWindow();
-                javafx.scene.Scene previous = stage.getScene();
-                stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(() -> stage.setScene(previous)));
+                AppNavigator.open(stage, "Worker");
         }
 
         private VBox hero() {
@@ -132,9 +108,7 @@ public class BusinessPage {
                 Button hire = primary("HIRE WORKERS NOW");
                 hire.setOnAction(event -> {
                     javafx.stage.Stage stage = (javafx.stage.Stage) hire.getScene().getWindow();
-                    javafx.scene.Scene currentScene = hire.getScene();
-                    stage.setScene(new com.dihadi.view.recruiter.SignUpRecruiter()
-                            .getRecruiterSignUpScene(() -> stage.setScene(currentScene)));
+                    AppNavigator.open(stage, "Recruiter");
                 });
                 VBox words = new VBox(18, eyebrow, title, copy, hire);
                 words.setAlignment(Pos.CENTER_LEFT);

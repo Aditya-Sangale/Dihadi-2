@@ -140,13 +140,16 @@ public class CreateProjectPage {
             if (!validProject())
                 return;
 
-            // Ensure any pending selected files get uploaded before saving
+            // Ensure any pending selected working site files get uploaded before saving
             for (File file : selectedFiles) {
-                if (uploadedImageUrls.isEmpty() && selectedFiles.size() > 0) {
+                if (!uploadedImageUrls.contains(file.toURI().toString())) {
                     ImageUploadController uploadController = new ImageUploadController();
                     String url = uploadController.imageUpload(file);
                     if (url != null && !uploadedImageUrls.contains(url)) {
                         uploadedImageUrls.add(url);
+                    } else if (file.exists() && uploadedImageUrls.isEmpty()) {
+                        // Fallback to real local working site image URI
+                        uploadedImageUrls.add(file.toURI().toString());
                     }
                 }
             }
