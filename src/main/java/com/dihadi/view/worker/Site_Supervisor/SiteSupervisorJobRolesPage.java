@@ -32,15 +32,15 @@ public class SiteSupervisorJobRolesPage {
             "/assets/images/worker/foreman/skill-02.jpg", "/assets/images/worker/foreman/skill-03.jpg"
     };
     private static final String[][] JOBS = {
-            {"Lodha Grandeur Site Office", "Pune, Maharashtra", "₹1,500", "01", null, null, null, "Foreman"},
-            {"Coastal Road Safety Zone", "Mumbai, Maharashtra", "₹1,600", "02", null, null, null, "Safety Supervisor"},
-            {"Nashik Expressway QA Unit", "Nashik, Maharashtra", "₹1,450", "03", null, null, null, "Quality Inspector"},
-            {"Electronic City Highrise", "Bangalore, Karnataka", "₹1,700", "04", null, null, null, "General Supervisor"},
-            {"Central Vista Materials Yard", "New Delhi, Delhi", "₹1,550", "05", null, null, null, "Material Supervisor"},
-            {"Chennai Metro Rail Phase 2", "Chennai, Tamil Nadu", "₹1,800", "06", null, null, null, "Site Engineer"},
-            {"Hitec Smart City Tower B", "Hyderabad, Telangana", "₹1,650", "07", null, null, null, "Project Coordinator"},
-            {"DLF Cyber City Expansion", "Gurgaon, Haryana", "₹1,750", "08", null, null, null, "Construction Supervisor"},
-            {"Bhiwandi Amazon SEZ", "Bhiwandi, Maharashtra", "₹1,400", "09", null, null, null, "Shift Incharge"}
+            {"Lodha Grandeur Site Office", "Pune, Maharashtra", "₹1,500", "01", "CURATED_SS_01", null, null, "Foreman"},
+            {"Coastal Road Safety Zone", "Mumbai, Maharashtra", "₹1,600", "02", "CURATED_SS_02", null, null, "Safety Supervisor"},
+            {"Nashik Expressway QA Unit", "Nashik, Maharashtra", "₹1,450", "03", "CURATED_SS_03", null, null, "Quality Inspector"},
+            {"Electronic City Highrise", "Bangalore, Karnataka", "₹1,700", "04", "CURATED_SS_04", null, null, "General Supervisor"},
+            {"Central Vista Materials Yard", "New Delhi, Delhi", "₹1,550", "05", "CURATED_SS_05", null, null, "Material Supervisor"},
+            {"Chennai Metro Rail Phase 2", "Chennai, Tamil Nadu", "₹1,800", "06", "CURATED_SS_06", null, null, "Site Engineer"},
+            {"Hitec Smart City Tower B", "Hyderabad, Telangana", "₹1,650", "07", "CURATED_SS_07", null, null, "Project Coordinator"},
+            {"DLF Cyber City Expansion", "Gurgaon, Haryana", "₹1,750", "08", "CURATED_SS_08", null, null, "Construction Supervisor"},
+            {"Bhiwandi Amazon SEZ", "Bhiwandi, Maharashtra", "₹1,400", "09", "CURATED_SS_09", null, null, "Shift Incharge"}
     };
 
     private final FlowPane jobs = new FlowPane(24, 24);
@@ -248,23 +248,34 @@ public class SiteSupervisorJobRolesPage {
             if (com.dihadi.view.SessionManager.currentWorker != null) {
                 new Thread(() -> {
                     try {
-                        List<com.dihadi.model.JobApplication> apps = new com.dihadi.controller.JobApplicationController().getApplicationsByWorker(com.dihadi.view.SessionManager.currentWorker.getMobileNumber());
-                        boolean hasApplied = false;
-                        for (com.dihadi.model.JobApplication app : apps) {
-                            if ((app.getJobTitle() != null && app.getJobTitle().equalsIgnoreCase(roleTitle)) || (j[4] != null && j[4].equals(app.getProjectId()))) {
-                                hasApplied = true;
-                                break;
-                            }
-                        }
+                        boolean hasApplied = new com.dihadi.controller.JobApplicationController().hasWorkerApplied(
+                                com.dihadi.view.SessionManager.currentWorker.getMobileNumber(),
+                                j[4],
+                                j.length > 6 ? j[6] : null,
+                                roleTitle,
+                                j[1]
+                        );
                         if (hasApplied) {
                             javafx.application.Platform.runLater(() -> {
                                 apply.setText("Already applied ✓");
                                 apply.setStyle("-fx-background-color:#2a7e3b;-fx-background-radius:12px;-fx-text-fill:#ffffff;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;");
                                 apply.setDisable(true);
                             });
+                        } else {
+                            javafx.application.Platform.runLater(() -> {
+                                apply.setText("Apply now");
+                                apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                                apply.setDisable(false);
+                            });
                         }
                     } catch (Exception ignored) {}
                 }).start();
+            } else {
+                javafx.application.Platform.runLater(() -> {
+                    apply.setText("Apply now");
+                    apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                    apply.setDisable(false);
+                });
             }
         };
         checkAppliedStatus.run();

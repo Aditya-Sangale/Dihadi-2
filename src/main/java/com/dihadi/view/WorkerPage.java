@@ -439,9 +439,23 @@ public class WorkerPage extends Application {
                     () -> stage.setScene(new BusinessPage().getBusinessScene(homeAction,
                             () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)))),
                     () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)), aboutPageAction));
-            case "Worker" -> showWorkerSignUp();
-            case "Recruiter" -> stage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(
-                    () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction))));
+            case "Worker" -> {
+                if (SessionManager.currentWorker != null) {
+                    stage.setScene(new com.dihadi.view.worker.WorkerDashboard(SessionManager.currentWorker).getScene(homeAction));
+                    return;
+                }
+                if (!SessionManager.checkAccessAllowed(SessionManager.Role.WORKER)) return;
+                showWorkerSignUp();
+            }
+            case "Recruiter" -> {
+                if (SessionManager.currentRecruiter != null) {
+                    stage.setScene(new com.dihadi.view.recruiter.RecruiterDashboard(SessionManager.currentRecruiter).getScene(homeAction));
+                    return;
+                }
+                if (!SessionManager.checkAccessAllowed(SessionManager.Role.RECRUITER)) return;
+                stage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(
+                        () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction))));
+            }
             default -> {
             }
         }

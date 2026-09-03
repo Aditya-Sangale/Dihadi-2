@@ -17,6 +17,7 @@ import com.dihadi.model.Notification;
 import com.dihadi.model.Project;
 import com.dihadi.model.Worker;
 import com.dihadi.view.ExploreProjectsPage;
+import com.dihadi.view.NotificationToast;
 import com.dihadi.view.SessionManager;
 import com.dihadi.view.WorkerPage;
 
@@ -127,6 +128,8 @@ public class WorkerDashboard {
         logoutBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:20px;-fx-border-color:#ffcdd2;-fx-border-radius:20px;-fx-text-fill:#ba1a1a;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;");
         logoutBtn.setOnAction(e -> {
             if (liveRefresher != null) liveRefresher.stop();
+            SessionManager.clearAllSessions();
+            NotificationToast.show("Signed Out", "You have signed out of your worker session.", NotificationToast.ToastType.INFO);
             back.run();
         });
 
@@ -499,11 +502,7 @@ public class WorkerDashboard {
                                                         worker.getMobileNumber()
                                                 );
                                                 Platform.runLater(() -> {
-                                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                                                    alert.setTitle("Offer Accepted");
-                                                    alert.setHeaderText(null);
-                                                    alert.setContentText("You accepted the hiring offer for " + currentApp.getJobTitle() + ".");
-                                                    alert.show();
+                                                    NotificationToast.show("Offer Accepted", "You accepted the hiring offer for " + currentApp.getJobTitle() + ".", NotificationToast.ToastType.SUCCESS);
                                                     refreshWorkerData(heroContainer);
                                                 });
                                             }).start();
@@ -516,11 +515,7 @@ public class WorkerDashboard {
                                                 currentApp.setStatus("Declined");
                                                 new JobApplicationController().saveApplication(currentApp);
                                                 Platform.runLater(() -> {
-                                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                                                    alert.setTitle("Offer Declined");
-                                                    alert.setHeaderText(null);
-                                                    alert.setContentText("Offer declined.");
-                                                    alert.show();
+                                                    NotificationToast.show("Offer Declined", "The offer for " + currentApp.getJobTitle() + " was declined.", NotificationToast.ToastType.INFO);
                                                     refreshWorkerData(heroContainer);
                                                 });
                                             }).start();

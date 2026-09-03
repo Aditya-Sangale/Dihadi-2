@@ -107,22 +107,12 @@ public class LoginPage {
         Button create = link("New worker? Create an account");
         create.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:700;-fx-cursor:hand;");
         create.setOnAction(e -> {
+            if (!SessionManager.checkAccessAllowed(SessionManager.Role.WORKER)) return;
             Stage stage = (Stage) create.getScene().getWindow();
-            stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(back));
+            stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(() -> stage.setScene(getWorkerLoginScene())));
         });
 
-        Button backBtn = new Button("<");
-        backBtn.setStyle(
-                "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:10px;-fx-border-color:rgba(212,175,55,0.4);-fx-border-radius:10px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:16px;-fx-font-weight:800;-fx-padding:6px 12px;-fx-cursor:hand;");
-        backBtn.setOnAction(e -> {
-            Stage stage = (Stage) backBtn.getScene().getWindow();
-            if (back != null) back.run();
-            else AppNavigator.open(stage, "Home");
-        });
-        HBox topRow = new HBox(backBtn);
-        topRow.setAlignment(Pos.CENTER_LEFT);
-
-        VBox card = new VBox(20, topRow, brand, introBox, credentials, continueButton, create);
+        VBox card = new VBox(20, brand, introBox, credentials, continueButton, create);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(460);
         card.setPadding(new Insets(34, 38, 34, 38));
@@ -163,7 +153,7 @@ public class LoginPage {
                 label("Meri Dihadi ~ Mera Haq",
                         "-fx-font-family:'Georgia';-fx-font-size:17px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
         brand.setAlignment(Pos.CENTER);
-        Label welcome = label("👋  Welcome to DIHADI", "-fx-font-size:28px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
+        Label welcome = label("Welcome to DIHADI", "-fx-font-size:28px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
         Label intro = label("Please enter your login details to proceed ahead and join the network.",
                 "-fx-font-size:15px;-fx-text-fill:#4c4637;");
         intro.setWrapText(true);
@@ -192,10 +182,13 @@ public class LoginPage {
         Button create = link(recruiter ? "New recruiter? Create an account" : "New worker? Create an account");
         create.setOnAction(e -> {
             Stage stage = (Stage) create.getScene().getWindow();
-            if (recruiter)
+            if (recruiter) {
+                if (!SessionManager.checkAccessAllowed(SessionManager.Role.RECRUITER)) return;
                 stage.setScene(new com.dihadi.view.recruiter.SignUpRecruiter().getRecruiterSignUpScene(back));
-            else
-                stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(back));
+            } else {
+                if (!SessionManager.checkAccessAllowed(SessionManager.Role.WORKER)) return;
+                stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(() -> stage.setScene(getLoginScene())));
+            }
         });
         VBox content = new VBox(24, brand, introBox, credentials, continueButton, create);
         content.setAlignment(Pos.CENTER);
@@ -278,15 +271,20 @@ public class LoginPage {
     }
 
     private void handleLogin(TextField account, PasswordField passwordField, Button continueButton) {
+        SessionManager.Role targetRole = recruiter ? SessionManager.Role.RECRUITER : SessionManager.Role.WORKER;
+        if (!SessionManager.checkAccessAllowed(targetRole)) {
+            return;
+        }
+
         String identifierInput = account.getText().trim();
         if (identifierInput.isEmpty()) {
-            AppNavigator.information("Login", "Please enter your details.");
+            NotificationToast.show("Login", "Please enter your mobile number or email address.", NotificationToast.ToastType.ALERT);
             return;
         }
 
         String password = passwordField.getText();
         if (password == null || password.trim().isEmpty()) {
-            AppNavigator.information("Login", "Please enter your password.");
+            NotificationToast.show("Login", "Please enter your password.", NotificationToast.ToastType.ALERT);
             return;
         }
 
@@ -298,8 +296,9 @@ public class LoginPage {
             if (loginCompleted.compareAndSet(false, true)) {
                 continueButton.setDisable(false);
                 continueButton.setText("Login");
-                AppNavigator.information("Login Timed Out",
-                        "The account service did not respond. Please check your internet connection and try again.");
+                NotificationToast.show("Login Timed Out",
+                        "The account service did not respond. Please check your internet connection and try again.",
+                        NotificationToast.ToastType.ERROR);
             }
         });
         loginTimeout.play();
@@ -317,10 +316,11 @@ public class LoginPage {
                         continueButton.setText("Login");
 
                         if (r == null || r.getPassword() == null || !r.getPassword().equals(password)) {
-                            AppNavigator.information("Login Failed", "Invalid credentials. Please try again.");
+                            NotificationToast.show("Login Failed", "Invalid credentials. Please try again.", NotificationToast.ToastType.ERROR);
                         } else {
                             com.dihadi.view.SessionManager.currentRecruiter = r;
                             Stage stage = (Stage) continueButton.getScene().getWindow();
+                            NotificationToast.show(stage, "Login Successful", "Welcome back, " + r.getFirstName() + "!", NotificationToast.ToastType.SUCCESS);
                             Runnable homeNav = (back != null) ? back : () -> AppNavigator.open(stage, "Home");
                             stage.setScene(new com.dihadi.view.recruiter.RecruiterPage().getRecruiterScene(homeNav));
                         }
@@ -336,10 +336,11 @@ public class LoginPage {
                         continueButton.setText("Login");
 
                         if (worker == null || worker.getPassword() == null || !worker.getPassword().equals(password)) {
-                            AppNavigator.information("Login Failed", "Invalid credentials. Please try again.");
+                            NotificationToast.show("Login Failed", "Invalid credentials. Please try again.", NotificationToast.ToastType.ERROR);
                         } else {
                             com.dihadi.view.SessionManager.currentWorker = worker;
                             Stage stage = (Stage) continueButton.getScene().getWindow();
+                            NotificationToast.show(stage, "Login Successful", "Welcome back, " + worker.getFirstName() + "!", NotificationToast.ToastType.SUCCESS);
                             Runnable homeNav = (back != null) ? back : () -> AppNavigator.open(stage, "Home");
                             stage.setScene(new com.dihadi.view.WorkerPage(worker).getWorkerScene(homeNav));
                         }
@@ -352,8 +353,9 @@ public class LoginPage {
                     loginTimeout.stop();
                     continueButton.setDisable(false);
                     continueButton.setText("Login");
-                    AppNavigator.information("Login Unavailable",
-                            "Unable to connect to the account service. Configure DIHADI_FIREBASE_CREDENTIALS and try again.");
+                    NotificationToast.show("Network Error",
+                            "Unable to verify credentials. Please check your internet connection.",
+                            NotificationToast.ToastType.ERROR);
                 });
             }
         }).start();

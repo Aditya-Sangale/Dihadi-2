@@ -32,12 +32,12 @@ public class PainterJobRole {
             "/assets/images/worker/painter/skill-02.jpg", "/assets/images/worker/painter/skill-03.jpg"
     };
     private static final String[][] JOBS = {
-            { "Royal Palms Luxury Villas", "Pune, Maharashtra", "₹950", "01", null, null, null, "Interior Painter" },
-            { "Sea Princess Texture Works", "Mumbai, Maharashtra", "₹1,100", "02", null, null, null, "Wall Texture Painter" },
-            { "Nashik Industrial Coatings", "Nashik, Maharashtra", "₹1,200", "03", null, null, null, "Industrial Painter" },
-            { "Prestige Tech Park Spraying", "Bangalore, Karnataka", "₹1,150", "04", null, null, null, "Spray Painter" },
-            { "Lutyens Bungalow Woodwork", "New Delhi, Delhi", "₹1,300", "05", null, null, null, "Wood Polish Painter" },
-            { "East Coast Road Residences", "Chennai, Tamil Nadu", "₹1,000", "06", null, null, null, "Exterior Painter" }
+            { "Royal Palms Luxury Villas", "Pune, Maharashtra", "₹950", "01", "CURATED_PA_01", null, null, "Interior Painter" },
+            { "Sea Princess Texture Works", "Mumbai, Maharashtra", "₹1,100", "02", "CURATED_PA_02", null, null, "Wall Texture Painter" },
+            { "Nashik Industrial Coatings", "Nashik, Maharashtra", "₹1,200", "03", "CURATED_PA_03", null, null, "Industrial Painter" },
+            { "Prestige Tech Park Spraying", "Bangalore, Karnataka", "₹1,150", "04", "CURATED_PA_04", null, null, "Spray Painter" },
+            { "Lutyens Bungalow Woodwork", "New Delhi, Delhi", "₹1,300", "05", "CURATED_PA_05", null, null, "Wood Polish Painter" },
+            { "East Coast Road Residences", "Chennai, Tamil Nadu", "₹1,000", "06", "CURATED_PA_06", null, null, "Exterior Painter" }
     };
 
     private final FlowPane jobs = new FlowPane(24, 24);
@@ -241,23 +241,34 @@ public class PainterJobRole {
             if (com.dihadi.view.SessionManager.currentWorker != null) {
                 new Thread(() -> {
                     try {
-                        List<com.dihadi.model.JobApplication> apps = new com.dihadi.controller.JobApplicationController().getApplicationsByWorker(com.dihadi.view.SessionManager.currentWorker.getMobileNumber());
-                        boolean hasApplied = false;
-                        for (com.dihadi.model.JobApplication app : apps) {
-                            if ((app.getJobTitle() != null && app.getJobTitle().equalsIgnoreCase(roleTitle)) || (j[4] != null && j[4].equals(app.getProjectId()))) {
-                                hasApplied = true;
-                                break;
-                            }
-                        }
+                        boolean hasApplied = new com.dihadi.controller.JobApplicationController().hasWorkerApplied(
+                                com.dihadi.view.SessionManager.currentWorker.getMobileNumber(),
+                                j[4],
+                                j.length > 6 ? j[6] : null,
+                                roleTitle,
+                                j[1]
+                        );
                         if (hasApplied) {
                             javafx.application.Platform.runLater(() -> {
                                 apply.setText("Already applied ✓");
                                 apply.setStyle("-fx-background-color:#2a7e3b;-fx-background-radius:12px;-fx-text-fill:#ffffff;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;");
                                 apply.setDisable(true);
                             });
+                        } else {
+                            javafx.application.Platform.runLater(() -> {
+                                apply.setText("Apply now");
+                                apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                                apply.setDisable(false);
+                            });
                         }
                     } catch (Exception ignored) {}
                 }).start();
+            } else {
+                javafx.application.Platform.runLater(() -> {
+                    apply.setText("Apply now");
+                    apply.setStyle("-fx-background-color:#d4af37;-fx-background-radius:12px;-fx-text-fill:#342f28;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:10px 18px;-fx-cursor:hand;");
+                    apply.setDisable(false);
+                });
             }
         };
         checkAppliedStatus.run();
