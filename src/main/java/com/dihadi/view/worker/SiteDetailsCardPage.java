@@ -51,13 +51,14 @@ public class SiteDetailsCardPage {
         Label wageVal = label(wage, "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#735c00;");
 
         VBox overview = new VBox(14,
-                heading("Project Overview"),
+                heading("Project Information"),
                 detailBox("Project Name", projNameVal),
                 detailBox("Contact Person", contactVal),
                 detailBox("Worker Requirement", reqVal),
                 detailBox("Daily Wage", wageVal)
         );
         overview.setPadding(new Insets(20));
+        overview.setPrefWidth(420);
         overview.setStyle(boxStyle());
 
         // UI Labels for Site Address
@@ -68,7 +69,7 @@ public class SiteDetailsCardPage {
         FlowPane facilitiesPane = new FlowPane(8, 8);
 
         VBox address = new VBox(10,
-                heading("Site Address"),
+                heading("Site & Work Details"),
                 addressLine1Val,
                 addressLine2Val,
                 landmarkVal,
@@ -77,19 +78,25 @@ public class SiteDetailsCardPage {
         );
         address.setPadding(new Insets(20));
         address.setStyle(boxStyle());
-
-        VBox left = new VBox(20, overview, address);
-        left.setPrefWidth(560);
+        HBox.setHgrow(address, Priority.ALWAYS);
 
         ImageView image = new ImageView(load(imagePath));
-        image.setFitWidth(360);
-        image.setFitHeight(300);
+        image.setFitWidth(220);
+        image.setFitHeight(200);
         image.setPreserveRatio(false);
-        image.setStyle("-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.15),10,0,0,3px);");
-
-        VBox right = new VBox(14, heading("Site Imagery"), image);
-        right.setPadding(new Insets(20));
-        right.setStyle(boxStyle());
+        StackPane imageFrame = new StackPane(image);
+        imageFrame.setPrefSize(220, 200);
+        imageFrame.setStyle("-fx-background-color:#f4ede2;-fx-background-radius:14px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:14px;");
+        VBox identity = new VBox(10,
+                label(title, "-fx-font-family:Georgia;-fx-font-size:29px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
+                label("CARPENTER OPPORTUNITY", "-fx-background-color:#fff8f0;-fx-border-color:#d4af37;-fx-border-radius:999px;-fx-background-radius:999px;-fx-padding:7px 12px;-fx-text-fill:#735c00;-fx-font-weight:700;"),
+                label(location, "-fx-font-size:15px;-fx-text-fill:#4c4637;"),
+                label("Daily wage: " + wage + " / day", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
+        identity.setAlignment(Pos.CENTER_LEFT);
+        HBox hero = new HBox(28, imageFrame, identity);
+        hero.setAlignment(Pos.CENTER_LEFT);
+        hero.setPadding(new Insets(20));
+        hero.setStyle(boxStyle());
 
         Button apply = new Button("APPLY FOR THIS JOB");
         apply.setMaxWidth(Double.MAX_VALUE);
@@ -315,20 +322,20 @@ public class SiteDetailsCardPage {
             }
         });
 
-        Button close = new Button("←  BACK");
+        Button close = new Button("←  BACK TO PROJECT");
         close.setOnAction(e -> {
             if (back != null)
                 back.run();
         });
         close.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-weight:700;-fx-cursor:hand;");
+        apply.setMaxWidth(Region.USE_PREF_SIZE);
         HBox actions = new HBox(14, close, apply);
-        HBox.setHgrow(apply, Priority.ALWAYS);
         actions.setAlignment(Pos.CENTER_RIGHT);
+        actions.setPadding(new Insets(16, 20, 16, 20));
+        actions.setStyle(boxStyle());
 
         VBox content = new VBox(22,
-                new VBox(4, heading("Construction Site Details"),
-                        label("Ref: DIHADI-" + title.toUpperCase().replace(' ', '-'))),
-                new HBox(20, left, right), actions);
+                hero, new HBox(20, overview, address), actions);
         content.setPadding(new Insets(28));
         content.setMaxWidth(1020);
         ScrollPane scroll = new ScrollPane(content);
@@ -337,7 +344,7 @@ public class SiteDetailsCardPage {
         scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;");
         StackPane card = new StackPane(scroll);
         card.setMaxSize(1080, 670);
-        card.setStyle("-fx-background-color:rgba(255,253,249,0.92);-fx-background-radius:20px;-fx-border-color:#d0c5af;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.22),30,0,0,8px);");
+        card.setStyle("-fx-background-color:rgba(255,253,249,0.76);-fx-background-radius:20px;-fx-border-color:#d0c5af;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.22),30,0,0,8px);");
 
         StackPane root = new StackPane();
         if (currentScene != null) {
@@ -384,7 +391,7 @@ public class SiteDetailsCardPage {
     }
 
     private String boxStyle() {
-        return "-fx-background-color:#f4ede2;-fx-background-radius:10px;-fx-border-color:#e9e2d7;-fx-border-radius:10px;";
+        return "-fx-background-color:rgba(255,250,242,.72);-fx-background-radius:18px;-fx-border-color:rgba(217,207,189,.90);-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),12,0,0,3px);";
     }
 
     private Image load(String path) {
@@ -404,4 +411,4 @@ public class SiteDetailsCardPage {
         } catch (Exception ignored) {}
         return null;
     }
-}
+}
