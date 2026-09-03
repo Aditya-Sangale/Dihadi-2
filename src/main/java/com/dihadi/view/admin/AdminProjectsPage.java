@@ -103,23 +103,15 @@ public class AdminProjectsPage {
         Button workersNav = nav("Workers", false);
         workersNav.setOnAction(e -> {
             if (clock != null) clock.stop();
-            for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
-                if (window.isFocused() && window instanceof Stage stage) {
-                    stage.setScene(new AdminWorkersPage().getWorkersScene(dashboardAction, logout));
-                    return;
-                }
-            }
+            Stage stage = (Stage) workersNav.getScene().getWindow();
+            stage.setScene(new AdminWorkersPage().getWorkersScene(dashboardAction, logout));
         });
 
         Button recruitersNav = nav("Recruiters", false);
         recruitersNav.setOnAction(e -> {
             if (clock != null) clock.stop();
-            for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
-                if (window.isFocused() && window instanceof Stage stage) {
-                    stage.setScene(new AdminRecruitersPage().getRecruitersScene(dashboardAction, logout));
-                    return;
-                }
-            }
+            Stage stage = (Stage) recruitersNav.getScene().getWindow();
+            stage.setScene(new AdminRecruitersPage().getRecruitersScene(dashboardAction, logout));
         });
 
         Button projectsNav = nav("Projects", true);
@@ -127,25 +119,21 @@ public class AdminProjectsPage {
         Button grievances = nav("Grievances", false);
         grievances.setOnAction(e -> {
             if (clock != null) clock.stop();
-            for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
-                if (window.isFocused() && window instanceof Stage stage) {
-                    stage.setScene(new AdminGrievancesPage().getGrievancesScene(
-                            () -> stage.setScene(getProjectsScene(dashboardAction, logout))));
-                    return;
-                }
-            }
+            Stage stage = (Stage) grievances.getScene().getWindow();
+            stage.setScene(new AdminGrievancesPage().getGrievancesScene(dashboardAction, logout));
         });
 
         VBox links = new VBox(4, command, workersNav, recruitersNav, projectsNav,
                 nav("Financials", false), nav("Verification", false), grievances);
         VBox.setVgrow(links, Priority.ALWAYS);
 
-        Button profile = nav("Admin User\nSystem Administrator", false);
+        String adminName = com.dihadi.view.SessionManager.getAdminDisplayName();
+        Button profile = nav(adminName + "\nSystem Administrator", false);
         profile.setOnAction(e -> {
             if (clock != null) clock.stop();
             logout.run();
         });
-        VBox bottom = new VBox(4, nav("Support", false), nav("Compliance", false), profile);
+        VBox bottom = new VBox(4, profile);
         bottom.setPadding(new Insets(14, 0, 14, 0));
         bottom.setStyle("-fx-border-color:#ffffff1a;-fx-border-width:1px 0 0 0;");
 
@@ -157,8 +145,9 @@ public class AdminProjectsPage {
     }
 
     private BorderPane mainContent() {
+        String adminName = com.dihadi.view.SessionManager.getAdminDisplayName();
         HBox breadcrumb = new HBox(
-                label("Admin", "-fx-font-size:16px;-fx-text-fill:#1A1A1A;"),
+                label(adminName, "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#1A1A1A;"),
                 label("   >   ", "-fx-font-size:16px;-fx-text-fill:#4A4A4A;"),
                 label("Projects Management", "-fx-font-size:16px;-fx-text-fill:" + GOLD + ";")
         );
@@ -279,7 +268,7 @@ public class AdminProjectsPage {
         if (isLoading) {
             ProgressIndicator pi = new ProgressIndicator();
             pi.setPrefSize(42, 42);
-            VBox box = new VBox(12, pi, label("Synchronizing real-time project ecosystem...", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
+            VBox box = new VBox(12, pi, label("Loading projects...", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
             box.setAlignment(Pos.CENTER);
             box.setPadding(new Insets(50));
             projectCardsPane.add(box, 0, 0, 2, 1);
@@ -798,7 +787,7 @@ public class AdminProjectsPage {
         clock = new Timeline(new KeyFrame(Duration.ZERO, e -> time.setText("System Time: " + ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).format(DateTimeFormatter.ofPattern("hh:mm:ss a 'IST'")))), new KeyFrame(Duration.seconds(1)));
         clock.setCycleCount(Timeline.INDEFINITE);
         clock.play();
-        HBox footer = new HBox(28, health("Database: OK"), health("Firestore Sync: Realtime"), health("Escrow Gateway: OK"), spacer(), time);
+        HBox footer = new HBox(28, health("Database: OK"), health("Projects: OK"), health("Payments: OK"), spacer(), time);
         footer.setAlignment(Pos.CENTER_LEFT);
         footer.setPadding(new Insets(0, 28, 0, 28));
         footer.setPrefHeight(36);

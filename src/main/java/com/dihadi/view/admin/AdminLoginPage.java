@@ -3,7 +3,6 @@ package com.dihadi.view.admin;
 import com.dihadi.controller.AdminController;
 import com.dihadi.model.Admin;
 import com.dihadi.view.AppNavigator;
-import com.dihadi.view.NotificationToast;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -58,7 +57,7 @@ public class AdminLoginPage {
                 label("Meri Dihadi ~ Mera Haq", "-fx-font-family:Georgia;-fx-font-size:18px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
         brand.setAlignment(Pos.CENTER);
 
-        Label welcome = label("👋  Welcome to DIHADI", "-fx-font-family:Georgia;-fx-font-size:29px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
+        Label welcome = label("Welcome to DIHADI", "-fx-font-family:Georgia;-fx-font-size:29px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
         Label intro = label("Please enter your DIHADI official email address\nand password to proceed ahead.",
                 "-fx-font-size:16px;-fx-text-fill:#4c4637;-fx-text-alignment:center;");
         VBox introduction = new VBox(9, welcome, intro); introduction.setAlignment(Pos.CENTER);
@@ -137,7 +136,6 @@ public class AdminLoginPage {
         String passText = password.getText().trim();
 
         if (emailText.isBlank() || passText.isBlank()) {
-            NotificationToast.show(login, "Input Required ⚠️", "Please enter both your official email and password.", NotificationToast.ToastType.ALERT);
             notice("Invalid Input", "Please enter your official email address and password.");
             return;
         }
@@ -151,18 +149,16 @@ public class AdminLoginPage {
 
                 Platform.runLater(() -> {
                     if (admin != null) {
-                        NotificationToast.show(login, "Login Successful! 🎉", "Welcome, " + admin.getFullName() + "!", NotificationToast.ToastType.SUCCESS);
-                        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.millis(350));
-                        pause.setOnFinished(e -> {
-                            Stage stage = (Stage) login.getScene().getWindow();
-                            stage.setScene(new AdminDashboard().getDashboardScene(
-                                    () -> stage.setScene(getAdminLoginScene(backAction))));
-                        });
-                        pause.play();
+                        com.dihadi.view.SessionManager.currentAdmin = admin;
+                        Stage stage = (Stage) login.getScene().getWindow();
+                        stage.setScene(new AdminDashboard().getDashboardScene(
+                                () -> {
+                                    com.dihadi.view.SessionManager.currentAdmin = null;
+                                    stage.setScene(getAdminLoginScene(backAction));
+                                }));
                     } else {
                         login.setDisable(false);
                         login.setText("LOGIN");
-                        NotificationToast.show(login, "Invalid Credentials ⚠️", "Incorrect official email or password. Please try again.", NotificationToast.ToastType.ERROR);
                         notice("Invalid Credentials", "Invalid email address or password. Please check your credentials and try again.");
                     }
                 });
@@ -171,7 +167,6 @@ public class AdminLoginPage {
                 Platform.runLater(() -> {
                     login.setDisable(false);
                     login.setText("LOGIN");
-                    NotificationToast.show(login, "Connection Error ⚠️", "Unable to reach Firebase. Please check your network.", NotificationToast.ToastType.ERROR);
                     notice("Network Error", "Unable to verify credentials. Please check your internet connection.");
                 });
             }
