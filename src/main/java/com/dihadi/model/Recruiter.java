@@ -1,5 +1,8 @@
 package com.dihadi.model;
 
+import com.google.cloud.firestore.annotation.IgnoreExtraProperties;
+
+@IgnoreExtraProperties
 public class Recruiter {
     private String firstName;
     private String middleName;
@@ -137,5 +140,50 @@ public class Recruiter {
 
     public void setWalletBalance(double walletBalance) {
         this.walletBalance = walletBalance;
+    }
+
+    public String getId() {
+        if (uid != null && !uid.isBlank()) return uid;
+        if (mobileNumber != null && !mobileNumber.isBlank()) return mobileNumber;
+        return "";
+    }
+
+    public void setId(String id) {
+        if ((this.uid == null || this.uid.isBlank()) && id != null) {
+            this.uid = id;
+        }
+    }
+
+    public String getName() {
+        String fn = firstName != null ? firstName.trim() : "";
+        String mn = middleName != null ? middleName.trim() : "";
+        String ln = lastName != null ? lastName.trim() : "";
+        String full = (fn + (mn.isEmpty() ? "" : " " + mn) + (ln.isEmpty() ? "" : " " + ln)).trim();
+        return !full.isEmpty() ? full : (companyName != null ? companyName : "Recruiter");
+    }
+
+    public void setName(String name) {
+        if (name != null && !name.isBlank()) {
+            if (this.firstName == null || this.firstName.isBlank()) {
+                String[] parts = name.trim().split("\\s+", 3);
+                this.firstName = parts[0];
+                if (parts.length == 2) {
+                    this.lastName = parts[1];
+                } else if (parts.length > 2) {
+                    this.middleName = parts[1];
+                    this.lastName = parts[2];
+                }
+            }
+        }
+    }
+
+    public String getPhone() {
+        return mobileNumber != null ? mobileNumber : "";
+    }
+
+    public void setPhone(String phone) {
+        if ((this.mobileNumber == null || this.mobileNumber.isBlank()) && phone != null) {
+            this.mobileNumber = phone;
+        }
     }
 }

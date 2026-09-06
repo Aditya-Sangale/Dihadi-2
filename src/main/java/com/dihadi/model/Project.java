@@ -3,6 +3,9 @@ package com.dihadi.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.cloud.firestore.annotation.IgnoreExtraProperties;
+
+@IgnoreExtraProperties
 public class Project {
     private String projectId;
     private String projectName;
@@ -167,8 +170,20 @@ public class Project {
         return projectId != null ? projectId : "";
     }
 
+    public void setId(String id) {
+        if ((this.projectId == null || this.projectId.isBlank()) && id != null) {
+            this.projectId = id;
+        }
+    }
+
     public String getTitle() {
         return projectName != null ? projectName : "Untitled Project";
+    }
+
+    public void setTitle(String title) {
+        if ((this.projectName == null || this.projectName.isBlank()) && title != null) {
+            this.projectName = title;
+        }
     }
 
     @Override
