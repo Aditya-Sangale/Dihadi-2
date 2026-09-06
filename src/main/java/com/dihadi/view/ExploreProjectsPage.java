@@ -142,7 +142,7 @@ public class ExploreProjectsPage {
     private ScrollPane body() {
         HBox backRow = new HBox(homeBackButton());
         backRow.setAlignment(Pos.CENTER_LEFT);
-        VBox content = new VBox(34, hero(), featuredBannerBox(), filterBar(), projectGridSection(), backRow, footer());
+        VBox content = new VBox(24, backRow, hero(), featuredBannerBox(), filterBar(), projectGridSection(), footer());
         content.setMaxWidth(1180);
         content.setPadding(new Insets(30, 20, 36, 20));
         content.setAlignment(Pos.TOP_CENTER);

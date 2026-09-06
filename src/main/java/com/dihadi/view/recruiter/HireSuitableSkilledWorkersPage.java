@@ -16,7 +16,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
+import javafx.scene.layout.Priority;  
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
@@ -100,7 +100,7 @@ public class HireSuitableSkilledWorkersPage {
         }
 
         private HBox hero() {
-                heroImage = image(HERO_IMAGES[0], 780, 400);
+                heroImage = image(HERO_IMAGES[0], 780, 400);   
                 heroImage.setPreserveRatio(false);
                 StackPane photo = new StackPane(heroImage);
                 photo.setPrefSize(780, 400);
@@ -334,7 +334,7 @@ public class HireSuitableSkilledWorkersPage {
                                 "-fx-background-color:#fbf3e5;-fx-background-radius:18px;-fx-border-color:#c6a15b;-fx-border-radius:18px;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:9px 18px;-fx-cursor:hand;");
                 return button;
         }
-
+      
         private ComboBox<String> combo(String prompt, String... values) {
                 ComboBox<String> box = new ComboBox<>();
                 box.setPromptText(prompt);

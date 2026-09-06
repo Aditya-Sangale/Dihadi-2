@@ -89,15 +89,15 @@ public class CreateProjectPage {
     }
 
     private VBox projectCard(Runnable closeAction) {
-        Button back = new Button("<");
+        Button back = new Button("←  Back");
         back.setStyle(
-                "-fx-background-color:transparent;-fx-padding:0 2px 0 0;-fx-font-size:22px;-fx-font-weight:700;-fx-text-fill:#1e1b15;-fx-cursor:hand;");
+                "-fx-background-color:rgba(212,175,55,.16);-fx-background-radius:12px;-fx-border-color:rgba(212,175,55,.58);-fx-border-radius:12px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:9px 16px;-fx-cursor:hand;");
         back.setOnAction(e -> {
             if (closeAction != null)
                 closeAction.run();
         });
         Label heading = text("ADD NEW PROJECT",
-                "-fx-font-size:13px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#1e1b15;");
+                "-fx-background-color:rgba(212,175,55,.16);-fx-background-radius:12px;-fx-border-color:rgba(212,175,55,.58);-fx-border-radius:12px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:12px;-fx-font-weight:800;-fx-letter-spacing:1.2px;-fx-padding:10px 16px;");
         HBox title = new HBox(8, back, heading);
         title.setAlignment(Pos.CENTER_LEFT);
 
