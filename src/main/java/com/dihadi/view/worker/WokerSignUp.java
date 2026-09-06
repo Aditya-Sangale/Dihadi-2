@@ -116,16 +116,14 @@ public class WokerSignUp {
                 }
             }
 
-            if (backAction != null) {
+            if (stage != null) {
+                AppNavigator.open(stage, "Home");
+            } else if (backAction != null) {
                 try {
                     backAction.run();
-                    return;
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-            }
-            if (stage != null) {
-                AppNavigator.open(stage, "Home");
             }
         });
         Label personalDetails = label("PERSONAL DETAILS",
@@ -234,7 +232,7 @@ public class WokerSignUp {
         login.setOnAction(event -> {
             if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.WORKER)) return;
             Stage stage = (Stage) login.getScene().getWindow();
-            stage.setScene(new WorkerLoginPage(() -> stage.setScene(getSignUpScene(backAction))).getLoginScene());
+            stage.setScene(new WorkerLoginPage(() -> AppNavigator.open(stage, "Home")).getLoginScene());
         });
         VBox actions = new VBox(18, consent, submit, login);
         actions.setAlignment(Pos.CENTER);

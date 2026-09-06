@@ -1,5 +1,8 @@
 package com.dihadi.model;
 
+import com.google.cloud.firestore.annotation.IgnoreExtraProperties;
+
+@IgnoreExtraProperties
 public class Worker {
     private String firstName;
     private String middleName;
@@ -242,13 +245,43 @@ public class Worker {
         return !full.isEmpty() ? full : "Worker";
     }
 
+    public void setName(String name) {
+        if (name != null && !name.isBlank()) {
+            if (this.firstName == null || this.firstName.isBlank()) {
+                String[] parts = name.trim().split("\\s+", 3);
+                this.firstName = parts[0];
+                if (parts.length == 2) {
+                    this.lastName = parts[1];
+                } else if (parts.length > 2) {
+                    this.middleName = parts[1];
+                    this.lastName = parts[2];
+                }
+            }
+        }
+    }
+
     public String getPhone() {
         return mobileNumber != null ? mobileNumber : "";
+    }
+
+    public void setPhone(String phone) {
+        if ((this.mobileNumber == null || this.mobileNumber.isBlank()) && phone != null) {
+            this.mobileNumber = phone;
+        }
     }
 
     public String getSkill() {
         if (workerType != null && !workerType.isBlank()) return workerType;
         if (subSkill != null && !subSkill.isBlank()) return subSkill;
         return "General Worker";
+    }
+
+    public void setSkill(String skill) {
+        if ((this.workerType == null || this.workerType.isBlank()) && skill != null) {
+            this.workerType = skill;
+        }
+        if ((this.subSkill == null || this.subSkill.isBlank()) && skill != null) {
+            this.subSkill = skill;
+        }
     }
 }

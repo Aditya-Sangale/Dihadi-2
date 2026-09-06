@@ -1,7 +1,9 @@
 package com.dihadi.model;
 
 import java.util.Date;
+import com.google.cloud.firestore.annotation.IgnoreExtraProperties;
 
+@IgnoreExtraProperties
 public class Admin {
     private String fullName;
     private String personalEmail;

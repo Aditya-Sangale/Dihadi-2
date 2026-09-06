@@ -109,10 +109,24 @@ public class LoginPage {
         create.setOnAction(e -> {
             if (!SessionManager.checkAccessAllowed(SessionManager.Role.WORKER)) return;
             Stage stage = (Stage) create.getScene().getWindow();
-            stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(() -> stage.setScene(getWorkerLoginScene())));
+            stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(() -> AppNavigator.open(stage, "Home")));
         });
 
-        VBox card = new VBox(20, brand, introBox, credentials, continueButton, create);
+        Button backButton = new Button("← Back");
+        backButton.setStyle(
+                "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:10px;-fx-border-color:rgba(212,175,55,0.4);-fx-border-radius:10px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
+        backButton.setOnAction(e -> {
+            Stage stage = (Stage) backButton.getScene().getWindow();
+            if (back != null) {
+                back.run();
+            } else {
+                AppNavigator.open(stage, "Home");
+            }
+        });
+        HBox topRow = new HBox(backButton);
+        topRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox card = new VBox(20, topRow, brand, introBox, credentials, continueButton, create);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(460);
         card.setPadding(new Insets(34, 38, 34, 38));
@@ -187,10 +201,24 @@ public class LoginPage {
                 stage.setScene(new com.dihadi.view.recruiter.SignUpRecruiter().getRecruiterSignUpScene(back));
             } else {
                 if (!SessionManager.checkAccessAllowed(SessionManager.Role.WORKER)) return;
-                stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(() -> stage.setScene(getLoginScene())));
+                stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(() -> AppNavigator.open(stage, "Home")));
             }
         });
-        VBox content = new VBox(24, brand, introBox, credentials, continueButton, create);
+        Button backButton = new Button("← Back");
+        backButton.setStyle(
+                "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:10px;-fx-border-color:rgba(212,175,55,0.4);-fx-border-radius:10px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
+        backButton.setOnAction(e -> {
+            Stage stage = (Stage) backButton.getScene().getWindow();
+            if (back != null) {
+                back.run();
+            } else {
+                AppNavigator.open(stage, "Home");
+            }
+        });
+        HBox topRow = new HBox(backButton);
+        topRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox content = new VBox(24, topRow, brand, introBox, credentials, continueButton, create);
         content.setAlignment(Pos.CENTER);
         content.setMaxWidth(520);
         content.setPadding(new Insets(50));

@@ -1,7 +1,9 @@
 package com.dihadi.model;
 
 import java.util.Date;
+import com.google.cloud.firestore.annotation.IgnoreExtraProperties;
 
+@IgnoreExtraProperties
 public class JobApplication {
     private String applicationId;
     private String workerMobile;
