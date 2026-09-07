@@ -27,6 +27,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -138,8 +139,30 @@ public class AttendancePage {
         projectSelectLabel.setTextFill(Color.web("#4c4637"));
 
         projectDropdown.setPromptText("Choose Project");
-        projectDropdown.setPrefWidth(260);
+        projectDropdown.setPrefWidth(300);
         projectDropdown.setStyle("-fx-font-size: 13px; -fx-background-radius: 6;");
+        projectDropdown.setCellFactory(lv -> new ListCell<Project>() {
+            @Override
+            protected void updateItem(Project item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getTitle() + " (" + item.getStatus() + ")");
+                }
+            }
+        });
+        projectDropdown.setButtonCell(new ListCell<Project>() {
+            @Override
+            protected void updateItem(Project item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getTitle() + " (" + item.getStatus() + ")");
+                }
+            }
+        });
         projectDropdown.setOnAction(e -> refreshAttendanceList());
 
         Label dateLabel = new Label("Date:");
@@ -229,15 +252,54 @@ public class AttendancePage {
         loadingIndicator.setVisible(true);
         new Thread(() -> {
             try {
-                List<Project> projects = projectDao.getProjectsByRecruiterId(currentRecruiterId);
+                List<Project> allProjects = projectDao.getProjectsByRecruiterId(currentRecruiterId);
+                List<Project> ongoingProjects = new ArrayList<>();
+                if (allProjects != null) {
+                    for (Project p : allProjects) {
+                        if (p == null) continue;
+                        String status = p.getStatus() != null ? p.getStatus().trim() : "";
+                        // Strictly exclude Completed, Cancelled, and Upcoming projects
+                        if ("Completed".equalsIgnoreCase(status) || "Cancelled".equalsIgnoreCase(status) || "Upcoming".equalsIgnoreCase(status)) {
+                            continue;
+                        }
+                        boolean isOngoing = "Active".equalsIgnoreCase(status)
+                                || "Available".equalsIgnoreCase(status)
+                                || "Unavailable".equalsIgnoreCase(status)
+                                || "Requirement Fulfilled".equalsIgnoreCase(status);
+                        if (isOngoing) {
+                            ongoingProjects.add(p);
+                        }
+                    }
+                }
+
                 Platform.runLater(() -> {
                     projectDropdown.getItems().clear();
-                    if (projects != null && !projects.isEmpty()) {
-                        projectDropdown.getItems().addAll(projects);
-                        projectDropdown.getSelectionModel().selectFirst();
+                    if (!ongoingProjects.isEmpty()) {
+                        projectDropdown.getItems().addAll(ongoingProjects);
+                        Project preselect = null;
+                        if (com.dihadi.view.SessionManager.currentRecruiterProject != null) {
+                            String activeId = com.dihadi.view.SessionManager.currentRecruiterProject.getProjectId();
+                            for (Project p : ongoingProjects) {
+                                if (activeId != null && (activeId.equals(p.getProjectId()) || activeId.equals(p.getId()))) {
+                                    preselect = p;
+                                    break;
+                                }
+                            }
+                        }
+                        if (preselect != null) {
+                            projectDropdown.getSelectionModel().select(preselect);
+                        } else {
+                            projectDropdown.getSelectionModel().selectFirst();
+                        }
                         refreshAttendanceList();
                     } else {
-                        statusSummaryLabel.setText("No active projects found for current recruiter.");
+                        statusSummaryLabel.setText("No active ongoing projects available for attendance (completed projects excluded).");
+                        tableRowsContainer.getChildren().clear();
+                        Label emptyLabel = new Label("No active ongoing project found. Completed projects are excluded from daily attendance.");
+                        emptyLabel.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 14));
+                        emptyLabel.setTextFill(Color.web("#685c52"));
+                        emptyLabel.setPadding(new Insets(36));
+                        tableRowsContainer.getChildren().add(emptyLabel);
                     }
                     loadingIndicator.setVisible(false);
                 });
@@ -299,32 +361,56 @@ public class AttendancePage {
         row.setStyle("-fx-border-color: #f3f4f6; -fx-border-width: 0 0 1 0; -fx-background-color: #ffffff;");
 
         // Hover effect
-        row.setOnMouseEntered(e -> row.setStyle("-fx-border-color: #f3f4f6; -fx-border-width: 0 0 1 0; -fx-background-color: #faf5eb;"));
+        row.setOnMouseEntered(e -> row.setStyle("-fx-border-color: #ebdccb; -fx-border-width: 0 0 1 0; -fx-background-color: #fdfaf3;"));
         row.setOnMouseExited(e -> row.setStyle("-fx-border-color: #f3f4f6; -fx-border-width: 0 0 1 0; -fx-background-color: #ffffff;"));
 
-        // 1. Worker Details
-        VBox workerDetails = new VBox(3);
+        // 1. Worker Details - Name with robust resolution and dark bold styling
+        VBox workerDetails = new VBox(4);
         workerDetails.setPrefWidth(260);
-        Label nameLabel = new Label(worker.getName() != null ? worker.getName() : "Worker");
-        nameLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
-        nameLabel.setTextFill(Color.web("#1e1b15"));
 
-        Label phoneLabel = new Label("ID: " + worker.getId() + " | " + (worker.getPhone() != null && !worker.getPhone().isBlank() ? worker.getPhone() : "N/A"));
-        phoneLabel.setFont(Font.font("Segoe UI", 12));
-        phoneLabel.setTextFill(Color.web("#685c52"));
+        String displayName = worker.getFullName();
+        if (displayName == null || displayName.isBlank() || "Worker".equalsIgnoreCase(displayName.trim())) {
+            displayName = worker.getName();
+        }
+        if (displayName == null || displayName.isBlank() || "Worker".equalsIgnoreCase(displayName.trim())) {
+            String fn = worker.getFirstName() != null ? worker.getFirstName().trim() : "";
+            String mn = worker.getMiddleName() != null ? worker.getMiddleName().trim() : "";
+            String ln = worker.getLastName() != null ? worker.getLastName().trim() : "";
+            displayName = (fn + (mn.isEmpty() ? "" : " " + mn) + (ln.isEmpty() ? "" : " " + ln)).trim();
+        }
+        if (displayName.isEmpty() || "Worker".equalsIgnoreCase(displayName.trim())) {
+            displayName = "Verified Worker";
+        }
+        final String finalWorkerName = displayName;
+
+        Label nameLabel = new Label(finalWorkerName);
+        nameLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
+        nameLabel.setTextFill(Color.web("#111827"));
+        nameLabel.setStyle("-fx-font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif; -fx-font-size: 15px; -fx-font-weight: 800; -fx-text-fill: #111827;");
+
+        String phoneStr = worker.getPhone() != null && !worker.getPhone().isBlank()
+                ? worker.getPhone()
+                : (worker.getMobileNumber() != null ? worker.getMobileNumber() : "");
+        String idStr = (worker.getId() != null && !worker.getId().isBlank()) ? worker.getId() : phoneStr;
+        Label phoneLabel = new Label("Phone: " + (phoneStr.isEmpty() ? "N/A" : phoneStr) + "  |  ID: " + idStr);
+        phoneLabel.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 12));
+        phoneLabel.setTextFill(Color.web("#374151"));
+        phoneLabel.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #374151;");
         workerDetails.getChildren().addAll(nameLabel, phoneLabel);
 
         // 2. Role
-        Label roleLabel = new Label(worker.getSkill() != null ? worker.getSkill() : "Daily Labour");
-        roleLabel.setFont(Font.font("Segoe UI", 13));
-        roleLabel.setTextFill(Color.web("#4c4637"));
+        Label roleLabel = new Label(worker.getSkill() != null && !worker.getSkill().isBlank() ? worker.getSkill() : "Daily Labour");
+        roleLabel.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 13));
+        roleLabel.setTextFill(Color.web("#1f2937"));
+        roleLabel.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #1f2937;");
         roleLabel.setPrefWidth(180);
 
         // 3. Daily Wage
         double wage = worker.getDailyWage() > 0 ? worker.getDailyWage() : 600.00;
         Label wageLabel = new Label(String.format("₹%.2f", wage));
-        wageLabel.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
-        wageLabel.setTextFill(Color.web("#1b5e20"));
+        wageLabel.setFont(Font.font("Georgia", FontWeight.BOLD, 15));
+        wageLabel.setTextFill(Color.web("#15803d"));
+        wageLabel.setStyle("-fx-font-family: 'Georgia', serif; -fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #15803d;");
         wageLabel.setPrefWidth(140);
 
         // 4. Status Indicator
@@ -368,7 +454,7 @@ public class AttendancePage {
             markPresentBtn.setText("Initiating Gateway...");
 
             String receiptId = "RCPT_" + System.currentTimeMillis();
-            String notes = "Attendance Wage: " + worker.getName() + " on " + date;
+            String notes = "Attendance Wage: " + finalWorkerName + " on " + date;
 
             // Step 1: Create Razorpay Order via Controller
             attendanceController.createPaymentOrder(
@@ -387,7 +473,7 @@ public class AttendancePage {
                         keyId,
                         orderId,
                         wage,
-                        worker.getName(),
+                        finalWorkerName,
                         (paymentId, returnedOrderId, signature) -> {
                             // Step 3: Payment succeeded at Gateway -> Verify signature & credit worker
                             markPresentBtn.setText("Verifying...");
@@ -402,9 +488,14 @@ public class AttendancePage {
                                 signature,
                                 () -> {
                                     setMarkedPresentState(markPresentBtn, statusDot, statusText, paymentId);
-                                    NotificationToast.show(markPresentBtn, "Payout Successful",
-                                            String.format("Paid ₹%.2f to %s via Razorpay", wage, worker.getName()),
+                                    NotificationToast.show(markPresentBtn, "Payment Successful",
+                                            String.format("Paid ₹%.2f to %s via Razorpay", wage, finalWorkerName),
                                             NotificationToast.ToastType.SUCCESS);
+                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                    alert.setTitle("Payment Successful");
+                                    alert.setHeaderText("Wage Disbursed Successfully");
+                                    alert.setContentText(String.format("Payment of ₹%.2f to %s was completed successfully!\nPayee: Aditya Sangale\nTxn ID: %s", wage, finalWorkerName, paymentId));
+                                    alert.showAndWait();
                                 },
                                 verifyError -> {
                                     markPresentBtn.setDisable(false);
@@ -545,9 +636,9 @@ public class AttendancePage {
 
                                     updateWalletDisplay();
                                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                                    alert.setTitle("Recharge Successful");
-                                    alert.setHeaderText("Wallet Credited");
-                                    alert.setContentText(String.format("₹%.2f credited to your wallet!\nTxn ID: %s", amount, paymentId));
+                                    alert.setTitle("Payment Successful");
+                                    alert.setHeaderText("Payment Successful - Wallet Credited");
+                                    alert.setContentText(String.format("₹%.2f credited to your wallet!\nPayee: Aditya Sangale\nTxn ID: %s", amount, paymentId));
                                     alert.showAndWait();
                                 }
 

@@ -77,20 +77,29 @@ public class WelcomePage {
 
     private Path resolveResourceToFile(String resourcePath, String suffix) throws IOException, URISyntaxException {
         var resource = getClass().getResource(resourcePath);
-        if (resource == null) {
-            return null;
+        if (resource != null) {
+            URI resourceUri = resource.toURI();
+            if ("file".equals(resourceUri.getScheme())) {
+                return Path.of(resourceUri);
+            }
+
+            Path tempFile = Files.createTempFile("dihadi-resource-", suffix);
+            tempFile.toFile().deleteOnExit();
+            try (var in = resource.openStream()) {
+                Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+            return tempFile;
         }
 
-        URI resourceUri = resource.toURI();
-        if ("file".equals(resourceUri.getScheme())) {
-            return Path.of(resourceUri);
+        Path directPath = Path.of("src/main/resources" + (resourcePath.startsWith("/") ? "" : "/") + resourcePath);
+        if (Files.exists(directPath)) {
+            return directPath.toAbsolutePath();
+        }
+        Path targetPath = Path.of("target/classes" + (resourcePath.startsWith("/") ? "" : "/") + resourcePath);
+        if (Files.exists(targetPath)) {
+            return targetPath.toAbsolutePath();
         }
 
-        Path tempFile = Files.createTempFile("dihadi-resource-", suffix);
-        tempFile.toFile().deleteOnExit();
-        try (var in = resource.openStream()) {
-            Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
-        }
-        return tempFile;
+        return null;
     }
 }

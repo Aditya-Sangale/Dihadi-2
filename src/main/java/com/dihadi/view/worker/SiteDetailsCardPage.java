@@ -26,18 +26,25 @@ import java.util.List;
  * Compact project-opening details card shown when a worker selects Apply Now.
  */
 public class SiteDetailsCardPage {
-    private final String title, location, wage, imagePath;
+    private final String projectName;
+    private final String roleTitle;
+    private final String location, wage, imagePath;
     private final String projectId, recruiterMobile, requirementId;
     private Project matchedProj;
 
-    public SiteDetailsCardPage(String title, String location, String wage, String imagePath, String projectId, String recruiterMobile, String requirementId) {
-        this.title = title;
-        this.location = location;
-        this.wage = wage;
+    public SiteDetailsCardPage(String projectName, String roleTitle, String location, String wage, String imagePath, String projectId, String recruiterMobile, String requirementId) {
+        this.projectName = (projectName != null && !projectName.isBlank()) ? projectName : (roleTitle != null ? roleTitle : "Project");
+        this.roleTitle = (roleTitle != null && !roleTitle.isBlank()) ? roleTitle : this.projectName;
+        this.location = location != null ? location : "Site Location";
+        this.wage = wage != null ? wage : "Daily Wage";
         this.imagePath = imagePath;
         this.projectId = projectId;
         this.recruiterMobile = recruiterMobile;
         this.requirementId = requirementId;
+    }
+
+    public SiteDetailsCardPage(String title, String location, String wage, String imagePath, String projectId, String recruiterMobile, String requirementId) {
+        this(title, title, location, wage, imagePath, projectId, recruiterMobile, requirementId);
     }
 
     public Scene getScene(Runnable back) {
@@ -45,10 +52,13 @@ public class SiteDetailsCardPage {
     }
 
     public Scene getScene(Runnable back, Scene currentScene) {
+        String displayProjName = (projectName != null && !projectName.isBlank()) ? projectName : roleTitle;
+        String opportunityText = (roleTitle != null && !roleTitle.isBlank() ? roleTitle.toUpperCase() : "WORK") + " OPPORTUNITY";
+
         // UI Labels for Project Overview
-        Label projNameVal = label(title, "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
-        Label contactVal = label("Loading...", "-fx-font-size:15px;-fx-text-fill:#1e1b15;");
-        Label reqVal = label(title + " Required", "-fx-font-size:15px;-fx-text-fill:#1e1b15;");
+        Label projNameVal = label(displayProjName, "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
+        Label contactVal = label("Site Project Supervisor", "-fx-font-size:15px;-fx-text-fill:#1e1b15;");
+        Label reqVal = label(roleTitle + " Required", "-fx-font-size:15px;-fx-text-fill:#1e1b15;");
         Label wageVal = label(wage, "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#735c00;");
 
         VBox overview = new VBox(14,
@@ -63,11 +73,20 @@ public class SiteDetailsCardPage {
         overview.setStyle(boxStyle());
 
         // UI Labels for Site Address
-        Label addressLine1Val = label("Loading site address...", "-fx-font-size:14px;-fx-text-fill:#1e1b15;");
+        Label addressLine1Val = label("📍 " + location + " Construction Zone", "-fx-font-size:14px;-fx-text-fill:#1e1b15;");
         Label addressLine2Val = label("", "-fx-font-size:14px;-fx-text-fill:#4c4637;");
+        addressLine2Val.setVisible(false);
+        addressLine2Val.setManaged(false);
         Label landmarkVal = label("", "-fx-font-size:13px;-fx-font-weight:600;-fx-text-fill:#735c00;");
-        Label locationPinVal = label(location, "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
+        landmarkVal.setVisible(false);
+        landmarkVal.setManaged(false);
+        Label locationPinVal = label("Region: " + location, "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
         FlowPane facilitiesPane = new FlowPane(8, 8);
+        facilitiesPane.getChildren().addAll(
+                facilityBadge("💧 Clean Water"),
+                facilityBadge("⚡ Electricity"),
+                facilityBadge("🏠 Accommodation")
+        );
 
         VBox address = new VBox(10,
                 heading("Site & Work Details"),
@@ -88,11 +107,16 @@ public class SiteDetailsCardPage {
         StackPane imageFrame = new StackPane(image);
         imageFrame.setPrefSize(220, 200);
         imageFrame.setStyle("-fx-background-color:#f4ede2;-fx-background-radius:14px;-fx-border-color:#d4af37;-fx-border-width:2px;-fx-border-radius:14px;");
-        VBox identity = new VBox(10,
-                label(title, "-fx-font-family:Georgia;-fx-font-size:29px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
-                label("CARPENTER OPPORTUNITY", "-fx-background-color:#fff8f0;-fx-border-color:#d4af37;-fx-border-radius:999px;-fx-background-radius:999px;-fx-padding:7px 12px;-fx-text-fill:#735c00;-fx-font-weight:700;"),
-                label(location, "-fx-font-size:15px;-fx-text-fill:#4c4637;"),
-                label("Daily wage: " + wage + " / day", "-fx-font-size:14px;-fx-text-fill:#4c4637;"));
+
+        Label heroNameLabel = label(displayProjName, "-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
+        heroNameLabel.setWrapText(true);
+        heroNameLabel.setMaxWidth(460);
+
+        Label heroBadgeLabel = label(opportunityText, "-fx-background-color:#fff8f0;-fx-border-color:#d4af37;-fx-border-radius:999px;-fx-background-radius:999px;-fx-padding:7px 12px;-fx-text-fill:#735c00;-fx-font-weight:700;");
+        Label heroLocLabel = label(location, "-fx-font-size:15px;-fx-text-fill:#4c4637;");
+        Label heroWageLabel = label("Daily wage: " + wage + " / day", "-fx-font-size:14px;-fx-text-fill:#4c4637;");
+
+        VBox identity = new VBox(10, heroNameLabel, heroBadgeLabel, heroLocLabel, heroWageLabel);
         identity.setAlignment(Pos.CENTER_LEFT);
         HBox hero = new HBox(28, imageFrame, identity);
         hero.setAlignment(Pos.CENTER_LEFT);
@@ -108,64 +132,55 @@ public class SiteDetailsCardPage {
         new Thread(() -> {
             matchedProj = null;
             WorkforceRequirement matchedReq = null;
-            try {
-                ProjectController pc = new ProjectController();
-                List<Project> allProjects = pc.getAllProjects();
+            boolean isCurated = (projectId == null || projectId.isBlank() || projectId.startsWith("CURATED_"));
 
-                if (projectId != null && !projectId.isBlank() && allProjects != null) {
-                    for (Project p : allProjects) {
-                        if (projectId.equals(p.getProjectId()) || (p.getMobile() != null && projectId.equals(p.getMobile()))) {
-                            matchedProj = p;
-                            break;
+            if (!isCurated) {
+                try {
+                    ProjectController pc = new ProjectController();
+                    Project p = pc.getProject(projectId);
+
+                    if (p == null && recruiterMobile != null && !recruiterMobile.isBlank()) {
+                        List<Project> allProjects = pc.getAllProjects();
+                        if (allProjects != null) {
+                            String cleanMob = recruiterMobile.replaceAll("\\D", "");
+                            for (Project proj : allProjects) {
+                                String pMob = proj.getMobile() != null ? proj.getMobile().replaceAll("\\D", "") : "";
+                                if (!cleanMob.isEmpty() && (pMob.equals(cleanMob) || pMob.endsWith(cleanMob) || cleanMob.endsWith(pMob))) {
+                                    p = proj;
+                                    break;
+                                }
+                            }
                         }
                     }
-                }
+                    matchedProj = p;
 
-                if (matchedProj == null && recruiterMobile != null && !recruiterMobile.isBlank() && allProjects != null) {
-                    String cleanMob = recruiterMobile.replaceAll("\\D", "");
-                    for (Project p : allProjects) {
-                        String pMob = p.getMobile() != null ? p.getMobile().replaceAll("\\D", "") : "";
-                        if (!cleanMob.isEmpty() && (pMob.equals(cleanMob) || pMob.endsWith(cleanMob) || cleanMob.endsWith(pMob))) {
-                            matchedProj = p;
-                            break;
+                    WorkforceRequirementController rc = new WorkforceRequirementController();
+                    List<WorkforceRequirement> allReqs = rc.getAllRequirements();
+                    if (requirementId != null && !requirementId.isBlank() && allReqs != null) {
+                        for (WorkforceRequirement r : allReqs) {
+                            if (requirementId.equals(r.getRequirementId())) {
+                                matchedReq = r;
+                                break;
+                            }
                         }
                     }
-                }
-
-                if (matchedProj == null && allProjects != null && !allProjects.isEmpty()) {
-                    // Fallback to first active project if direct id not linked
-                    for (Project p : allProjects) {
-                        if ("Active".equalsIgnoreCase(p.getStatus())) {
-                            matchedProj = p;
-                            break;
+                    if (matchedReq == null && matchedProj != null) {
+                        List<WorkforceRequirement> projReqs = rc.getRequirementsForProject(matchedProj.getProjectId());
+                        if (projReqs != null && !projReqs.isEmpty()) {
+                            for (WorkforceRequirement r : projReqs) {
+                                if (roleTitle != null && (roleTitle.equalsIgnoreCase(r.getSubSkill()) || roleTitle.equalsIgnoreCase(r.getWorkerType()))) {
+                                    matchedReq = r;
+                                    break;
+                                }
+                            }
+                            if (matchedReq == null) {
+                                matchedReq = projReqs.get(0);
+                            }
                         }
                     }
-                    if (matchedProj == null) {
-                        matchedProj = allProjects.get(0);
-                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-
-                WorkforceRequirementController rc = new WorkforceRequirementController();
-                List<WorkforceRequirement> allReqs = rc.getAllRequirements();
-                if (requirementId != null && !requirementId.isBlank() && allReqs != null) {
-                    for (WorkforceRequirement r : allReqs) {
-                        if (requirementId.equals(r.getRequirementId())) {
-                            matchedReq = r;
-                            break;
-                        }
-                    }
-                }
-
-                if (matchedReq == null && matchedProj != null && allReqs != null) {
-                    for (WorkforceRequirement r : allReqs) {
-                        if (matchedProj.getProjectId() != null && matchedProj.getProjectId().equals(r.getProjectId())) {
-                            matchedReq = r;
-                            break;
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
             }
 
             final Project finalP = matchedProj;
@@ -175,6 +190,7 @@ public class SiteDetailsCardPage {
                 if (finalP != null) {
                     // Real Project Name
                     if (finalP.getProjectName() != null && !finalP.getProjectName().isBlank()) {
+                        heroNameLabel.setText(finalP.getProjectName());
                         projNameVal.setText(finalP.getProjectName());
                     }
 
@@ -204,20 +220,25 @@ public class SiteDetailsCardPage {
                     if (!a2.isEmpty()) {
                         addressLine2Val.setText(a2);
                         addressLine2Val.setVisible(true);
+                        addressLine2Val.setManaged(true);
                     } else {
                         addressLine2Val.setVisible(false);
+                        addressLine2Val.setManaged(false);
                     }
 
                     if (!lm.isEmpty()) {
                         landmarkVal.setText("Landmark: " + lm);
                         landmarkVal.setVisible(true);
+                        landmarkVal.setManaged(true);
                     } else {
                         landmarkVal.setVisible(false);
+                        landmarkVal.setManaged(false);
                     }
 
                     String fullLoc = (city + (state.isEmpty() ? "" : ", " + state) + (pin.isEmpty() ? "" : " - " + pin)).trim();
                     if (!fullLoc.isEmpty()) {
                         locationPinVal.setText("City & State: " + fullLoc);
+                        heroLocLabel.setText(fullLoc);
                     }
 
                     // Real Site Image if available
@@ -230,24 +251,21 @@ public class SiteDetailsCardPage {
                             }
                         }
                     }
-                } else {
-                    contactVal.setText("Project Supervisor");
-                    addressLine1Val.setText("📍 " + location + " Construction Zone");
-                    landmarkVal.setVisible(false);
-                    addressLine2Val.setVisible(false);
                 }
 
                 if (finalReq != null) {
                     // Real Worker Requirement
                     String skillText = finalReq.getSubSkill() != null && !finalReq.getSubSkill().isBlank()
                             ? finalReq.getSubSkill()
-                            : (finalReq.getWorkerType() != null ? finalReq.getWorkerType() : title);
+                            : (finalReq.getWorkerType() != null ? finalReq.getWorkerType() : roleTitle);
                     String qty = finalReq.getQuantity() > 0 ? finalReq.getQuantity() + " " : "";
                     reqVal.setText(qty + skillText + " Required");
 
                     // Real Daily Wage
                     if (finalReq.getDailyWages() > 0) {
-                        wageVal.setText("₹" + String.format("%,d", (long) finalReq.getDailyWages()) + " / day");
+                        String wStr = "₹" + String.format("%,d", (long) finalReq.getDailyWages()) + " / day";
+                        wageVal.setText(wStr);
+                        heroWageLabel.setText("Daily wage: " + wStr);
                     }
 
                     // Facilities Badges
@@ -256,6 +274,9 @@ public class SiteDetailsCardPage {
                     if (finalReq.isElectricityFacility()) facilitiesPane.getChildren().add(facilityBadge("⚡ Electricity"));
                     if (finalReq.isAccommodationFacility()) facilitiesPane.getChildren().add(facilityBadge("🏠 Accommodation"));
                     if (finalReq.isTransportationFacility()) facilitiesPane.getChildren().add(facilityBadge("🚌 Transportation"));
+                    if (facilitiesPane.getChildren().isEmpty()) {
+                        facilitiesPane.getChildren().add(facilityBadge("Standard Site Amenities"));
+                    }
                 }
             });
         }).start();
@@ -269,7 +290,7 @@ public class SiteDetailsCardPage {
                         SessionManager.currentWorker.getMobileNumber(),
                         projectId,
                         requirementId,
-                        title,
+                        roleTitle,
                         location
                 );
                 JobApplication activeAssignment = controller.getActiveAssignedApplicationForWorker(SessionManager.currentWorker.getMobileNumber());
@@ -311,7 +332,7 @@ public class SiteDetailsCardPage {
                 javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Worker Account Required");
                 alert.setHeaderText("Please log in or sign up to apply");
-                alert.setContentText("You need an active worker profile to apply for " + title + ".\n\nChoose an option to continue:");
+                alert.setContentText("You need an active worker profile to apply for " + roleTitle + ".\n\nChoose an option to continue:");
                 
                 javafx.scene.control.ButtonType loginBtnType = new javafx.scene.control.ButtonType("Login");
                 javafx.scene.control.ButtonType signUpBtnType = new javafx.scene.control.ButtonType("Create Account");
@@ -357,7 +378,7 @@ public class SiteDetailsCardPage {
                 JobApplication app = new JobApplication(
                         String.valueOf(System.currentTimeMillis()) + String.format("%03d", (int) (Math.random() * 1000)),
                         SessionManager.currentWorker.getMobileNumber(),
-                        title,
+                        roleTitle,
                         location,
                         wage,
                         "Pending",
@@ -370,15 +391,20 @@ public class SiteDetailsCardPage {
                         (SessionManager.currentWorker.getLastName() != null ? SessionManager.currentWorker.getLastName() : "");
                 workerName = workerName.trim();
                 if (workerName.isEmpty()) workerName = "Worker (" + SessionManager.currentWorker.getMobileNumber() + ")";
+
+                String notifProjName = (matchedProj != null && matchedProj.getProjectName() != null && !matchedProj.getProjectName().isBlank())
+                        ? matchedProj.getProjectName()
+                        : projectName;
+
                 new com.dihadi.controller.NotificationController().notifyRecruiterApplicationReceived(
                         app,
                         workerName,
                         SessionManager.currentWorker.getMobileNumber(),
-                        title
+                        notifProjName
                 );
                 javafx.application.Platform.runLater(() -> {
                     com.dihadi.view.NotificationToast.show(apply, "Application Submitted",
-                            "Your application for " + title + " has been successfully submitted to the recruiter.",
+                            "Your application for " + roleTitle + " has been successfully submitted.",
                             com.dihadi.view.NotificationToast.ToastType.SUCCESS);
                 });
             }).start();

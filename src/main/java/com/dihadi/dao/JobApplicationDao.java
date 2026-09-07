@@ -14,6 +14,19 @@ import java.util.concurrent.ConcurrentHashMap;
 public class JobApplicationDao {
     private Firestore db = FirebaseConfig.getFirestore();
     private static final Map<String, JobApplication> LOCAL_APP_MAP = new ConcurrentHashMap<>();
+    private static volatile long lastAppsFetch = 0;
+    private static final long CACHE_TTL_MS = 15000;
+
+    static {
+        try {
+            List<JobApplication> disk = LocalCacheManager.loadApplications();
+            for (JobApplication a : disk) {
+                if (a != null && a.getApplicationId() != null && !a.getApplicationId().isBlank()) {
+                    LOCAL_APP_MAP.put(a.getApplicationId(), a);
+                }
+            }
+        } catch (Exception ignored) {}
+    }
 
     public void saveApplication(JobApplication application) {
         if (application == null) return;
@@ -34,13 +47,20 @@ public class JobApplicationDao {
             }
 
             LOCAL_APP_MAP.put(application.getApplicationId(), application);
+            LocalCacheManager.saveApplications(LOCAL_APP_MAP.values());
 
-            db.collection("JobApplications")
-                    .document(application.getApplicationId())
-                    .set(application);
-            System.out.println("Job Application Saved: " + application.getApplicationId());
+            if (!LocalCacheManager.isQuotaExhausted()) {
+                db.collection("JobApplications")
+                        .document(application.getApplicationId())
+                        .set(application);
+                System.out.println("Job Application Saved: " + application.getApplicationId());
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            if (LocalCacheManager.isQuotaExhaustedException(e)) {
+                LocalCacheManager.markQuotaExhausted();
+            } else {
+                System.err.println("[JobApplicationDao] Save notice: " + e.getMessage());
+            }
         }
     }
 
@@ -245,22 +265,35 @@ public class JobApplicationDao {
     }
 
     public List<JobApplication> getAllApplications() {
+        long now = System.currentTimeMillis();
+        if ((now - lastAppsFetch < CACHE_TTL_MS || LocalCacheManager.isQuotaExhausted()) && !LOCAL_APP_MAP.isEmpty()) {
+            return new ArrayList<>(LOCAL_APP_MAP.values());
+        }
+
         List<JobApplication> applications = new ArrayList<>();
-        try {
-            ApiFuture<QuerySnapshot> future = db.collection("JobApplications").get();
-            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-            for (QueryDocumentSnapshot document : documents) {
-                JobApplication app = document.toObject(JobApplication.class);
-                if (app != null) {
-                    if (app.getApplicationId() == null || app.getApplicationId().isBlank()) {
-                        app.setApplicationId(document.getId());
+        if (!LocalCacheManager.isQuotaExhausted()) {
+            try {
+                ApiFuture<QuerySnapshot> future = db.collection("JobApplications").get();
+                List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+                lastAppsFetch = now;
+                for (QueryDocumentSnapshot document : documents) {
+                    JobApplication app = document.toObject(JobApplication.class);
+                    if (app != null) {
+                        if (app.getApplicationId() == null || app.getApplicationId().isBlank()) {
+                            app.setApplicationId(document.getId());
+                        }
+                        LOCAL_APP_MAP.put(app.getApplicationId(), app);
+                        applications.add(app);
                     }
-                    LOCAL_APP_MAP.put(app.getApplicationId(), app);
-                    applications.add(app);
+                }
+                LocalCacheManager.saveApplications(LOCAL_APP_MAP.values());
+            } catch (Exception e) {
+                if (LocalCacheManager.isQuotaExhaustedException(e)) {
+                    LocalCacheManager.markQuotaExhausted();
+                } else {
+                    System.err.println("[JobApplicationDao] Remote fetch notice: " + e.getMessage());
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         for (Map.Entry<String, JobApplication> entry : LOCAL_APP_MAP.entrySet()) {
             if (applications.stream().noneMatch(a -> entry.getKey().equals(a.getApplicationId()))) {

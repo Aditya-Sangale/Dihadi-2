@@ -53,23 +53,17 @@ public class ProjectDetailsPage {
             imgUrls.add(imagePath);
         }
 
-        try {
-            List<com.dihadi.model.Project> allProj = new com.dihadi.controller.ProjectController().getAllProjects();
-            if (allProj != null) {
-                for (com.dihadi.model.Project p : allProj) {
-                    if (mobile != null && p.getMobile() != null && p.getMobile().replaceAll("\\D", "").equals(mobile.replaceAll("\\D", ""))) {
-                        if (p.getImageUrls() != null && !p.getImageUrls().isEmpty()) {
-                            for (String url : p.getImageUrls()) {
-                                if (url != null && !url.isBlank() && !imgUrls.contains(url)) {
-                                    imgUrls.add(url);
-                                }
-                            }
+        if (projectId != null && !projectId.isBlank()) {
+            try {
+                com.dihadi.model.Project p = new com.dihadi.controller.ProjectController().getProject(projectId);
+                if (p != null && p.getImageUrls() != null && !p.getImageUrls().isEmpty()) {
+                    for (String url : p.getImageUrls()) {
+                        if (url != null && !url.isBlank() && !imgUrls.contains(url)) {
+                            imgUrls.add(url);
                         }
                     }
                 }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            } catch (Exception ignored) {}
         }
 
         if (imgUrls.isEmpty()) {

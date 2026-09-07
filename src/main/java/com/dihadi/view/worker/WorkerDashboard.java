@@ -109,7 +109,7 @@ public class WorkerDashboard {
 
         refreshWorkerData(heroContainer);
 
-        liveRefresher = new Timeline(new KeyFrame(Duration.seconds(3), e -> refreshWorkerData(heroContainer)));
+        liveRefresher = new Timeline(new KeyFrame(Duration.seconds(25), e -> refreshWorkerData(heroContainer)));
         liveRefresher.setCycleCount(Timeline.INDEFINITE);
         liveRefresher.play();
 
