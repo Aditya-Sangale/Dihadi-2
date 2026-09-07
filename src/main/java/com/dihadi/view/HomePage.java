@@ -60,6 +60,7 @@ public class HomePage extends Application {
     @Override
     public void start(Stage stage) {
         primaryStage = stage;
+        ScrollUtils.initGlobal(stage);
         primaryStage.setTitle("DIHADI - Meri Dihadi ~ Mera Haq");
         primaryStage.setFullScreen(false);
         primaryStage.setWidth(1400);
@@ -102,8 +103,7 @@ public class HomePage extends Application {
         content.setPadding(new Insets(26, 24, 30, 24));
 
         ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
 
         BorderPane page = new BorderPane(scroll);
@@ -381,7 +381,7 @@ public class HomePage extends Application {
         if (SessionManager.currentAdmin != null) {
             primaryStage.setScene(new com.dihadi.view.admin.AdminDashboard().getDashboardScene(() -> {
                 SessionManager.clearAllSessions();
-                showHome();
+                primaryStage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(this::showHome));
             }));
             return;
         }

@@ -66,8 +66,8 @@ public class AdminGrievancesPage {
 
     public Scene getGrievancesScene(Runnable dashboardAction, Runnable logout) {
         BorderPane layout = new BorderPane();
-        layout.setLeft(sidebar(dashboardAction, logout));
-        layout.setCenter(mainContent());
+        layout.setLeft(AdminSidebar.create(AdminSidebar.Category.GRIEVANCES, logout, this::stopTimers));
+        layout.setCenter(mainContent(logout));
 
         modalContainer = new StackPane();
         modalContainer.setPickOnBounds(false);
@@ -78,74 +78,47 @@ public class AdminGrievancesPage {
         return new Scene(rootStack, 1400, 780);
     }
 
-    private VBox sidebar(Runnable dashboardAction, Runnable logout) {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 82, 82);
-        VBox identity = new VBox(10, logo,
-                label("DIHADI", "-fx-font-family:Georgia;-fx-font-size:28px;-fx-text-fill:" + GOLD + ";"),
-                label("ADMIN CONTROL CENTER", "-fx-font-size:11px;-fx-letter-spacing:1.2px;-fx-text-fill:#dcdad4;"));
-        identity.setAlignment(Pos.CENTER);
-        identity.setPadding(new Insets(28, 10, 35, 10));
-
-        Button command = nav("Command Center", false);
-        command.setOnAction(e -> {
-            if (clock != null) clock.stop();
-            dashboardAction.run();
-        });
-
-        Button workersNav = nav("Workers", false);
-        workersNav.setOnAction(e -> {
-            if (clock != null) clock.stop();
-            Stage stage = (Stage) workersNav.getScene().getWindow();
-            stage.setScene(new AdminWorkersPage().getWorkersScene(dashboardAction, logout));
-        });
-
-        Button recruitersNav = nav("Recruiters", false);
-        recruitersNav.setOnAction(e -> {
-            if (clock != null) clock.stop();
-            Stage stage = (Stage) recruitersNav.getScene().getWindow();
-            stage.setScene(new AdminRecruitersPage().getRecruitersScene(dashboardAction, logout));
-        });
-
-        Button projectsNav = nav("Projects", false);
-        projectsNav.setOnAction(e -> {
-            if (clock != null) clock.stop();
-            Stage stage = (Stage) projectsNav.getScene().getWindow();
-            stage.setScene(new AdminProjectsPage().getProjectsScene(dashboardAction, logout));
-        });
-
-        Button grievances = nav("Grievances", true);
-
-        VBox links = new VBox(4, command, workersNav, recruitersNav, projectsNav,
-                nav("Financials", false), nav("Verification", false), grievances);
-        VBox.setVgrow(links, Priority.ALWAYS);
-
-        String adminName = com.dihadi.view.SessionManager.getAdminDisplayName();
-        Button profile = nav(adminName + "\nSystem Administrator", false);
-        profile.setOnAction(e -> {
-            if (clock != null) clock.stop();
-            logout.run();
-        });
-        VBox bottom = new VBox(4, profile);
-        bottom.setPadding(new Insets(14, 0, 14, 0));
-        bottom.setStyle("-fx-border-color:#ffffff1a;-fx-border-width:1px 0 0 0;");
-
-        VBox bar = new VBox(identity, links, bottom);
-        bar.setPrefWidth(312);
-        bar.setMinWidth(312);
-        bar.setStyle("-fx-background-color:" + DARK + ";");
-        return bar;
+    private void stopTimers() {
+        if (clock != null) clock.stop();
     }
 
-    private BorderPane mainContent() {
+    private BorderPane mainContent(Runnable logout) {
         String adminName = com.dihadi.view.SessionManager.getAdminDisplayName();
-        HBox breadcrumb = new HBox(
-                label(adminName, "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#1A1A1A;"),
-                label("   >   ", "-fx-font-size:16px;-fx-text-fill:#4A4A4A;"),
-                label("Grievance Resolution Center", "-fx-font-size:16px;-fx-text-fill:" + GOLD + ";")
-        );
+
+        Label nameLbl = label(adminName, "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#1A1A1A;");
+        Label sep = label("   >   ", "-fx-font-size:15px;-fx-text-fill:#8c7b6d;");
+        Label pageLbl = label("Grievance Resolution Center", "-fx-font-size:15px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button signOutBtn = new Button("Sign Out");
+        signOutBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:20px;-fx-border-color:#ffcdd2;-fx-border-radius:20px;-fx-text-fill:#ba1a1a;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;");
+        signOutBtn.setOnAction(e -> {
+            stopTimers();
+            com.dihadi.view.SessionManager.clearAllSessions();
+            Stage stage = (signOutBtn.getScene() != null && signOutBtn.getScene().getWindow() instanceof Stage s) ? s : null;
+            if (stage == null) {
+                for (javafx.stage.Window w : javafx.stage.Window.getWindows()) {
+                    if (w instanceof Stage s && s.isShowing()) {
+                        stage = s;
+                        break;
+                    }
+                }
+            }
+            com.dihadi.view.NotificationToast.show("Signed Out", "You have signed out of your administrator session.", com.dihadi.view.NotificationToast.ToastType.INFO);
+            if (stage != null) {
+                final Stage finalStage = stage;
+                stage.setScene(new AdminHomePage().getAdminHomeScene(() -> com.dihadi.view.AppNavigator.open(finalStage, "Home")));
+            } else if (logout != null) {
+                logout.run();
+            }
+        });
+
+        HBox breadcrumb = new HBox(12, nameLbl, sep, pageLbl, spacer, signOutBtn);
         breadcrumb.setAlignment(Pos.CENTER_LEFT);
         breadcrumb.setPadding(new Insets(0, 40, 0, 40));
-        breadcrumb.setPrefHeight(80);
+        breadcrumb.setPrefHeight(75);
         breadcrumb.setStyle("-fx-background-color:" + MAIN + ";-fx-border-color:" + BORDER + "80;-fx-border-width:0 0 1px 0;");
 
         VBox content = new VBox(26,
@@ -158,8 +131,7 @@ public class AdminGrievancesPage {
         content.setMaxWidth(1280);
 
         ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:" + MAIN + ";-fx-border-width:0;");
 
         BorderPane page = new BorderPane(scroll);

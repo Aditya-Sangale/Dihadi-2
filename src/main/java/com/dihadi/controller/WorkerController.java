@@ -76,6 +76,10 @@ public class WorkerController {
         dao.deleteWorker(mobileNumber);
     }
 
+    public void updateLastLogin(String mobileNumber, String lastLogin) {
+        dao.updateLastLogin(mobileNumber, lastLogin);
+    }
+
     public List<Worker> getAllWorkers() {
         return dao.getAllWorkers();
     }

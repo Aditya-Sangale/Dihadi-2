@@ -28,6 +28,7 @@ import java.util.List;
 public class SiteDetailsCardPage {
     private final String title, location, wage, imagePath;
     private final String projectId, recruiterMobile, requirementId;
+    private Project matchedProj;
 
     public SiteDetailsCardPage(String title, String location, String wage, String imagePath, String projectId, String recruiterMobile, String requirementId) {
         this.title = title;
@@ -105,7 +106,7 @@ public class SiteDetailsCardPage {
 
         // Background Data Fetching for Real Project and Requirement
         new Thread(() -> {
-            Project matchedProj = null;
+            matchedProj = null;
             WorkforceRequirement matchedReq = null;
             try {
                 ProjectController pc = new ProjectController();
@@ -258,23 +259,36 @@ public class SiteDetailsCardPage {
                 }
             });
         }).start();
-
         // Check if already applied
         if (SessionManager.currentWorker != null) {
             apply.setText("CHECKING STATUS...");
             apply.setDisable(true);
             new Thread(() -> {
-                boolean hasApplied = new JobApplicationController().hasWorkerApplied(
+                JobApplicationController controller = new JobApplicationController();
+                boolean hasApplied = controller.hasWorkerApplied(
                         SessionManager.currentWorker.getMobileNumber(),
                         projectId,
                         requirementId,
                         title,
                         location
                 );
+                JobApplication activeAssignment = controller.getActiveAssignedApplicationForWorker(SessionManager.currentWorker.getMobileNumber());
                 Platform.runLater(() -> {
-                    if (hasApplied) {
+                    if (matchedProj != null && "Completed".equalsIgnoreCase(matchedProj.getStatus())) {
+                        apply.setText("PROJECT COMPLETED");
+                        apply.setStyle("-fx-background-color:#9e9e9e;-fx-text-fill:#ffffff;-fx-font-size:16px;-fx-font-weight:700;-fx-padding:14px 28px;-fx-background-radius:8px;");
+                        apply.setDisable(true);
+                    } else if (matchedProj != null && ("Requirement Fulfilled".equalsIgnoreCase(matchedProj.getStatus()) || "Unavailable".equalsIgnoreCase(matchedProj.getStatus()))) {
+                        apply.setText("REQUIREMENT FULFILLED");
+                        apply.setStyle("-fx-background-color:#fff3e0;-fx-text-fill:#b48700;-fx-border-color:#ffe082;-fx-border-radius:8px;-fx-font-size:16px;-fx-font-weight:800;-fx-padding:14px 28px;-fx-background-radius:8px;");
+                        apply.setDisable(true);
+                    } else if (hasApplied) {
                         apply.setText("ALREADY APPLIED ✓");
                         apply.setStyle("-fx-background-color:#2a7e3b;-fx-text-fill:#ffffff;-fx-font-size:16px;-fx-font-weight:700;-fx-padding:14px 28px;-fx-background-radius:8px;");
+                        apply.setDisable(true);
+                    } else if (activeAssignment != null) {
+                        apply.setText("ASSIGNED TO ANOTHER PROJECT");
+                        apply.setStyle("-fx-background-color:#c67d00;-fx-text-fill:#ffffff;-fx-font-size:14px;-fx-font-weight:700;-fx-padding:14px 24px;-fx-background-radius:8px;");
                         apply.setDisable(true);
                     } else {
                         apply.setText("APPLY FOR THIS JOB");
@@ -310,6 +324,29 @@ public class SiteDetailsCardPage {
                 } else if (result.isPresent() && result.get() == signUpBtnType) {
                     stage.setScene(new com.dihadi.view.worker.WokerSignUp().getSignUpScene(() -> stage.setScene(returnScene)));
                 }
+                return;
+            }
+
+            if (matchedProj != null && "Completed".equalsIgnoreCase(matchedProj.getStatus())) {
+                com.dihadi.view.NotificationToast.show(apply, "Project Completed",
+                        "This project has already been completed by the recruiter and moved to past projects.",
+                        com.dihadi.view.NotificationToast.ToastType.ALERT);
+                return;
+            }
+
+            if (matchedProj != null && ("Requirement Fulfilled".equalsIgnoreCase(matchedProj.getStatus()) || "Unavailable".equalsIgnoreCase(matchedProj.getStatus()))) {
+                com.dihadi.view.NotificationToast.show(apply, "Requirement Fulfilled",
+                        "Workforce requirements for this project have already been fulfilled.",
+                        com.dihadi.view.NotificationToast.ToastType.ALERT);
+                return;
+            }
+
+            JobApplication activeAssignment = new JobApplicationController().getActiveAssignedApplicationForWorker(SessionManager.currentWorker.getMobileNumber());
+            if (activeAssignment != null) {
+                String activeProj = activeAssignment.getJobTitle() != null ? activeAssignment.getJobTitle() : "another active project";
+                com.dihadi.view.NotificationToast.show(apply, "Already Assigned",
+                        "You are already assigned to active project '" + activeProj + "'. A worker can only be assigned to one project at a time.",
+                        com.dihadi.view.NotificationToast.ToastType.ALERT);
                 return;
             }
 
@@ -364,7 +401,7 @@ public class SiteDetailsCardPage {
         content.setPadding(new Insets(28));
         content.setMaxWidth(1020);
         ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setMaxSize(1040, 640);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;");
         StackPane card = new StackPane(scroll);

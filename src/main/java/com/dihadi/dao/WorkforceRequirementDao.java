@@ -19,14 +19,12 @@ public class WorkforceRequirementDao {
     public void saveRequirement(WorkforceRequirement req) {
         if (req == null) return;
         try {
-            String docId = (req.getProjectId() != null && !req.getProjectId().isBlank())
-                    ? req.getProjectId()
-                    : (req.getRequirementId() != null && !req.getRequirementId().isBlank()
-                            ? req.getRequirementId()
+            String docId = (req.getRequirementId() != null && !req.getRequirementId().isBlank())
+                    ? req.getRequirementId()
+                    : ((req.getProjectId() != null && !req.getProjectId().isBlank())
+                            ? req.getProjectId() + "_" + System.currentTimeMillis()
                             : String.valueOf(System.currentTimeMillis()));
-            if (req.getRequirementId() == null || req.getRequirementId().isBlank()) {
-                req.setRequirementId(docId);
-            }
+            req.setRequirementId(docId);
             LOCAL_REQ_MAP.put(docId, req);
 
             db.collection("WorkforceRequirements")
@@ -85,7 +83,8 @@ public class WorkforceRequirementDao {
             e.printStackTrace();
         }
         for (Map.Entry<String, WorkforceRequirement> entry : LOCAL_REQ_MAP.entrySet()) {
-            boolean exists = list.stream().anyMatch(r -> entry.getKey().equals(r.getRequirementId()) || entry.getKey().equals(r.getProjectId()));
+            boolean exists = list.stream().anyMatch(r -> entry.getKey().equals(r.getRequirementId())
+                    || (r.getRequirementId() != null && r.getRequirementId().equals(entry.getValue().getRequirementId())));
             if (!exists) {
                 list.add(0, entry.getValue());
             }

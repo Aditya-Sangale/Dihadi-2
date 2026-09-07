@@ -62,8 +62,7 @@ public class SiteSupervisorJobRolesPage {
         canvas.setAlignment(Pos.TOP_CENTER);
         canvas.setStyle("-fx-background-color:#f3e7ce;");
         ScrollPane scroll = new ScrollPane(canvas);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
 
         BorderPane page = new BorderPane(scroll);
@@ -158,10 +157,11 @@ public class SiteSupervisorJobRolesPage {
 
     private List<String[]> getAllJobs() {
         List<String[]> all = new java.util.ArrayList<>();
+        List<com.dihadi.model.Project> projects = null;
+        java.util.Map<String, com.dihadi.model.Project> projectMap = new java.util.HashMap<>();
         try {
             List<com.dihadi.model.WorkforceRequirement> reqs = new com.dihadi.controller.WorkforceRequirementController().getAllRequirements();
-            List<com.dihadi.model.Project> projects = new com.dihadi.controller.ProjectController().getAllProjects();
-            java.util.Map<String, com.dihadi.model.Project> projectMap = new java.util.HashMap<>();
+            projects = new com.dihadi.controller.ProjectController().getAllProjects();
             if (projects != null) {
                 for (com.dihadi.model.Project p : projects) {
                     if (p.getProjectId() != null) projectMap.put(p.getProjectId(), p);
@@ -173,6 +173,10 @@ public class SiteSupervisorJobRolesPage {
                     if (req.getWorkerType() != null && req.getWorkerType().toLowerCase().contains("supervisor")) {
                         String title = req.getSubSkill() != null && !req.getSubSkill().isBlank() ? req.getSubSkill() : "Site Supervisor";
                         com.dihadi.model.Project p = req.getProjectId() != null ? projectMap.get(req.getProjectId()) : null;
+                        if (p != null && "Completed".equalsIgnoreCase(p.getStatus())) {
+                            continue; // Recruiter marked project completed -> remove card from worker interface!
+                        }
+                        boolean isFulfilled = p != null && ("Requirement Fulfilled".equalsIgnoreCase(p.getStatus()) || "Unavailable".equalsIgnoreCase(p.getStatus()));
                         String projectName = (p != null && p.getProjectName() != null && !p.getProjectName().isBlank())
                                 ? p.getProjectName()
                                 : title + " Project";
@@ -186,7 +190,7 @@ public class SiteSupervisorJobRolesPage {
                         String imgNum = (photoUrl != null && !photoUrl.isBlank()) ? photoUrl : String.format("%02d", (imgIdx % 12) + 1);
                         imgIdx++;
                         String recruiterMobile = p != null ? p.getMobile() : null;
-                        all.add(new String[]{ projectName, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId(), title });
+                        all.add(new String[]{ projectName, loc, wage, imgNum, req.getProjectId(), recruiterMobile, req.getRequirementId(), title, isFulfilled ? "FULFILLED" : "OPEN" });
                     }
                 }
             }
@@ -194,7 +198,23 @@ public class SiteSupervisorJobRolesPage {
             e.printStackTrace();
         }
         for (String[] j : JOBS) {
-            all.add(j);
+            String projId = j.length > 4 ? j[4] : null;
+            String pName = j[0];
+            boolean isCompleted = false;
+            if (projId != null && projectMap.containsKey(projId) && "Completed".equalsIgnoreCase(projectMap.get(projId).getStatus())) {
+                isCompleted = true;
+            }
+            if (projects != null) {
+                for (com.dihadi.model.Project p : projects) {
+                    if ("Completed".equalsIgnoreCase(p.getStatus()) && p.getProjectName() != null && p.getProjectName().equalsIgnoreCase(pName)) {
+                        isCompleted = true;
+                        break;
+                    }
+                }
+            }
+            if (!isCompleted) {
+                all.add(j);
+            }
         }
         return all;
     }
@@ -227,6 +247,7 @@ public class SiteSupervisorJobRolesPage {
 
         String projectName = j[0];
         String roleTitle = j.length > 7 && j[7] != null ? j[7] : j[0];
+        boolean isJobFulfilled = j.length > 8 && "FULFILLED".equalsIgnoreCase(j[8]);
 
         Label name = label(projectName, "-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:#3a3027;");
         name.setWrapText(true);
@@ -234,6 +255,10 @@ public class SiteSupervisorJobRolesPage {
         Label role = label("Role: " + roleTitle, "-fx-font-size:14px;-fx-font-weight:700;-fx-text-fill:#735c00;");
         role.setWrapText(true);
         role.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        Label fulfilledBadge = label("• Requirement Fulfilled",
+                "-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:#b48700;-fx-background-color:#fff3e0;-fx-background-radius:6px;-fx-padding:3px 10px;-fx-border-color:#ffe082;-fx-border-radius:6px;");
+        fulfilledBadge.setVisible(isJobFulfilled);
+        fulfilledBadge.setManaged(isJobFulfilled);
         Label location = label("⌖  " + j[1], "-fx-font-size:13px;-fx-text-fill:#4d4635;");
         location.setWrapText(true);
         location.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
@@ -243,8 +268,21 @@ public class SiteSupervisorJobRolesPage {
         VBox.setVgrow(space, Priority.ALWAYS);
         Button apply = primary("Apply now");
         apply.setMaxWidth(Double.MAX_VALUE);
+        if (isJobFulfilled) {
+            apply.setText("Requirement fulfilled ✓");
+            apply.setStyle("-fx-background-color:#fff3e0;-fx-background-radius:12px;-fx-text-fill:#b48700;-fx-border-color:#ffe082;-fx-border-radius:12px;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:10px 18px;");
+            apply.setDisable(true);
+        }
 
         Runnable checkAppliedStatus = () -> {
+            if (isJobFulfilled) {
+                javafx.application.Platform.runLater(() -> {
+                    apply.setText("Requirement fulfilled ✓");
+                    apply.setStyle("-fx-background-color:#fff3e0;-fx-background-radius:12px;-fx-text-fill:#b48700;-fx-border-color:#ffe082;-fx-border-radius:12px;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:10px 18px;");
+                    apply.setDisable(true);
+                });
+                return;
+            }
             if (com.dihadi.view.SessionManager.currentWorker != null) {
                 new Thread(() -> {
                     try {
@@ -292,7 +330,7 @@ public class SiteSupervisorJobRolesPage {
         HBox pay = new HBox(wageLabel, wage);
         pay.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(wageLabel, Priority.ALWAYS);
-        VBox card = new VBox(10, photo, name, role, location, space, pay, apply);
+        VBox card = new VBox(10, photo, name, role, fulfilledBadge, location, space, pay, apply);
         name.setAlignment(Pos.CENTER);
         name.setMaxWidth(Double.MAX_VALUE);
         role.setAlignment(Pos.CENTER);

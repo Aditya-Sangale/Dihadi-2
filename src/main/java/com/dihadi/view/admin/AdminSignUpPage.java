@@ -105,7 +105,9 @@ public class AdminSignUpPage {
         card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:17px;-fx-border-color:#e2d9ca;-fx-border-radius:17px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.09),20,.15,0,5px);");
 
         VBox wrap = new VBox(card); wrap.setAlignment(Pos.CENTER); wrap.setPadding(new Insets(36)); wrap.setPrefWidth(700);
-        ScrollPane pane = new ScrollPane(wrap); pane.setFitToWidth(true); pane.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
+        ScrollPane pane = new ScrollPane(wrap);
+        com.dihadi.view.ScrollUtils.style(pane);
+        pane.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
         return pane;
     }
 

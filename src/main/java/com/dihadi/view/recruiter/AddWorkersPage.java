@@ -67,13 +67,7 @@ public class AddWorkersPage {
     }
 
     public AddWorkersPage(String projectId) {
-        this.projectId = projectId;
-        this.projectName = "Project";
-        this.contactName = "";
-        this.mobile = "";
-        this.email = "";
-        this.projectAddress = "";
-        this.projectImage = "/assets/images/recruiter/slide-03.jpeg";
+        this(projectId, "Project", "", "", "", "", "/assets/images/recruiter/slide-03.jpeg");
     }
 
     public AddWorkersPage(String projectId, String projectName, String contactName, String mobile, String email,
@@ -85,6 +79,19 @@ public class AddWorkersPage {
         this.email = email;
         this.projectAddress = projectAddress;
         this.projectImage = projectImage;
+        if ((this.projectName == null || this.projectName.isBlank() || "Project".equalsIgnoreCase(this.projectName)) && projectId != null && !projectId.isBlank()) {
+            try {
+                com.dihadi.model.Project p = new com.dihadi.controller.ProjectController().getProjectById(projectId);
+                if (p != null) {
+                    if (p.getProjectName() != null && !p.getProjectName().isBlank()) this.projectName = p.getProjectName();
+                    if (p.getContactName() != null && !p.getContactName().isBlank()) this.contactName = p.getContactName();
+                    if (p.getMobile() != null && !p.getMobile().isBlank()) this.mobile = p.getMobile();
+                    if (p.getEmail() != null && !p.getEmail().isBlank()) this.email = p.getEmail();
+                    if (p.getAddressLine1() != null && !p.getAddressLine1().isBlank()) this.projectAddress = p.getAddressLine1();
+                    if (p.getImageUrls() != null && !p.getImageUrls().isEmpty()) this.projectImage = p.getImageUrls().get(0);
+                }
+            } catch (Exception ignored) {}
+        }
     }
 
     public Scene getAddWorkersScene(Runnable backAction) {
@@ -94,8 +101,7 @@ public class AddWorkersPage {
         formColumn.setPrefWidth(700);
 
         ScrollPane scroll = new ScrollPane(formColumn);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:#f3e7ce;-fx-border-width:0;");
         HBox.setHgrow(scroll, Priority.ALWAYS);
 
@@ -118,9 +124,12 @@ public class AddWorkersPage {
     }
 
     private VBox welcome() {
+        String subtitle = (projectName != null && !projectName.isBlank() && !"Project".equalsIgnoreCase(projectName))
+                ? "Add workforce requirement details for " + projectName
+                : "Go ahead. Add your workforce requirement details";
         VBox welcome = new VBox(7,
                 text("Welcome to DIHADI", "-fx-font-size:21px;-fx-font-weight:700;-fx-text-fill:#1e1b15;"),
-                text("Go ahead. Add your workforce requirement details", "-fx-font-size:16px;-fx-text-fill:#4c4637;"));
+                text(subtitle, "-fx-font-size:16px;-fx-text-fill:#4c4637;"));
         welcome.setAlignment(Pos.CENTER);
         return welcome;
     }
@@ -167,10 +176,11 @@ public class AddWorkersPage {
             }
         });
         ComboBox<String> quantity = quantityField = combo("1", "2", "5", "10", "20", "50", "100", "200");
+        quantity.setEditable(true);
         TextField wage = wageField = input("");
 
-        HBox numbers = new HBox(16, field("No. of worker *required", quantity),
-                wageField("Daily wages *required", wage));
+        HBox numbers = new HBox(16, field("No. of worker *", quantity),
+                wageField("Daily wages *", wage));
         for (javafx.scene.Node node : numbers.getChildren())
             HBox.setHgrow(node, Priority.ALWAYS);
 
@@ -189,8 +199,8 @@ public class AddWorkersPage {
         facilities.setStyle("-fx-border-color:#e9e2d7 transparent transparent transparent;-fx-border-width:1px 0 0 0;");
 
         VBox card = new VBox(23, illustrationFrame,
-                field("Hiring Priority *required", priority), field("Select Worker Type *required", workerType),
-                field("Select sub skill *required", skill), numbers, facilities);
+                field("Hiring Priority *", priority), field("Select Worker Type *", workerType),
+                field("Select sub skill *", skill), numbers, facilities);
         card.setMaxWidth(540);
         card.setPadding(new Insets(28));
         card.setStyle(
@@ -199,7 +209,7 @@ public class AddWorkersPage {
     }
 
     private VBox addButton(Runnable backAction) {
-        Button button = new Button("Add worker");
+        Button button = new Button("Add Workforce Requirement");
         button.setMaxWidth(540);
         button.setPrefHeight(52);
         button.setStyle(
@@ -211,7 +221,7 @@ public class AddWorkersPage {
                         javafx.scene.control.Alert.AlertType.WARNING);
                 alert.setTitle("Required details");
                 alert.setHeaderText(null);
-                alert.setContentText("Please complete all fields marked *required before adding a worker.");
+                alert.setContentText("Please complete all fields marked * before adding workforce.");
                 alert.show();
                 return;
             }
@@ -230,9 +240,22 @@ public class AddWorkersPage {
                 return;
             }
 
+            int qty = 1;
+            try {
+                qty = Integer.parseInt(quantityField.getValue().trim());
+                if (qty <= 0) throw new NumberFormatException();
+            } catch (Exception ex) {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.WARNING);
+                alert.setTitle("Invalid worker count");
+                alert.setHeaderText(null);
+                alert.setContentText("Please enter a valid positive number for workers needed.");
+                alert.show();
+                return;
+            }
+
             // Save details to Firebase
-            String requirementId = String.valueOf(System.currentTimeMillis()) + String.format("%03d", (int)(Math.random() * 1000));
-            int qty = Integer.parseInt(quantityField.getValue());
+            String requirementId = "REQ_" + (projectId != null && !projectId.isBlank() ? projectId : "P") + "_" + System.currentTimeMillis();
             com.dihadi.model.WorkforceRequirement req = new com.dihadi.model.WorkforceRequirement(
                     requirementId,
                     projectId != null ? projectId : "",
@@ -247,16 +270,38 @@ public class AddWorkersPage {
                     transportationBox.isSelected());
             new com.dihadi.controller.WorkforceRequirementController().addRequirement(req);
 
+            // Re-activate project if it was marked fulfilled or unavailable
+            if (projectId != null && !projectId.isBlank()) {
+                new Thread(() -> {
+                    try {
+                        com.dihadi.model.Project p = new com.dihadi.controller.ProjectController().getProjectById(projectId);
+                        if (p != null) {
+                            if ("Requirement Fulfilled".equalsIgnoreCase(p.getStatus()) || "Unavailable".equalsIgnoreCase(p.getStatus())) {
+                                p.setStatus("Active");
+                                new com.dihadi.controller.ProjectController().addProject(p);
+                                com.dihadi.view.SessionManager.currentRecruiterProject = p;
+                            }
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }).start();
+            }
+
             javafx.stage.Stage stage = (javafx.stage.Stage) button.getScene().getWindow();
-            stage.setScene(new ProjectDetailsPage(projectName, contactName, mobile, email, projectAddress,
+            stage.setScene(new ProjectDetailsPage(projectId, projectName, contactName, mobile, email, projectAddress,
                     priorityField.getValue(), workerTypeField.getValue(), skillField.getValue(),
-                    quantityField.getValue(), wageField.getText(), projectImage, facilitiesText()).getScene(() -> {
-                        com.dihadi.model.Recruiter r = com.dihadi.view.SessionManager.currentRecruiter;
-                        stage.setScene(new RecruiterDashboard(r)
-                                .getScene(() -> com.dihadi.view.AppNavigator.open(stage, "Home")));
+                    String.valueOf(qty), wageField.getText(), projectImage, facilitiesText()).getScene(() -> {
+                        if (backAction != null) {
+                            backAction.run();
+                        } else {
+                            com.dihadi.model.Recruiter r = com.dihadi.view.SessionManager.currentRecruiter;
+                            stage.setScene(new RecruiterDashboard(r)
+                                    .getScene(() -> com.dihadi.view.AppNavigator.open(stage, "Home")));
+                        }
                     }));
         });
-        Button close = new Button("Close");
+        Button close = new Button("Cancel / Close");
         close.setStyle(
                 "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:16px;-fx-font-weight:700;-fx-cursor:hand;");
         close.setOnAction(e -> {

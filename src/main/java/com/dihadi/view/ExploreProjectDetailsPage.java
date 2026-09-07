@@ -179,8 +179,7 @@ public class ExploreProjectDetailsPage {
         centeredWrap.setStyle("-fx-background-color: " + SURFACE + ";");
 
         ScrollPane scroll = new ScrollPane(centeredWrap);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background: " + SURFACE + "; -fx-background-color: " + SURFACE + "; -fx-border-width: 0;");
         return scroll;
     }
@@ -218,10 +217,14 @@ public class ExploreProjectDetailsPage {
         Label locBadge = label(location, "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#735c00;-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-padding:4px 12px;-fx-border-color:#d0c5af;-fx-border-radius:10px;");
         Label devBadge = label(company + " (Verified Developer)", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#1565c0;-fx-background-color:#e3f2fd;-fx-background-radius:10px;-fx-padding:4px 12px;");
         
+        boolean isFulfilled = status != null && ("requirement fulfilled".equalsIgnoreCase(status.trim()) || "unavailable".equalsIgnoreCase(status.trim()));
         boolean isUrgent = status != null && status.toLowerCase().contains("urgent");
-        Label statusBadge = label(isUrgent ? "URGENT HIRING" : "ACTIVE PROJECT SITE",
-                "-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:" + (isUrgent ? "#ffffff" : "#2e7d32") + ";"
-                        + "-fx-background-color:" + (isUrgent ? "#c62828" : "#e8f5e9") + ";"
+        String badgeText = isFulfilled ? "REQUIREMENT FULFILLED" : (isUrgent ? "URGENT HIRING" : "ACTIVE PROJECT SITE");
+        String badgeTextColor = isFulfilled ? "#b48700" : (isUrgent ? "#ffffff" : "#2e7d32");
+        String badgeBgColor = isFulfilled ? "#fff8e1" : (isUrgent ? "#c62828" : "#e8f5e9");
+        Label statusBadge = label(badgeText,
+                "-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:" + badgeTextColor + ";"
+                        + "-fx-background-color:" + badgeBgColor + ";"
                         + "-fx-background-radius:10px;-fx-padding:4px 12px;");
 
         Label sectorBadge = label(sector, "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#4c4637;-fx-background-color:#f4ede2;-fx-background-radius:10px;-fx-padding:4px 12px;");

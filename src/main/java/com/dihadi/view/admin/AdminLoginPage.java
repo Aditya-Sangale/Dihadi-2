@@ -62,16 +62,10 @@ public class AdminLoginPage {
                 "-fx-font-size:16px;-fx-text-fill:#4c4637;-fx-text-alignment:center;");
         VBox introduction = new VBox(9, welcome, intro); introduction.setAlignment(Pos.CENTER);
 
-        Button back = new Button("‹");
-        back.setOnAction(event -> backAction.run());
-        back.setStyle("-fx-background-color:#f4ede2;-fx-background-radius:10px;-fx-text-fill:#735c00;-fx-font-size:22px;-fx-font-weight:700;-fx-padding:2px 13px 5px 13px;-fx-cursor:hand;");
         Label credentialsTitle = label("Enter your Login Credentials & Password", "-fx-font-size:18px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
-        HBox credentialsHeader = new HBox(10, back, credentialsTitle);
-        credentialsHeader.setAlignment(Pos.CENTER_LEFT);
-
         TextField email = new TextField(); email.setPromptText("Enter your Official Email Address"); email.setStyle(inputStyle());
         PasswordField password = new PasswordField(); password.setPromptText("Enter your Password"); password.setStyle(inputStyle());
-        VBox credentials = new VBox(15, credentialsHeader, email, password);
+        VBox credentials = new VBox(15, credentialsTitle, email, password);
 
         Button login = new Button("LOGIN"); login.setMaxWidth(Double.MAX_VALUE);
         login.setStyle("-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#231b00;-fx-font-size:18px;-fx-font-weight:800;-fx-padding:14px;-fx-cursor:hand;");
@@ -159,7 +153,7 @@ public class AdminLoginPage {
                         stage.setScene(new AdminDashboard().getDashboardScene(
                                 () -> {
                                     com.dihadi.view.SessionManager.clearAllSessions();
-                                    stage.setScene(getAdminLoginScene(backAction));
+                                    stage.setScene(new AdminHomePage().getAdminHomeScene(backAction != null ? backAction : () -> AppNavigator.open(stage, "Home")));
                                 }));
                     } else {
                         login.setDisable(false);

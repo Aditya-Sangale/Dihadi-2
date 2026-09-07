@@ -144,8 +144,7 @@ public class WokerSignUp {
         content.setAlignment(Pos.TOP_LEFT);
         content.setPadding(new Insets(24, 20, 48, 70));
         ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
         return scroll;
     }

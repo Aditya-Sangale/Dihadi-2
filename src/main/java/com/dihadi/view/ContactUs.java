@@ -34,8 +34,7 @@ public class ContactUs {
                 content.setPadding(new Insets(36, 0, 0, 0));
 
                 ScrollPane scroll = new ScrollPane(content);
-                scroll.setFitToWidth(true);
-                scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                ScrollUtils.style(scroll);
                 scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
                 BorderPane page = new BorderPane(scroll);
                 page.setTop(header());

@@ -48,8 +48,7 @@ public class ElectricianPage {
         scrollContent.setStyle("-fx-background-color:" + PAPER + ";");
 
         ScrollPane scroll = new ScrollPane(scrollContent);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:" + PAPER + ";-fx-border-width:0;");
 
         BorderPane page = new BorderPane(scroll);

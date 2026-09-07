@@ -49,8 +49,7 @@ public class CreateProjectPage {
         form.setPrefWidth(700);
 
         ScrollPane formScroll = new ScrollPane(form);
-        formScroll.setFitToWidth(true);
-        formScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.dihadi.view.ScrollUtils.style(formScroll);
         formScroll.setStyle("-fx-background:transparent;-fx-background-color:#f3e7ce;-fx-border-width:0;");
         HBox.setHgrow(formScroll, Priority.ALWAYS);
 
@@ -108,16 +107,16 @@ public class CreateProjectPage {
         email = input("Enter email");
 
         VBox details = new VBox(15,
-                fieldBox("Project name *required", projectName),
-                fieldBox("Project contact person name *required", contactName),
-                fieldBox("Mobile number *required", mobile),
+                fieldBox("Project name *", projectName),
+                fieldBox("Project contact person name *", contactName),
+                fieldBox("Mobile number *", mobile),
                 fieldBox("Alternate mobile number", alternateMobile),
-                fieldBox("Email address *required", email), uploadArea());
+                fieldBox("Email address *", email), uploadArea());
 
         Label addressHeading = text("ADDRESS DETAILS",
                 "-fx-font-size:13px;-fx-font-weight:800;-fx-letter-spacing:1.4px;-fx-text-fill:#1e1b15;");
         pincode = input("Enter pincode");
-        VBox pinRow = fieldBox("Pincode *required", pincode);
+        VBox pinRow = fieldBox("Pincode *", pincode);
         TextField city = input("Enter city");
         TextField state = input("Enter state");
         HBox locationRow = new HBox(16, fieldBox("City", city), fieldBox("State", state));
@@ -128,9 +127,9 @@ public class CreateProjectPage {
         landmark = input("Near by landmark");
 
         VBox address = new VBox(15, addressHeading, pinRow, locationRow,
-                fieldBox("Address line 1 *required", addressLine),
+                fieldBox("Address line 1 *", addressLine),
                 fieldBox("Address line 2", addressLine2),
-                fieldBox("Landmark *required", landmark));
+                fieldBox("Landmark *", landmark));
 
         Button save = new Button("SAVE PROJECT");
         save.setMaxWidth(Double.MAX_VALUE);
@@ -198,6 +197,7 @@ public class CreateProjectPage {
             );
             project.setStatus(hasActive ? "Upcoming" : "Active");
             new com.dihadi.controller.ProjectController().addProject(project);
+            com.dihadi.view.SessionManager.currentRecruiterProject = project;
 
             Stage stage = (Stage) save.getScene().getWindow();
             stage.setScene(
@@ -230,7 +230,7 @@ public class CreateProjectPage {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Required details");
                 alert.setHeaderText(null);
-                alert.setContentText("Please complete all fields marked *required before saving the project.");
+                alert.setContentText("Please complete all fields marked * before saving the project.");
                 alert.show();
                 return false;
             }
@@ -269,11 +269,48 @@ public class CreateProjectPage {
                     selectedFiles.add(file);
 
                     ImageView thumbnail = new ImageView(new Image(file.toURI().toString()));
-                    thumbnail.setFitWidth(60);
-                    thumbnail.setFitHeight(60);
+                    thumbnail.setFitWidth(62);
+                    thumbnail.setFitHeight(62);
                     thumbnail.setPreserveRatio(false);
-                    StackPane thumbPane = new StackPane(thumbnail);
-                    thumbPane.setStyle("-fx-border-color:#735c00;-fx-border-radius:6px;-fx-border-width:1px;");
+                    Rectangle clip = new Rectangle(62, 62);
+                    clip.setArcWidth(10);
+                    clip.setArcHeight(10);
+                    thumbnail.setClip(clip);
+
+                    final boolean[] isRemoved = new boolean[] { false };
+                    final String[] uploadedUrlHolder = new String[1];
+
+                    Button removeBtn = new Button("✕");
+                    removeBtn.setStyle("-fx-background-color:rgba(30,27,21,0.85);-fx-text-fill:#ffffff;-fx-font-size:9px;-fx-font-weight:900;-fx-background-radius:999px;-fx-min-width:18px;-fx-min-height:18px;-fx-max-width:18px;-fx-max-height:18px;-fx-padding:0;-fx-cursor:hand;");
+                    removeBtn.setOnMouseEntered(ev -> removeBtn.setStyle("-fx-background-color:#ba1a1a;-fx-text-fill:#ffffff;-fx-font-size:9px;-fx-font-weight:900;-fx-background-radius:999px;-fx-min-width:18px;-fx-min-height:18px;-fx-max-width:18px;-fx-max-height:18px;-fx-padding:0;-fx-cursor:hand;"));
+                    removeBtn.setOnMouseExited(ev -> removeBtn.setStyle("-fx-background-color:rgba(30,27,21,0.85);-fx-text-fill:#ffffff;-fx-font-size:9px;-fx-font-weight:900;-fx-background-radius:999px;-fx-min-width:18px;-fx-min-height:18px;-fx-max-width:18px;-fx-max-height:18px;-fx-padding:0;-fx-cursor:hand;"));
+                    StackPane.setAlignment(removeBtn, Pos.TOP_RIGHT);
+                    StackPane.setMargin(removeBtn, new Insets(2, 2, 0, 0));
+
+                    StackPane thumbPane = new StackPane(thumbnail, removeBtn);
+                    thumbPane.setPrefSize(66, 66);
+                    thumbPane.setStyle("-fx-border-color:#735c00;-fx-border-radius:8px;-fx-border-width:1.5px;-fx-background-radius:8px;");
+                    thumbPane.setOnMouseClicked(ev -> ev.consume());
+
+                    removeBtn.setOnMouseClicked(ev -> ev.consume());
+                    removeBtn.setOnAction(ev -> {
+                        ev.consume();
+                        isRemoved[0] = true;
+                        previewsContainer.getChildren().remove(thumbPane);
+                        selectedFiles.remove(file);
+                        if (uploadedUrlHolder[0] != null) {
+                            synchronized (uploadedImageUrls) {
+                                uploadedImageUrls.remove(uploadedUrlHolder[0]);
+                            }
+                        }
+                        int count = uploadedImageUrls.size();
+                        if (count == 0) {
+                            uploadStatusLabel.setText("");
+                        } else {
+                            uploadStatusLabel.setText(count + " image(s) uploaded successfully.");
+                        }
+                    });
+
                     previewsContainer.getChildren().add(thumbPane);
 
                     uploadStatusLabel.setText("Uploading " + selectedFiles.size() + " image(s)...");
@@ -282,11 +319,16 @@ public class CreateProjectPage {
                         ImageUploadController uploadController = new ImageUploadController();
                         String url = uploadController.imageUpload(file);
                         if (url != null) {
+                            uploadedUrlHolder[0] = url;
                             synchronized (uploadedImageUrls) {
-                                uploadedImageUrls.add(url);
+                                if (!isRemoved[0]) {
+                                    uploadedImageUrls.add(url);
+                                }
                             }
                             Platform.runLater(() -> {
-                                uploadStatusLabel.setText(uploadedImageUrls.size() + " image(s) uploaded successfully.");
+                                if (!isRemoved[0]) {
+                                    uploadStatusLabel.setText(uploadedImageUrls.size() + " image(s) uploaded successfully.");
+                                }
                             });
                         }
                     }).start();

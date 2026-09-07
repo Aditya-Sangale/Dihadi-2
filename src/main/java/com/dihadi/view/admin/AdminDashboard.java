@@ -90,7 +90,7 @@ public class AdminDashboard {
     public Scene getDashboardScene(Runnable logout) {
         BorderPane root = new BorderPane();
         rootLayout = root;
-        root.setLeft(sidebar(logout));
+        root.setLeft(AdminSidebar.create(AdminSidebar.Category.COMMAND_CENTER, logout, this::stopTimers));
         root.setCenter(main(logout));
 
         loadRealtimeMetrics(logout);
@@ -100,71 +100,6 @@ public class AdminDashboard {
         poller.play();
 
         return new Scene(root, 1400, 780);
-    }
-
-    private VBox sidebar(Runnable logout) {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 82, 82);
-        VBox identity = new VBox(10, logo,
-                label("DIHADI", "-fx-font-family:Georgia;-fx-font-size:28px;-fx-text-fill:" + GOLD + ";"),
-                label("ADMIN CONTROL CENTER", "-fx-font-size:11px;-fx-letter-spacing:1.2px;-fx-text-fill:#dcdad4;"));
-        identity.setAlignment(Pos.CENTER);
-        identity.setPadding(new Insets(28, 10, 35, 10));
-
-        Button grievances = nav("Grievances", false);
-        grievances.setOnAction(e -> {
-            stopTimers();
-            Stage stage = (Stage) grievances.getScene().getWindow();
-            stage.setScene(new AdminGrievancesPage().getGrievancesScene(
-                    () -> stage.setScene(getDashboardScene(logout)),
-                    logout));
-        });
-
-        Button workersNav = nav("Workers", false);
-        workersNav.setOnAction(e -> {
-            stopTimers();
-            Stage stage = (Stage) workersNav.getScene().getWindow();
-            stage.setScene(new AdminWorkersPage().getWorkersScene(
-                    () -> stage.setScene(getDashboardScene(logout)),
-                    logout));
-        });
-
-        Button recruitersNav = nav("Recruiters", false);
-        recruitersNav.setOnAction(e -> {
-            stopTimers();
-            Stage stage = (Stage) recruitersNav.getScene().getWindow();
-            stage.setScene(new AdminRecruitersPage().getRecruitersScene(
-                    () -> stage.setScene(getDashboardScene(logout)),
-                    logout));
-        });
-
-        Button projectsNav = nav("Projects", false);
-        projectsNav.setOnAction(e -> {
-            stopTimers();
-            Stage stage = (Stage) projectsNav.getScene().getWindow();
-            stage.setScene(new AdminProjectsPage().getProjectsScene(
-                    () -> stage.setScene(getDashboardScene(logout)),
-                    logout));
-        });
-
-        VBox links = new VBox(4, nav("Command Center", true), workersNav, recruitersNav, projectsNav, nav("Financials", false), nav("Verification", false), grievances);
-        VBox.setVgrow(links, Priority.ALWAYS);
-
-        String adminName = SessionManager.getAdminDisplayName();
-        Button signOut = new Button("Sign Out");
-        signOut.setStyle("-fx-background-color:#3a3027;-fx-background-radius:16px;-fx-border-color:#ffffff26;-fx-border-radius:16px;-fx-text-fill:#f8f0e2;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:12px 15px;-fx-cursor:hand;");
-        signOut.setOnAction(e -> { stopTimers(); logout.run(); });
-        HBox accountActions = new HBox(8, signOut);
-        accountActions.setAlignment(Pos.CENTER);
-
-        VBox bottom = new VBox(8, label(adminName + "  •  System Administrator", "-fx-font-size:11px;-fx-text-fill:#dcdad4;"), accountActions);
-        bottom.setPadding(new Insets(14, 12, 14, 12));
-        bottom.setStyle("-fx-border-color:#ffffff1a;-fx-border-width:1px 0 0 0;");
-
-        VBox bar = new VBox(identity, links, bottom);
-        bar.setPrefWidth(312);
-        bar.setMinWidth(312);
-        bar.setStyle("-fx-background-color:" + DARK + ";");
-        return bar;
     }
 
     private void stopTimers() {
@@ -186,8 +121,22 @@ public class AdminDashboard {
         signOutBtn.setOnAction(e -> {
             stopTimers();
             SessionManager.clearAllSessions();
+            Stage stage = (signOutBtn.getScene() != null && signOutBtn.getScene().getWindow() instanceof Stage s) ? s : null;
+            if (stage == null) {
+                for (javafx.stage.Window w : javafx.stage.Window.getWindows()) {
+                    if (w instanceof Stage s && s.isShowing()) {
+                        stage = s;
+                        break;
+                    }
+                }
+            }
             NotificationToast.show("Signed Out", "You have signed out of your administrator session.", NotificationToast.ToastType.INFO);
-            if (logout != null) logout.run();
+            if (stage != null) {
+                final Stage finalStage = stage;
+                stage.setScene(new AdminHomePage().getAdminHomeScene(() -> com.dihadi.view.AppNavigator.open(finalStage, "Home")));
+            } else if (logout != null) {
+                logout.run();
+            }
         });
 
         HBox breadcrumb = new HBox(12, nameLbl, sep, dashLbl, spacer, signOutBtn);
@@ -207,8 +156,7 @@ public class AdminDashboard {
         content.setMaxWidth(1300);
 
         ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:" + MAIN + ";-fx-border-width:0;");
 
         BorderPane page = new BorderPane(scroll);
@@ -281,9 +229,9 @@ public class AdminDashboard {
 
         grid.add(kpiExecutiveCard("TOTAL WORKERS", totalWorkersNum, "workers", GOLD,
                 0.66,
-                new String[] { "Verified Workers", "Pending Verification", "Registered Workers" },
+                new String[] { "Verified Workers", "Pending Verification", "Inactive (30+ Days)" },
                 new Label[] { verifiedWorkersRow, pendingWorkersRow, inactiveWorkersRow },
-                new String[] { "#065f46", "#b45309", "#4b5563" }), 0, 0);
+                new String[] { "#065f46", "#b45309", "#dc2626" }), 0, 0);
 
         grid.add(kpiExecutiveCard("TOTAL RECRUITERS", totalRecruitersNum, "briefcase", "#2563eb",
                 0.78,
@@ -555,10 +503,15 @@ public class AdminDashboard {
                 int totalW = workers != null ? workers.size() : 0;
                 int verifiedW = 0;
                 int pendingW = 0;
+                int inactiveW = 0;
                 if (workers != null) {
                     for (Worker w : workers) {
                         if (w.getFirstName() != null && !w.getFirstName().isBlank()) verifiedW++;
                         else pendingW++;
+
+                        if (com.dihadi.util.UserActivityUtil.isInactive(w.getLastLogin())) {
+                            inactiveW++;
+                        }
                     }
                 }
 
@@ -566,12 +519,17 @@ public class AdminDashboard {
                 int contractors = 0;
                 int indEmployers = 0;
                 int agencies = 0;
+                int inactiveR = 0;
                 if (recruiters != null) {
                     for (Recruiter r : recruiters) {
                         String bType = r.getBusinessType() != null ? r.getBusinessType().toLowerCase() : "";
                         if (bType.contains("contractor")) contractors++;
                         else if (bType.contains("agency") || bType.contains("firm")) agencies++;
                         else indEmployers++;
+
+                        if (com.dihadi.util.UserActivityUtil.isInactive(r.getLastLogin())) {
+                            inactiveR++;
+                        }
                     }
                 }
 
@@ -601,12 +559,13 @@ public class AdminDashboard {
                 final int finalW = totalW > 0 ? totalW : 12450;
                 final int finalVerifiedW = totalW > 0 ? verifiedW : 8200;
                 final int finalPendingW = totalW > 0 ? pendingW : 3150;
-                final int finalInactiveW = totalW > 0 ? totalW : 1100;
+                final int finalInactiveW = totalW > 0 ? inactiveW : 14;
 
                 final int finalR = totalR > 0 ? totalR : 1840;
                 final int finalContr = totalR > 0 ? contractors : 1200;
                 final int finalIndiv = totalR > 0 ? indEmployers : 540;
                 final int finalAgenc = totalR > 0 ? agencies : 100;
+                final int finalInactiveR = totalR > 0 ? inactiveR : 8;
 
                 final int finalP = totalP > 0 ? totalP : 740;
                 final int finalActiveP = totalP > 0 ? activeP : 450;
@@ -661,9 +620,14 @@ public class AdminDashboard {
                         String grievText = (finalG > 0 ? finalG + " Active Grievances & Queries" : "12 Grievances Escalated");
                         String grievDetail = (finalNewG > 0 ? finalNewG + " new inquiries awaiting review." : "Pending resolution over 48 hours.");
 
+                        int totalInactiveAll = finalInactiveW + finalInactiveR;
+                        String inactiveText = totalInactiveAll + " Inactive Accounts (>30 Days)";
+                        String inactiveDetail = "Eligible for administrative removal under 30-day inactivity policy.";
+
                         alertsContainer.getChildren().addAll(
                                 alertTriage(grievText, grievDetail, "View", "#fff0f0", "#dc2626", () -> openGrievances(logout)),
                                 alertTriage(finalPendingW > 0 ? finalPendingW + " Pending Verifications" : "85 Pending Verifications", "Worker KYC documents pending verification.", "Review", "#fffbeb", "#d97706", () -> openWorkers(logout)),
+                                alertTriage(inactiveText, inactiveDetail, "Manage", "#fef2f2", "#b91c1c", () -> openWorkers(logout)),
                                 alertTriage(finalR + " Active Recruiters", "Contractor accounts and site compliance.", "Inspect", "#eff6ff", "#2563eb", () -> openRecruiters(logout))
                         );
                     }

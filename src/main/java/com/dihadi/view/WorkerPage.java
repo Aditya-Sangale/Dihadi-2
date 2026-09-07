@@ -135,8 +135,7 @@ public class WorkerPage extends Application {
         content.setAlignment(Pos.TOP_CENTER);
         content.setPadding(new Insets(24, 24, 24, 24));
         ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-border-width: 0;");
         BorderPane page = new BorderPane(scroll);
         page.setTop(header(backAction, aboutAction));
@@ -360,9 +359,22 @@ public class WorkerPage extends Application {
             heroSlider.stop();
     }
 
+    private Stage getStage() {
+        if (heroImage != null && heroImage.getScene() != null && heroImage.getScene().getWindow() instanceof Stage s) {
+            return s;
+        }
+        for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
+            if (window instanceof Stage s && s.isShowing()) {
+                return s;
+            }
+        }
+        return null;
+    }
+
     private void showGeneralLabour() {
         stopHeroSlider();
-        Stage stage = (Stage) heroImage.getScene().getWindow();
+        Stage stage = getStage();
+        if (stage == null) return;
         stage.setScene(new GeneralLabourPage().getGeneralLabourScene(
                 () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)),
                 homeAction,
@@ -371,77 +383,108 @@ public class WorkerPage extends Application {
 
     private void showSiteSupervisor() {
         stopHeroSlider();
-        Stage stage = (Stage) heroImage.getScene().getWindow();
+        Stage stage = getStage();
+        if (stage == null) return;
         stage.setScene(new Site_Supervisor().getSiteSupervisorScene(
                 () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)), homeAction, aboutPageAction));
     }
 
     private void showElectrician() {
         stopHeroSlider();
-        Stage stage = (Stage) heroImage.getScene().getWindow();
+        Stage stage = getStage();
+        if (stage == null) return;
         stage.setScene(new ElectricianPage().getElectricianScene(
                 () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)), homeAction, aboutPageAction));
     }
 
     private void showMason() {
         stopHeroSlider();
-        Stage stage = (Stage) heroImage.getScene().getWindow();
+        Stage stage = getStage();
+        if (stage == null) return;
         stage.setScene(new MasonPage().getMasonScene(() -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)),
                 homeAction, aboutPageAction));
     }
 
     private void showPlumber() {
         stopHeroSlider();
-        Stage stage = (Stage) heroImage.getScene().getWindow();
+        Stage stage = getStage();
+        if (stage == null) return;
         stage.setScene(new PlumberPage().getPlumberScene(
                 () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)), homeAction, aboutPageAction));
     }
 
     private void showCarpenter() {
         stopHeroSlider();
-        Stage stage = (Stage) heroImage.getScene().getWindow();
+        Stage stage = getStage();
+        if (stage == null) return;
         stage.setScene(new CarpenterPage()
-                .getCarpenterScene(() -> stage.setScene(getWorkerScene(homeAction, aboutPageAction))));
+                .getCarpenterScene(() -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)), homeAction, aboutPageAction));
     }
 
     private void showItiTechnician() {
         stopHeroSlider();
-        Stage stage = (Stage) heroImage.getScene().getWindow();
+        Stage stage = getStage();
+        if (stage == null) return;
         stage.setScene(new ITI_Technician()
-                .getItiTechnicianScene(() -> stage.setScene(getWorkerScene(homeAction, aboutPageAction))));
+                .getItiTechnicianScene(() -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)), homeAction, aboutPageAction));
     }
 
     private void showPainter() {
         stopHeroSlider();
-        Stage stage = (Stage) heroImage.getScene().getWindow();
+        Stage stage = getStage();
+        if (stage == null) return;
         stage.setScene(
-                new PainterPage().getPainterScene(() -> stage.setScene(getWorkerScene(homeAction, aboutPageAction))));
+                new PainterPage().getPainterScene(() -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)), homeAction, aboutPageAction));
     }
 
     private void showWorkerSignUp() {
         stopHeroSlider();
-        Stage stage = (Stage) heroImage.getScene().getWindow();
+        Stage stage = getStage();
+        if (stage == null) return;
         stage.setScene(new WokerSignUp().getSignUpScene(
                 () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction))));
     }
 
     private void navigate(String destination) {
-        Stage stage = (Stage) heroImage.getScene().getWindow();
+        Stage stage = getStage();
+        if (stage == null) return;
+        Runnable effectiveHome = homeAction != null ? homeAction : () -> AppNavigator.open(stage, "Home");
+
         switch (destination) {
-            case "Home" -> homeAction.run();
-            case "Business" -> stage.setScene(new BusinessPage().getBusinessScene(homeAction,
-                    () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction))));
-            case "About Us" -> {
-                if (aboutPageAction != null)
-                    aboutPageAction.run();
+            case "Home" -> {
+                stopHeroSlider();
+                effectiveHome.run();
             }
-            case "Contact Us" -> stage.setScene(new ContactUs().getContactScene(homeAction,
-                    () -> stage.setScene(new BusinessPage().getBusinessScene(homeAction,
-                            () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)))),
-                    () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction)), aboutPageAction));
+            case "Business" -> {
+                stopHeroSlider();
+                stage.setScene(new BusinessPage().getBusinessScene(effectiveHome,
+                        () -> stage.setScene(getWorkerScene(effectiveHome, aboutPageAction))));
+            }
+            case "About Us" -> {
+                stopHeroSlider();
+                if (aboutPageAction != null) {
+                    aboutPageAction.run();
+                } else {
+                    stage.setScene(new AboutUs().getAboutScene(
+                            effectiveHome,
+                            () -> stage.setScene(getWorkerScene(effectiveHome, aboutPageAction))));
+                }
+            }
+            case "Contact Us" -> {
+                stopHeroSlider();
+                Runnable effectiveAbout = aboutPageAction != null ? aboutPageAction : () -> stage.setScene(new AboutUs().getAboutScene(
+                        effectiveHome,
+                        () -> stage.setScene(getWorkerScene(effectiveHome, aboutPageAction))));
+                stage.setScene(new ContactUs().getContactScene(effectiveHome,
+                        () -> stage.setScene(new BusinessPage().getBusinessScene(effectiveHome,
+                                () -> stage.setScene(getWorkerScene(effectiveHome, aboutPageAction)))),
+                        () -> stage.setScene(getWorkerScene(effectiveHome, aboutPageAction)),
+                        effectiveAbout));
+            }
             case "Worker" -> {
                 if (SessionManager.currentWorker != null) {
-                    stage.setScene(new com.dihadi.view.worker.WorkerDashboard(SessionManager.currentWorker).getScene(homeAction));
+                    stopHeroSlider();
+                    stage.setScene(new com.dihadi.view.worker.WorkerDashboard(SessionManager.currentWorker).getScene(effectiveHome));
                     return;
                 }
                 if (!SessionManager.checkAccessAllowed(SessionManager.Role.WORKER)) return;
@@ -449,12 +492,14 @@ public class WorkerPage extends Application {
             }
             case "Recruiter" -> {
                 if (SessionManager.currentRecruiter != null) {
-                    stage.setScene(new com.dihadi.view.recruiter.RecruiterDashboard(SessionManager.currentRecruiter).getScene(homeAction));
+                    stopHeroSlider();
+                    stage.setScene(new com.dihadi.view.recruiter.RecruiterDashboard(SessionManager.currentRecruiter).getScene(effectiveHome));
                     return;
                 }
                 if (!SessionManager.checkAccessAllowed(SessionManager.Role.RECRUITER)) return;
+                stopHeroSlider();
                 stage.setScene(new SignUpRecruiter().getRecruiterSignUpScene(
-                        () -> stage.setScene(getWorkerScene(homeAction, aboutPageAction))));
+                        () -> stage.setScene(getWorkerScene(effectiveHome, aboutPageAction))));
             }
             default -> {
             }
