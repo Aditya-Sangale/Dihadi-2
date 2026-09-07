@@ -166,7 +166,7 @@ public class AttendancePage {
         tableRowsContainer.setAlignment(Pos.TOP_CENTER);
 
         ScrollPane innerScroll = new ScrollPane(tableRowsContainer);
-        innerScroll.setFitToWidth(true);
+        com.dihadi.view.ScrollUtils.style(innerScroll);
         innerScroll.setPrefHeight(450);
         innerScroll.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;");
 
@@ -179,8 +179,13 @@ public class AttendancePage {
 
         loadProjects();
 
-        ScrollPane scrollPane = new ScrollPane(root);
-        scrollPane.setFitToWidth(true);
+        root.setPrefWidth(1360);
+        StackPane centerWrapper = new StackPane(root);
+        centerWrapper.setAlignment(Pos.TOP_CENTER);
+        centerWrapper.setStyle("-fx-background-color: #f3e7ce;");
+
+        ScrollPane scrollPane = new ScrollPane(centerWrapper);
+        com.dihadi.view.ScrollUtils.style(scrollPane);
         scrollPane.setStyle("-fx-background: #f3e7ce; -fx-background-color: #f3e7ce; -fx-border-width: 0;");
         return new Scene(scrollPane, 1400, 850);
     }

@@ -43,8 +43,7 @@ public class BusinessPage {
                 content.setAlignment(Pos.TOP_CENTER);
 
                 ScrollPane scroll = new ScrollPane(content);
-                scroll.setFitToWidth(true);
-                scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                ScrollUtils.style(scroll);
                 scroll.setStyle("-fx-background-color:transparent;-fx-border-width:0;");
                 BorderPane page = new BorderPane(scroll);
                 page.setTop(header());

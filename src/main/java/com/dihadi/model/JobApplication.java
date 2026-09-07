@@ -15,14 +15,19 @@ public class JobApplication {
     private String projectId;
     private String recruiterMobile;
     private String requirementId;
+    private String workerName;
 
     public JobApplication() {}
 
     public JobApplication(String applicationId, String workerMobile, String jobTitle, String jobLocation, String jobWage, String status) {
-        this(applicationId, workerMobile, jobTitle, jobLocation, jobWage, status, null, null, null);
+        this(applicationId, workerMobile, jobTitle, jobLocation, jobWage, status, null, null, null, null);
     }
 
     public JobApplication(String applicationId, String workerMobile, String jobTitle, String jobLocation, String jobWage, String status, String projectId, String recruiterMobile, String requirementId) {
+        this(applicationId, workerMobile, jobTitle, jobLocation, jobWage, status, projectId, recruiterMobile, requirementId, null);
+    }
+
+    public JobApplication(String applicationId, String workerMobile, String jobTitle, String jobLocation, String jobWage, String status, String projectId, String recruiterMobile, String requirementId, String workerName) {
         this.applicationId = applicationId;
         this.workerMobile = workerMobile;
         this.jobTitle = jobTitle;
@@ -32,6 +37,7 @@ public class JobApplication {
         this.projectId = projectId;
         this.recruiterMobile = recruiterMobile;
         this.requirementId = requirementId;
+        this.workerName = workerName;
         this.timestamp = new Date();
     }
 
@@ -64,4 +70,7 @@ public class JobApplication {
 
     public String getRequirementId() { return requirementId; }
     public void setRequirementId(String requirementId) { this.requirementId = requirementId; }
+
+    public String getWorkerName() { return workerName; }
+    public void setWorkerName(String workerName) { this.workerName = workerName; }
 }

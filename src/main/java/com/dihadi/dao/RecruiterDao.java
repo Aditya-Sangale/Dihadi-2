@@ -16,6 +16,9 @@ public class RecruiterDao {
 
     public void saveRecruiter(Recruiter recruiter) {
         try {
+            if (recruiter.getLastLogin() == null || recruiter.getLastLogin().isBlank()) {
+                recruiter.setLastLogin(com.dihadi.util.UserActivityUtil.getCurrentTimestamp());
+            }
             db.collection("Recruiters")
                     .document(recruiter.getMobileNumber())
                     .set(recruiter);
@@ -93,6 +96,17 @@ public class RecruiterDao {
             db.collection("Recruiters")
                     .document(mobileNumber).delete();
             System.out.println("Recruiter Data Deleted");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateLastLogin(String mobileNumber, String lastLogin) {
+        try {
+            db.collection("Recruiters")
+                    .document(mobileNumber)
+                    .update("lastLogin", lastLogin);
+            System.out.println("Recruiter lastLogin updated for " + mobileNumber);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -15,6 +15,9 @@ public class WorkerDao {
 
     public void saveWorker(Worker worker) {
         try {
+            if (worker.getLastLogin() == null || worker.getLastLogin().isBlank()) {
+                worker.setLastLogin(com.dihadi.util.UserActivityUtil.getCurrentTimestamp());
+            }
             db.collection("Workers")
                     .document(worker.getMobileNumber())
                     .set(worker);
@@ -106,6 +109,17 @@ public class WorkerDao {
             db.collection("Workers")
                     .document(mobileNumber).delete();
             System.out.println("Worker Data Deleted");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateLastLogin(String mobileNumber, String lastLogin) {
+        try {
+            db.collection("Workers")
+                    .document(mobileNumber)
+                    .update("lastLogin", lastLogin);
+            System.out.println("Worker lastLogin updated for " + mobileNumber);
         } catch (Exception e) {
             e.printStackTrace();
         }

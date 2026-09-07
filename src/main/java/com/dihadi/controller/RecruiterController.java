@@ -42,6 +42,10 @@ public class RecruiterController {
         dao.deleteRecruiter(mobileNumber);
     }
 
+    public void updateLastLogin(String mobileNumber, String lastLogin) {
+        dao.updateLastLogin(mobileNumber, lastLogin);
+    }
+
     public List<Recruiter> getAllRecruiters() {
         return dao.getAllRecruiters();
     }

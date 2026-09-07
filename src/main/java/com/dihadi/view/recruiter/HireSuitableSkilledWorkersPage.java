@@ -76,8 +76,7 @@ public class HireSuitableSkilledWorkersPage {
                 wrapper.setPadding(new Insets(0, 36, 0, 36));
                 wrapper.setStyle("-fx-background-color:" + PAPER + ";");
                 ScrollPane scroll = new ScrollPane(wrapper);
-                scroll.setFitToWidth(true);
-                scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                com.dihadi.view.ScrollUtils.style(scroll);
                 scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
                 return scroll;
         }

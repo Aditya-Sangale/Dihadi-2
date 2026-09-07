@@ -15,11 +15,19 @@ public class ProjectController {
         return dao.getProject(projectId);
     }
 
+    public Project getProjectById(String projectId) {
+        return dao.getProject(projectId);
+    }
+
     public List<Project> getAllProjects() {
         return dao.getAllProjects();
     }
 
     public boolean deleteProject(String projectId) {
         return dao.deleteProject(projectId);
+    }
+
+    public void updateProjectStatus(String projectId, String newStatus) {
+        dao.updateProjectStatus(projectId, newStatus);
     }
 }

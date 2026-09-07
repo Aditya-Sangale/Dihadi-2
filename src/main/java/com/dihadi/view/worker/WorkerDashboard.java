@@ -38,6 +38,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -95,11 +96,15 @@ public class WorkerDashboard {
         );
         content.setPadding(new Insets(24, 48, 40, 48));
         content.setMaxWidth(1360);
+        content.setPrefWidth(1360);
         content.setAlignment(Pos.TOP_CENTER);
 
-        ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        StackPane centerWrapper = new StackPane(content);
+        centerWrapper.setAlignment(Pos.TOP_CENTER);
+        centerWrapper.setStyle("-fx-background-color:#f3e7ce;");
+
+        ScrollPane scroll = new ScrollPane(centerWrapper);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
 
         refreshWorkerData(heroContainer);
@@ -128,36 +133,58 @@ public class WorkerDashboard {
             stage.setScene(new ExploreProjectsPage(() -> stage.setScene(getScene(back))).getExploreProjectsScene());
         });
 
+        HBox navBar = new HBox(18, navHome);
+        navBar.setAlignment(Pos.CENTER);
+
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        Button backBtn = new Button("←  Back");
+        backBtn.setStyle(
+                "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;");
+        backBtn.setOnAction(e -> {
+            if (liveRefresher != null) liveRefresher.stop();
+            Stage stage = (Stage) backBtn.getScene().getWindow();
+            Worker currentWorker = SessionManager.currentWorker != null ? SessionManager.currentWorker : worker;
+            stage.setScene(new WorkerPage(currentWorker).getWorkerScene(
+                    (back != null) ? back : () -> com.dihadi.view.AppNavigator.open(stage, "Home")));
+        });
+
         Label userPill = label(name + " (" + category + ")",
-                "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#4c4637;-fx-background-color:#faf3e8;-fx-background-radius:20px;-fx-border-color:#d0c5af;-fx-border-radius:20px;-fx-padding:7px 16px;");
+                "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#3f392e;-fx-background-color:#fffaf0;-fx-background-radius:16px;-fx-border-color:#d0c5af;-fx-border-radius:16px;-fx-padding:0 20px;");
+        userPill.setMinHeight(54);
+        userPill.setPrefHeight(54);
+        userPill.setAlignment(Pos.CENTER);
 
         Button logoutBtn = new Button("Sign Out");
-        logoutBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:20px;-fx-border-color:#ffcdd2;-fx-border-radius:20px;-fx-text-fill:#ba1a1a;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;");
+        logoutBtn.setMinHeight(54);
+        logoutBtn.setPrefHeight(54);
+        logoutBtn.setStyle(
+                "-fx-background-color:#fff1f1;-fx-background-radius:16px;-fx-border-color:#f1bcbc;-fx-border-radius:16px;-fx-text-fill:#a51d1d;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:0 20px;-fx-cursor:hand;");
         logoutBtn.setOnAction(e -> {
             if (liveRefresher != null) liveRefresher.stop();
-            SessionManager.currentWorker = null;
-            if (back != null) {
-                back.run();
-            }
             SessionManager.clearAllSessions();
+            Stage stage = null;
+            if (logoutBtn.getScene() != null && logoutBtn.getScene().getWindow() instanceof Stage s) {
+                stage = s;
+            } else {
+                for (javafx.stage.Window w : javafx.stage.Window.getWindows()) {
+                    if (w instanceof Stage s && s.isShowing()) {
+                        stage = s;
+                        break;
+                    }
+                }
+            }
             NotificationToast.show("Signed Out", "You have signed out of your worker session.", NotificationToast.ToastType.INFO);
-            back.run();
+            if (stage != null) {
+                com.dihadi.view.AppNavigator.open(stage, "Home");
+            }
         });
 
-        Button workerPageBtn = new Button("←  Back");
-        workerPageBtn.setStyle(
-                "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;");
-        workerPageBtn.setOnAction(e -> {
-            if (liveRefresher != null) liveRefresher.stop();
-            Stage stage = (Stage) workerPageBtn.getScene().getWindow();
-            Worker currentWorker = SessionManager.currentWorker != null ? SessionManager.currentWorker : worker;
-            stage.setScene(new WorkerPage(currentWorker).getWorkerScene(back));
-        });
+        HBox accountActions = new HBox(10, backBtn, userPill, logoutBtn);
+        accountActions.setAlignment(Pos.CENTER_RIGHT);
 
-        HBox h = new HBox(16, brandLockup, navHome, spacer, userPill, workerPageBtn, logoutBtn);
+        HBox h = new HBox(20, brandLockup, navBar, spacer, accountActions);
         h.setAlignment(Pos.CENTER_LEFT);
         h.setPadding(new Insets(0, 0, 14, 0));
         h.setStyle("-fx-border-color:transparent transparent #d0c5af transparent;-fx-border-width:0 0 1px 0;");
@@ -184,13 +211,13 @@ public class WorkerDashboard {
 
         Label badge = label("ASSIGNED PROJECT",
                 "-fx-font-size:10px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-text-fill:#1565c0;");
-        Label activeProjTitle = label(category,
+        Label activeProjTitle = label("No Active Project Assigned",
                 "-fx-font-family:Georgia;-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
 
         VBox roleDetail = detail("Role", category);
         VBox locationDetail = detail("Site Location", location);
         VBox wageDetail = detail("Daily Wage", "Rs. " + String.format("%,d", worker.getDailyWage() > 0 ? worker.getDailyWage() : 950) + " / day");
-        VBox siteStatusDetail = detail("Status", "Active");
+        VBox siteStatusDetail = detail("Status", "Available");
 
         HBox projDetails = new HBox(20, roleDetail, locationDetail, wageDetail, siteStatusDetail);
 
@@ -306,8 +333,15 @@ public class WorkerDashboard {
                         : (worker.getMobileNumber() != null ? worker.getMobileNumber() : SessionManager.getCurrentWorkerId());
 
                 String workerMob = worker.getMobileNumber() != null ? worker.getMobileNumber() : workerId;
+                if ((workerMob == null || workerMob.isBlank() || "WRK_DEFAULT".equals(workerMob)) && SessionManager.currentWorker != null) {
+                    if (SessionManager.currentWorker.getMobileNumber() != null && !SessionManager.currentWorker.getMobileNumber().isBlank()) {
+                        workerMob = SessionManager.currentWorker.getMobileNumber();
+                    }
+                }
+                String workerFullName = ((worker.getFirstName() != null ? worker.getFirstName() : "") + " " +
+                                        (worker.getLastName() != null ? worker.getLastName() : "")).trim();
 
-                List<JobApplication> apps = new JobApplicationController().getApplicationsByWorker(workerMob);
+                List<JobApplication> apps = new JobApplicationController().getApplicationsForWorker(workerMob, workerFullName, worker.getWorkerType());
                 List<Attendance> attendances = new AttendanceController().getAttendanceByWorker(workerMob);
                 List<Project> allProjects = new ProjectController().getAllProjects();
 
@@ -467,7 +501,7 @@ public class WorkerDashboard {
                         }
                     }
 
-                    // 4. Job Invitations & Applications Panels
+                    // 4. Job Invitations, Applications Panels & Recent Work History
                     if (recruiterRequestsPanel != null && pendingApplicationsPanel != null && historyPanel != null) {
                         recruiterRequestsPanel.getChildren().clear();
                         recruiterRequestsPanel.getChildren().add(panelHeader("Job Invitations"));
@@ -475,25 +509,42 @@ public class WorkerDashboard {
                         pendingApplicationsPanel.getChildren().clear();
                         pendingApplicationsPanel.getChildren().add(panelHeader("Submitted Applications"));
 
+                        historyPanel.getChildren().clear();
+                        historyPanel.getChildren().add(panelHeader("Recent Work History"));
+
                         int reqCount = 0;
                         int appCount = 0;
-                        int completedCount = 0;
+                        JobApplication activeApp = null;
+                        List<JobApplication> completedApps = new ArrayList<>();
+                        java.util.Set<String> seenCompletedProjects = new java.util.HashSet<>();
 
                         if (apps != null) {
                             for (JobApplication app : apps) {
                                 boolean isDirectRequest = (app.getJobTitle() != null && app.getJobTitle().contains("Hiring Request"))
-                                        || (app.getRecruiterMobile() != null && !app.getRecruiterMobile().isBlank());
+                                        || "DIRECT_HIRE".equalsIgnoreCase(app.getRequirementId());
 
-                                if ("Completed".equalsIgnoreCase(app.getStatus())) {
-                                    if (completedCount == 0) {
-                                        historyPanel.getChildren().removeIf(node -> node instanceof Label && ((Label)node).getText().contains("No completed work history yet"));
+                                Project proj = (app.getProjectId() != null) ? projectMap.get(app.getProjectId()) : null;
+                                boolean isCompleted = "Completed".equalsIgnoreCase(app.getStatus())
+                                        || (proj != null && "Completed".equalsIgnoreCase(proj.getStatus()));
+
+                                if (isCompleted) {
+                                    String projKey = app.getProjectId() != null && !app.getProjectId().isBlank()
+                                            ? app.getProjectId()
+                                            : extractProjectName(app, projectMap);
+                                    if (seenCompletedProjects.add(projKey)) {
+                                        completedApps.add(app);
                                     }
-                                    completedCount++;
-                                    addWorkHistoryCard(historyPanel, app);
                                 } else if ("Accepted".equalsIgnoreCase(app.getStatus())) {
-                                    HBox heroHBox = (HBox) heroContainer.getChildren().get(0);
-                                    Node[] details = (Node[]) heroHBox.getUserData();
-                                    updateActiveProjectCard(details, app);
+                                    if (activeApp == null) {
+                                        activeApp = app;
+                                    } else if (app.getTimestamp() != null && activeApp.getTimestamp() != null) {
+                                        if (app.getTimestamp().after(activeApp.getTimestamp())) {
+                                            activeApp = app;
+                                        }
+                                    } else if (app.getApplicationId() != null && activeApp.getApplicationId() != null
+                                            && app.getApplicationId().compareTo(activeApp.getApplicationId()) > 0) {
+                                        activeApp = app;
+                                    }
                                 } else if ("Pending".equalsIgnoreCase(app.getStatus())) {
                                     if (isDirectRequest) {
                                         reqCount++;
@@ -520,18 +571,57 @@ public class WorkerDashboard {
                                             acceptBtn.setDisable(true);
                                             declineBtn.setDisable(true);
                                             new Thread(() -> {
+                                                JobApplication activeAssignment = new JobApplicationController().getActiveAssignedApplicationForWorker(worker.getMobileNumber());
+                                                if (activeAssignment != null && activeAssignment.getApplicationId() != null
+                                                        && !activeAssignment.getApplicationId().equals(currentApp.getApplicationId())
+                                                        && activeAssignment.getProjectId() != null
+                                                        && !activeAssignment.getProjectId().equals(currentApp.getProjectId())) {
+                                                    try {
+                                                        Project activeAssignedProj = new ProjectController().getProject(activeAssignment.getProjectId());
+                                                        if (activeAssignedProj != null && ("Active".equalsIgnoreCase(activeAssignedProj.getStatus()) || "Unavailable".equalsIgnoreCase(activeAssignedProj.getStatus()))) {
+                                                            String activeProj = activeAssignedProj.getProjectName() != null ? activeAssignedProj.getProjectName() : activeAssignment.getJobTitle();
+                                                            Platform.runLater(() -> {
+                                                                acceptBtn.setDisable(false);
+                                                                declineBtn.setDisable(false);
+                                                                NotificationToast.show("Already Assigned", "You are already assigned to active project '" + activeProj + "'. A worker can only be assigned to one project at a time.", NotificationToast.ToastType.ALERT);
+                                                            });
+                                                            return;
+                                                        }
+                                                    } catch (Exception ignored) {}
+                                                }
+
+                                                // Complete any prior accepted assignments for this worker
+                                                List<JobApplication> allWorkerApps = new JobApplicationController().getApplicationsByWorker(worker.getMobileNumber());
+                                                if (allWorkerApps != null) {
+                                                    for (JobApplication oldApp : allWorkerApps) {
+                                                        if ("Accepted".equalsIgnoreCase(oldApp.getStatus())
+                                                                && oldApp.getApplicationId() != null
+                                                                && !oldApp.getApplicationId().equals(currentApp.getApplicationId())) {
+                                                            oldApp.setStatus("Completed");
+                                                            new JobApplicationController().saveApplication(oldApp);
+                                                        }
+                                                    }
+                                                }
+
                                                 currentApp.setStatus("Accepted");
+                                                String cleanProjectName = extractProjectName(currentApp, projectMap);
+                                                currentApp.setJobTitle(cleanProjectName);
                                                 new JobApplicationController().saveApplication(currentApp);
-                                                String workerFullName = ((worker.getFirstName() != null ? worker.getFirstName() : "") + " " +
+
+                                                if (currentApp.getProjectId() != null && !currentApp.getProjectId().isBlank()) {
+                                                    new com.dihadi.controller.ProjectController().updateProjectStatus(currentApp.getProjectId(), "Requirement Fulfilled");
+                                                }
+
+                                                String acceptedWorkerName = ((worker.getFirstName() != null ? worker.getFirstName() : "") + " " +
                                                         (worker.getLastName() != null ? worker.getLastName() : "")).trim();
-                                                if (workerFullName.isEmpty()) workerFullName = "Worker (" + worker.getMobileNumber() + ")";
+                                                if (acceptedWorkerName.isEmpty()) acceptedWorkerName = "Worker (" + worker.getMobileNumber() + ")";
                                                 new NotificationController().notifyRecruiterHiringAccepted(
                                                         currentApp,
-                                                        workerFullName,
+                                                        acceptedWorkerName,
                                                         worker.getMobileNumber()
                                                 );
                                                 Platform.runLater(() -> {
-                                                    NotificationToast.show("Offer Accepted", "You accepted the hiring offer for " + currentApp.getJobTitle() + ".", NotificationToast.ToastType.SUCCESS);
+                                                    NotificationToast.show("Offer Accepted", "You accepted the hiring offer for " + cleanProjectName + ". Project status is now set to Requirement Fulfilled.", NotificationToast.ToastType.SUCCESS);
                                                     refreshWorkerData(heroContainer);
                                                 });
                                             }).start();
@@ -567,6 +657,36 @@ public class WorkerDashboard {
                             }
                         }
 
+                        // Populate Recent Work History (deduplicated, single time)
+                        if (completedApps.isEmpty()) {
+                            String category = value(worker.getWorkerType(), "Skilled Worker");
+                            String location = (value(worker.getCity()) + ", " + value(worker.getState()))
+                                    .replace("Not provided, Not provided", "Pune, Maharashtra");
+                            historyPanel.getChildren().addAll(
+                                    label("No completed work history yet.", "-fx-font-size:13px;-fx-text-fill:#4c4637;"),
+                                    detail("Location", location),
+                                    detail("Experience", value(worker.getExperience()))
+                            );
+                        } else {
+                            for (JobApplication cApp : completedApps) {
+                                addWorkHistoryCard(historyPanel, cApp, projectMap);
+                            }
+                        }
+
+                        // Update or reset the Hero Assigned Project card
+                        if (heroContainer != null && !heroContainer.getChildren().isEmpty()) {
+                            HBox heroHBox = (HBox) heroContainer.getChildren().get(0);
+                            Node[] details = (Node[]) heroHBox.getUserData();
+                            if (activeApp != null) {
+                                updateActiveProjectCard(details, activeApp, projectMap);
+                            } else {
+                                String category = value(worker.getWorkerType(), "Skilled Worker");
+                                String location = (value(worker.getCity()) + ", " + value(worker.getState()))
+                                        .replace("Not provided, Not provided", "Pune, Maharashtra");
+                                resetActiveProjectCard(details, category, location);
+                            }
+                        }
+
                         jobRequestsMetricLabel.setText(String.valueOf(reqCount));
 
                         if (reqCount == 0) {
@@ -585,7 +705,48 @@ public class WorkerDashboard {
         }).start();
     }
 
-    private void updateActiveProjectCard(Node[] details, JobApplication app) {
+    private String extractProjectName(JobApplication app, Map<String, Project> projectMap) {
+        if (app == null) return "Active Project Site";
+
+        if (app.getProjectId() != null && !app.getProjectId().isBlank()) {
+            if (projectMap != null && projectMap.containsKey(app.getProjectId())) {
+                Project p = projectMap.get(app.getProjectId());
+                if (p != null) {
+                    if (p.getProjectName() != null && !p.getProjectName().isBlank()) {
+                        return p.getProjectName().trim();
+                    } else if (p.getTitle() != null && !p.getTitle().isBlank()) {
+                        return p.getTitle().trim();
+                    }
+                }
+            }
+            try {
+                Project p = new ProjectController().getProject(app.getProjectId());
+                if (p != null) {
+                    if (p.getProjectName() != null && !p.getProjectName().isBlank()) {
+                        return p.getProjectName().trim();
+                    } else if (p.getTitle() != null && !p.getTitle().isBlank()) {
+                        return p.getTitle().trim();
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
+        String jt = app.getJobTitle();
+        if (jt != null && !jt.isBlank()) {
+            if (jt.contains(" for ")) {
+                return jt.substring(jt.lastIndexOf(" for ") + 5).trim();
+            } else if (jt.startsWith("Hiring Request:")) {
+                return jt.substring("Hiring Request:".length()).trim();
+            } else if (jt.contains("Hiring Request")) {
+                return jt.replace("Hiring Request", "").replaceAll("^[:\\-\\s]+", "").trim();
+            }
+            return jt.trim();
+        }
+
+        return "Active Project Site";
+    }
+
+    private void updateActiveProjectCard(Node[] details, JobApplication app, Map<String, Project> projectMap) {
         if (details == null || details.length < 5) return;
         Label title = (Label) details[0];
         VBox role = (VBox) details[1];
@@ -593,16 +754,33 @@ public class WorkerDashboard {
         VBox wage = (VBox) details[3];
         VBox status = (VBox) details[4];
 
-        title.setText(app.getJobTitle() != null ? app.getJobTitle() : "Active Project Site");
+        String cleanProjectName = extractProjectName(app, projectMap);
+        title.setText(cleanProjectName);
         setDetailValue(role, value(worker.getWorkerType(), "Worker"));
         setDetailValue(loc, app.getJobLocation() != null ? app.getJobLocation() : "Pune, Maharashtra");
         setDetailValue(wage, "Rs. " + app.getJobWage() + " / day");
         setDetailValue(status, "Active");
     }
 
-    private void addWorkHistoryCard(VBox historyPanel, JobApplication app) {
+    private void resetActiveProjectCard(Node[] details, String category, String location) {
+        if (details == null || details.length < 5) return;
+        Label title = (Label) details[0];
+        VBox role = (VBox) details[1];
+        VBox loc = (VBox) details[2];
+        VBox wage = (VBox) details[3];
+        VBox status = (VBox) details[4];
+
+        title.setText("No Active Project Assigned");
+        setDetailValue(role, category);
+        setDetailValue(loc, location);
+        setDetailValue(wage, "Rs. " + String.format("%,d", worker.getDailyWage() > 0 ? worker.getDailyWage() : 950) + " / day");
+        setDetailValue(status, "Available");
+    }
+
+    private void addWorkHistoryCard(VBox historyPanel, JobApplication app, Map<String, Project> projectMap) {
+        String cleanProjectName = extractProjectName(app, projectMap);
         VBox card = new VBox(4,
-                label(app.getJobTitle() != null ? app.getJobTitle() : "Completed Project", "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#1e1b15;"),
+                label(cleanProjectName, "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#1e1b15;"),
                 label("Location: " + (app.getJobLocation() != null ? app.getJobLocation() : "Pune") + "  |  Daily Wage: Rs. " + app.getJobWage(), "-fx-font-size:12px;-fx-text-fill:#4d4635;"),
                 label("Status: Completed", "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#2e7d32;")
         );

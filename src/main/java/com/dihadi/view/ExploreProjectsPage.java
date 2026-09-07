@@ -41,7 +41,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * Explore Projects page rendering hero as 1st card, sliding multi-card banner marquee as 2nd card,
+ * Explore Projects page rendering hero as 1st card, sliding multi-card banner
+ * marquee as 2nd card,
  * and classic 2-column project cards with real live database synchronization.
  */
 public class ExploreProjectsPage {
@@ -152,25 +153,29 @@ public class ExploreProjectsPage {
         centeredWrap.setStyle("-fx-background-color: " + SURFACE + ";");
 
         ScrollPane scroll = new ScrollPane(centeredWrap);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background: " + SURFACE + "; -fx-background-color: " + SURFACE + "; -fx-border-width: 0;");
         return scroll;
     }
 
     /** Compact return control positioned above the Explore Projects hero. */
     private Button homeBackButton() {
-        Button back = new Button("←  Back to Home");
+        Button back = new Button("←  Back to Dashboard");
         back.setStyle(
                 "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;");
         back.setOnAction(e -> {
-            if (heroTimeline != null) heroTimeline.stop();
-            if (showHome != null) showHome.run();
+            if (heroTimeline != null)
+                heroTimeline.stop();
+            if (showHome != null)
+                showHome.run();
         });
         return back;
     }
 
-    /** 1st Box: Attractive Hero card with smooth multi-image auto-slider and premium typography */
+    /**
+     * 1st Box: Attractive Hero card with smooth multi-image auto-slider and premium
+     * typography
+     */
     private HBox hero() {
         Label eyebrow = label("✦  EXPLORE VERIFIED MEGA PROJECTS",
                 "-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:#735c00;-fx-letter-spacing:1.5px;");
@@ -209,9 +214,11 @@ public class ExploreProjectsPage {
         StackPane imageBox = new StackPane(heroImage);
         imageBox.setPrefSize(560, 350);
         imageBox.setMaxSize(560, 350);
-        imageBox.setStyle("-fx-background-color:#1e1b15;-fx-background-radius: 24px; -fx-border-radius: 24px; -fx-border-color: #d4af37; -fx-border-width:2px; -fx-effect:dropshadow(gaussian,rgba(58,48,39,.25),20,0,0,6px);");
+        imageBox.setStyle(
+                "-fx-background-color:#1e1b15;-fx-background-radius: 24px; -fx-border-radius: 24px; -fx-border-color: #d4af37; -fx-border-width:2px; -fx-effect:dropshadow(gaussian,rgba(58,48,39,.25),20,0,0,6px);");
 
-        if (heroTimeline != null) heroTimeline.stop();
+        if (heroTimeline != null)
+            heroTimeline.stop();
         heroTimeline = new Timeline(new KeyFrame(Duration.millis(2800), e -> {
             currentHeroIndex = (currentHeroIndex + 1) % HERO_SLIDER_IMAGES.length;
             heroImage.setImage(load(HERO_SLIDER_IMAGES[currentHeroIndex]));
@@ -225,7 +232,8 @@ public class ExploreProjectsPage {
         HBox hero = new HBox(36, copy, imageBox);
         hero.setAlignment(Pos.CENTER);
         hero.setPadding(new Insets(26, 32, 26, 32));
-        hero.setStyle("-fx-background-color:#f8eedb;-fx-background-radius:24px;-fx-border-color:#d0c5af;-fx-border-radius:24px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),18,0,0,6px);");
+        hero.setStyle(
+                "-fx-background-color:#f8eedb;-fx-background-radius:24px;-fx-border-color:#d0c5af;-fx-border-radius:24px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),18,0,0,6px);");
         hero.setMaxWidth(1180);
         return hero;
     }
@@ -235,11 +243,15 @@ public class ExploreProjectsPage {
         HBox box = new HBox(l);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setPadding(new Insets(6, 12, 6, 12));
-        box.setStyle("-fx-background-color:rgba(115,92,0,0.08);-fx-background-radius:12px;-fx-border-color:rgba(115,92,0,0.22);-fx-border-radius:12px;");
+        box.setStyle(
+                "-fx-background-color:rgba(115,92,0,0.08);-fx-background-radius:12px;-fx-border-color:rgba(115,92,0,0.22);-fx-border-radius:12px;");
         return box;
     }
 
-    /** 2nd Box: Dynamic Auto-Sliding Featured Developer & Recruiter Project Banners matching reference video flow */
+    /**
+     * 2nd Box: Dynamic Auto-Sliding Featured Developer & Recruiter Project Banners
+     * matching reference video flow
+     */
     private VBox featuredBannerBox() {
         double cardWidth = 520;
         double cardHeight = 260;
@@ -266,10 +278,13 @@ public class ExploreProjectsPage {
                 StackPane card = new StackPane(img);
                 card.setPrefSize(cardWidth, cardHeight);
                 card.setMaxSize(cardWidth, cardHeight);
-                card.setStyle("-fx-background-color:#161311;-fx-background-radius:20px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.14),12,0,0,4px);-fx-cursor:hand;");
+                card.setStyle(
+                        "-fx-background-color:#161311;-fx-background-radius:20px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.14),12,0,0,4px);-fx-cursor:hand;");
 
-                card.setOnMouseEntered(e -> card.setStyle("-fx-background-color:#161311;-fx-background-radius:20px;-fx-border-color:#e9c349;-fx-border-width:2px;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.35),16,0,0,6px);-fx-cursor:hand;"));
-                card.setOnMouseExited(e -> card.setStyle("-fx-background-color:#161311;-fx-background-radius:20px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.14),12,0,0,4px);-fx-cursor:hand;"));
+                card.setOnMouseEntered(e -> card.setStyle(
+                        "-fx-background-color:#161311;-fx-background-radius:20px;-fx-border-color:#e9c349;-fx-border-width:2px;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.35),16,0,0,6px);-fx-cursor:hand;"));
+                card.setOnMouseExited(e -> card.setStyle(
+                        "-fx-background-color:#161311;-fx-background-radius:20px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.14),12,0,0,4px);-fx-cursor:hand;"));
 
                 card.setOnMouseClicked(e -> {
                     if (loadedProjects.size() > bannerIdx) {
@@ -295,8 +310,7 @@ public class ExploreProjectsPage {
                                         pm.hasPower(),
                                         pm.hasStay(),
                                         pm.hasTransport(),
-                                        () -> stage.setScene(currentScene)
-                                ).getScene());
+                                        () -> stage.setScene(currentScene)).getScene());
                                 return;
                             }
                         }
@@ -318,7 +332,8 @@ public class ExploreProjectsPage {
         viewport.setClip(viewportClip);
 
         // Smooth continuous 60fps translation
-        if (marqueeTimer != null) marqueeTimer.stop();
+        if (marqueeTimer != null)
+            marqueeTimer.stop();
         final double cycleWidth = FEATURED_BANNER_IMAGES.length * (cardWidth + gap);
 
         marqueeTimer = new AnimationTimer() {
@@ -352,21 +367,23 @@ public class ExploreProjectsPage {
         bannerCard.setAlignment(Pos.CENTER);
         bannerCard.setPadding(new Insets(14, 12, 14, 12));
         bannerCard.setMaxWidth(1180);
-        bannerCard.setStyle("-fx-background-color:#f8eedb;-fx-background-radius:26px;-fx-border-color:#d0c5af;-fx-border-radius:26px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),18,0,0,6px);");
+        bannerCard.setStyle(
+                "-fx-background-color:#f8eedb;-fx-background-radius:26px;-fx-border-color:#d0c5af;-fx-border-radius:26px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.10),18,0,0,6px);");
         return bannerCard;
     }
 
     private HBox filterBar() {
-        tradeCombo = choice("All Trades", "Carpenter", "Electrician", "Mason", "Plumber", "Painter", "ITI Technician", "General Labour", "Site Supervisor");
-        stateCombo = choice("All Locations", "Maharashtra", "Karnataka", "Gujarat", "Delhi", "Tamil Nadu", "Telangana", "Chhattisgarh");
+        tradeCombo = choice("All Trades", "Carpenter", "Electrician", "Mason", "Plumber", "Painter", "ITI Technician",
+                "General Labour", "Site Supervisor");
+        stateCombo = choice("All Locations", "Maharashtra", "Karnataka", "Gujarat", "Delhi", "Tamil Nadu", "Telangana",
+                "Chhattisgarh");
         typeCombo = choice("All Categories", "Infrastructure", "Commercial", "Residential", "Industrial");
 
         HBox filters = new HBox(18,
                 text("Filter Projects:", "-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #735c00;"),
                 filterGroup("Trade / Skill", tradeCombo),
                 filterGroup("Location", stateCombo),
-                filterGroup("Sector", typeCombo)
-        );
+                filterGroup("Sector", typeCombo));
         filters.setAlignment(Pos.CENTER_LEFT);
         filters.setPadding(new Insets(16, 24, 16, 24));
         filters.setStyle("-fx-background-color: white; -fx-background-radius: 18px; -fx-border-color: " + BORDER
@@ -379,11 +396,13 @@ public class ExploreProjectsPage {
         ComboBox<String> choice = new ComboBox<>();
         choice.getItems().add(selected);
         for (String value : values) {
-            if (!value.equals(selected)) choice.getItems().add(value);
+            if (!value.equals(selected))
+                choice.getItems().add(value);
         }
         choice.setValue(selected);
         choice.setPrefWidth(165);
-        choice.setStyle("-fx-background-color: #faf3e8; -fx-background-radius: 8px; -fx-border-color: #d0c5af; -fx-border-radius: 8px; -fx-font-size: 13px; -fx-cursor: hand;");
+        choice.setStyle(
+                "-fx-background-color: #faf3e8; -fx-background-radius: 8px; -fx-border-color: #d0c5af; -fx-border-radius: 8px; -fx-font-size: 13px; -fx-cursor: hand;");
         choice.setOnAction(event -> applyFilters());
         return choice;
     }
@@ -404,7 +423,8 @@ public class ExploreProjectsPage {
         if (isLoading) {
             ProgressIndicator loader = new ProgressIndicator();
             loader.setPrefSize(42, 42);
-            VBox loadingBox = new VBox(14, loader, label("Fetching real projects from network...", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
+            VBox loadingBox = new VBox(14, loader,
+                    label("Fetching real projects from network...", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
             loadingBox.setAlignment(Pos.CENTER);
             loadingBox.setPadding(new Insets(40));
             cardsContainer.getChildren().add(loadingBox);
@@ -436,60 +456,98 @@ public class ExploreProjectsPage {
                 // Convert real created DB Projects into display cards
                 if (allDbProjects != null && !allDbProjects.isEmpty()) {
                     for (Project p : allDbProjects) {
+                        if ("Completed".equalsIgnoreCase(p.getStatus())) {
+                            continue; // Recruiter marked completed -> remove project card from worker interface!
+                        }
+
                         List<WorkforceRequirement> pReqs = reqMap.get(p.getProjectId());
                         if (pReqs == null && p.getMobile() != null) {
                             pReqs = reqMap.get(p.getMobile());
                         }
 
-                        double wage = 850;
-                        int workers = 25;
-                        String trade = "General Labour";
-                        boolean water = true, power = true, stay = false, transport = false;
-                        String reqId = "";
-
                         if (pReqs != null && !pReqs.isEmpty()) {
-                            WorkforceRequirement firstReq = pReqs.get(0);
-                            wage = firstReq.getDailyWages() > 0 ? firstReq.getDailyWages() : 850;
-                            workers = firstReq.getQuantity() > 0 ? firstReq.getQuantity() : 25;
-                            trade = (firstReq.getWorkerType() != null && !firstReq.getWorkerType().isBlank())
-                                    ? firstReq.getWorkerType() : "General Labour";
-                            water = firstReq.isWaterFacility();
-                            power = firstReq.isElectricityFacility();
-                            stay = firstReq.isAccommodationFacility();
-                            transport = firstReq.isTransportationFacility();
-                            reqId = firstReq.getRequirementId() != null ? firstReq.getRequirementId() : "";
+                            for (WorkforceRequirement req : pReqs) {
+                                double wage = req.getDailyWages() > 0 ? req.getDailyWages() : 850;
+                                int workers = req.getQuantity() > 0 ? req.getQuantity() : 25;
+                                String trade = (req.getSubSkill() != null && !req.getSubSkill().isBlank())
+                                        ? req.getSubSkill()
+                                        : (req.getWorkerType() != null && !req.getWorkerType().isBlank() ? req.getWorkerType() : "General Labour");
+                                boolean water = req.isWaterFacility();
+                                boolean power = req.isElectricityFacility();
+                                boolean stay = req.isAccommodationFacility();
+                                boolean transport = req.isTransportationFacility();
+                                String reqId = req.getRequirementId() != null ? req.getRequirementId() : "";
+
+                                String loc = (val(p.getCity(), "Pune") + ", " + val(p.getState(), "Maharashtra"))
+                                        .replaceAll("^, |, $", "");
+                                String company = val(p.getContactName(), "Verified Developer");
+                                boolean isFulfilled = "Requirement Fulfilled".equalsIgnoreCase(p.getStatus())
+                                        || "Unavailable".equalsIgnoreCase(p.getStatus());
+                                String status = isFulfilled ? "Requirement Fulfilled" : val(p.getStatus(), "Active");
+                                String openingsText = isFulfilled ? "Requirement Fulfilled" : (workers + " Workers Needed");
+
+                                List<String> pImages = (p.getImageUrls() != null && !p.getImageUrls().isEmpty())
+                                        ? p.getImageUrls()
+                                        : new ArrayList<>();
+                                String firstImg = !pImages.isEmpty() ? pImages.get(0) : getFallbackImageForTrade(trade);
+
+                                list.add(new ProjectCardModel(
+                                        p.getProjectId(),
+                                        val(p.getProjectName(), "Infrastructure Project Site"),
+                                        loc,
+                                        company,
+                                        trade,
+                                        "₹" + String.format("%,d", (long) wage) + " / day",
+                                        openingsText,
+                                        status,
+                                        "Infrastructure",
+                                        p.getMobile(),
+                                        reqId,
+                                        firstImg,
+                                        pImages,
+                                        water, power, stay, transport));
+                            }
+                        } else {
+                            double wage = 850;
+                            int workers = 25;
+                            String trade = "General Labour";
+                            String loc = (val(p.getCity(), "Pune") + ", " + val(p.getState(), "Maharashtra"))
+                                    .replaceAll("^, |, $", "");
+                            String company = val(p.getContactName(), "Verified Developer");
+                            boolean isFulfilled = "Requirement Fulfilled".equalsIgnoreCase(p.getStatus())
+                                    || "Unavailable".equalsIgnoreCase(p.getStatus());
+                            String status = isFulfilled ? "Requirement Fulfilled" : val(p.getStatus(), "Active");
+                            String openingsText = isFulfilled ? "Requirement Fulfilled" : (workers + " Workers Needed");
+
+                            List<String> pImages = (p.getImageUrls() != null && !p.getImageUrls().isEmpty())
+                                    ? p.getImageUrls()
+                                    : new ArrayList<>();
+                            String firstImg = !pImages.isEmpty() ? pImages.get(0) : getFallbackImageForTrade(trade);
+
+                            list.add(new ProjectCardModel(
+                                    p.getProjectId(),
+                                    val(p.getProjectName(), "Infrastructure Project Site"),
+                                    loc,
+                                    company,
+                                    trade,
+                                    "₹" + String.format("%,d", (long) wage) + " / day",
+                                    openingsText,
+                                    status,
+                                    "Infrastructure",
+                                    p.getMobile(),
+                                    "",
+                                    firstImg,
+                                    pImages,
+                                    true, true, false, false));
                         }
-
-                        String loc = (val(p.getCity(), "Pune") + ", " + val(p.getState(), "Maharashtra")).replaceAll("^, |, $", "");
-                        String company = val(p.getContactName(), "Verified Developer");
-                        String status = val(p.getStatus(), "Active");
-
-                        List<String> pImages = (p.getImageUrls() != null && !p.getImageUrls().isEmpty()) ? p.getImageUrls() : new ArrayList<>();
-                        String firstImg = !pImages.isEmpty() ? pImages.get(0) : getFallbackImageForTrade(trade);
-
-                        list.add(new ProjectCardModel(
-                                p.getProjectId(),
-                                val(p.getProjectName(), "Infrastructure Project Site"),
-                                loc,
-                                company,
-                                trade,
-                                "₹" + String.format("%,d", (long) wage) + " / day",
-                                workers + " Workers Needed",
-                                status,
-                                "Infrastructure",
-                                p.getMobile(),
-                                reqId,
-                                firstImg,
-                                pImages,
-                                water, power, stay, transport
-                        ));
                     }
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
 
-            // Only fallback to benchmark projects if zero real projects exist in the database
+            // Only fallback to benchmark projects if zero real projects exist in the
+            // database
             if (list.isEmpty()) {
                 list.addAll(getBenchmarkRealProjects());
             }
@@ -505,31 +563,66 @@ public class ExploreProjectsPage {
 
     private List<ProjectCardModel> getBenchmarkRealProjects() {
         return List.of(
-                new ProjectCardModel("P-BENCH-01", "Hiranandani Business & Residential Towers", "Mumbai, Maharashtra", "Hiranandani Developers", "Technician / Supervisor", "₹1,200 / day", "85 Workers Needed", "Urgent Hiring", "Commercial & Residential", "9822012341", "R-01", "/assets/images/explore/explore_slide_1.jpg", List.of("/assets/images/explore/explore_slide_1.jpg"), true, true, true, true),
-                new ProjectCardModel("P-BENCH-02", "BHRAMHA Horizon Premium Residential Complex", "Pune, Maharashtra", "BHRAMHA Group", "Carpenter / Plumber", "₹950 / day", "110 Workers Needed", "Active Site", "Residential", "9822012342", "R-02", "/assets/images/explore/explore_slide_2.jpg", List.of("/assets/images/explore/explore_slide_2.jpg"), true, true, true, false),
-                new ProjectCardModel("P-BENCH-03", "LODHAA Grand Central Urban Expressway", "Mumbai, Maharashtra", "LODHAA Group", "Civil Engineer / Foreman", "₹1,450 / day", "60 Workers Needed", "Urgent Hiring", "Infrastructure", "9822012343", "R-03", "/assets/images/explore/explore_slide_3.jpg", List.of("/assets/images/explore/explore_slide_3.jpg"), true, true, false, true),
-                new ProjectCardModel("P-BENCH-04", "Ramoji Film City Mega Studio Infrastructure", "Hyderabad, Telangana", "Ramoji Film City", "Painter & Welder", "₹1,050 / day", "95 Workers Needed", "Active Site", "Commercial", "9822012344", "R-04", "/assets/images/explore/explore_slide_4.jpg", List.of("/assets/images/explore/explore_slide_4.jpg"), true, true, true, true),
-                new ProjectCardModel("P-BENCH-05", "BASIL Tech Habitat Smart Residential Park", "Bengaluru, Karnataka", "BASIL Group", "General Labour / Mason", "₹880 / day", "150 Workers Needed", "Active Site", "Residential", "9822012345", "R-05", "/assets/images/explore/explore_slide_5.jpg", List.of("/assets/images/explore/explore_slide_5.jpg"), true, true, true, true),
-                new ProjectCardModel("P-BENCH-06", "Pune Metro Rail Underground Depot - Phase 2", "Pune, Maharashtra", "L&T Heavy Infrastructure", "Mason", "₹950 / day", "140 Workers Needed", "Active Site", "Infrastructure", "9822012346", "R-06", "/assets/images/recruiter/slide-01.jpeg", List.of("/assets/images/recruiter/slide-01.jpeg"), true, true, true, true),
-                new ProjectCardModel("P-BENCH-07", "Mumbai Coastal Road Expressway & Sea Bridge", "Mumbai, Maharashtra", "Afcons Infrastructure", "Structural Fitter", "₹1,250 / day", "95 Workers Needed", "Urgent Hiring", "Infrastructure", "9822012347", "R-07", "/assets/images/recruiter/slide-03.jpeg", List.of("/assets/images/recruiter/slide-03.jpeg"), true, true, false, true),
-                new ProjectCardModel("P-BENCH-08", "Prestige Tech Cloud IT Park - Phase 4 Towers", "Bangalore, Karnataka", "Prestige Group", "Electrician", "₹1,100 / day", "60 Workers Needed", "Active Site", "Commercial", "9822012348", "R-08", "/assets/images/recruiter/slide-05.jpeg", List.of("/assets/images/recruiter/slide-05.jpeg"), true, true, true, false)
-        );
+                new ProjectCardModel("P-BENCH-01", "Hiranandani Business & Residential Towers", "Mumbai, Maharashtra",
+                        "Hiranandani Developers", "Technician / Supervisor", "₹1,200 / day", "85 Workers Needed",
+                        "Urgent Hiring", "Commercial & Residential", "9822012341", "R-01",
+                        "/assets/images/explore/explore_slide_1.jpg",
+                        List.of("/assets/images/explore/explore_slide_1.jpg"), true, true, true, true),
+                new ProjectCardModel("P-BENCH-02", "BHRAMHA Horizon Premium Residential Complex", "Pune, Maharashtra",
+                        "BHRAMHA Group", "Carpenter / Plumber", "₹950 / day", "110 Workers Needed", "Active Site",
+                        "Residential", "9822012342", "R-02", "/assets/images/explore/explore_slide_2.jpg",
+                        List.of("/assets/images/explore/explore_slide_2.jpg"), true, true, true, false),
+                new ProjectCardModel("P-BENCH-03", "LODHAA Grand Central Urban Expressway", "Mumbai, Maharashtra",
+                        "LODHAA Group", "Civil Engineer / Foreman", "₹1,450 / day", "60 Workers Needed",
+                        "Urgent Hiring", "Infrastructure", "9822012343", "R-03",
+                        "/assets/images/explore/explore_slide_3.jpg",
+                        List.of("/assets/images/explore/explore_slide_3.jpg"), true, true, false, true),
+                new ProjectCardModel("P-BENCH-04", "Ramoji Film City Mega Studio Infrastructure",
+                        "Hyderabad, Telangana", "Ramoji Film City", "Painter & Welder", "₹1,050 / day",
+                        "95 Workers Needed", "Active Site", "Commercial", "9822012344", "R-04",
+                        "/assets/images/explore/explore_slide_4.jpg",
+                        List.of("/assets/images/explore/explore_slide_4.jpg"), true, true, true, true),
+                new ProjectCardModel("P-BENCH-05", "BASIL Tech Habitat Smart Residential Park", "Bengaluru, Karnataka",
+                        "BASIL Group", "General Labour / Mason", "₹880 / day", "150 Workers Needed", "Active Site",
+                        "Residential", "9822012345", "R-05", "/assets/images/explore/explore_slide_5.jpg",
+                        List.of("/assets/images/explore/explore_slide_5.jpg"), true, true, true, true),
+                new ProjectCardModel("P-BENCH-06", "Pune Metro Rail Underground Depot - Phase 2", "Pune, Maharashtra",
+                        "L&T Heavy Infrastructure", "Mason", "₹950 / day", "140 Workers Needed", "Active Site",
+                        "Infrastructure", "9822012346", "R-06", "/assets/images/recruiter/slide-01.jpeg",
+                        List.of("/assets/images/recruiter/slide-01.jpeg"), true, true, true, true),
+                new ProjectCardModel("P-BENCH-07", "Mumbai Coastal Road Expressway & Sea Bridge", "Mumbai, Maharashtra",
+                        "Afcons Infrastructure", "Structural Fitter", "₹1,250 / day", "95 Workers Needed",
+                        "Urgent Hiring", "Infrastructure", "9822012347", "R-07",
+                        "/assets/images/recruiter/slide-03.jpeg", List.of("/assets/images/recruiter/slide-03.jpeg"),
+                        true, true, false, true),
+                new ProjectCardModel("P-BENCH-08", "Prestige Tech Cloud IT Park - Phase 4 Towers",
+                        "Bangalore, Karnataka", "Prestige Group", "Electrician", "₹1,100 / day", "60 Workers Needed",
+                        "Active Site", "Commercial", "9822012348", "R-08", "/assets/images/recruiter/slide-05.jpeg",
+                        List.of("/assets/images/recruiter/slide-05.jpeg"), true, true, true, false));
     }
 
     private String getFallbackImageForTrade(String trade) {
-        if (trade == null) return "/assets/images/explore/explore_slide_1.jpg";
+        if (trade == null)
+            return "/assets/images/explore/explore_slide_1.jpg";
         String t = trade.toLowerCase();
-        if (t.contains("carpenter")) return "/assets/images/explore/explore_slide_2.jpg";
-        if (t.contains("plumber")) return "/assets/images/explore/explore_slide_2.jpg";
-        if (t.contains("engineer") || t.contains("foreman") || t.contains("supervisor")) return "/assets/images/recruiter/slide-04.jpeg";
-        if (t.contains("paint") || t.contains("weld")) return "/assets/images/explore/explore_slide_4.jpg";
-        if (t.contains("labour") || t.contains("mason") || t.contains("helper")) return "/assets/images/explore/explore_slide_5.jpg";
-        if (t.contains("electric")) return "/assets/images/recruiter/slide-03.jpeg";
+        if (t.contains("carpenter"))
+            return "/assets/images/explore/explore_slide_2.jpg";
+        if (t.contains("plumber"))
+            return "/assets/images/explore/explore_slide_2.jpg";
+        if (t.contains("engineer") || t.contains("foreman") || t.contains("supervisor"))
+            return "/assets/images/recruiter/slide-04.jpeg";
+        if (t.contains("paint") || t.contains("weld"))
+            return "/assets/images/explore/explore_slide_4.jpg";
+        if (t.contains("labour") || t.contains("mason") || t.contains("helper"))
+            return "/assets/images/explore/explore_slide_5.jpg";
+        if (t.contains("electric"))
+            return "/assets/images/recruiter/slide-03.jpeg";
         return "/assets/images/explore/explore_slide_1.jpg";
     }
 
     private void applyFilters() {
-        if (cardsContainer == null) return;
+        if (cardsContainer == null)
+            return;
         cardsContainer.getChildren().clear();
 
         String selTrade = tradeCombo != null && tradeCombo.getValue() != null ? tradeCombo.getValue() : "All Trades";
@@ -537,16 +630,21 @@ public class ExploreProjectsPage {
         String selType = typeCombo != null && typeCombo.getValue() != null ? typeCombo.getValue() : "All Categories";
 
         List<ProjectCardModel> filtered = loadedProjects.stream().filter(p -> {
-            boolean tradeMatch = "All Trades".equals(selTrade) || p.trade.toLowerCase().contains(selTrade.toLowerCase()) || selTrade.toLowerCase().contains(p.trade.toLowerCase());
-            boolean stateMatch = "All Locations".equals(selState) || p.location.toLowerCase().contains(selState.toLowerCase());
-            boolean typeMatch = "All Categories".equals(selType) || p.sector.equalsIgnoreCase(selType) || p.projectName.toLowerCase().contains(selType.toLowerCase());
+            boolean tradeMatch = "All Trades".equals(selTrade) || p.trade.toLowerCase().contains(selTrade.toLowerCase())
+                    || selTrade.toLowerCase().contains(p.trade.toLowerCase());
+            boolean stateMatch = "All Locations".equals(selState)
+                    || p.location.toLowerCase().contains(selState.toLowerCase());
+            boolean typeMatch = "All Categories".equals(selType) || p.sector.equalsIgnoreCase(selType)
+                    || p.projectName.toLowerCase().contains(selType.toLowerCase());
             return tradeMatch && stateMatch && typeMatch;
         }).toList();
 
         if (filtered.isEmpty()) {
             VBox emptyBox = new VBox(12,
-                    label("No matching project roles found for this filter selection.", "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#3a3027;"),
-                    label("Try clearing filters to view all active project opportunities.", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
+                    label("No matching project roles found for this filter selection.",
+                            "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#3a3027;"),
+                    label("Try clearing filters to view all active project opportunities.",
+                            "-fx-font-size:14px;-fx-text-fill:#685c52;"));
             emptyBox.setAlignment(Pos.CENTER);
             emptyBox.setPadding(new Insets(50));
             cardsContainer.getChildren().add(emptyBox);
@@ -558,7 +656,10 @@ public class ExploreProjectsPage {
         }
     }
 
-    /** Builds an effective, beautiful, and rich project card with complete real metrics and site image. */
+    /**
+     * Builds an effective, beautiful, and rich project card with complete real
+     * metrics and site image.
+     */
     private VBox renderRealProjectCard(ProjectCardModel p) {
         // Real Site Image Card Banner
         ImageView siteImg = new ImageView();
@@ -569,7 +670,8 @@ public class ExploreProjectsPage {
             for (String u : p.imageUrls()) {
                 if (u != null && !u.isBlank()) {
                     img = load(u);
-                    if (img != null) break;
+                    if (img != null)
+                        break;
                 }
             }
         }
@@ -612,12 +714,17 @@ public class ExploreProjectsPage {
         imgWrapper.setStyle("-fx-background-color: #1e1b15; -fx-background-radius: 14px;");
 
         // Location Badge & Status Pill (Clean badges without emojis)
-        Label locLabel = label(p.location(), "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#735c00;-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-padding:3px 10px;-fx-border-color:#e8ddcb;-fx-border-radius:10px;");
+        Label locLabel = label(p.location(),
+                "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#735c00;-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-padding:3px 10px;-fx-border-color:#e8ddcb;-fx-border-radius:10px;");
 
+        boolean isFulfilled = p.status() != null && ("requirement fulfilled".equalsIgnoreCase(p.status().trim()) || "unavailable".equalsIgnoreCase(p.status().trim()));
         boolean isUrgent = p.status() != null && p.status().toLowerCase().contains("urgent");
-        Label statusBadge = label(isUrgent ? "URGENT HIRING" : "ACTIVE SITE",
-                "-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:" + (isUrgent ? "#ffffff" : "#2e7d32") + ";"
-                        + "-fx-background-color:" + (isUrgent ? "#c62828" : "#e8f5e9") + ";"
+        String badgeText = isFulfilled ? "REQUIREMENT FULFILLED" : (isUrgent ? "URGENT HIRING" : "ACTIVE SITE");
+        String badgeTextColor = isFulfilled ? "#b48700" : (isUrgent ? "#ffffff" : "#2e7d32");
+        String badgeBgColor = isFulfilled ? "#fff8e1" : (isUrgent ? "#c62828" : "#e8f5e9");
+        Label statusBadge = label(badgeText,
+                "-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:" + badgeTextColor + ";"
+                        + "-fx-background-color:" + badgeBgColor + ";"
                         + "-fx-background-radius:10px;-fx-padding:4px 10px;");
 
         Region topSpacer = new Region();
@@ -626,15 +733,17 @@ public class ExploreProjectsPage {
         topRow.setAlignment(Pos.CENTER_LEFT);
 
         // Project Title & Enterprise Developer
-        Label titleLabel = label(p.projectName(), "-fx-font-family:'Georgia';-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+        Label titleLabel = label(p.projectName(),
+                "-fx-font-family:'Georgia';-fx-font-size:19px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
         titleLabel.setWrapText(true);
         titleLabel.setMaxWidth(515);
 
-        Label companyLabel = label(p.company() + "  •  " + p.sector(), "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
+        Label companyLabel = label(p.company() + "  •  " + p.sector(),
+                "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
 
         // Wage, Workforce Openings, and Trade Role Metrics Bar
         HBox wagePill = statPill("Rate", p.wage(), "#735c00", "rgba(115,92,0,0.08)");
-        HBox countPill = statPill("Openings", p.workersNeeded(), "#1e1b15", "rgba(30,27,21,0.06)");
+        HBox countPill = statPill("Openings", p.workersNeeded(), isFulfilled ? "#b48700" : "#1e1b15", isFulfilled ? "rgba(180,135,0,0.12)" : "rgba(30,27,21,0.06)");
         HBox tradePill = statPill("Trade", p.trade(), "#1565c0", "rgba(21,101,192,0.08)");
         HBox statsRow = new HBox(10, wagePill, countPill, tradePill);
         statsRow.setAlignment(Pos.CENTER_LEFT);
@@ -642,17 +751,27 @@ public class ExploreProjectsPage {
         // Real Site Amenities & Facilities Row
         HBox facilitiesRow = new HBox(6);
         facilitiesRow.setAlignment(Pos.CENTER_LEFT);
-        if (p.hasWater()) facilitiesRow.getChildren().add(facilityTag("Water Facility"));
-        if (p.hasPower()) facilitiesRow.getChildren().add(facilityTag("Electricity"));
-        if (p.hasStay()) facilitiesRow.getChildren().add(facilityTag("Accommodation"));
-        if (p.hasTransport()) facilitiesRow.getChildren().add(facilityTag("Transportation"));
+        if (p.hasWater())
+            facilitiesRow.getChildren().add(facilityTag("Water Facility"));
+        if (p.hasPower())
+            facilitiesRow.getChildren().add(facilityTag("Electricity"));
+        if (p.hasStay())
+            facilitiesRow.getChildren().add(facilityTag("Accommodation"));
+        if (p.hasTransport())
+            facilitiesRow.getChildren().add(facilityTag("Transportation"));
 
         // Bottom Action Bar
         Region btmSpacer = new Region();
         HBox.setHgrow(btmSpacer, Priority.ALWAYS);
 
-        Button viewBtn = new Button("View Full Details →");
-        viewBtn.setStyle("-fx-background-color:linear-gradient(to right, #d4af37, #b8921e);-fx-background-radius:14px;-fx-text-fill:#ffffff;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(184,146,30,.28),8,0,0,2px);");
+        Button viewBtn = new Button(isFulfilled ? "Requirement Fulfilled →" : "View Full Details →");
+        if (isFulfilled) {
+            viewBtn.setStyle(
+                    "-fx-background-color:#fff8e1;-fx-background-radius:14px;-fx-border-color:#ffe082;-fx-border-radius:14px;-fx-text-fill:#b48700;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;");
+        } else {
+            viewBtn.setStyle(
+                    "-fx-background-color:linear-gradient(to right, #d4af37, #b8921e);-fx-background-radius:14px;-fx-text-fill:#ffffff;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(184,146,30,.28),8,0,0,2px);");
+        }
 
         Runnable openDetailsAction = () -> {
             for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
@@ -676,8 +795,7 @@ public class ExploreProjectsPage {
                             p.hasPower(),
                             p.hasStay(),
                             p.hasTransport(),
-                            () -> stage.setScene(currentScene)
-                    ).getScene());
+                            () -> stage.setScene(currentScene)).getScene());
                     return;
                 }
             }
@@ -694,10 +812,13 @@ public class ExploreProjectsPage {
         card.setMaxWidth(555);
         card.setMinWidth(555);
         card.setPadding(new Insets(18, 20, 18, 20));
-        card.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 18px; -fx-border-color: #d0c5af; -fx-border-width: 1.5px; -fx-border-radius: 18px; -fx-effect: dropshadow(gaussian, rgba(58,48,39,.08), 16, 0, 0, 4); -fx-cursor: hand;");
+        card.setStyle(
+                "-fx-background-color: #ffffff; -fx-background-radius: 18px; -fx-border-color: #d0c5af; -fx-border-width: 1.5px; -fx-border-radius: 18px; -fx-effect: dropshadow(gaussian, rgba(58,48,39,.08), 16, 0, 0, 4); -fx-cursor: hand;");
 
-        card.setOnMouseEntered(e -> card.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 18px; -fx-border-color: #d4af37; -fx-border-width: 2px; -fx-border-radius: 18px; -fx-effect: dropshadow(gaussian, rgba(212,175,55,.30), 20, 0, 0, 6px); -fx-cursor: hand;"));
-        card.setOnMouseExited(e -> card.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 18px; -fx-border-color: #d0c5af; -fx-border-width: 1.5px; -fx-border-radius: 18px; -fx-effect: dropshadow(gaussian, rgba(58,48,39,.08), 16, 0, 0, 4); -fx-cursor: hand;"));
+        card.setOnMouseEntered(e -> card.setStyle(
+                "-fx-background-color: #ffffff; -fx-background-radius: 18px; -fx-border-color: #d4af37; -fx-border-width: 2px; -fx-border-radius: 18px; -fx-effect: dropshadow(gaussian, rgba(212,175,55,.30), 20, 0, 0, 6px); -fx-cursor: hand;"));
+        card.setOnMouseExited(e -> card.setStyle(
+                "-fx-background-color: #ffffff; -fx-background-radius: 18px; -fx-border-color: #d0c5af; -fx-border-width: 1.5px; -fx-border-radius: 18px; -fx-effect: dropshadow(gaussian, rgba(58,48,39,.08), 16, 0, 0, 4); -fx-cursor: hand;"));
         card.setOnMouseClicked(e -> openDetailsAction.run());
 
         return card;
@@ -714,7 +835,8 @@ public class ExploreProjectsPage {
     }
 
     private Label facilityTag(String text) {
-        return label(text, "-fx-font-size:10px;-fx-font-weight:700;-fx-text-fill:#4c4637;-fx-background-color:#f4ede2;-fx-background-radius:8px;-fx-padding:3px 8px;");
+        return label(text,
+                "-fx-font-size:10px;-fx-font-weight:700;-fx-text-fill:#4c4637;-fx-background-color:#f4ede2;-fx-background-radius:8px;-fx-padding:3px 8px;");
     }
 
     private Label tag(String value, String color) {
@@ -737,7 +859,8 @@ public class ExploreProjectsPage {
         promise.setMaxWidth(310);
         VBox identity = new VBox(9, new HBox(10, logo, brand), promise);
         identity.setPrefWidth(360);
-        VBox explore = footerColumn("Explore", "Home", () -> navigateTo("Home"), "Find Work", () -> navigateTo("Worker"), "About Us",
+        VBox explore = footerColumn("Explore", "Home", () -> navigateTo("Home"), "Find Work",
+                () -> navigateTo("Worker"), "About Us",
                 () -> navigateTo("About Us"));
         VBox contact = footerColumn("Contact", "9561789599", () -> navigateTo("Contact Us"), "info@meridihadi.com",
                 () -> navigateTo("Contact Us"), "Pune, Maharashtra", () -> navigateTo("Contact Us"));
@@ -768,8 +891,10 @@ public class ExploreProjectsPage {
     }
 
     private void navigateTo(String destination) {
-        if (heroTimeline != null) heroTimeline.stop();
-        if (marqueeTimer != null) marqueeTimer.stop();
+        if (heroTimeline != null)
+            heroTimeline.stop();
+        if (marqueeTimer != null)
+            marqueeTimer.stop();
         for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
             if (window.isFocused() && window instanceof Stage stage) {
                 AppNavigator.open(stage, destination);
@@ -781,8 +906,10 @@ public class ExploreProjectsPage {
     private Button navButton(String t, boolean active, Runnable action) {
         Button b = new Button(t);
         b.setOnAction(e -> {
-            if (heroTimeline != null) heroTimeline.stop();
-            if (marqueeTimer != null) marqueeTimer.stop();
+            if (heroTimeline != null)
+                heroTimeline.stop();
+            if (marqueeTimer != null)
+                marqueeTimer.stop();
             action.run();
         });
         b.setStyle("-fx-background-color:transparent;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:"
@@ -862,6 +989,6 @@ public class ExploreProjectsPage {
             boolean hasWater,
             boolean hasPower,
             boolean hasStay,
-            boolean hasTransport
-    ) {}
+            boolean hasTransport) {
+    }
 }

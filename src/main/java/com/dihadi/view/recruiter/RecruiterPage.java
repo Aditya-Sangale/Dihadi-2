@@ -47,8 +47,7 @@ public class RecruiterPage {
         content.setMinWidth(1280);
         content.setStyle("-fx-background-color:#f3e7ce;");
         ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:#f3e7ce;-fx-border-width:0;");
         BorderPane page = new BorderPane(scroll);
         page.setMinSize(1280, 720);

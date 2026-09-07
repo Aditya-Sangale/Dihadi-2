@@ -20,10 +20,16 @@ import javafx.stage.Stage;
 
 /** Final project summary shown after workforce requirements are added. */
 public class ProjectDetailsPage {
-    private final String name, contact, mobile, email, address, priority, type, skill, workers, wage, imagePath, facilities;
+    private final String projectId, name, contact, mobile, email, address, priority, type, skill, workers, wage, imagePath, facilities;
 
     public ProjectDetailsPage(String name, String contact, String mobile, String email, String address, String priority,
             String type, String skill, String workers, String wage, String imagePath, String facilities) {
+        this("", name, contact, mobile, email, address, priority, type, skill, workers, wage, imagePath, facilities);
+    }
+
+    public ProjectDetailsPage(String projectId, String name, String contact, String mobile, String email, String address, String priority,
+            String type, String skill, String workers, String wage, String imagePath, String facilities) {
+        this.projectId = projectId;
         this.name = name;
         this.contact = contact;
         this.mobile = mobile;
@@ -133,8 +139,16 @@ public class ProjectDetailsPage {
         exitButton.setOnAction(e -> {
             if (exit != null) exit.run();
         });
+
+        Button addAnotherBtn = new Button("+ ADD ANOTHER WORKFORCE");
+        addAnotherBtn.setStyle("-fx-background-color:#272727;-fx-background-radius:999px;-fx-text-fill:#ffd54f;-fx-font-weight:700;-fx-font-size:15px;-fx-padding:12px 28px;-fx-cursor:hand;");
+        addAnotherBtn.setOnAction(e -> {
+            Stage stage = (Stage) addAnotherBtn.getScene().getWindow();
+            stage.setScene(new AddWorkersPage(projectId, name, contact, mobile, email, address, imagePath)
+                    .getAddWorkersScene(exit));
+        });
         
-        HBox footer = new HBox(exitButton);
+        HBox footer = new HBox(12, addAnotherBtn, exitButton);
         footer.setAlignment(Pos.CENTER_RIGHT);
         footer.setPadding(new Insets(18, 0, 0, 0));
 
@@ -148,7 +162,7 @@ public class ProjectDetailsPage {
         content.setMaxWidth(1050);
 
         ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:#fff8f0;-fx-background-color:#fff8f0;-fx-border-width:0;");
 
         StackPane card = new StackPane(scroll);

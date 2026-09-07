@@ -24,6 +24,10 @@ public class JobApplicationController {
         return dao.getApplicationsByWorker(workerMobile);
     }
 
+    public List<JobApplication> getApplicationsForWorker(String workerMobile, String workerName, String workerType) {
+        return dao.getApplicationsForWorker(workerMobile, workerName, workerType);
+    }
+
     public List<JobApplication> getApplicationsByRecruiter(String recruiterMobile) {
         return dao.getApplicationsByRecruiter(recruiterMobile);
     }
@@ -79,5 +83,13 @@ public class JobApplicationController {
             }
         }
         return false;
+    }
+
+    public void updateProjectApplicationsStatus(String projectId, String newStatus) {
+        dao.updateProjectApplicationsStatus(projectId, newStatus);
+    }
+
+    public JobApplication getActiveAssignedApplicationForWorker(String workerMobile) {
+        return dao.getActiveAssignedApplicationForWorker(workerMobile);
     }
 }

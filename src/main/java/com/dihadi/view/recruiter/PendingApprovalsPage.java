@@ -88,6 +88,12 @@ public class PendingApprovalsPage {
                     Map<String, JobApplication> deduplicatedPending = new java.util.LinkedHashMap<>();
                     for (JobApplication app : allApps) {
                         if ("Pending".equalsIgnoreCase(app.getStatus())) {
+                            boolean isOutgoingHire = (app.getJobTitle() != null && app.getJobTitle().contains("Hiring Request"))
+                                    || "DIRECT_HIRE".equalsIgnoreCase(app.getRequirementId());
+                            if (isOutgoingHire) {
+                                continue;
+                            }
+
                             boolean matchesRecruiter = false;
                             if (app.getProjectId() != null && recruiterProjIds.contains(app.getProjectId())) {
                                 matchesRecruiter = true;
@@ -131,8 +137,13 @@ public class PendingApprovalsPage {
         mainBox.setMaxWidth(1000);
         content.getChildren().add(mainBox);
         
-        ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
+        content.setPrefWidth(1440);
+        StackPane centerWrapper = new StackPane(content);
+        centerWrapper.setAlignment(Pos.TOP_CENTER);
+        centerWrapper.setStyle("-fx-background-color:#f3e7ce;");
+
+        ScrollPane scroll = new ScrollPane(centerWrapper);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
         return new Scene(scroll, 1440, 900);
     }
@@ -174,12 +185,37 @@ public class PendingApprovalsPage {
         
         final String finalWorkerName = name;
         accept.setOnAction(e -> {
-            app.setStatus("Accepted");
             accept.setDisable(true);
             reject.setDisable(true);
             new Thread(() -> {
+                JobApplication activeAssignment = c.getActiveAssignedApplicationForWorker(app.getWorkerMobile());
+                if (activeAssignment != null && (activeAssignment.getProjectId() == null || !activeAssignment.getProjectId().equals(app.getProjectId()))) {
+                    String activeProj = activeAssignment.getJobTitle() != null ? activeAssignment.getJobTitle() : "another active project";
+                    Platform.runLater(() -> {
+                        accept.setDisable(false);
+                        reject.setDisable(false);
+                        com.dihadi.view.NotificationToast.show(accept, "Worker Already Assigned",
+                                finalWorkerName + " is already assigned to active project '" + activeProj + "'. A worker can be assigned to only one project at a time.",
+                                com.dihadi.view.NotificationToast.ToastType.ALERT);
+                    });
+                    return;
+                }
+
+                app.setStatus("Accepted");
                 c.saveApplication(app);
                 c.updateWorkerApplicationsForProject(app.getWorkerMobile(), app.getProjectId(), "Accepted");
+                com.dihadi.service.WorkerAvailabilityService.hireWorker(
+                        app.getWorkerMobile(),
+                        finalWorkerName,
+                        app.getProjectId(),
+                        app.getJobTitle(),
+                        app.getRecruiterMobile()
+                );
+
+                if (app.getProjectId() != null && !app.getProjectId().isBlank()) {
+                    new com.dihadi.controller.ProjectController().updateProjectStatus(app.getProjectId(), "Requirement Fulfilled");
+                }
+
                 String recName = (recruiter != null && recruiter.getFirstName() != null)
                         ? (recruiter.getFirstName() + " " + (recruiter.getLastName() != null ? recruiter.getLastName() : "")).trim()
                         : "Site Recruiter";
@@ -192,9 +228,12 @@ public class PendingApprovalsPage {
                         }
                     } catch (Exception ignored) {}
                 }
-                new com.dihadi.controller.NotificationController().notifyWorkerApplicationAccepted(app, recName, projName);
+                final String finalProjName = projName;
+                new com.dihadi.controller.NotificationController().notifyWorkerApplicationAccepted(app, recName, finalProjName);
                 Platform.runLater(() -> {
-                    com.dihadi.view.NotificationToast.show(accept, "Worker Accepted!", "Your approval for " + finalWorkerName + " has been recorded and a notification was sent to the worker.", com.dihadi.view.NotificationToast.ToastType.SUCCESS);
+                    com.dihadi.view.NotificationToast.show(accept, "Worker Assigned!",
+                            finalWorkerName + " has been assigned to project " + finalProjName + ". The project is now marked Unavailable.",
+                            com.dihadi.view.NotificationToast.ToastType.SUCCESS);
                     listContainer.getChildren().remove(card);
                     if (listContainer.getChildren().isEmpty()) {
                         Label lbl = new Label("No pending applications at this time.");

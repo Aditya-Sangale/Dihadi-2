@@ -56,7 +56,7 @@ public final class AppNavigator {
                 if (SessionManager.currentAdmin != null) {
                     stage.setScene(new com.dihadi.view.admin.AdminDashboard().getDashboardScene(() -> {
                         SessionManager.clearAllSessions();
-                        open(stage, "Home");
+                        stage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(() -> open(stage, "Home")));
                     }));
                     return;
                 }
@@ -69,7 +69,7 @@ public final class AppNavigator {
                 if (SessionManager.currentAdmin != null) {
                     stage.setScene(new com.dihadi.view.admin.AdminDashboard().getDashboardScene(() -> {
                         SessionManager.clearAllSessions();
-                        open(stage, "Home");
+                        stage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(() -> open(stage, "Home")));
                     }));
                     return;
                 }
@@ -91,7 +91,7 @@ public final class AppNavigator {
         } else if (SessionManager.currentAdmin != null) {
             stage.setScene(new com.dihadi.view.admin.AdminDashboard().getDashboardScene(() -> {
                 SessionManager.clearAllSessions();
-                open(stage, "Home");
+                stage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(() -> open(stage, "Home")));
             }));
         } else {
             stage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(() -> open(stage, "Home")));
@@ -106,7 +106,7 @@ public final class AppNavigator {
             if (SessionManager.currentAdmin != null) {
                 stage.setScene(new com.dihadi.view.admin.AdminDashboard().getDashboardScene(() -> {
                     SessionManager.clearAllSessions();
-                    open(stage, "Home");
+                    stage.setScene(new com.dihadi.view.admin.AdminHomePage().getAdminHomeScene(() -> open(stage, "Home")));
                 }));
                 return;
             }

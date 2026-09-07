@@ -46,12 +46,11 @@ public class AboutUs {
     }
 
     public Scene getAboutScene(Runnable back, Runnable workerAction) {
-        VBox content = new VBox(32, videoShowcase(), hero(), mission(), stats(), faq(), footer());
+        VBox content = new VBox(32, videoShowcase(), hero(), mission(), stats(), faq(), footer(back, workerAction));
         content.setAlignment(Pos.TOP_CENTER);
         content.setPadding(new Insets(26, 24, 36, 24));
         ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:#f3e7ce;-fx-background-color:#f3e7ce;-fx-border-width:0;");
         BorderPane page = new BorderPane(scroll);
         page.setTop(header(back, workerAction));
@@ -263,7 +262,7 @@ public class AboutUs {
         list.getChildren().add(item);
     }
 
-    private VBox footer() {
+    private VBox footer(Runnable back, Runnable workerAction) {
         ImageView logo = image("/assets/logo/dihadi logo.jpeg", 52, 52);
         logo.setPreserveRatio(true);
         Label brand = label("DIHADI", "-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#e9c349;");
@@ -274,8 +273,15 @@ public class AboutUs {
         promise.setMaxWidth(310);
         VBox identity = new VBox(9, new HBox(10, logo, brand), promise);
         identity.setPrefWidth(360);
-        VBox explore = footerColumn("Explore", "Home", () -> navigateTo("Home"), "Find Work", () -> navigateTo("Worker"), "About Us",
-                () -> navigateTo("About Us"));
+        VBox explore = footerColumn("Explore", "Home", () -> {
+            stopVideo();
+            if (back != null) back.run();
+            else navigateTo("Home");
+        }, "Find Work", () -> {
+            stopVideo();
+            if (workerAction != null) workerAction.run();
+            else navigateTo("Worker");
+        }, "About Us", () -> navigateTo("About Us"));
         VBox contact = footerColumn("Contact", "9561789599", () -> navigateTo("Contact Us"), "info@meridihadi.com",
                 () -> navigateTo("Contact Us"), "Pune, Maharashtra", () -> navigateTo("Contact Us"));
         HBox top = new HBox(64, identity, explore, contact);
@@ -337,7 +343,13 @@ public class AboutUs {
             Button b = navButton(n, n.equals("About Us"));
             b.setOnAction(e -> {
                 stopVideo();
-                AppNavigator.open((Stage) b.getScene().getWindow(), n);
+                if (n.equals("Home") && back != null) {
+                    back.run();
+                } else if (n.equals("Worker") && workerAction != null) {
+                    workerAction.run();
+                } else {
+                    AppNavigator.open((Stage) b.getScene().getWindow(), n);
+                }
             });
             nav.getChildren().add(b);
         }

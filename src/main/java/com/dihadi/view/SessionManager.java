@@ -10,6 +10,7 @@ public class SessionManager {
     public static Worker currentWorker = null;
     public static Recruiter currentRecruiter = null;
     public static Admin currentAdmin = null;
+    public static com.dihadi.model.Project currentRecruiterProject = null;
 
     public enum Role {
         WORKER("Worker"),
@@ -42,6 +43,7 @@ public class SessionManager {
         currentWorker = null;
         currentRecruiter = null;
         currentAdmin = null;
+        currentRecruiterProject = null;
     }
 
     public static void signOut() {

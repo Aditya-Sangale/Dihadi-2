@@ -107,8 +107,7 @@ public class AdminHomePage {
         pageContent.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
 
         ScrollPane scroll = new ScrollPane(pageContent);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
 
         BorderPane shell = new BorderPane(scroll);

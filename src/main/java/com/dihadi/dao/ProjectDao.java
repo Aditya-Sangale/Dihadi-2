@@ -38,6 +38,19 @@ public class ProjectDao {
         }
     }
 
+    public void updateProjectStatus(String projectId, String newStatus) {
+        if (projectId == null || projectId.isBlank()) return;
+        Project p = getProject(projectId);
+        if (p != null) {
+            p.setStatus(newStatus);
+            saveProject(p);
+        } else {
+            try {
+                db.collection("Projects").document(projectId).update("status", newStatus);
+            } catch (Exception ignored) {}
+        }
+    }
+
     public Project getProject(String idOrMobile) {
         if (idOrMobile == null) return null;
         if (LOCAL_PROJECT_MAP.containsKey(idOrMobile)) {

@@ -56,6 +56,7 @@ public class AdminWorkersPage {
     private ComboBox<String> tradeCombo;
     private ComboBox<String> statusCombo;
     private ComboBox<String> locationCombo;
+    private ComboBox<String> activityCombo;
 
     private Label totalWorkersKpi;
     private Label verifiedKpi;
@@ -67,8 +68,8 @@ public class AdminWorkersPage {
 
     public Scene getWorkersScene(Runnable dashboardAction, Runnable logout) {
         BorderPane layout = new BorderPane();
-        layout.setLeft(sidebar(dashboardAction, logout));
-        layout.setCenter(mainContent());
+        layout.setLeft(AdminSidebar.create(AdminSidebar.Category.WORKERS, logout, this::stopTimers));
+        layout.setCenter(mainContent(logout));
 
         modalContainer = new StackPane();
         modalContainer.setPickOnBounds(false);
@@ -79,74 +80,47 @@ public class AdminWorkersPage {
         return new Scene(rootStack, 1400, 780);
     }
 
-    private VBox sidebar(Runnable dashboardAction, Runnable logout) {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 82, 82);
-        VBox identity = new VBox(10, logo,
-                label("DIHADI", "-fx-font-family:Georgia;-fx-font-size:28px;-fx-text-fill:" + GOLD + ";"),
-                label("ADMIN CONTROL CENTER", "-fx-font-size:11px;-fx-letter-spacing:1.2px;-fx-text-fill:#dcdad4;"));
-        identity.setAlignment(Pos.CENTER);
-        identity.setPadding(new Insets(28, 10, 35, 10));
-
-        Button command = nav("Command Center", false);
-        command.setOnAction(e -> {
-            if (clock != null) clock.stop();
-            dashboardAction.run();
-        });
-
-        Button workersNav = nav("Workers", true);
-
-        Button recruitersNav = nav("Recruiters", false);
-        recruitersNav.setOnAction(e -> {
-            if (clock != null) clock.stop();
-            Stage stage = (Stage) recruitersNav.getScene().getWindow();
-            stage.setScene(new AdminRecruitersPage().getRecruitersScene(dashboardAction, logout));
-        });
-
-        Button projectsNav = nav("Projects", false);
-        projectsNav.setOnAction(e -> {
-            if (clock != null) clock.stop();
-            Stage stage = (Stage) projectsNav.getScene().getWindow();
-            stage.setScene(new AdminProjectsPage().getProjectsScene(dashboardAction, logout));
-        });
-
-        Button grievances = nav("Grievances", false);
-        grievances.setOnAction(e -> {
-            if (clock != null) clock.stop();
-            Stage stage = (Stage) grievances.getScene().getWindow();
-            stage.setScene(new AdminGrievancesPage().getGrievancesScene(dashboardAction, logout));
-        });
-
-        VBox links = new VBox(4, command, workersNav, recruitersNav, projectsNav,
-                nav("Financials", false), nav("Verification", false), grievances);
-        VBox.setVgrow(links, Priority.ALWAYS);
-
-        String adminName = com.dihadi.view.SessionManager.getAdminDisplayName();
-        Button profile = nav(adminName + "\nSystem Administrator", false);
-        profile.setOnAction(e -> {
-            if (clock != null) clock.stop();
-            logout.run();
-        });
-        VBox bottom = new VBox(4, profile);
-        bottom.setPadding(new Insets(14, 0, 14, 0));
-        bottom.setStyle("-fx-border-color:#ffffff1a;-fx-border-width:1px 0 0 0;");
-
-        VBox bar = new VBox(identity, links, bottom);
-        bar.setPrefWidth(312);
-        bar.setMinWidth(312);
-        bar.setStyle("-fx-background-color:" + DARK + ";");
-        return bar;
+    private void stopTimers() {
+        if (clock != null) clock.stop();
     }
 
-    private BorderPane mainContent() {
+    private BorderPane mainContent(Runnable logout) {
         String adminName = com.dihadi.view.SessionManager.getAdminDisplayName();
-        HBox breadcrumb = new HBox(
-                label(adminName, "-fx-font-size:16px;-fx-font-weight:700;-fx-text-fill:#1A1A1A;"),
-                label("   >   ", "-fx-font-size:16px;-fx-text-fill:#4A4A4A;"),
-                label("Workforce Management", "-fx-font-size:16px;-fx-text-fill:" + GOLD + ";")
-        );
+
+        Label nameLbl = label(adminName, "-fx-font-size:15px;-fx-font-weight:700;-fx-text-fill:#1A1A1A;");
+        Label sep = label("   >   ", "-fx-font-size:15px;-fx-text-fill:#8c7b6d;");
+        Label pageLbl = label("Workforce Management", "-fx-font-size:15px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button signOutBtn = new Button("Sign Out");
+        signOutBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:20px;-fx-border-color:#ffcdd2;-fx-border-radius:20px;-fx-text-fill:#ba1a1a;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:7px 16px;-fx-cursor:hand;");
+        signOutBtn.setOnAction(e -> {
+            stopTimers();
+            com.dihadi.view.SessionManager.clearAllSessions();
+            Stage stage = (signOutBtn.getScene() != null && signOutBtn.getScene().getWindow() instanceof Stage s) ? s : null;
+            if (stage == null) {
+                for (javafx.stage.Window w : javafx.stage.Window.getWindows()) {
+                    if (w instanceof Stage s && s.isShowing()) {
+                        stage = s;
+                        break;
+                    }
+                }
+            }
+            com.dihadi.view.NotificationToast.show("Signed Out", "You have signed out of your administrator session.", com.dihadi.view.NotificationToast.ToastType.INFO);
+            if (stage != null) {
+                final Stage finalStage = stage;
+                stage.setScene(new AdminHomePage().getAdminHomeScene(() -> com.dihadi.view.AppNavigator.open(finalStage, "Home")));
+            } else if (logout != null) {
+                logout.run();
+            }
+        });
+
+        HBox breadcrumb = new HBox(12, nameLbl, sep, pageLbl, spacer, signOutBtn);
         breadcrumb.setAlignment(Pos.CENTER_LEFT);
         breadcrumb.setPadding(new Insets(0, 40, 0, 40));
-        breadcrumb.setPrefHeight(80);
+        breadcrumb.setPrefHeight(75);
         breadcrumb.setStyle("-fx-background-color:" + MAIN + ";-fx-border-color:" + BORDER + "80;-fx-border-width:0 0 1px 0;");
 
         VBox content = new VBox(26,
@@ -159,8 +133,7 @@ public class AdminWorkersPage {
         content.setMaxWidth(1280);
 
         ScrollPane scroll = new ScrollPane(content);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:" + MAIN + ";-fx-border-width:0;");
 
         BorderPane page = new BorderPane(scroll);
@@ -214,6 +187,7 @@ public class AdminWorkersPage {
         tradeCombo = choice("All Trades", "Mason", "Carpenter", "Electrician", "Plumber", "Painter", "Welder", "General Labour", "Crane Operator", "Structural Fitter", "Supervisor");
         statusCombo = choice("All Statuses", "KYC Verified", "Pending Verification", "Available for Hire", "Active on Site");
         locationCombo = choice("All Locations", "Pune", "Mumbai", "Bengaluru", "Hyderabad", "Delhi NCR", "Nagpur", "Nashik");
+        activityCombo = choice("All Activity", "Active (< 30 Days)", "Inactive (30+ Days)");
 
         Button refreshBtn = new Button("Refresh");
         refreshBtn.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-padding:8px 16px;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#735c00;-fx-cursor:hand;");
@@ -224,6 +198,7 @@ public class AdminWorkersPage {
                 tradeCombo,
                 statusCombo,
                 locationCombo,
+                activityCombo,
                 refreshBtn
         );
         filters.setAlignment(Pos.CENTER_LEFT);
@@ -294,6 +269,9 @@ public class AdminWorkersPage {
                         String email = val(w.getEmail(), "worker@dihadi.gov.in");
                         String gender = val(w.getGender(), "Male");
                         String dob = val(w.getDateOfBirth(), "15/08/1992");
+                        String lastLogin = val(w.getLastLogin(), "");
+                        boolean isInactive = com.dihadi.util.UserActivityUtil.isInactive(lastLogin);
+                        long daysInactive = com.dihadi.util.UserActivityUtil.getInactiveDays(lastLogin);
 
                         list.add(new AdminWorkerData(
                                 phone,
@@ -314,6 +292,9 @@ public class AdminWorkersPage {
                                 "Available for Hire",
                                 4.8,
                                 42,
+                                lastLogin,
+                                isInactive,
+                                daysInactive,
                                 false
                         ));
                     }
@@ -337,14 +318,14 @@ public class AdminWorkersPage {
 
     private List<AdminWorkerData> getBenchmarkWorkers() {
         return List.of(
-                new AdminWorkerData("9822001101", "Rameshwar D. Patil", "Mason", "Bricklaying, Plastering & Foundation", "₹950 / day", 950, "Pune, Maharashtra", "8 Years Experience", "10th Standard", "9822001101", "9822001102", "ramesh.patil@gmail.com", "Male", "12/04/1988", "KYC Verified", "Active on Site", 4.9, 68, true),
-                new AdminWorkerData("9822001102", "Sunita Bai Rathod", "General Labour", "Material Handling & Site Safety", "₹850 / day", 850, "Mumbai, Maharashtra", "5 Years Experience", "8th Standard", "9822001102", "9822001103", "sunita.rathod@dihadi.in", "Female", "05/11/1994", "KYC Verified", "Available for Hire", 4.8, 54, true),
-                new AdminWorkerData("9822001103", "Anil Kumar Shinde", "Carpenter", "Formwork, Shuttering & Finishing", "₹1,100 / day", 1100, "Pune, Maharashtra", "10 Years Experience", "ITI Certified", "9822001103", "9822001104", "anil.shinde@gmail.com", "Male", "22/07/1985", "KYC Verified", "Active on Site", 5.0, 92, true),
-                new AdminWorkerData("9822001104", "Manoj B. Yadav", "Electrician", "Industrial Wiring & Distribution Panels", "₹1,200 / day", 1200, "Bengaluru, Karnataka", "7 Years Experience", "Diploma in Electrical", "9822001104", "9822001105", "manoj.yadav@gmail.com", "Male", "18/09/1990", "KYC Verified", "Available for Hire", 4.9, 76, true),
-                new AdminWorkerData("9822001105", "Ganesh V. Gaikwad", "Plumber", "Drainage Systems & High Pressure Piping", "₹1,050 / day", 1050, "Hyderabad, Telangana", "6 Years Experience", "ITI Plumbing", "9822001105", "9822001106", "ganesh.gaikwad@gmail.com", "Male", "30/03/1993", "KYC Verified", "Active on Site", 4.7, 45, true),
-                new AdminWorkerData("9822001106", "Vikram S. Rathore", "Crane Operator", "Tower Crane & Heavy Rigging Certified", "₹1,450 / day", 1450, "Mumbai, Maharashtra", "12 Years Experience", "Heavy Commercial License", "9822001106", "9822001107", "vikram.rathore@outlook.com", "Male", "14/01/1983", "KYC Verified", "Active on Site", 5.0, 110, true),
-                new AdminWorkerData("9822001107", "Santosh K. Mishra", "Welder", "Arc & TIG High Pressure Welding", "₹1,150 / day", 1150, "Delhi NCR", "9 Years Experience", "ITI Certified Welder", "9822001107", "9822001108", "santosh.mishra@gmail.com", "Male", "09/06/1989", "KYC Verified", "Available for Hire", 4.8, 62, true),
-                new AdminWorkerData("9822001108", "Deepak R. Kamble", "Structural Fitter", "Steel Girder & Bridge Assembly", "₹1,250 / day", 1250, "Nagpur, Maharashtra", "8 Years Experience", "Vocational Training", "9822001108", "9822001109", "deepak.kamble@gmail.com", "Male", "27/10/1991", "Pending Verification", "Available for Hire", 4.6, 38, true)
+                new AdminWorkerData("9822001101", "Rameshwar D. Patil", "Mason", "Bricklaying, Plastering & Foundation", "₹950 / day", 950, "Pune, Maharashtra", "8 Years Experience", "10th Standard", "9822001101", "9822001102", "ramesh.patil@gmail.com", "Male", "12/04/1988", "KYC Verified", "Active on Site", 4.9, 68, com.dihadi.util.UserActivityUtil.getPastTimestamp(2), false, 2, true),
+                new AdminWorkerData("9822001102", "Sunita Bai Rathod", "General Labour", "Material Handling & Site Safety", "₹850 / day", 850, "Mumbai, Maharashtra", "5 Years Experience", "8th Standard", "9822001102", "9822001103", "sunita.rathod@dihadi.in", "Female", "05/11/1994", "KYC Verified", "Available for Hire", 4.8, 54, com.dihadi.util.UserActivityUtil.getPastTimestamp(42), true, 42, true),
+                new AdminWorkerData("9822001103", "Anil Kumar Shinde", "Carpenter", "Formwork, Shuttering & Finishing", "₹1,100 / day", 1100, "Pune, Maharashtra", "10 Years Experience", "ITI Certified", "9822001103", "9822001104", "anil.shinde@gmail.com", "Male", "22/07/1985", "KYC Verified", "Active on Site", 5.0, 92, com.dihadi.util.UserActivityUtil.getPastTimestamp(5), false, 5, true),
+                new AdminWorkerData("9822001104", "Manoj B. Yadav", "Electrician", "Industrial Wiring & Distribution Panels", "₹1,200 / day", 1200, "Bengaluru, Karnataka", "7 Years Experience", "Diploma in Electrical", "9822001104", "9822001105", "manoj.yadav@gmail.com", "Male", "18/09/1990", "KYC Verified", "Available for Hire", 4.9, 76, com.dihadi.util.UserActivityUtil.getPastTimestamp(65), true, 65, true),
+                new AdminWorkerData("9822001105", "Ganesh V. Gaikwad", "Plumber", "Drainage Systems & High Pressure Piping", "₹1,050 / day", 1050, "Hyderabad, Telangana", "6 Years Experience", "ITI Plumbing", "9822001105", "9822001106", "ganesh.gaikwad@gmail.com", "Male", "30/03/1993", "KYC Verified", "Active on Site", 4.7, 45, com.dihadi.util.UserActivityUtil.getPastTimestamp(1), false, 1, true),
+                new AdminWorkerData("9822001106", "Vikram S. Rathore", "Crane Operator", "Tower Crane & Heavy Rigging Certified", "₹1,450 / day", 1450, "Mumbai, Maharashtra", "12 Years Experience", "Heavy Commercial License", "9822001106", "9822001107", "vikram.rathore@outlook.com", "Male", "14/01/1983", "KYC Verified", "Active on Site", 5.0, 110, com.dihadi.util.UserActivityUtil.getPastTimestamp(16), false, 16, true),
+                new AdminWorkerData("9822001107", "Santosh K. Mishra", "Welder", "Arc & TIG High Pressure Welding", "₹1,150 / day", 1150, "Delhi NCR", "9 Years Experience", "ITI Certified Welder", "9822001107", "9822001108", "santosh.mishra@gmail.com", "Male", "09/06/1989", "KYC Verified", "Available for Hire", 4.8, 62, com.dihadi.util.UserActivityUtil.getPastTimestamp(35), true, 35, true),
+                new AdminWorkerData("9822001108", "Deepak R. Kamble", "Structural Fitter", "Steel Girder & Bridge Assembly", "₹1,250 / day", 1250, "Nagpur, Maharashtra", "8 Years Experience", "Vocational Training", "9822001108", "9822001109", "deepak.kamble@gmail.com", "Male", "27/10/1991", "Pending Verification", "Available for Hire", 4.6, 38, com.dihadi.util.UserActivityUtil.getPastTimestamp(80), true, 80, true)
         );
     }
 
@@ -368,6 +349,7 @@ public class AdminWorkersPage {
         String selTrade = tradeCombo != null && tradeCombo.getValue() != null ? tradeCombo.getValue() : "All Trades";
         String selStatus = statusCombo != null && statusCombo.getValue() != null ? statusCombo.getValue() : "All Statuses";
         String selLoc = locationCombo != null && locationCombo.getValue() != null ? locationCombo.getValue() : "All Locations";
+        String selActivity = activityCombo != null && activityCombo.getValue() != null ? activityCombo.getValue() : "All Activity";
 
         List<AdminWorkerData> filtered = allWorkersList.stream().filter(w -> {
             boolean qMatch = query.isEmpty()
@@ -386,7 +368,11 @@ public class AdminWorkersPage {
 
             boolean locMatch = "All Locations".equals(selLoc) || w.location().toLowerCase().contains(selLoc.toLowerCase());
 
-            return qMatch && trMatch && stMatch && locMatch;
+            boolean actMatch = "All Activity".equals(selActivity)
+                    || ("Active (< 30 Days)".equals(selActivity) && !w.isInactive())
+                    || ("Inactive (30+ Days)".equals(selActivity) && w.isInactive());
+
+            return qMatch && trMatch && stMatch && locMatch && actMatch;
         }).toList();
 
         if (filtered.isEmpty()) {
@@ -428,9 +414,21 @@ public class AdminWorkersPage {
                         + "-fx-background-color:" + (isActive ? "#e3f2fd" : "#e8f5e9") + ";"
                         + "-fx-background-radius:6px;-fx-padding:4px 8px;");
 
+        Label activityBadge;
+        if (w.isInactive()) {
+            activityBadge = label("● INACTIVE (" + w.daysInactive() + "d)",
+                    "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#ba1a1a;"
+                            + "-fx-background-color:#ffebee;-fx-background-radius:6px;-fx-padding:3px 8px;-fx-border-color:#ffcdd2;-fx-border-radius:6px;");
+        } else {
+            String actText = w.daysInactive() == 0 ? "● ACTIVE TODAY" : "● ACTIVE (" + w.daysInactive() + "d ago)";
+            activityBadge = label(actText,
+                    "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#1b5e20;"
+                            + "-fx-background-color:#e8f5e9;-fx-background-radius:6px;-fx-padding:3px 8px;-fx-border-color:#c8e6c9;-fx-border-radius:6px;");
+        }
+
         Region topSpacer = new Region();
         HBox.setHgrow(topSpacer, Priority.ALWAYS);
-        HBox topStrip = new HBox(8, kycBadge, locLabel, topSpacer, availBadge);
+        HBox topStrip = new HBox(8, kycBadge, locLabel, topSpacer, activityBadge, availBadge);
         topStrip.setAlignment(Pos.CENTER_LEFT);
 
         Label nameLabel = label(w.fullName(), "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
@@ -438,7 +436,8 @@ public class AdminWorkersPage {
 
         Label phoneLabel = label("Mobile: " + w.mobileNumber(), "-fx-font-family:Consolas;-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#735c00;");
         Label ratingLabel = label("Rating: ★ " + w.rating() + " (" + w.completedJobs() + " Jobs)", "-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:#ba1a1a;");
-        HBox contactRow = new HBox(14, phoneLabel, ratingLabel);
+        Label lastLoginLabel = label("Last Login: " + com.dihadi.util.UserActivityUtil.formatDisplayDate(w.lastLogin()), "-fx-font-family:Consolas;-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
+        HBox contactRow = new HBox(12, phoneLabel, ratingLabel, lastLoginLabel);
         contactRow.setAlignment(Pos.CENTER_LEFT);
 
         HBox block1 = adminDataBlock("DAILY RATE", w.wage(), GOLD);
@@ -453,9 +452,24 @@ public class AdminWorkersPage {
         tagsRow.getChildren().add(adminTag("Bank Linked"));
         tagsRow.getChildren().add(adminTag("Safety Trained"));
 
-        Button deleteBtn = new Button("Delete");
-        deleteBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:8px;-fx-text-fill:#ba1a1a;-fx-border-color:#ffcdd2;-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
-        deleteBtn.setOnAction(e -> confirmAndDeleteWorker(w));
+        Button actionBtn;
+        if (w.isInactive()) {
+            actionBtn = new Button("Remove Inactive");
+            actionBtn.setStyle("-fx-background-color:#ba1a1a;-fx-background-radius:8px;-fx-text-fill:#ffffff;-fx-border-color:#991b1b;-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
+            actionBtn.setOnAction(e -> confirmAndDeleteWorker(w));
+        } else {
+            actionBtn = new Button("Active (<30d)");
+            actionBtn.setStyle("-fx-background-color:#f1eee7;-fx-background-radius:8px;-fx-text-fill:#8c7b6d;-fx-border-color:#dcd4c7;-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:700;-fx-padding:6px 12px;-fx-cursor:hand;");
+            actionBtn.setOnAction(e -> {
+                Alert info = new Alert(Alert.AlertType.INFORMATION);
+                info.setTitle("Active Account Protected");
+                info.setHeaderText("Account Protected from Removal");
+                info.setContentText(w.fullName() + " was active " + (w.daysInactive() == 0 ? "today" : w.daysInactive() + " days ago") +
+                        " (" + com.dihadi.util.UserActivityUtil.formatDisplayDate(w.lastLogin()) + ").\n\n" +
+                        "Under administrative policy, only accounts inactive for 30 or more days can be removed.");
+                info.show();
+            });
+        }
 
         Button inspectBtn = new Button("Inspect Profile ->");
         inspectBtn.setStyle("-fx-background-color:#272727;-fx-background-radius:8px;-fx-text-fill:#ffd54f;-fx-border-color:" + GOLD + ";-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
@@ -463,7 +477,7 @@ public class AdminWorkersPage {
 
         Region btmSpacer = new Region();
         HBox.setHgrow(btmSpacer, Priority.ALWAYS);
-        HBox btmRow = new HBox(8, tagsRow, btmSpacer, deleteBtn, inspectBtn);
+        HBox btmRow = new HBox(8, tagsRow, btmSpacer, actionBtn, inspectBtn);
         btmRow.setAlignment(Pos.CENTER_LEFT);
         btmRow.setPadding(new Insets(6, 0, 0, 0));
         btmRow.setStyle("-fx-border-color:" + BORDER + "60;-fx-border-width:1px 0 0 0;");
@@ -476,7 +490,7 @@ public class AdminWorkersPage {
         card.setOnMouseEntered(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + GOLD + ";-fx-border-width:2px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.30),16,0,0,5px);-fx-cursor:hand;"));
         card.setOnMouseExited(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),10,0,0,3px);"));
         card.setOnMouseClicked(e -> {
-            if (e.getTarget() != deleteBtn && e.getTarget() != inspectBtn) {
+            if (e.getTarget() != actionBtn && e.getTarget() != inspectBtn) {
                 openWorkerDetailsModal(w);
             }
         });
@@ -516,19 +530,37 @@ public class AdminWorkersPage {
         Label availPill = label(w.availability().toUpperCase(),
                 "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#ffffff;-fx-background-color:#1565c0;-fx-background-radius:6px;-fx-padding:4px 10px;");
 
-        HBox topBadges = new HBox(8, kycPill, availPill);
+        Label actPill = label(w.isInactive() ? "INACTIVE (" + w.daysInactive() + "D)" : "ACTIVE USER",
+                "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#ffffff;-fx-background-color:" + (w.isInactive() ? "#ba1a1a" : "#2e7d32") + ";-fx-background-radius:6px;-fx-padding:4px 10px;");
+
+        HBox topBadges = new HBox(8, kycPill, availPill, actPill);
         topBadges.setAlignment(Pos.CENTER_LEFT);
 
         Label titleLbl = label(w.fullName(), "-fx-font-family:Georgia;-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
         Label subLbl = label("Primary Trade: " + w.trade() + "   |   Location: " + w.location() + "   |   Rating: ★ " + w.rating() + " (" + w.completedJobs() + " Site Jobs)", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
         VBox titleBox = new VBox(6, topBadges, titleLbl, subLbl);
 
-        Button deleteBtn = new Button("Delete Worker");
-        deleteBtn.setStyle("-fx-background-color:#ba1a1a;-fx-background-radius:10px;-fx-text-fill:#ffffff;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:9px 20px;-fx-cursor:hand;");
-        deleteBtn.setOnAction(e -> {
-            closeModal();
-            confirmAndDeleteWorker(w);
-        });
+        Button deleteBtn;
+        if (w.isInactive()) {
+            deleteBtn = new Button("Remove Inactive Worker");
+            deleteBtn.setStyle("-fx-background-color:#ba1a1a;-fx-background-radius:10px;-fx-text-fill:#ffffff;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:9px 20px;-fx-cursor:hand;");
+            deleteBtn.setOnAction(e -> {
+                closeModal();
+                confirmAndDeleteWorker(w);
+            });
+        } else {
+            deleteBtn = new Button("Active (<30d) - Protected");
+            deleteBtn.setStyle("-fx-background-color:#ece7df;-fx-background-radius:10px;-fx-text-fill:#8c7b6d;-fx-font-size:12px;-fx-font-weight:700;-fx-padding:9px 20px;-fx-cursor:hand;");
+            deleteBtn.setOnAction(e -> {
+                Alert info = new Alert(Alert.AlertType.INFORMATION);
+                info.setTitle("Active Account Protected");
+                info.setHeaderText("Account Protected from Removal");
+                info.setContentText(w.fullName() + " was active " + (w.daysInactive() == 0 ? "today" : w.daysInactive() + " days ago") +
+                        " (" + com.dihadi.util.UserActivityUtil.formatDisplayDate(w.lastLogin()) + ").\n\n" +
+                        "Administrative removal is restricted to users who have been inactive for 30 or more days.");
+                info.show();
+            });
+        }
 
         Button closeBtn = new Button("Close");
         closeBtn.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-text-fill:#1A1A1A;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:8px 16px;-fx-cursor:hand;-fx-border-color:#d0c5af;-fx-border-radius:10px;");
@@ -565,7 +597,9 @@ public class AdminWorkersPage {
                 modalDetailRow("Education Level", w.education()),
                 modalDetailRow("Primary Mobile", w.mobileNumber()),
                 modalDetailRow("Alternate Mobile", w.alternateMobile()),
-                modalDetailRow("Official Email", w.email())
+                modalDetailRow("Official Email", w.email()),
+                modalDetailRow("Last Login Date/Time", com.dihadi.util.UserActivityUtil.formatDisplayDate(w.lastLogin())),
+                modalDetailRow("Activity Status", w.isInactive() ? "Inactive (" + w.daysInactive() + " days - Eligible for Removal)" : "Active (" + (w.daysInactive() == 0 ? "Today" : w.daysInactive() + " days ago") + ")")
         );
         personalCard.setPadding(new Insets(16));
         personalCard.setStyle("-fx-background-color:#faf5eb;-fx-background-radius:14px;-fx-border-color:#ebdccb;-fx-border-radius:14px;");
@@ -640,9 +674,11 @@ public class AdminWorkersPage {
 
     private void confirmAndDeleteWorker(AdminWorkerData w) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirm Worker Deletion");
-        confirm.setHeaderText("Delete " + w.fullName() + "?");
-        confirm.setContentText("Are you sure you want to delete this worker profile from the database? This will permanently remove their records.");
+        confirm.setTitle("Confirm Inactive Worker Removal");
+        confirm.setHeaderText("Remove Inactive Worker: " + w.fullName() + "?");
+        confirm.setContentText("Worker has been inactive for " + w.daysInactive() + " days.\n" +
+                "Last recorded activity: " + com.dihadi.util.UserActivityUtil.formatDisplayDate(w.lastLogin()) + "\n\n" +
+                "Under the 30-day inactivity policy, this user is eligible for administrative removal. Are you sure you want to permanently delete their account and records from the database?");
 
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
@@ -763,6 +799,9 @@ public class AdminWorkersPage {
             String availability,
             double rating,
             int completedJobs,
+            String lastLogin,
+            boolean isInactive,
+            long daysInactive,
             boolean isBenchmark
     ) {}
 }

@@ -69,8 +69,7 @@ public class ITI_TechnicianResultPage {
         canvas.setPadding(new Insets(0, 38, 0, 38));
         canvas.setStyle("-fx-background-color:" + PAPER + ";");
         ScrollPane scroll = new ScrollPane(canvas);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.dihadi.view.ScrollUtils.style(scroll);
         scroll.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
         return scroll;
     }
@@ -148,14 +147,16 @@ public class ITI_TechnicianResultPage {
         String wage;
         String trade;
         String photo;
+        String mobile;
 
-        WorkerCardData(String name, String age, String location, String wage, String trade, String photo) {
+        WorkerCardData(String name, String age, String location, String wage, String trade, String photo, String mobile) {
             this.name = name;
             this.age = age;
             this.location = location;
             this.wage = wage;
             this.trade = trade;
             this.photo = photo;
+            this.mobile = mobile;
         }
     }
 
@@ -178,8 +179,9 @@ public class ITI_TechnicianResultPage {
                         String skillTag = w.getSubSkill() != null && !w.getSubSkill().isBlank() ? w.getSubSkill() : "ITI Technician";
                         String photo = w.getProfilePhotoUrl() != null && !w.getProfilePhotoUrl().isBlank() 
                                        ? w.getProfilePhotoUrl() : PHOTOS[pIdx % PHOTOS.length];
+                        String mob = w.getMobileNumber() != null ? w.getMobileNumber() : "";
                         pIdx++;
-                        list.add(new WorkerCardData(fullName, demo, loc, wage, skillTag, photo));
+                        list.add(new WorkerCardData(fullName, demo, loc, wage, skillTag, photo, mob));
                     }
                 }
             }
@@ -187,7 +189,8 @@ public class ITI_TechnicianResultPage {
             e.printStackTrace();
         }
         for (int i = 0; i < TECHNICIANS.length; i++) {
-            list.add(new WorkerCardData(TECHNICIANS[i][0], TECHNICIANS[i][1], TECHNICIANS[i][2], TECHNICIANS[i][3], TECHNICIANS[i][4], PHOTOS[i % PHOTOS.length]));
+            String benchMob = "982204" + String.format("%04d", i + 1);
+            list.add(new WorkerCardData(TECHNICIANS[i][0], TECHNICIANS[i][1], TECHNICIANS[i][2], TECHNICIANS[i][3], TECHNICIANS[i][4], PHOTOS[i % PHOTOS.length], benchMob));
         }
         return list;
     }
@@ -217,9 +220,22 @@ public class ITI_TechnicianResultPage {
         Label skill = label(technician.trade,
                 "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#b48700;-fx-background-color:#f4ede2;-fx-background-radius:5px;-fx-padding:4px 7px;");
         Label location = label("•  Based in " + technician.location, "-fx-font-size:11px;-fx-text-fill:" + MUTED + ";");
-        Label availability = label("•  Available for new projects",
-                "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#477044;");
-        VBox details = new VBox(4, name, age, skill, location, availability);
+        com.dihadi.service.WorkerAvailabilityService.AvailabilityInfo avail =
+                com.dihadi.service.WorkerAvailabilityService.getAvailability(technician.mobile, technician.name);
+        Label availability = label(avail.getBadgeText(),
+                avail.isAvailable()
+                        ? "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#477044;"
+                        : (avail.isHiredByCurrentRecruiter()
+                                ? "-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:#2e7d32;"
+                                : "-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:#c0392b;"));
+        Label busySubtext = label(avail.getSubtext(),
+                avail.isHiredByCurrentRecruiter()
+                        ? "-fx-font-size:10px;-fx-font-style:italic;-fx-text-fill:#2e7d32;"
+                        : "-fx-font-size:10px;-fx-font-style:italic;-fx-text-fill:#c0392b;");
+        busySubtext.setVisible(!avail.isAvailable());
+        busySubtext.setManaged(!avail.isAvailable());
+
+        VBox details = new VBox(3, name, age, skill, location, availability, busySubtext);
         HBox top = new HBox(14, avatar, details);
         top.setAlignment(Pos.TOP_LEFT);
         Region divider = new Region();
@@ -229,9 +245,19 @@ public class ITI_TechnicianResultPage {
         divider.setStyle("-fx-background-color:#e9e2d7;");
         Label wage = label("Wage:  ₹" + technician.wage + " / day",
                 "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#d4a300;");
-        Button hire = new Button("HIRE NOW");
-        hire.setStyle(
-                "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-radius:18px;-fx-text-fill:#b48700;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;");
+        Button hire = new Button(avail.getButtonText());
+        if (avail.isAvailable()) {
+            hire.setStyle(
+                    "-fx-background-color:transparent;-fx-background-radius:18px;-fx-border-color:#d4af37;-fx-border-radius:18px;-fx-text-fill:#b48700;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;");
+        } else if (avail.isHiredByCurrentRecruiter()) {
+            hire.setDisable(true);
+            hire.setStyle(
+                    "-fx-background-color:#e8f5e9;-fx-background-radius:18px;-fx-border-color:#a5d6a7;-fx-border-radius:18px;-fx-text-fill:#2e7d32;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;");
+        } else {
+            hire.setDisable(true);
+            hire.setStyle(
+                    "-fx-background-color:#f8d7da;-fx-background-radius:18px;-fx-border-color:#e0a0a5;-fx-border-radius:18px;-fx-text-fill:#721c24;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 14px;");
+        }
         Region gap = new Region();
         HBox.setHgrow(gap, Priority.ALWAYS);
         HBox bottom = new HBox(wage, gap, hire);
@@ -242,7 +268,9 @@ public class ITI_TechnicianResultPage {
         card.setStyle(cardStyle(false));
         card.setOnMouseEntered(e -> card.setStyle(cardStyle(true)));
         card.setOnMouseExited(e -> card.setStyle(cardStyle(false)));
-        hire.setOnAction(e -> openTechnicianProfile(card, technician));
+        if (avail.isAvailable()) {
+            hire.setOnAction(e -> openTechnicianProfile(card, technician));
+        }
         card.setOnMouseClicked(e -> openTechnicianProfile(card, technician));
         return card;
     }
@@ -251,7 +279,7 @@ public class ITI_TechnicianResultPage {
         Stage stage = (Stage) card.getScene().getWindow();
         Scene currentScene = card.getScene();
         stage.setScene(new RecruiterWorkerProfilePage(technician.name, "ITI / Technician", technician.age,
-                technician.location, technician.wage, technician.photo, "", () -> RecruiterWorkerProfilePage.markResultCardHired(card)).getProfileScene(
+                technician.location, technician.wage, technician.photo, technician.mobile, () -> RecruiterWorkerProfilePage.markResultCardHired(card)).getProfileScene(
                         () -> stage.setScene(currentScene), currentScene));
     }
 

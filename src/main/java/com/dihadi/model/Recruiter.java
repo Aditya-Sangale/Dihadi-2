@@ -17,6 +17,7 @@ public class Recruiter {
     private String uid;
     private String password;
     private double walletBalance;
+    private String lastLogin;
 
     public Recruiter() {
     }
@@ -185,5 +186,13 @@ public class Recruiter {
         if ((this.mobileNumber == null || this.mobileNumber.isBlank()) && phone != null) {
             this.mobileNumber = phone;
         }
+    }
+
+    public String getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(String lastLogin) {
+        this.lastLogin = lastLogin;
     }
 }

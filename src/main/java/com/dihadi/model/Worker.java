@@ -24,6 +24,7 @@ public class Worker {
     private String password;
     private double walletBalance;
     private int totalDaysWorked;
+    private String lastLogin;
 
     public Worker() {
     }
@@ -283,5 +284,13 @@ public class Worker {
         if ((this.subSkill == null || this.subSkill.isBlank()) && skill != null) {
             this.subSkill = skill;
         }
+    }
+
+    public String getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(String lastLogin) {
+        this.lastLogin = lastLogin;
     }
 }
