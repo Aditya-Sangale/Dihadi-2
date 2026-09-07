@@ -12,6 +12,20 @@ import java.util.List;
 
 public class NotificationDao {
     private final Firestore db = FirebaseConfig.getFirestore();
+    private static final java.util.Map<String, Notification> LOCAL_NOTIF_MAP = new java.util.concurrent.ConcurrentHashMap<>();
+    private static volatile long lastNotifsFetch = 0;
+    private static final long CACHE_TTL_MS = 15000;
+
+    static {
+        try {
+            List<Notification> disk = LocalCacheManager.loadNotifications();
+            for (Notification n : disk) {
+                if (n != null && n.getNotificationId() != null && !n.getNotificationId().isBlank()) {
+                    LOCAL_NOTIF_MAP.put(n.getNotificationId(), n);
+                }
+            }
+        } catch (Exception ignored) {}
+    }
 
     public void saveNotification(Notification notification) {
         if (notification == null) return;
@@ -27,65 +41,94 @@ public class NotificationDao {
             if (notification.getTimestamp() == null) {
                 notification.setTimestamp(new java.util.Date());
             }
-            db.collection("Notifications")
-                    .document(notification.getNotificationId())
-                    .set(notification)
-                    .get();
-            System.out.println("Notification Saved: " + notification.getNotificationId() + " for recipient: " + notification.getRecipientId());
+            LOCAL_NOTIF_MAP.put(notification.getNotificationId(), notification);
+            LocalCacheManager.saveNotifications(LOCAL_NOTIF_MAP.values());
+
+            if (!LocalCacheManager.isQuotaExhausted()) {
+                db.collection("Notifications")
+                        .document(notification.getNotificationId())
+                        .set(notification);
+                System.out.println("Notification Saved: " + notification.getNotificationId() + " for recipient: " + notification.getRecipientId());
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            if (LocalCacheManager.isQuotaExhaustedException(e)) {
+                LocalCacheManager.markQuotaExhausted();
+            } else {
+                System.err.println("[NotificationDao] Save notice: " + e.getMessage());
+            }
         }
     }
 
     public List<Notification> getNotificationsForRecipient(String recipientKey) {
-        List<Notification> list = new ArrayList<>();
-        if (recipientKey == null || recipientKey.isBlank()) return list;
+        if (recipientKey == null || recipientKey.isBlank()) return new ArrayList<>();
 
+        long now = System.currentTimeMillis();
+        boolean queryRemote = !LocalCacheManager.isQuotaExhausted() && (now - lastNotifsFetch >= CACHE_TTL_MS);
+
+        if (queryRemote) {
+            try {
+                ApiFuture<QuerySnapshot> future = db.collection("Notifications").get();
+                List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+                lastNotifsFetch = now;
+                for (QueryDocumentSnapshot doc : documents) {
+                    Notification n = doc.toObject(Notification.class);
+                    if (n != null && n.getNotificationId() != null) {
+                        LOCAL_NOTIF_MAP.put(n.getNotificationId(), n);
+                    }
+                }
+                LocalCacheManager.saveNotifications(LOCAL_NOTIF_MAP.values());
+            } catch (Exception e) {
+                if (LocalCacheManager.isQuotaExhaustedException(e)) {
+                    LocalCacheManager.markQuotaExhausted();
+                } else {
+                    System.err.println("[NotificationDao] Remote fetch notice: " + e.getMessage());
+                }
+            }
+        }
+
+        List<Notification> list = new ArrayList<>();
         String rawClean = recipientKey.replaceAll("\\D", "");
         String tenDigit = rawClean.length() >= 10 ? rawClean.substring(rawClean.length() - 10) : rawClean;
 
-        try {
-            ApiFuture<QuerySnapshot> future = db.collection("Notifications").get();
-            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-            for (QueryDocumentSnapshot doc : documents) {
-                Notification n = doc.toObject(Notification.class);
-                if (n == null || n.getRecipientId() == null) continue;
+        for (Notification n : LOCAL_NOTIF_MAP.values()) {
+            if (n == null || n.getRecipientId() == null) continue;
+            String rKey = n.getRecipientId().trim();
+            String rClean = rKey.replaceAll("\\D", "");
 
-                String rKey = n.getRecipientId().trim();
-                String rClean = rKey.replaceAll("\\D", "");
-
-                boolean match = rKey.equalsIgnoreCase(recipientKey.trim());
-                if (!match && !tenDigit.isEmpty() && !rClean.isEmpty()) {
-                    match = rClean.endsWith(tenDigit) || tenDigit.endsWith(rClean);
-                }
-
-                if (match) {
-                    list.add(n);
-                }
+            boolean match = rKey.equalsIgnoreCase(recipientKey.trim());
+            if (!match && !tenDigit.isEmpty() && !rClean.isEmpty()) {
+                match = rClean.endsWith(tenDigit) || tenDigit.endsWith(rClean);
             }
 
-            // Sort by newest timestamp first
-            list.sort((a, b) -> {
-                if (a.getTimestamp() == null && b.getTimestamp() == null) return 0;
-                if (a.getTimestamp() == null) return 1;
-                if (b.getTimestamp() == null) return -1;
-                return b.getTimestamp().compareTo(a.getTimestamp());
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
+            if (match) {
+                list.add(n);
+            }
         }
+
+        // Sort by newest timestamp first
+        list.sort((a, b) -> {
+            if (a.getTimestamp() == null && b.getTimestamp() == null) return 0;
+            if (a.getTimestamp() == null) return 1;
+            if (b.getTimestamp() == null) return -1;
+            return b.getTimestamp().compareTo(a.getTimestamp());
+        });
+
         return list;
     }
 
     public void markAsRead(String notificationId) {
         if (notificationId == null || notificationId.isBlank()) return;
-        try {
-            db.collection("Notifications")
-                    .document(notificationId)
-                    .update("read", true)
-                    .get();
-        } catch (Exception e) {
-            e.printStackTrace();
+        Notification n = LOCAL_NOTIF_MAP.get(notificationId);
+        if (n != null) {
+            n.setRead(true);
+            LocalCacheManager.saveNotifications(LOCAL_NOTIF_MAP.values());
+        }
+        if (!LocalCacheManager.isQuotaExhausted()) {
+            try {
+                db.collection("Notifications")
+                        .document(notificationId)
+                        .update("read", true);
+            } catch (Exception ignored) {}
         }
     }
 

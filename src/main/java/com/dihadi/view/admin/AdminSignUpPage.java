@@ -1,84 +1,101 @@
 package com.dihadi.view.admin;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import com.dihadi.view.AppNavigator;
+import com.dihadi.view.NotificationToast;
+import com.dihadi.view.ScrollUtils;
+import com.dihadi.view.SessionManager;
+
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
-/** Native DIHADI admin registration form matching the supplied admin sign-up layout. */
+/**
+ * Native DIHADI admin registration form styled with full-bleed background imagery
+ * and frosted glass form card positioned on the right side.
+ */
 public class AdminSignUpPage {
-    private static final String[] ADMIN_VISUALS = {
-            "/assets/images/sitesuperviser.jpeg",
-            "/assets/images/worker 5.jpeg",
-            "/assets/images/welder.jpeg",
-            "/assets/images/electrician.jpeg",
-            "/assets/images/carpenter.jpeg"
-    };
 
-    private Timeline visualRotation;
     private final TextField name = field("e.g. Ram");
-    private final TextField officialEmail = field("e.g. rushi.sawant@meridihadi.com");
+    private final TextField personalEmail = field("e.g. ram@email.com");
     private final PasswordField password = passwordField("Create a strong password");
     private final PasswordField confirmation = passwordField("Re-enter password");
-    private final TextField personalEmail = field("e.g. ram@email.com");
     private final TextField mobile = field("e.g. +91 9876543210");
+    private final TextField officialEmail = field("e.g. rushi.sawant@meridihadi.com");
     private final TextField adminCode = field("Enter Admin Access Code");
 
     public Scene getAdminSignUpScene(Runnable backAction) {
-        BorderPane page = new BorderPane();
-        page.setLeft(createFormPanel(backAction));
-        page.setCenter(createVisualPanel());
-        page.setBackground(new Background(new BackgroundFill(Color.web("#f3e7ce"), CornerRadii.EMPTY, Insets.EMPTY)));
-        return new Scene(page, 1400, 780);
+        Region bg = new Region();
+        String bgUrl = resolveBgUrl();
+        bg.setStyle("-fx-background-image: url('" + bgUrl + "');" +
+                "-fx-background-size: cover;" +
+                "-fx-background-position: center center;" +
+                "-fx-background-repeat: no-repeat;");
+
+        ScrollPane scroll = createForm(backAction);
+        StackPane root = new StackPane(bg, scroll);
+        return new Scene(root, 1400, 780);
     }
 
-    private ScrollPane createFormPanel(Runnable backAction) {
-        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 76, 76);
-        Label brand = text("DIHADI", "-fx-font-family:Georgia;-fx-font-size:36px;-fx-font-weight:800;-fx-text-fill:#27438a;");
-        Label tagline = text("Meri Dihadi ~ Mera Haq", "-fx-font-family:Georgia;-fx-font-size:18px;-fx-font-style:italic;-fx-text-fill:#685c52;");
-        VBox branding = new VBox(5, logo, brand, tagline); branding.setAlignment(Pos.CENTER);
+    private ScrollPane createForm(Runnable backAction) {
+        Button back = new Button("← Back");
+        back.setStyle(
+                "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:10px;-fx-border-color:rgba(212,175,55,0.4);-fx-border-radius:10px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
+        back.setOnAction(event -> {
+            if (backAction != null) {
+                backAction.run();
+            } else {
+                Stage stage = (Stage) back.getScene().getWindow();
+                AppNavigator.open(stage, "Home");
+            }
+        });
 
-        Label welcome = text("Welcome to DIHADI", "-fx-font-family:Georgia;-fx-font-size:29px;-fx-font-weight:700;-fx-text-fill:#1e1b15;");
-        Label title = text("Sign In to Create an Admin Account", "-fx-font-size:19px;-fx-text-fill:#4c4637;");
-        Label note = text("Remember to enter your DIHADI Admin Code to complete the sign-up process.", "-fx-font-size:15px;-fx-text-fill:#685c52;-fx-text-alignment:center;");
-        note.setWrapText(true);
-        VBox header = new VBox(11, branding, welcome, title, note); header.setAlignment(Pos.CENTER);
+        Label badge = text("ADMIN REGISTRATION",
+                "-fx-background-color:rgba(212,175,55,0.18);-fx-background-radius:10px;-fx-border-color:rgba(212,175,55,0.4);-fx-border-radius:10px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-padding:6px 14px;");
+        HBox topBar = new HBox(12, back, badge);
+        topBar.setAlignment(Pos.CENTER_LEFT);
 
-        Button back = new Button("‹");
-        back.setOnAction(event -> backAction.run());
-        back.setStyle("-fx-background-color:#f4ede2;-fx-background-radius:10px;-fx-text-fill:#735c00;-fx-font-size:24px;-fx-font-weight:700;-fx-padding:2px 13px 6px 13px;-fx-cursor:hand;");
-        Label formHeadingLbl = text("ENTER YOUR DETAILS", "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#4d4635;-fx-letter-spacing:1px;-fx-background-color:#f4ede2;-fx-background-radius:10px;-fx-padding:10px 15px;");
-        HBox sectionHeader = new HBox(10, back, formHeadingLbl);
-        sectionHeader.setAlignment(Pos.CENTER_LEFT);
+        ImageView logo = image("/assets/logo/dihadi logo.jpeg", 68, 68);
+        VBox branding = new VBox(3, logo,
+                text("DIHADI", "-fx-font-family:'Georgia';-fx-font-size:28px;-fx-font-weight:800;-fx-text-fill:#735c00;"),
+                text("Meri Dihadi ~ Mera Haq", "-fx-font-family:'Georgia';-fx-font-size:15px;-fx-font-style:italic;-fx-text-fill:#685c52;"));
+        branding.setAlignment(Pos.CENTER);
+
+        Label welcome = text("Create Admin Account", "-fx-font-size:22px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+        Label intro = text("Enter your official credentials and DIHADI Admin Code to register.", "-fx-font-size:13px;-fx-text-fill:#594f42;");
+        intro.setWrapText(true);
+        intro.setMaxWidth(460);
+        intro.setAlignment(Pos.CENTER);
+        VBox header = new VBox(6, branding, welcome, intro);
+        header.setAlignment(Pos.CENTER);
 
         GridPane fields = new GridPane();
-        fields.setHgap(18); fields.setVgap(16);
+        fields.setHgap(16);
+        fields.setVgap(14);
+        ColumnConstraints left = new ColumnConstraints();
+        left.setPercentWidth(50);
+        left.setHgrow(Priority.ALWAYS);
+        ColumnConstraints right = new ColumnConstraints();
+        right.setPercentWidth(50);
+        right.setHgrow(Priority.ALWAYS);
+        fields.getColumnConstraints().addAll(left, right);
+
         add(fields, 0, 0, "Full Name *", name, 1);
         add(fields, 1, 0, "Personal Email Address *", personalEmail, 1);
         add(fields, 0, 1, "Password *", password, 1);
@@ -87,80 +104,48 @@ public class AdminSignUpPage {
         add(fields, 0, 3, "Official Email Address *", officialEmail, 2);
         add(fields, 0, 4, "Enter Your DIHADI Admin Code *", adminCode, 2);
 
-        Button submit = new Button("CREATE ADMIN ACCOUNT"); submit.setMaxWidth(Double.MAX_VALUE);
-        submit.setStyle("-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#231b00;-fx-font-size:18px;-fx-font-weight:800;-fx-padding:14px;-fx-cursor:hand;");
+        Button submit = new Button("CREATE ADMIN ACCOUNT");
+        submit.setMaxWidth(Double.MAX_VALUE);
+        submit.setStyle(
+                "-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#1e1b15;-fx-font-size:16px;-fx-font-weight:800;-fx-padding:13px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.18),10,0,0,3px);");
         submit.setOnAction(event -> register(submit, backAction));
 
-        Button login = new Button("Already have an admin account? Login");
-        login.setOnAction(event -> {
-            if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.ADMIN)) return;
-            Stage stage = (Stage) login.getScene().getWindow();
+        Button loginLink = new Button("Already have an admin account? Login");
+        loginLink.setOnAction(event -> {
+            if (!SessionManager.checkAccessAllowed(SessionManager.Role.ADMIN)) return;
+            Stage stage = (Stage) loginLink.getScene().getWindow();
             stage.setScene(new AdminLoginPage().getAdminLoginScene(backAction));
         });
-        login.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:700;-fx-cursor:hand;");
-        VBox actions = new VBox(13, submit, login); actions.setAlignment(Pos.CENTER);
-        actions.setPadding(new Insets(24, 0, 0, 0));
-        VBox card = new VBox(22, header, divider(), sectionHeader, fields, divider(), actions);
-        card.setMaxWidth(600); card.setPadding(new Insets(30, 42, 28, 42));
-        card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:17px;-fx-border-color:#e2d9ca;-fx-border-radius:17px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.09),20,.15,0,5px);");
+        loginLink.setStyle("-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:13px;-fx-font-weight:800;-fx-cursor:hand;");
 
-        VBox wrap = new VBox(card); wrap.setAlignment(Pos.CENTER); wrap.setPadding(new Insets(36)); wrap.setPrefWidth(700);
-        ScrollPane pane = new ScrollPane(wrap);
-        com.dihadi.view.ScrollUtils.style(pane);
+        VBox actions = new VBox(14, submit, loginLink);
+        actions.setAlignment(Pos.CENTER);
+
+        VBox card = new VBox(18, topBar, header, fields, actions);
+        card.setMaxWidth(580);
+        card.setPadding(new Insets(28, 36, 28, 36));
+        card.setStyle(
+                "-fx-background-color:rgba(255,253,248,0.88);" +
+                "-fx-background-radius:22px;" +
+                "-fx-border-color:rgba(212,175,55,0.45);" +
+                "-fx-border-radius:22px;" +
+                "-fx-border-width:1.5px;" +
+                "-fx-effect:dropshadow(gaussian,rgba(30,24,16,0.22),30,0,0,10px);");
+
+        // Align card to the RIGHT side
+        VBox content = new VBox(card);
+        content.setAlignment(Pos.TOP_RIGHT);
+        content.setPadding(new Insets(24, 70, 48, 20));
+
+        ScrollPane pane = new ScrollPane(content);
+        ScrollUtils.style(pane);
         pane.setStyle("-fx-background:transparent;-fx-background-color:transparent;-fx-border-width:0;");
+        pane.setFitToWidth(true);
         return pane;
     }
 
-    private StackPane createVisualPanel() {
-        ImageView visual = image(ADMIN_VISUALS[0], 520, 430);
-        visual.setPreserveRatio(true);
-        startVisualRotation(visual);
-        StackPane photo = new StackPane(visual);
-        photo.setPrefSize(540, 455);
-        photo.setMaxSize(540, 455);
-        photo.setPadding(new Insets(12));
-        photo.setStyle(
-                "-fx-background-color:#fff8f0;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-radius:18px;"
-                        + "-fx-effect:dropshadow(gaussian,rgba(58,48,39,.16),18,0,0,7px);");
-
-        Label eyebrow = text("DIHADI ADMIN COMMUNITY",
-                "-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:#d4af37;-fx-letter-spacing:1.5px;");
-        Label headline = text("Lead with trust.\nBuild with clarity.",
-                "-fx-font-size:32px;-fx-font-weight:800;-fx-text-fill:#fff8f0;-fx-line-spacing:4px;");
-        Label copy = text(
-                "Manage verified workforce, requirements and operations from one dependable DIHADI control center.",
-                "-fx-font-size:15px;-fx-text-fill:#f8f0e2;-fx-opacity:.86;");
-        copy.setWrapText(true);
-        copy.setMaxWidth(500);
-        VBox words = new VBox(12, eyebrow, headline, copy);
-        words.setAlignment(Pos.CENTER_LEFT);
-        VBox content = new VBox(24, photo, words);
-        content.setAlignment(Pos.CENTER);
-        content.setPadding(new Insets(38));
-        StackPane panel = new StackPane(content);
-        panel.setAlignment(Pos.CENTER);
-        panel.setPrefWidth(700);
-        panel.setMinWidth(520);
-        panel.setStyle("-fx-background-color:linear-gradient(to bottom right,#343027,#4c4233);");
-        return panel;
-    }
-
-    private void startVisualRotation(ImageView visual) {
-        if (visualRotation != null) visualRotation.stop();
-        final int[] index = { 0 };
-        visualRotation = new Timeline(new KeyFrame(Duration.millis(1800), event -> {
-            index[0] = (index[0] + 1) % ADMIN_VISUALS.length;
-            try {
-                java.net.URL url = getClass().getResource(ADMIN_VISUALS[index[0]]);
-                if (url != null) visual.setImage(new Image(url.toExternalForm()));
-            } catch (Exception e) {}
-        }));
-        visualRotation.setCycleCount(Timeline.INDEFINITE);
-        visualRotation.play();
-    }
-
     private void register(Button submitBtn, Runnable backAction) {
-        if (!com.dihadi.view.SessionManager.checkAccessAllowed(com.dihadi.view.SessionManager.Role.ADMIN)) {
+        if (!SessionManager.checkAccessAllowed(SessionManager.Role.ADMIN)) {
             return;
         }
         String nameStr = name.getText().trim();
@@ -193,11 +178,11 @@ public class AdminSignUpPage {
                 submitBtn.setDisable(false);
                 submitBtn.setText("CREATE ADMIN ACCOUNT");
                 if (success) {
-                    com.dihadi.view.SessionManager.clearAllSessions();
+                    SessionManager.clearAllSessions();
                     Stage stage = (Stage) submitBtn.getScene().getWindow();
-                    com.dihadi.view.NotificationToast.show(stage, "Admin Account Created",
+                    NotificationToast.show(stage, "Admin Account Created",
                             "Your DIHADI admin account has been registered successfully. Please login to proceed.",
-                            com.dihadi.view.NotificationToast.ToastType.SUCCESS);
+                            NotificationToast.ToastType.SUCCESS);
                     stage.setScene(new AdminLoginPage().getAdminLoginScene(backAction));
                 } else {
                     info("Registration failed", "Unable to save admin record to Firebase. Please check your network connection.");
@@ -206,14 +191,79 @@ public class AdminSignUpPage {
         }).start();
     }
 
-    private static TextField field(String prompt) { TextField field = new TextField(); field.setPromptText(prompt); field.setStyle(inputStyle()); return field; }
-    private static PasswordField passwordField(String prompt) { PasswordField field = new PasswordField(); field.setPromptText(prompt); field.setStyle(inputStyle()); return field; }
-    private static ColumnConstraints copy(ColumnConstraints source) { ColumnConstraints copy = new ColumnConstraints(); copy.setPercentWidth(source.getPercentWidth()); copy.setHgrow(Priority.ALWAYS); return copy; }
-    private void add(GridPane grid, int column, int row, String title, javafx.scene.Node field, int span) { VBox box = new VBox(7, text(title, "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#4c4637;"), field); GridPane.setHgrow(box, Priority.ALWAYS); grid.add(box, column, row, span, 1); }
-    private Region divider() { Region line = new Region(); line.setPrefHeight(1); line.setStyle("-fx-background-color:#e9e2d7;"); return line; }
-    private Label footer() { return text("© 2026 DIHADI  •  Meri Dihadi ~ Mera Haq. All rights reserved.", "-fx-font-size:12px;-fx-text-fill:#685c52;"); }
-    private ImageView image(String path, double width, double height) { ImageView image = new ImageView(new Image(getClass().getResource(path).toExternalForm())); image.setFitWidth(width); image.setFitHeight(height); image.setPreserveRatio(true); image.setSmooth(true); return image; }
-    private Label text(String value, String style) { Label label = new Label(value); label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style); return label; }
-    private static String inputStyle() { return "-fx-background-color:#f4ede2;-fx-background-radius:10px;-fx-border-color:transparent;-fx-font-size:15px;-fx-padding:12px 14px;-fx-pref-height:48px;"; }
-    private void info(String title, String message) { com.dihadi.view.NotificationToast.show(title, message, com.dihadi.view.NotificationToast.ToastType.INFO); }
+    private String resolveBgUrl() {
+        try {
+            var res = getClass().getResource("/assets/images/admin_auth_bg.jpg");
+            if (res != null) return res.toExternalForm();
+            java.io.File f1 = new java.io.File("src/main/resources/assets/images/admin_auth_bg.jpg");
+            if (f1.exists()) return f1.toURI().toString();
+            java.io.File f2 = new java.io.File("target/classes/assets/images/admin_auth_bg.jpg");
+            if (f2.exists()) return f2.toURI().toString();
+        } catch (Exception ignored) {}
+        return "";
+    }
+
+    private static TextField field(String prompt) {
+        TextField field = new TextField();
+        field.setPromptText(prompt);
+        field.setStyle(inputStyle());
+        return field;
+    }
+
+    private static PasswordField passwordField(String prompt) {
+        PasswordField field = new PasswordField();
+        field.setPromptText(prompt);
+        field.setStyle(inputStyle());
+        return field;
+    }
+
+    private void add(GridPane grid, int column, int row, String title, javafx.scene.Node field, int span) {
+        VBox box = new VBox(6, text(title, "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#2c251d;"), field);
+        GridPane.setHgrow(box, Priority.ALWAYS);
+        grid.add(box, column, row, span, 1);
+    }
+
+    private ImageView image(String path, double width, double height) {
+        ImageView image = new ImageView();
+        try {
+            var res = getClass().getResource(path);
+            if (res != null) {
+                image.setImage(new Image(res.toExternalForm()));
+            } else {
+                java.io.File f = new java.io.File("src/main/resources" + (path.startsWith("/") ? "" : "/") + path);
+                if (f.exists()) {
+                    image.setImage(new Image(f.toURI().toString()));
+                }
+            }
+        } catch (Exception ignored) {}
+        image.setFitWidth(width);
+        image.setFitHeight(height);
+        image.setPreserveRatio(true);
+        image.setSmooth(true);
+        return image;
+    }
+
+    private static Label text(String value, String style) {
+        Label label = new Label(value);
+        label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
+        return label;
+    }
+
+    private static String inputStyle() {
+        return "-fx-background-color: rgba(255, 255, 255, 0.85);" +
+                "-fx-background-radius: 10px;" +
+                "-fx-border-color: rgba(200, 185, 165, 0.6);" +
+                "-fx-border-radius: 10px;" +
+                "-fx-border-width: 1.2px;" +
+                "-fx-text-fill: #1e1b15;" +
+                "-fx-font-weight: 600;" +
+                "-fx-prompt-text-fill: #7d7263;" +
+                "-fx-font-size: 13px;" +
+                "-fx-padding: 10px 13px;" +
+                "-fx-pref-height: 44px;";
+    }
+
+    private void info(String title, String message) {
+        NotificationToast.show(title, message, NotificationToast.ToastType.INFO);
+    }
 }

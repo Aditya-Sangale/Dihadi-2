@@ -145,56 +145,80 @@ public class WorkerDao {
     public List<Worker> getWorkersByProjectId(String projectId) {
         List<Worker> list = new ArrayList<>();
         if (projectId == null || projectId.isBlank()) {
-            return getAllWorkers();
+            return list;
         }
 
         try {
+            // Find project to get title for fallback matching
+            com.dihadi.dao.ProjectDao projectDao = new com.dihadi.dao.ProjectDao();
+            com.dihadi.model.Project proj = projectDao.getProject(projectId);
+            String projName = (proj != null && proj.getTitle() != null) ? proj.getTitle().trim().toLowerCase() : "";
+
             // Find all accepted applications for this project
             JobApplicationDao jobAppDao = new JobApplicationDao();
             List<com.dihadi.model.JobApplication> allApps = jobAppDao.getAllApplications();
-            
-            java.util.Set<String> workerMobiles = new java.util.HashSet<>();
+
+            java.util.Map<String, com.dihadi.model.JobApplication> acceptedByWorker = new java.util.LinkedHashMap<>();
             if (allApps != null) {
                 for (com.dihadi.model.JobApplication app : allApps) {
-                    if (projectId.equals(app.getProjectId()) && "Accepted".equalsIgnoreCase(app.getStatus())) {
-                        if (app.getWorkerMobile() != null && !app.getWorkerMobile().isBlank()) {
-                            workerMobiles.add(app.getWorkerMobile());
+                    if ("Accepted".equalsIgnoreCase(app.getStatus())) {
+                        boolean matchesProject = false;
+                        String aProjId = app.getProjectId() != null ? app.getProjectId().trim() : "";
+                        String aTitle = app.getJobTitle() != null ? app.getJobTitle().trim().toLowerCase() : "";
+
+                        if (!aProjId.isEmpty() && projectId.equalsIgnoreCase(aProjId)) {
+                            matchesProject = true;
+                        } else if (!projName.isEmpty() && (aTitle.contains(projName) || projName.contains(aTitle))) {
+                            matchesProject = true;
                         }
-                    }
-                }
-                // If no accepted applications, check all applications for this project
-                if (workerMobiles.isEmpty()) {
-                    for (com.dihadi.model.JobApplication app : allApps) {
-                        if (projectId.equals(app.getProjectId())) {
-                            if (app.getWorkerMobile() != null && !app.getWorkerMobile().isBlank()) {
-                                workerMobiles.add(app.getWorkerMobile());
-                            }
+
+                        if (matchesProject && app.getWorkerMobile() != null && !app.getWorkerMobile().isBlank()) {
+                            String clean = app.getWorkerMobile().replaceAll("\\D", "");
+                            String key = clean.length() >= 10 ? clean.substring(clean.length() - 10) : clean;
+                            acceptedByWorker.putIfAbsent(key, app);
                         }
                     }
                 }
             }
 
-            for (String mobile : workerMobiles) {
+            for (com.dihadi.model.JobApplication app : acceptedByWorker.values()) {
+                String mobile = app.getWorkerMobile();
                 Worker w = getWorkerByEmailOrMobile(mobile);
-                if (w != null && list.stream().noneMatch(existing -> mobile.equals(existing.getMobileNumber()))) {
-                    list.add(w);
-                } else if (w == null) {
-                    // Create minimal worker from mobile
+                if (w != null) {
+                    // Populate worker's name if missing in worker profile
+                    if ((w.getName().equalsIgnoreCase("Worker") || (w.getFirstName() == null || w.getFirstName().isBlank()))
+                            && app.getWorkerName() != null && !app.getWorkerName().isBlank()) {
+                        w.setName(app.getWorkerName());
+                    }
+                    if (list.stream().noneMatch(existing -> (w.getId() != null && !w.getId().isEmpty() && w.getId().equals(existing.getId()))
+                            || (mobile != null && mobile.equals(existing.getMobileNumber())))) {
+                        list.add(w);
+                    }
+                } else {
+                    // Create worker from accepted application details
                     Worker fallback = new Worker();
                     fallback.setMobileNumber(mobile);
-                    fallback.setFirstName("Worker (" + mobile + ")");
-                    fallback.setDailyWage(500);
+                    fallback.setId(mobile);
+                    if (app.getWorkerName() != null && !app.getWorkerName().isBlank()) {
+                        fallback.setName(app.getWorkerName());
+                    } else {
+                        fallback.setFirstName("Worker (" + mobile + ")");
+                    }
+                    fallback.setWorkerType(app.getJobTitle() != null ? app.getJobTitle() : "General Labour");
+                    try {
+                        if (app.getJobWage() != null) {
+                            fallback.setDailyWage((int) Double.parseDouble(app.getJobWage().replaceAll("[^0-9.]", "")));
+                        } else {
+                            fallback.setDailyWage(600);
+                        }
+                    } catch (Exception ignored) {
+                        fallback.setDailyWage(600);
+                    }
                     list.add(fallback);
                 }
             }
-
-            // If still empty, return all workers as fallback for testing
-            if (list.isEmpty()) {
-                list = getAllWorkers();
-            }
         } catch (Exception e) {
             e.printStackTrace();
-            list = getAllWorkers();
         }
 
         return list;

@@ -68,7 +68,7 @@ public class RecruiterDashboardController {
                                 if (depositAmountField != null) {
                                     depositAmountField.clear();
                                 }
-                                displayAlert(Alert.AlertType.INFORMATION, "Success", "Payment verified and credited!\nTxn ID: " + paymentId);
+                                displayAlert(Alert.AlertType.INFORMATION, "Payment Successful", "Payment verified and credited!\nPayee: Aditya Sangale\nTxn ID: " + paymentId);
                             } else {
                                 displayAlert(Alert.AlertType.ERROR, "Security Mismatch", "Payment signature verification failed.");
                             }

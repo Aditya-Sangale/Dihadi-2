@@ -98,7 +98,7 @@ public class RecruiterDashboard {
 
         pollRecruiterLiveState(currentR, back);
 
-        livePoller = new Timeline(new KeyFrame(Duration.seconds(3), e -> pollRecruiterLiveState(currentR, back)));
+        livePoller = new Timeline(new KeyFrame(Duration.seconds(25), e -> pollRecruiterLiveState(currentR, back)));
         livePoller.setCycleCount(Timeline.INDEFINITE);
         livePoller.play();
 
@@ -368,19 +368,46 @@ public class RecruiterDashboard {
                         String id2 = p2.getProjectId() != null ? p2.getProjectId() : "";
                         return id2.compareTo(id1);
                     });
+
+                    Project sessionProj = com.dihadi.view.SessionManager.currentRecruiterProject;
+                    String sessionProjId = sessionProj != null ? sessionProj.getProjectId() : null;
+
                     for (Project p : sortedAll) {
                         if (isMatch(p, currentR, currentR.getCompanyName())
                                 || isMatch(p, currentR, currentR.getMobileNumber())
                                 || isMatch(p, currentR, currentR.getEmail())) {
                             recruiterProjects.add(p);
-                            if ("Active".equalsIgnoreCase(p.getStatus()) || "Available".equalsIgnoreCase(p.getStatus())
-                                    || "Unavailable".equalsIgnoreCase(p.getStatus())) {
-                                if (activeProj == null)
+                            boolean isActiveStatus = "Active".equalsIgnoreCase(p.getStatus())
+                                    || "Available".equalsIgnoreCase(p.getStatus())
+                                    || "Unavailable".equalsIgnoreCase(p.getStatus())
+                                    || "Requirement Fulfilled".equalsIgnoreCase(p.getStatus());
+
+                            if (isActiveStatus) {
+                                if (sessionProjId != null && sessionProjId.equals(p.getProjectId())) {
                                     activeProj = p;
+                                } else if (activeProj == null) {
+                                    activeProj = p;
+                                }
                             } else if ("Upcoming".equalsIgnoreCase(p.getStatus())) {
                                 upcoming.add(p);
                             } else if ("Completed".equalsIgnoreCase(p.getStatus())) {
                                 completed.add(p);
+                            }
+                        }
+                    }
+
+                    // If recruiter already had an active project selected, preserve it
+                    if (sessionProjId != null) {
+                        for (Project p : recruiterProjects) {
+                            if (sessionProjId.equals(p.getProjectId())) {
+                                boolean isActiveStatus = "Active".equalsIgnoreCase(p.getStatus())
+                                        || "Available".equalsIgnoreCase(p.getStatus())
+                                        || "Unavailable".equalsIgnoreCase(p.getStatus())
+                                        || "Requirement Fulfilled".equalsIgnoreCase(p.getStatus());
+                                if (isActiveStatus) {
+                                    activeProj = p;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -399,17 +426,32 @@ public class RecruiterDashboard {
                 final List<Project> finalCompleted = completed;
                 final int finalProjCount = recruiterProjects.size();
 
-                int assignedWorkersCount = 0;
-                if (allApps != null && finalActiveProj != null && finalActiveProj.getProjectId() != null) {
-                    assignedWorkersCount = (int) allApps.stream()
-                            .filter(a -> finalActiveProj.getProjectId().equals(a.getProjectId())
-                                    && "Accepted".equalsIgnoreCase(a.getStatus()))
-                            .map(JobApplication::getWorkerMobile)
-                            .filter(m -> m != null && !m.isBlank())
-                            .distinct()
-                            .count();
+                java.util.Set<String> assignedWorkerKeys = new java.util.HashSet<>();
+                if (allApps != null && finalActiveProj != null) {
+                    String actProjId = finalActiveProj.getProjectId() != null ? finalActiveProj.getProjectId().trim() : "";
+                    String actProjName = finalActiveProj.getProjectName() != null ? finalActiveProj.getProjectName().trim().toLowerCase() : "";
+
+                    for (JobApplication a : allApps) {
+                        if ("Accepted".equalsIgnoreCase(a.getStatus())) {
+                            boolean matchesProject = false;
+                            String aProjId = a.getProjectId() != null ? a.getProjectId().trim() : "";
+                            String aTitle = a.getJobTitle() != null ? a.getJobTitle().trim().toLowerCase() : "";
+
+                            if (!actProjId.isEmpty() && actProjId.equals(aProjId)) {
+                                matchesProject = true;
+                            } else if (!actProjName.isEmpty() && (aTitle.contains(actProjName) || actProjName.contains(aTitle))) {
+                                matchesProject = true;
+                            }
+
+                            if (matchesProject && a.getWorkerMobile() != null && !a.getWorkerMobile().isBlank()) {
+                                String cleanMob = a.getWorkerMobile().replaceAll("\\D", "");
+                                String workerKey = cleanMob.length() >= 10 ? cleanMob.substring(cleanMob.length() - 10) : cleanMob;
+                                assignedWorkerKeys.add(workerKey);
+                            }
+                        }
+                    }
                 }
-                final int finalAssignedWorkers = assignedWorkersCount;
+                final int finalAssignedWorkers = assignedWorkerKeys.size();
 
                 java.util.Set<String> recruiterProjIds = new java.util.HashSet<>();
                 for (Project p : recruiterProjects) {
@@ -720,6 +762,10 @@ public class RecruiterDashboard {
                                         "-fx-background-color:#ffffff;-fx-background-radius:8px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:8px;-fx-cursor:hand;"));
                                 activeCard.setOnMouseExited(e -> activeCard.setStyle(
                                         "-fx-background-color:#faf5eb;-fx-background-radius:8px;-fx-border-color:#ebdccb;-fx-border-width:1px;-fx-border-radius:8px;"));
+                                activeCard.setOnMouseClicked(e -> {
+                                    com.dihadi.view.SessionManager.currentRecruiterProject = actP;
+                                    pollRecruiterLiveState(currentR, back);
+                                });
                                 activeProjPanel.getChildren().add(activeCard);
                             }
                         }
@@ -958,7 +1004,7 @@ public class RecruiterDashboard {
 
                                     displayAlert(Alert.AlertType.INFORMATION, "Payment Successful",
                                             "Rs. " + String.format("%.2f", amount)
-                                                    + " credited to your wallet.\nTxn ID: " + paymentId);
+                                                    + " credited to your wallet.\nPayee: Aditya Sangale\nTxn ID: " + paymentId);
                                     dashboardStage.setScene(getScene(back));
                                 }
 

@@ -214,6 +214,13 @@ public class PendingApprovalsPage {
 
                 if (app.getProjectId() != null && !app.getProjectId().isBlank()) {
                     new com.dihadi.controller.ProjectController().updateProjectStatus(app.getProjectId(), "Requirement Fulfilled");
+                    try {
+                        com.dihadi.model.Project p = new com.dihadi.controller.ProjectController().getProject(app.getProjectId());
+                        if (p != null) {
+                            p.setStatus("Requirement Fulfilled");
+                            com.dihadi.view.SessionManager.currentRecruiterProject = p;
+                        }
+                    } catch (Exception ignored) {}
                 }
 
                 String recName = (recruiter != null && recruiter.getFirstName() != null)

@@ -139,16 +139,19 @@ public class CreateProjectPage {
             if (!validProject())
                 return;
 
-            // Ensure any pending selected working site files get uploaded before saving
+            save.setDisable(true);
+            save.setText("Opening Workforce Requirements...");
+
+            // Collect image URLs: use already uploaded Cloudinary URLs or local file URIs as immediate fallback
+            List<String> projectImages = new ArrayList<>();
+            synchronized (uploadedImageUrls) {
+                projectImages.addAll(uploadedImageUrls);
+            }
             for (File file : selectedFiles) {
-                if (!uploadedImageUrls.contains(file.toURI().toString())) {
-                    ImageUploadController uploadController = new ImageUploadController();
-                    String url = uploadController.imageUpload(file);
-                    if (url != null && !uploadedImageUrls.contains(url)) {
-                        uploadedImageUrls.add(url);
-                    } else if (file.exists() && uploadedImageUrls.isEmpty()) {
-                        // Fallback to real local working site image URI
-                        uploadedImageUrls.add(file.toURI().toString());
+                if (file != null && file.exists()) {
+                    String localUri = file.toURI().toString();
+                    if (!projectImages.contains(localUri) && projectImages.size() < selectedFiles.size()) {
+                        projectImages.add(localUri);
                     }
                 }
             }
@@ -160,48 +163,88 @@ public class CreateProjectPage {
                     ? com.dihadi.view.SessionManager.currentRecruiter.getEmail()
                     : email.getText().trim();
 
-            boolean hasActive = false;
-            try {
-                List<com.dihadi.model.Project> existingProjects = new com.dihadi.controller.ProjectController().getAllProjects();
-                if (existingProjects != null) {
-                    String cleanRecruiterMobile = recruiterMobile.replaceAll("\\D", "");
-                    for (com.dihadi.model.Project p : existingProjects) {
-                        String pMobile = p.getMobile() != null ? p.getMobile().replaceAll("\\D", "") : "";
-                        boolean mobileMatch = !cleanRecruiterMobile.isBlank() && !pMobile.isBlank() && (pMobile.endsWith(cleanRecruiterMobile) || cleanRecruiterMobile.endsWith(pMobile));
-                        boolean emailMatch = recruiterEmail != null && !recruiterEmail.isBlank() && p.getEmail() != null && p.getEmail().equalsIgnoreCase(recruiterEmail);
-                        if (mobileMatch || emailMatch) {
-                            if ("Active".equalsIgnoreCase(p.getStatus())) {
-                                hasActive = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            } catch (Exception ex) {}
-
             String projectId = String.valueOf(System.currentTimeMillis()) + String.format("%03d", (int)(Math.random() * 1000));
+            String pName = projectName.getText().trim();
+            String cName = contactName.getText().trim();
+            String altMobile = alternateMobile.getText().trim();
+            String pPin = pincode.getText().trim();
+            String pCity = city.getText().trim();
+            String pState = state.getText().trim();
+            String addr1 = addressLine.getText().trim();
+            String addr2 = addressLine2.getText().trim();
+            String landm = landmark.getText().trim();
+
             com.dihadi.model.Project project = new com.dihadi.model.Project(
                 projectId,
-                projectName.getText().trim(),
-                contactName.getText().trim(),
+                pName,
+                cName,
                 recruiterMobile,
-                alternateMobile.getText().trim(),
+                altMobile,
                 recruiterEmail,
-                pincode.getText().trim(),
-                city.getText().trim(),
-                state.getText().trim(),
-                addressLine.getText().trim(),
-                addressLine2.getText().trim(),
-                landmark.getText().trim(),
-                new ArrayList<>(uploadedImageUrls)
+                pPin,
+                pCity,
+                pState,
+                addr1,
+                addr2,
+                landm,
+                new ArrayList<>(projectImages)
             );
-            project.setStatus(hasActive ? "Upcoming" : "Active");
-            new com.dihadi.controller.ProjectController().addProject(project);
+            // The newly created project is immediately the active project for recruitment
+            project.setStatus("Active");
+
+            // Cache immediately in memory so lookups succeed in 0ms
+            com.dihadi.dao.ProjectDao.cacheProject(project);
             com.dihadi.view.SessionManager.currentRecruiterProject = project;
 
+            // Save to Firestore in background without blocking the UI thread
+            final List<File> filesToUpload = new ArrayList<>(selectedFiles);
+            new Thread(() -> {
+                try {
+                    new com.dihadi.controller.ProjectController().addProject(project);
+
+                    boolean hasNewCloudinary = false;
+                    for (File file : filesToUpload) {
+                        boolean hasRemote = false;
+                        synchronized (uploadedImageUrls) {
+                            for (String u : uploadedImageUrls) {
+                                if (u != null && u.startsWith("http")) {
+                                    hasRemote = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!hasRemote && file != null && file.exists()) {
+                            try {
+                                ImageUploadController uploadController = new ImageUploadController();
+                                String url = uploadController.imageUpload(file);
+                                if (url != null && !url.isBlank()) {
+                                    synchronized (uploadedImageUrls) {
+                                        uploadedImageUrls.add(url);
+                                    }
+                                    hasNewCloudinary = true;
+                                }
+                            } catch (Exception ignored) {}
+                        }
+                    }
+
+                    if (hasNewCloudinary) {
+                        synchronized (uploadedImageUrls) {
+                            project.setImageUrls(new ArrayList<>(uploadedImageUrls));
+                        }
+                        new com.dihadi.controller.ProjectController().addProject(project);
+                        com.dihadi.dao.ProjectDao.cacheProject(project);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }).start();
+
+            // Navigate immediately to AddWorkersPage (instant transition!)
+            String firstImage = !projectImages.isEmpty() ? projectImages.get(0) : "";
             Stage stage = (Stage) save.getScene().getWindow();
             stage.setScene(
-                    new AddWorkersPage(projectId, projectName.getText().trim(), contactName.getText().trim(), mobile.getText().trim(), email.getText().trim(), addressLine.getText().trim(), uploadedImageUrls.isEmpty() ? "" : uploadedImageUrls.get(0)).getAddWorkersScene(() -> stage.setScene(getCreateProjectScene(closeAction))));
+                    new AddWorkersPage(projectId, pName, cName, recruiterMobile, recruiterEmail, addr1, firstImage)
+                            .getAddWorkersScene(() -> stage.setScene(getCreateProjectScene(closeAction))));
         });
         Button close = new Button("Close");
         close.setStyle(

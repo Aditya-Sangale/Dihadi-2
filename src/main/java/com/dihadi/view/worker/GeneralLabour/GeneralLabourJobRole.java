@@ -320,7 +320,7 @@ public class GeneralLabourJobRole {
         Runnable openDetails = () -> {
             javafx.stage.Stage stage = (javafx.stage.Stage) apply.getScene().getWindow(); 
             javafx.scene.Scene currentScene = apply.getScene();
-            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(roleTitle, j[1], j[2], detailImg, j[4], j[5], j[6]).getScene(() -> {
+            stage.setScene(new com.dihadi.view.worker.SiteDetailsCardPage(projectName, roleTitle, j[1], j[2], detailImg, j[4], j[5], j[6]).getScene(() -> {
                 checkAppliedStatus.run();
                 stage.setScene(currentScene);
             }, currentScene)); 

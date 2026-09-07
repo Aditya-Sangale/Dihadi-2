@@ -246,9 +246,13 @@ public class Worker {
         return !full.isEmpty() ? full : "Worker";
     }
 
+    public String getFullName() {
+        return getName();
+    }
+
     public void setName(String name) {
         if (name != null && !name.isBlank()) {
-            if (this.firstName == null || this.firstName.isBlank()) {
+            if (this.firstName == null || this.firstName.isBlank() || "Worker".equalsIgnoreCase(this.firstName.trim())) {
                 String[] parts = name.trim().split("\\s+", 3);
                 this.firstName = parts[0];
                 if (parts.length == 2) {

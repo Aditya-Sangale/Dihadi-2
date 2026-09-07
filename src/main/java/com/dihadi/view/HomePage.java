@@ -315,9 +315,43 @@ public class HomePage extends Application {
         return label;
     }
 
+    private Image loadImage(String path) {
+        if (path == null || path.isBlank()) {
+            return null;
+        }
+        try {
+            var res = getClass().getResource(path);
+            if (res != null) {
+                return new Image(res.toExternalForm());
+            }
+            String altPath = path.startsWith("/") ? path.substring(1) : "/" + path;
+            var altRes = getClass().getResource(altPath);
+            if (altRes != null) {
+                return new Image(altRes.toExternalForm());
+            }
+            java.io.File file = new java.io.File(path);
+            if (file.exists()) {
+                return new Image(file.toURI().toString());
+            }
+            java.io.File srcFile = new java.io.File("src/main/resources" + (path.startsWith("/") ? "" : "/") + path);
+            if (srcFile.exists()) {
+                return new Image(srcFile.toURI().toString());
+            }
+            java.io.File targetFile = new java.io.File("target/classes" + (path.startsWith("/") ? "" : "/") + path);
+            if (targetFile.exists()) {
+                return new Image(targetFile.toURI().toString());
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
     private ImageView image(String path, double width, double height) {
-        Image image = new Image(getClass().getResource(path).toExternalForm());
-        ImageView imageView = new ImageView(image);
+        ImageView imageView = new ImageView();
+        Image img = loadImage(path);
+        if (img != null) {
+            imageView.setImage(img);
+        }
         imageView.setFitWidth(width);
         imageView.setFitHeight(height);
         imageView.setPreserveRatio(true);
@@ -397,7 +431,10 @@ public class HomePage extends Application {
         }
         imageSlider = new Timeline(new KeyFrame(Duration.seconds(4), event -> {
             imageIndex = (imageIndex + 1) % HERO_IMAGES.length;
-            heroImage.setImage(new Image(getClass().getResource(HERO_IMAGES[imageIndex]).toExternalForm()));
+            Image nextImg = loadImage(HERO_IMAGES[imageIndex]);
+            if (nextImg != null && heroImage != null) {
+                heroImage.setImage(nextImg);
+            }
         }));
         imageSlider.setCycleCount(Timeline.INDEFINITE);
         imageSlider.play();
