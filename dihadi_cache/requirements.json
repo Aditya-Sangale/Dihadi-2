@@ -1,0 +1,41 @@
+[
+  {
+    "workerType": "Plumber",
+    "quantity": 20,
+    "electricityFacility": true,
+    "transportationFacility": false,
+    "accommodationFacility": true,
+    "requirementId": "REQ_1788818916357188_1788818941862",
+    "priority": "Urgent",
+    "projectId": "1788818916357188",
+    "subSkill": "Pipe Fittings",
+    "dailyWages": 850,
+    "waterFacility": true
+  },
+  {
+    "workerType": "Painter",
+    "quantity": 5,
+    "electricityFacility": true,
+    "transportationFacility": false,
+    "accommodationFacility": true,
+    "requirementId": "REQ_1788813151759633_1788813171724",
+    "priority": "Very Urgent",
+    "projectId": "1788813151759633",
+    "subSkill": "Enamel Painting",
+    "dailyWages": 1250,
+    "waterFacility": true
+  },
+  {
+    "workerType": "Labour (General Labour)",
+    "quantity": 5,
+    "electricityFacility": true,
+    "transportationFacility": false,
+    "accommodationFacility": true,
+    "requirementId": "REQ_1788813151759633_1788818603284",
+    "priority": "Very Urgent",
+    "projectId": "1788813151759633",
+    "subSkill": "General Labour",
+    "dailyWages": 1400,
+    "waterFacility": true
+  }
+]

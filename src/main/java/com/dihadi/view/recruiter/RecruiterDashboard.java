@@ -29,6 +29,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
@@ -53,7 +54,6 @@ public class RecruiterDashboard {
 
     private VBox activeOngoingPanel;
     private VBox activeProjPanel;
-    private VBox upcomingProjPanel;
     private VBox pastProjPanel;
     private VBox reqPanel;
     private VBox notificationsPanel;
@@ -121,6 +121,14 @@ public class RecruiterDashboard {
             stage.setScene(new AttendancePage(currentR).getScene(() -> stage.setScene(getScene(back))));
         });
 
+        Button paymentHistory = nav("Payment History", false);
+        paymentHistory.setOnAction(e -> {
+            if (livePoller != null)
+                livePoller.stop();
+            Stage stage = (Stage) paymentHistory.getScene().getWindow();
+            stage.setScene(new PaymentHistoryPage(currentR).getScene(() -> stage.setScene(getScene(back))));
+        });
+
         Button pendingApprovals = nav("Pending Approvals", false);
         pendingApprovals.setOnAction(e -> {
             if (livePoller != null)
@@ -129,7 +137,7 @@ public class RecruiterDashboard {
             stage.setScene(new PendingApprovalsPage(currentR).getScene(() -> stage.setScene(getScene(back))));
         });
 
-        HBox navBar = new HBox(18, overview, attendance, pendingApprovals);
+        HBox navBar = new HBox(18, overview, attendance, paymentHistory, pendingApprovals);
         navBar.setAlignment(Pos.CENTER);
 
         Region spacer = new Region();
@@ -169,8 +177,11 @@ public class RecruiterDashboard {
         });
 
         Button backBtn = new Button("←  Back");
-        backBtn.setStyle(
-                "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;");
+        String backIdle = "-fx-background-color:transparent;-fx-text-fill:#4c4637;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-background-radius:10px;";
+        String backHover = "-fx-background-color:#ffffff;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:#735c00;-fx-border-radius:10px;-fx-background-radius:10px;";
+        backBtn.setStyle(backIdle);
+        backBtn.setOnMouseEntered(e -> backBtn.setStyle(backHover));
+        backBtn.setOnMouseExited(e -> backBtn.setStyle(backIdle));
         backBtn.setOnAction(e -> {
             if (livePoller != null)
                 livePoller.stop();
@@ -243,10 +254,20 @@ public class RecruiterDashboard {
                 "-fx-background-color:#272727;-fx-background-radius:8px;-fx-text-fill:#ffd54f;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:5px 12px;-fx-cursor:hand;");
         addFundsBtn.setOnAction(e -> handleAddFunds(currentR, addFundsBtn, walletBalanceLabel, back));
 
+        Button historyBtn = new Button("History →");
+        historyBtn.setStyle(
+                "-fx-background-color:#f5f0e8;-fx-background-radius:8px;-fx-text-fill:#735c00;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:5px 10px;-fx-border-color:#d0c5af;-fx-border-radius:8px;-fx-cursor:hand;");
+        historyBtn.setOnAction(e -> {
+            if (livePoller != null)
+                livePoller.stop();
+            Stage stage = (Stage) historyBtn.getScene().getWindow();
+            stage.setScene(new PaymentHistoryPage(currentR).getScene(() -> stage.setScene(getScene(back))));
+        });
+
         HBox walletHeadRow = new HBox(8,
                 label("WALLET BALANCE",
                         "-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:0.8px;-fx-text-fill:#685c52;"),
-                spacer(), addFundsBtn);
+                spacer(), historyBtn, addFundsBtn);
         walletHeadRow.setAlignment(Pos.CENTER_LEFT);
 
         VBox walletMetric = new VBox(6, walletHeadRow, walletBalanceLabel,
@@ -312,10 +333,8 @@ public class RecruiterDashboard {
     }
 
     private HBox createBody(Recruiter currentR, Runnable back) {
-        activeProjPanel = executivePanel("Active Projects",
+        activeProjPanel = executivePanel("Current and Ongoing Projects",
                 label("Loading...", "-fx-font-size:13px;-fx-text-fill:#685c52;"));
-        upcomingProjPanel = executivePanel("Upcoming Projects",
-                label("Loading upcoming projects...", "-fx-font-size:13px;-fx-text-fill:#685c52;"));
         pastProjPanel = executivePanel("Past Completed Projects",
                 label("Loading past projects...", "-fx-font-size:13px;-fx-text-fill:#685c52;"));
 
@@ -331,8 +350,8 @@ public class RecruiterDashboard {
                 detail("Business Structure", val(currentR.getBusinessType(), "General Contractor")),
                 detail("Account Status", "Active"));
 
-        VBox leftBody = new VBox(18, activeProjPanel, upcomingProjPanel, pastProjPanel);
-        VBox rightBody = new VBox(18, reqPanel, notificationsPanel, recruiterProfilePanel);
+        VBox leftBody = new VBox(18, activeProjPanel, pastProjPanel, recruiterProfilePanel);
+        VBox rightBody = new VBox(18, reqPanel, notificationsPanel);
         HBox.setHgrow(leftBody, Priority.ALWAYS);
         HBox.setHgrow(rightBody, Priority.ALWAYS);
 
@@ -358,7 +377,6 @@ public class RecruiterDashboard {
 
                 List<Project> recruiterProjects = new ArrayList<>();
                 Project activeProj = null;
-                List<Project> upcoming = new ArrayList<>();
                 List<Project> completed = new ArrayList<>();
 
                 if (allProjects != null) {
@@ -377,21 +395,18 @@ public class RecruiterDashboard {
                                 || isMatch(p, currentR, currentR.getMobileNumber())
                                 || isMatch(p, currentR, currentR.getEmail())) {
                             recruiterProjects.add(p);
-                            boolean isActiveStatus = "Active".equalsIgnoreCase(p.getStatus())
-                                    || "Available".equalsIgnoreCase(p.getStatus())
-                                    || "Unavailable".equalsIgnoreCase(p.getStatus())
-                                    || "Requirement Fulfilled".equalsIgnoreCase(p.getStatus());
-
-                            if (isActiveStatus) {
+                            if ("Completed".equalsIgnoreCase(p.getStatus()) || "Cancelled".equalsIgnoreCase(p.getStatus())) {
+                                completed.add(p);
+                            } else {
+                                // All active, ongoing, or new projects belong to Current & Ongoing
+                                if ("Upcoming".equalsIgnoreCase(p.getStatus())) {
+                                    p.setStatus("Active");
+                                }
                                 if (sessionProjId != null && sessionProjId.equals(p.getProjectId())) {
                                     activeProj = p;
                                 } else if (activeProj == null) {
                                     activeProj = p;
                                 }
-                            } else if ("Upcoming".equalsIgnoreCase(p.getStatus())) {
-                                upcoming.add(p);
-                            } else if ("Completed".equalsIgnoreCase(p.getStatus())) {
-                                completed.add(p);
                             }
                         }
                     }
@@ -400,11 +415,7 @@ public class RecruiterDashboard {
                     if (sessionProjId != null) {
                         for (Project p : recruiterProjects) {
                             if (sessionProjId.equals(p.getProjectId())) {
-                                boolean isActiveStatus = "Active".equalsIgnoreCase(p.getStatus())
-                                        || "Available".equalsIgnoreCase(p.getStatus())
-                                        || "Unavailable".equalsIgnoreCase(p.getStatus())
-                                        || "Requirement Fulfilled".equalsIgnoreCase(p.getStatus());
-                                if (isActiveStatus) {
+                                if (!"Completed".equalsIgnoreCase(p.getStatus()) && !"Cancelled".equalsIgnoreCase(p.getStatus())) {
                                     activeProj = p;
                                     break;
                                 }
@@ -413,16 +424,16 @@ public class RecruiterDashboard {
                     }
                 }
 
-                if (activeProj == null && !upcoming.isEmpty()) {
-                    Project next = upcoming.remove(0);
-                    next.setStatus("Active");
-                    new ProjectController().addProject(next);
-                    activeProj = next;
+                if (activeProj != null && activeProj.getProjectId() != null) {
+                    new ProjectController().checkAndUpdateProjectFulfilledStatus(activeProj.getProjectId());
+                    try {
+                        Project fresh = new ProjectController().getProject(activeProj.getProjectId());
+                        if (fresh != null) activeProj = fresh;
+                    } catch (Exception ignored) {}
                 }
 
                 com.dihadi.view.SessionManager.currentRecruiterProject = activeProj;
                 final Project finalActiveProj = activeProj;
-                final List<Project> finalUpcoming = upcoming;
                 final List<Project> finalCompleted = completed;
                 final int finalProjCount = recruiterProjects.size();
 
@@ -524,7 +535,7 @@ public class RecruiterDashboard {
 
                     if (activeOngoingPanel != null) {
                         activeOngoingPanel.getChildren().clear();
-                        Label tag = label("ACTIVE PROJECT",
+                        Label tag = label("CURRENT & ONGOING PROJECT",
                                 "-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:#735c00;");
 
                         if (finalActiveProj == null) {
@@ -558,7 +569,7 @@ public class RecruiterDashboard {
                             VBox siteDetail = detail("Location", loc.isBlank() ? "Pune, Maharashtra" : loc);
                             boolean isFulfilled = "Requirement Fulfilled".equalsIgnoreCase(finalActiveProj.getStatus())
                                     || "Unavailable".equalsIgnoreCase(finalActiveProj.getStatus());
-                            String displayStatus = isFulfilled ? "Requirement Fulfilled" : "Active (Seeking Workers)";
+                            String displayStatus = isFulfilled ? "Requirement Fulfilled" : "Currently Ongoing";
                             VBox statusDetail = detail("Status", displayStatus);
                             Button completeBtn = new Button("Mark Project Complete");
                             completeBtn.setStyle(
@@ -575,8 +586,13 @@ public class RecruiterDashboard {
                                         com.dihadi.service.WorkerAvailabilityService.completeProjectHires(finalActiveProj.getProjectId());
                                     }
 
-                                    if (!finalUpcoming.isEmpty()) {
-                                        Project nextActive = finalUpcoming.get(0);
+                                    List<Project> remainingOngoing = recruiterProjects.stream()
+                                            .filter(p -> !p.getProjectId().equals(finalActiveProj.getProjectId())
+                                                    && !"Completed".equalsIgnoreCase(p.getStatus())
+                                                    && !"Cancelled".equalsIgnoreCase(p.getStatus()))
+                                            .toList();
+                                    if (!remainingOngoing.isEmpty()) {
+                                        Project nextActive = remainingOngoing.get(0);
                                         nextActive.setStatus("Active");
                                         new ProjectController().addProject(nextActive);
                                         com.dihadi.view.SessionManager.currentRecruiterProject = nextActive;
@@ -646,15 +662,13 @@ public class RecruiterDashboard {
 
                     if (activeProjPanel != null) {
                         activeProjPanel.getChildren().clear();
-                        activeProjPanel.getChildren().add(panelHeader("Active & Ongoing Projects"));
+                        activeProjPanel.getChildren().add(panelHeader("Current and Ongoing Projects"));
                         List<Project> activeList = recruiterProjects.stream()
-                                .filter(p -> "Active".equalsIgnoreCase(p.getStatus())
-                                        || "Available".equalsIgnoreCase(p.getStatus())
-                                        || "Unavailable".equalsIgnoreCase(p.getStatus())
-                                        || "Requirement Fulfilled".equalsIgnoreCase(p.getStatus()))
+                                .filter(p -> !"Completed".equalsIgnoreCase(p.getStatus())
+                                        && !"Cancelled".equalsIgnoreCase(p.getStatus()))
                                 .toList();
                         if (activeList.isEmpty()) {
-                            activeProjPanel.getChildren().add(label("No active projects currently.",
+                            activeProjPanel.getChildren().add(label("No current or ongoing projects.",
                                     "-fx-font-size:13px;-fx-text-fill:#685c52;"));
                         } else {
                             for (Project actP : activeList) {
@@ -663,7 +677,7 @@ public class RecruiterDashboard {
                                 boolean isActFulfilled = "Requirement Fulfilled".equalsIgnoreCase(actP.getStatus())
                                         || "Unavailable".equalsIgnoreCase(actP.getStatus());
                                 Label stLabel = label(
-                                        isActFulfilled ? "Status: Requirement Fulfilled" : "Status: Active (Seeking Workers)",
+                                        isActFulfilled ? "Status: Requirement Fulfilled" : "Status: Currently Ongoing",
                                         "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:"
                                                 + (isActFulfilled ? "#b48700;" : "#2e7d32;"));
 
@@ -727,20 +741,19 @@ public class RecruiterDashboard {
                                                     actP.getProjectId(), "Completed");
                                             com.dihadi.service.WorkerAvailabilityService.completeProjectHires(actP.getProjectId());
                                         }
-                                        if (!finalUpcoming.isEmpty() && actP.getProjectId() != null
-                                                && actP.getProjectId()
-                                                        .equals(finalActiveProj != null
-                                                                ? finalActiveProj.getProjectId()
-                                                                : null)) {
-                                            Project nextActive = finalUpcoming.get(0);
+                                        List<Project> remainingOngoing = recruiterProjects.stream()
+                                                .filter(p -> !p.getProjectId().equals(actP.getProjectId())
+                                                        && !"Completed".equalsIgnoreCase(p.getStatus())
+                                                        && !"Cancelled".equalsIgnoreCase(p.getStatus()))
+                                                .toList();
+                                        if (!remainingOngoing.isEmpty() && actP.getProjectId() != null
+                                                && actP.getProjectId().equals(finalActiveProj != null ? finalActiveProj.getProjectId() : null)) {
+                                            Project nextActive = remainingOngoing.get(0);
                                             nextActive.setStatus("Active");
                                             new ProjectController().addProject(nextActive);
                                             com.dihadi.view.SessionManager.currentRecruiterProject = nextActive;
-                                        } else if (finalUpcoming.isEmpty() && actP.getProjectId() != null
-                                                && actP.getProjectId()
-                                                        .equals(finalActiveProj != null
-                                                                ? finalActiveProj.getProjectId()
-                                                                : null)) {
+                                        } else if (remainingOngoing.isEmpty() && actP.getProjectId() != null
+                                                && actP.getProjectId().equals(finalActiveProj != null ? finalActiveProj.getProjectId() : null)) {
                                             com.dihadi.view.SessionManager.currentRecruiterProject = null;
                                         }
                                         Platform.runLater(() -> {
@@ -767,35 +780,6 @@ public class RecruiterDashboard {
                                     pollRecruiterLiveState(currentR, back);
                                 });
                                 activeProjPanel.getChildren().add(activeCard);
-                            }
-                        }
-                    }
-
-                    if (upcomingProjPanel != null) {
-                        upcomingProjPanel.getChildren().clear();
-                        upcomingProjPanel.getChildren().add(panelHeader("Upcoming Projects"));
-                        if (finalUpcoming.isEmpty()) {
-                            upcomingProjPanel.getChildren().add(label("No upcoming projects scheduled.",
-                                    "-fx-font-size:13px;-fx-text-fill:#685c52;"));
-                        } else {
-                            for (Project up : finalUpcoming) {
-                                String upLoc = (val(up.getCity(), "") + ", " + val(up.getState(), ""))
-                                        .replaceAll("^, |, $", "");
-                                VBox upCard = new VBox(4,
-                                        label(up.getProjectName(),
-                                                "-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:#1e1b15;"),
-                                        label("Location: " + (upLoc.isBlank() ? "Pune" : upLoc),
-                                                "-fx-font-size:12px;-fx-text-fill:#4d4635;"),
-                                        label("Status: Upcoming",
-                                                "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#735c00;"));
-                                upCard.setPadding(new Insets(10, 12, 10, 12));
-                                upCard.setStyle(
-                                        "-fx-background-color:#faf5eb;-fx-background-radius:8px;-fx-border-color:#ebdccb;-fx-border-width:1px;-fx-border-radius:8px;");
-                                upCard.setOnMouseEntered(e -> upCard.setStyle(
-                                        "-fx-background-color:#ffffff;-fx-background-radius:8px;-fx-border-color:#d4af37;-fx-border-width:1.5px;-fx-border-radius:8px;-fx-cursor:hand;"));
-                                upCard.setOnMouseExited(e -> upCard.setStyle(
-                                        "-fx-background-color:#faf5eb;-fx-background-radius:8px;-fx-border-color:#ebdccb;-fx-border-width:1px;-fx-border-radius:8px;"));
-                                upcomingProjPanel.getChildren().add(upCard);
                             }
                         }
                     }
@@ -1101,6 +1085,7 @@ public class RecruiterDashboard {
     private Label label(String v, String s) {
         Label l = new Label(v);
         l.setWrapText(true);
+        l.setTextOverrun(OverrunStyle.CLIP);
         l.setStyle("-fx-font-family:'Segoe UI';" + s);
         return l;
     }

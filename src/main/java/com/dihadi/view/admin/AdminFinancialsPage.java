@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -166,7 +167,7 @@ public class AdminFinancialsPage {
 
     private HBox filterSearchBar() {
         searchField = new TextField();
-        searchField.setPromptText("Search project, contractor, or transaction ID...");
+        searchField.setPromptText("Search project, contractor, or transaction ID");
         searchField.setPrefWidth(320);
         searchField.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-padding:9px 14px;-fx-font-size:13px;");
         searchField.textProperty().addListener((obs, oldV, newV) -> applyFilters());
@@ -270,7 +271,11 @@ public class AdminFinancialsPage {
         topRow.setAlignment(Pos.CENTER_LEFT);
 
         Label projectLbl = label(txn.projectName(), "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
+        projectLbl.setWrapText(true);
+        projectLbl.setTextOverrun(OverrunStyle.CLIP);
         Label contractorLbl = label("Contractor: " + txn.contractor(), "-fx-font-size:13px;-fx-text-fill:#574e44;");
+        contractorLbl.setWrapText(true);
+        contractorLbl.setTextOverrun(OverrunStyle.CLIP);
 
         Region sp2 = new Region();
         HBox.setHgrow(sp2, Priority.ALWAYS);
@@ -318,6 +323,7 @@ public class AdminFinancialsPage {
 
     private Label label(String text, String style) {
         Label l = new Label(text);
+        l.setTextOverrun(OverrunStyle.CLIP);
         l.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
         return l;
     }

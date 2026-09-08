@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.dihadi.controller.RecruiterController;
 import com.dihadi.model.Recruiter;
+import com.dihadi.view.NotificationToast;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -21,6 +22,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -153,10 +155,10 @@ public class AdminRecruitersPage {
         GridPane grid = grid(4);
         grid.setHgap(20);
 
-        totalRecruitersKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
-        enterpriseKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#2e7d32;");
-        activeSitesKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1565c0;");
-        totalEscrowKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
+        totalRecruitersKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
+        enterpriseKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#2e7d32;");
+        activeSitesKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1565c0;");
+        totalEscrowKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
 
         grid.add(kpiCard("TOTAL RECRUITERS", totalRecruitersKpi, "Database Verified", "#685c52"), 0, 0);
         grid.add(kpiCard("ENTERPRISE BUILDERS", enterpriseKpi, "GST / CIN Validated", "#2e7d32"), 1, 0);
@@ -178,7 +180,7 @@ public class AdminRecruitersPage {
 
     private HBox filterSearchBar() {
         searchField = new TextField();
-        searchField.setPromptText("Search company name, contact person, mobile, or business type...");
+        searchField.setPromptText("Search company name, contact person, mobile, or business type");
         searchField.setPrefWidth(340);
         searchField.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-padding:9px 14px;-fx-font-size:13px;");
         searchField.textProperty().addListener((obs, oldV, newV) -> applyFilters());
@@ -233,7 +235,7 @@ public class AdminRecruitersPage {
         if (isLoading) {
             ProgressIndicator pi = new ProgressIndicator();
             pi.setPrefSize(42, 42);
-            VBox box = new VBox(12, pi, label("Synchronizing real-time recruiter registry...", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
+            VBox box = new VBox(12, pi, label("Synchronizing real-time recruiter registry", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
             box.setAlignment(Pos.CENTER);
             box.setPadding(new Insets(50));
             recruiterCardsPane.add(box, 0, 0, 2, 1);
@@ -415,12 +417,12 @@ public class AdminRecruitersPage {
         topStrip.setAlignment(Pos.CENTER_LEFT);
 
         Label companyLabel = label(r.companyName(), "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
+        companyLabel.setWrapText(true);
+        companyLabel.setTextOverrun(OverrunStyle.CLIP);
         Label contactLabel = label("Authorized Director: " + r.contactPerson() + "  |  Region: " + r.region(), "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
 
         Label phoneLabel = label("Phone: " + r.mobileNumber(), "-fx-font-family:Consolas;-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#735c00;");
-        Label emailLabel = label("Email: " + r.email(), "-fx-font-family:Consolas;-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#1565c0;");
-        Label lastLoginLabel = label("Last Login: " + com.dihadi.util.UserActivityUtil.formatDisplayDate(r.lastLogin()), "-fx-font-family:Consolas;-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
-        HBox contactRow = new HBox(12, phoneLabel, emailLabel, lastLoginLabel);
+        HBox contactRow = new HBox(12, phoneLabel);
         contactRow.setAlignment(Pos.CENTER_LEFT);
 
         HBox block1 = adminDataBlock("ACTIVE SITES", r.activeSites() + " Projects", GOLD);
@@ -429,39 +431,16 @@ public class AdminRecruitersPage {
         HBox dataStrip = new HBox(10, block1, block2, block3);
         dataStrip.setAlignment(Pos.CENTER_LEFT);
 
-        HBox tagsRow = new HBox(6);
-        tagsRow.setAlignment(Pos.CENTER_LEFT);
-        tagsRow.getChildren().add(adminTag("GST Compliant"));
-        tagsRow.getChildren().add(adminTag("Escrow Linked"));
-        tagsRow.getChildren().add(adminTag("Labour Law Verified"));
-
-        Button actionBtn;
-        if (r.isInactive()) {
-            actionBtn = new Button("Remove Inactive");
-            actionBtn.setStyle("-fx-background-color:#ba1a1a;-fx-background-radius:8px;-fx-text-fill:#ffffff;-fx-border-color:#991b1b;-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
-            actionBtn.setOnAction(e -> confirmAndDeleteRecruiter(r));
-        } else {
-            actionBtn = new Button("Active (<30d)");
-            actionBtn.setStyle("-fx-background-color:#f1eee7;-fx-background-radius:8px;-fx-text-fill:#8c7b6d;-fx-border-color:#dcd4c7;-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:700;-fx-padding:6px 12px;-fx-cursor:hand;");
-            actionBtn.setOnAction(e -> {
-                Alert info = new Alert(Alert.AlertType.INFORMATION);
-                info.setTitle("Active Recruiter Protected");
-                info.setHeaderText("Account Protected from Removal");
-                info.setContentText(r.companyName() + " was active " + (r.daysInactive() == 0 ? "today" : r.daysInactive() + " days ago") +
-                        " (" + com.dihadi.util.UserActivityUtil.formatDisplayDate(r.lastLogin()) + ").\n\n" +
-                        "Under administrative policy, only recruiter accounts inactive for 30 or more days can be removed.");
-                info.show();
-            });
-        }
-
         Button inspectBtn = new Button("Inspect Recruiter ->");
         inspectBtn.setStyle("-fx-background-color:#272727;-fx-background-radius:8px;-fx-text-fill:#ffd54f;-fx-border-color:" + GOLD + ";-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
         inspectBtn.setOnAction(e -> openRecruiterDetailsModal(r));
 
+        Button dustbinBtn = DormantManager.createDustbinButton("Move Recruiter to Dormant / Remove", () -> confirmAndDeleteRecruiter(r));
+
         Region btmSpacer = new Region();
         HBox.setHgrow(btmSpacer, Priority.ALWAYS);
-        HBox btmRow = new HBox(8, tagsRow, btmSpacer, actionBtn, inspectBtn);
-        btmRow.setAlignment(Pos.CENTER_LEFT);
+        HBox btmRow = new HBox(8, btmSpacer, inspectBtn, dustbinBtn);
+        btmRow.setAlignment(Pos.CENTER_RIGHT);
         btmRow.setPadding(new Insets(6, 0, 0, 0));
         btmRow.setStyle("-fx-border-color:" + BORDER + "60;-fx-border-width:1px 0 0 0;");
 
@@ -473,7 +452,7 @@ public class AdminRecruitersPage {
         card.setOnMouseEntered(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + GOLD + ";-fx-border-width:2px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.30),16,0,0,5px);-fx-cursor:hand;"));
         card.setOnMouseExited(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),10,0,0,3px);"));
         card.setOnMouseClicked(e -> {
-            if (e.getTarget() != actionBtn && e.getTarget() != inspectBtn) {
+            if (e.getTarget() != dustbinBtn && e.getTarget() != inspectBtn) {
                 openRecruiterDetailsModal(r);
             }
         });
@@ -520,30 +499,19 @@ public class AdminRecruitersPage {
         topBadges.setAlignment(Pos.CENTER_LEFT);
 
         Label titleLbl = label(r.companyName(), "-fx-font-family:Georgia;-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
+        titleLbl.setWrapText(true);
+        titleLbl.setTextOverrun(OverrunStyle.CLIP);
         Label subLbl = label("Director: " + r.contactPerson() + "   |   Operating Region: " + r.region() + "   |   Reliability Score: ★ " + r.rating() + " / 5.0", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
+        subLbl.setWrapText(true);
+        subLbl.setTextOverrun(OverrunStyle.CLIP);
         VBox titleBox = new VBox(6, topBadges, titleLbl, subLbl);
 
-        Button deleteBtn;
-        if (r.isInactive()) {
-            deleteBtn = new Button("Remove Inactive Recruiter");
-            deleteBtn.setStyle("-fx-background-color:#ba1a1a;-fx-background-radius:10px;-fx-text-fill:#ffffff;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:9px 20px;-fx-cursor:hand;");
-            deleteBtn.setOnAction(e -> {
-                closeModal();
-                confirmAndDeleteRecruiter(r);
-            });
-        } else {
-            deleteBtn = new Button("Active (<30d) - Protected");
-            deleteBtn.setStyle("-fx-background-color:#ece7df;-fx-background-radius:10px;-fx-text-fill:#8c7b6d;-fx-font-size:12px;-fx-font-weight:700;-fx-padding:9px 20px;-fx-cursor:hand;");
-            deleteBtn.setOnAction(e -> {
-                Alert info = new Alert(Alert.AlertType.INFORMATION);
-                info.setTitle("Active Recruiter Protected");
-                info.setHeaderText("Account Protected from Removal");
-                info.setContentText(r.companyName() + " was active " + (r.daysInactive() == 0 ? "today" : r.daysInactive() + " days ago") +
-                        " (" + com.dihadi.util.UserActivityUtil.formatDisplayDate(r.lastLogin()) + ").\n\n" +
-                        "Under administrative policy, only recruiter accounts inactive for 30 or more days can be removed.");
-                info.show();
-            });
-        }
+        Button deleteBtn = new Button("Move to Dormant");
+        deleteBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:10px;-fx-text-fill:#ba1a1a;-fx-border-color:#ffcdd2;-fx-border-radius:10px;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:9px 18px;-fx-cursor:hand;");
+        deleteBtn.setOnAction(e -> {
+            closeModal();
+            confirmAndDeleteRecruiter(r);
+        });
 
         Button closeBtn = new Button("Close");
         closeBtn.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-text-fill:#1A1A1A;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:8px 16px;-fx-cursor:hand;-fx-border-color:#d0c5af;-fx-border-radius:10px;");
@@ -572,6 +540,7 @@ public class AdminRecruitersPage {
 
         VBox leftCol = new VBox(14);
         leftCol.setPrefWidth(455);
+        HBox.setHgrow(leftCol, Priority.ALWAYS);
 
         VBox companyCard = new VBox(10,
                 modalCardHeading("Corporate Entity & Registration"),
@@ -591,6 +560,7 @@ public class AdminRecruitersPage {
 
         VBox rightCol = new VBox(14);
         rightCol.setPrefWidth(455);
+        HBox.setHgrow(rightCol, Priority.ALWAYS);
 
         VBox contactCard = new VBox(10,
                 modalCardHeading("Authorized Contact & Communications"),
@@ -646,25 +616,29 @@ public class AdminRecruitersPage {
 
     private HBox modalDetailRow(String labelText, String valText) {
         Label l = label(labelText + ":", "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#685c52;");
-        l.setPrefWidth(130);
+        l.setMinWidth(140);
+        l.setPrefWidth(140);
         Label v = label(valText, "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#1A1A1A;");
         v.setWrapText(true);
-        v.setMaxWidth(280);
-        HBox box = new HBox(6, l, v);
-        box.setAlignment(Pos.CENTER_LEFT);
+        v.setTextOverrun(OverrunStyle.CLIP);
+        HBox.setHgrow(v, Priority.ALWAYS);
+        HBox box = new HBox(8, l, v);
+        box.setAlignment(Pos.TOP_LEFT);
         return box;
     }
 
     private void confirmAndDeleteRecruiter(AdminRecruiterData r) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirm Inactive Recruiter Removal");
-        confirm.setHeaderText("Remove Inactive Recruiter: " + r.companyName() + "?");
-        confirm.setContentText("Account has been inactive for " + r.daysInactive() + " days.\n" +
-                "Last recorded activity: " + com.dihadi.util.UserActivityUtil.formatDisplayDate(r.lastLogin()) + "\n\n" +
-                "Under the 30-day inactivity policy, this user is eligible for administrative removal. Are you sure you want to permanently delete this recruiter account from the database?");
+        confirm.setTitle("Move Recruiter to Dormant");
+        confirm.setHeaderText("Remove Recruiter: " + r.companyName() + "?");
+        confirm.setContentText("Organization: " + r.companyName() + " (" + r.contactPerson() + ")\n" +
+                "Mobile: " + r.mobileNumber() + " | Inactivity: " + r.daysInactive() + " days.\n\n" +
+                "Are you sure you want to remove this recruiter card? It will be archived and viewable under the Dormant category.");
 
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
+                DormantManager.getInstance().addDormantRecruiter(r);
+
                 new Thread(() -> {
                     try {
                         if (!r.isBenchmark()) {
@@ -678,11 +652,7 @@ public class AdminRecruitersPage {
                         allRecruitersList.removeIf(item -> item.mobileNumber().equals(r.mobileNumber()));
                         updateKpis();
                         applyFilters();
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Success");
-                        alert.setHeaderText(null);
-                        alert.setContentText(r.companyName() + " has been successfully removed.");
-                        alert.show();
+                        NotificationToast.show("Moved to Dormant", r.companyName() + " moved to Dormant archives.", NotificationToast.ToastType.SUCCESS);
                     });
                 }).start();
             }
@@ -750,6 +720,7 @@ public class AdminRecruitersPage {
     private Label label(String value, String style) {
         Label label = new Label(value);
         label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
+        label.setTextOverrun(OverrunStyle.CLIP);
         return label;
     }
 

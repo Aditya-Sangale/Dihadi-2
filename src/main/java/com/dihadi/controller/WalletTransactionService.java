@@ -68,8 +68,9 @@ public class WalletTransactionService {
                 recruiterBalance = recruiterSnap.getDouble("walletBalance");
             } else if (recruiterAltSnap.exists() && recruiterAltSnap.contains("walletBalance")) {
                 recruiterBalance = recruiterAltSnap.getDouble("walletBalance");
-            } else if (com.dihadi.view.SessionManager.currentRecruiter != null &&
-                       recruiterId.equals(com.dihadi.view.SessionManager.getCurrentRecruiterId())) {
+            }
+
+            if ((recruiterBalance == null || recruiterBalance <= 0) && com.dihadi.view.SessionManager.currentRecruiter != null) {
                 recruiterBalance = com.dihadi.view.SessionManager.currentRecruiter.getWalletBalance();
             }
 
@@ -124,13 +125,25 @@ public class WalletTransactionService {
             transaction.set(txnRef, txnData);
 
             // 7. Update attendance document
+            String dateStr = java.time.LocalDate.now().toString();
+            if (attendanceId != null && attendanceId.startsWith("ATT_")) {
+                String[] parts = attendanceId.split("_");
+                if (parts.length >= 4) {
+                    dateStr = parts[parts.length - 1];
+                }
+            }
+
             Map<String, Object> attendanceData = new HashMap<>();
             attendanceData.put("attendanceId", attendanceId);
             attendanceData.put("projectId", projectId);
             attendanceData.put("recruiterId", recruiterId);
             attendanceData.put("workerId", workerId);
+            attendanceData.put("workerMobile", workerId);
+            attendanceData.put("date", dateStr);
             attendanceData.put("status", "PRESENT");
+            attendanceData.put("paymentStatus", "PAID");
             attendanceData.put("transactionId", txnId);
+            attendanceData.put("paymentTransactionId", txnId);
             attendanceData.put("paidAmount", wageAmount);
             attendanceData.put("markedAt", FieldValue.serverTimestamp());
             attendanceData.put("timestamp", FieldValue.serverTimestamp());
@@ -142,12 +155,38 @@ public class WalletTransactionService {
 
         try {
             String resultTxn = futureTransaction.get();
+
             // Sync SessionManager recruiter balance in memory
             if (com.dihadi.view.SessionManager.currentRecruiter != null &&
                 recruiterId.equals(com.dihadi.view.SessionManager.getCurrentRecruiterId())) {
                 double current = com.dihadi.view.SessionManager.currentRecruiter.getWalletBalance();
                 com.dihadi.view.SessionManager.currentRecruiter.setWalletBalance(Math.max(0, current - wageAmount));
             }
+
+            // Sync SessionManager worker balance and days worked in memory if active
+            if (com.dihadi.view.SessionManager.currentWorker != null &&
+                (workerId.equals(com.dihadi.view.SessionManager.getCurrentWorkerId()) ||
+                 workerId.equals(com.dihadi.view.SessionManager.currentWorker.getMobileNumber()))) {
+                double wBal = com.dihadi.view.SessionManager.currentWorker.getWalletBalance();
+                com.dihadi.view.SessionManager.currentWorker.setWalletBalance(wBal + wageAmount);
+                int days = com.dihadi.view.SessionManager.currentWorker.getTotalDaysWorked();
+                com.dihadi.view.SessionManager.currentWorker.setTotalDaysWorked(days + 1);
+            }
+
+            // Sync AttendanceDao cache synchronously
+            String dateStr = java.time.LocalDate.now().toString();
+            if (attendanceId != null && attendanceId.startsWith("ATT_")) {
+                String[] parts = attendanceId.split("_");
+                if (parts.length >= 4) {
+                    dateStr = parts[parts.length - 1];
+                }
+            }
+            com.dihadi.model.Attendance attRecord = new com.dihadi.model.Attendance(attendanceId, projectId, workerId, dateStr, "PRESENT", resultTxn, wageAmount);
+            attRecord.setRecruiterId(recruiterId);
+            attRecord.setWorkerId(workerId);
+            attRecord.setPaymentStatus("PAID");
+            attRecord.setPaymentTransactionId(resultTxn);
+            new com.dihadi.dao.AttendanceDao().saveAttendance(attRecord);
             return resultTxn;
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();

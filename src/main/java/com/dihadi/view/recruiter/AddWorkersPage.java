@@ -289,17 +289,14 @@ public class AddWorkersPage {
             }
 
             javafx.stage.Stage stage = (javafx.stage.Stage) button.getScene().getWindow();
+            Runnable returnToDashboard = () -> {
+                com.dihadi.model.Recruiter r = com.dihadi.view.SessionManager.currentRecruiter;
+                stage.setScene(new RecruiterDashboard(r)
+                        .getScene(() -> com.dihadi.view.AppNavigator.open(stage, "Home")));
+            };
             stage.setScene(new ProjectDetailsPage(projectId, projectName, contactName, mobile, email, projectAddress,
                     priorityField.getValue(), workerTypeField.getValue(), skillField.getValue(),
-                    String.valueOf(qty), wageField.getText(), projectImage, facilitiesText()).getScene(() -> {
-                        if (backAction != null) {
-                            backAction.run();
-                        } else {
-                            com.dihadi.model.Recruiter r = com.dihadi.view.SessionManager.currentRecruiter;
-                            stage.setScene(new RecruiterDashboard(r)
-                                    .getScene(() -> com.dihadi.view.AppNavigator.open(stage, "Home")));
-                        }
-                    }));
+                    String.valueOf(qty), wageField.getText(), projectImage, facilitiesText()).getScene(returnToDashboard));
         });
         Button close = new Button("Cancel / Close");
         close.setStyle(

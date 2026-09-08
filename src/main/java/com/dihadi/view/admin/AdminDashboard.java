@@ -29,6 +29,7 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
@@ -58,17 +59,17 @@ public class AdminDashboard {
     private Timeline poller;
 
     // Real-time KPI Labels
-    private final Label totalWorkersNum = new Label("Loading...");
+    private final Label totalWorkersNum = new Label("Loading");
     private final Label verifiedWorkersRow = new Label("0");
     private final Label pendingWorkersRow = new Label("0");
     private final Label inactiveWorkersRow = new Label("0");
 
-    private final Label totalRecruitersNum = new Label("Loading...");
+    private final Label totalRecruitersNum = new Label("Loading");
     private final Label contractorsRow = new Label("0");
     private final Label indEmployersRow = new Label("0");
     private final Label agenciesRow = new Label("0");
 
-    private final Label totalProjectsNum = new Label("Loading...");
+    private final Label totalProjectsNum = new Label("Loading");
     private final Label activeProjectsRow = new Label("0");
     private final Label upcomingProjectsRow = new Label("0");
     private final Label completedProjectsRow = new Label("0");
@@ -78,6 +79,7 @@ public class AdminDashboard {
     private final Label ribbonRecruitersCount = new Label("0");
     private final Label ribbonProjectsCount = new Label("0");
     private final Label ribbonGrievancesCount = new Label("0");
+    private final Label ribbonDormantCount = new Label("0");
 
     // Dynamic Chart Data
     private PieChart.Data pieVerified;
@@ -173,7 +175,7 @@ public class AdminDashboard {
         Label title = label("Admin Dashboard",
                 "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#ffffff;");
 
-        Label subtitle = label("Welcome, " + adminName + ". Here is the current overview of workers, recruiters, projects, and grievances.",
+        Label subtitle = label("Welcome, " + adminName + ". Here is the current overview of workers, recruiters, projects, grievances, and dormant records.",
                 "-fx-font-size:15px;-fx-text-fill:#d4cebe;");
         subtitle.setWrapText(true);
 
@@ -184,13 +186,14 @@ public class AdminDashboard {
     }
 
     private GridPane quickAccessRibbon(Runnable logout) {
-        GridPane grid = grid(4);
-        grid.setHgap(18);
+        GridPane grid = grid(5);
+        grid.setHgap(16);
 
         grid.add(ribbonCard("WORKERS", "Registered Workers", ribbonWorkersCount, "View Workers ->", () -> openWorkers(logout), GOLD), 0, 0);
         grid.add(ribbonCard("RECRUITERS", "Contractors & Employers", ribbonRecruitersCount, "View Recruiters ->", () -> openRecruiters(logout), "#2563eb"), 1, 0);
         grid.add(ribbonCard("PROJECTS", "Construction Sites", ribbonProjectsCount, "View Projects ->", () -> openProjects(logout), "#10b981"), 2, 0);
         grid.add(ribbonCard("GRIEVANCES", "Disputes & Inquiries", ribbonGrievancesCount, "View Grievances ->", () -> openGrievances(logout), "#dc2626"), 3, 0);
+        grid.add(ribbonCard("DORMANT", "Deleted & Archived", ribbonDormantCount, "View Dormant ->", () -> openDormant(logout), "#78350f"), 4, 0);
 
         return grid;
     }
@@ -409,7 +412,7 @@ public class AdminDashboard {
         // Right: Immediate Attention
         alertsContainer = new VBox(12, boxHeader("Requires Immediate Attention", "Items requiring administrative review"));
         alertsContainer.getChildren().addAll(
-                alertTriage("Loading Inquiries...", "Fetching support queries.", "View", "#fff0f0", "#dc2626", () -> openGrievances(logout)),
+                alertTriage("Loading Inquiries", "Fetching support queries.", "View", "#fff0f0", "#dc2626", () -> openGrievances(logout)),
                 alertTriage("85 Pending Verifications", "Worker KYC documents pending verification.", "Review", "#fffbeb", "#d97706", () -> openWorkers(logout)),
                 alertTriage("Contractor Review", "Contractor accounts and site compliance.", "Inspect", "#eff6ff", "#2563eb", () -> openRecruiters(logout))
         );
@@ -489,6 +492,14 @@ public class AdminDashboard {
         Stage stage = getStage();
         if (stage != null) {
             stage.setScene(new AdminProjectsPage().getProjectsScene(() -> stage.setScene(getDashboardScene(logout)), logout));
+        }
+    }
+
+    private void openDormant(Runnable logout) {
+        stopTimers();
+        Stage stage = getStage();
+        if (stage != null) {
+            stage.setScene(new AdminDormantPage().getDormantScene(() -> stage.setScene(getDashboardScene(logout)), logout));
         }
     }
 
@@ -596,6 +607,7 @@ public class AdminDashboard {
                     ribbonRecruitersCount.setText(String.format("%,d", finalR));
                     ribbonProjectsCount.setText(String.format("%,d", finalP));
                     ribbonGrievancesCount.setText(String.format("%,d", finalG > 0 ? finalG : 12));
+                    ribbonDormantCount.setText(String.format("%,d", DormantManager.getInstance().getAllDormantItems().size()));
 
                     // Update PieChart Data dynamically
                     if (pieVerified != null) {
@@ -696,6 +708,7 @@ public class AdminDashboard {
 
     private Label label(String value, String style) {
         Label label = new Label(value);
+        label.setTextOverrun(OverrunStyle.CLIP);
         label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
         return label;
     }

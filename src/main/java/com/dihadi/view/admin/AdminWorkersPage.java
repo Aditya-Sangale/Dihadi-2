@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.dihadi.controller.WorkerController;
 import com.dihadi.model.Worker;
+import com.dihadi.view.NotificationToast;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -21,6 +22,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -154,10 +156,10 @@ public class AdminWorkersPage {
         GridPane grid = grid(4);
         grid.setHgap(20);
 
-        totalWorkersKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
-        verifiedKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#2e7d32;");
-        activeSitesKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1565c0;");
-        avgWageKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
+        totalWorkersKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
+        verifiedKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#2e7d32;");
+        activeSitesKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1565c0;");
+        avgWageKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
 
         grid.add(kpiCard("TOTAL REGISTERED", totalWorkersKpi, "Database Verified", "#685c52"), 0, 0);
         grid.add(kpiCard("KYC VERIFIED", verifiedKpi, "Aadhaar / Bank Linked", "#2e7d32"), 1, 0);
@@ -179,7 +181,7 @@ public class AdminWorkersPage {
 
     private HBox filterSearchBar() {
         searchField = new TextField();
-        searchField.setPromptText("Search worker name, mobile number, trade skill, or city...");
+        searchField.setPromptText("Search worker name, mobile number, trade skill, or city");
         searchField.setPrefWidth(320);
         searchField.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-padding:9px 14px;-fx-font-size:13px;");
         searchField.textProperty().addListener((obs, oldV, newV) -> applyFilters());
@@ -236,7 +238,7 @@ public class AdminWorkersPage {
         if (isLoading) {
             ProgressIndicator pi = new ProgressIndicator();
             pi.setPrefSize(42, 42);
-            VBox box = new VBox(12, pi, label("Synchronizing real-time workforce registry...", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
+            VBox box = new VBox(12, pi, label("Synchronizing real-time workforce registry", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
             box.setAlignment(Pos.CENTER);
             box.setPadding(new Insets(50));
             workerCardsPane.add(box, 0, 0, 2, 1);
@@ -432,53 +434,30 @@ public class AdminWorkersPage {
         topStrip.setAlignment(Pos.CENTER_LEFT);
 
         Label nameLabel = label(w.fullName(), "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
+        nameLabel.setWrapText(true);
+        nameLabel.setTextOverrun(OverrunStyle.CLIP);
         Label tradeLabel = label("Trade Skill: " + w.trade() + " (" + w.subSkill() + ")", "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
 
         Label phoneLabel = label("Mobile: " + w.mobileNumber(), "-fx-font-family:Consolas;-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#735c00;");
         Label ratingLabel = label("Rating: ★ " + w.rating() + " (" + w.completedJobs() + " Jobs)", "-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:#ba1a1a;");
-        Label lastLoginLabel = label("Last Login: " + com.dihadi.util.UserActivityUtil.formatDisplayDate(w.lastLogin()), "-fx-font-family:Consolas;-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
-        HBox contactRow = new HBox(12, phoneLabel, ratingLabel, lastLoginLabel);
+        HBox contactRow = new HBox(12, phoneLabel, ratingLabel);
         contactRow.setAlignment(Pos.CENTER_LEFT);
 
         HBox block1 = adminDataBlock("DAILY RATE", w.wage(), GOLD);
         HBox block2 = adminDataBlock("EXPERIENCE", w.experience(), "#1A1A1A");
-        HBox block3 = adminDataBlock("EDUCATION", w.education(), "#1565c0");
-        HBox dataStrip = new HBox(10, block1, block2, block3);
+        HBox dataStrip = new HBox(10, block1, block2);
         dataStrip.setAlignment(Pos.CENTER_LEFT);
-
-        HBox tagsRow = new HBox(6);
-        tagsRow.setAlignment(Pos.CENTER_LEFT);
-        tagsRow.getChildren().add(adminTag("Aadhaar Verified"));
-        tagsRow.getChildren().add(adminTag("Bank Linked"));
-        tagsRow.getChildren().add(adminTag("Safety Trained"));
-
-        Button actionBtn;
-        if (w.isInactive()) {
-            actionBtn = new Button("Remove Inactive");
-            actionBtn.setStyle("-fx-background-color:#ba1a1a;-fx-background-radius:8px;-fx-text-fill:#ffffff;-fx-border-color:#991b1b;-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
-            actionBtn.setOnAction(e -> confirmAndDeleteWorker(w));
-        } else {
-            actionBtn = new Button("Active (<30d)");
-            actionBtn.setStyle("-fx-background-color:#f1eee7;-fx-background-radius:8px;-fx-text-fill:#8c7b6d;-fx-border-color:#dcd4c7;-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:700;-fx-padding:6px 12px;-fx-cursor:hand;");
-            actionBtn.setOnAction(e -> {
-                Alert info = new Alert(Alert.AlertType.INFORMATION);
-                info.setTitle("Active Account Protected");
-                info.setHeaderText("Account Protected from Removal");
-                info.setContentText(w.fullName() + " was active " + (w.daysInactive() == 0 ? "today" : w.daysInactive() + " days ago") +
-                        " (" + com.dihadi.util.UserActivityUtil.formatDisplayDate(w.lastLogin()) + ").\n\n" +
-                        "Under administrative policy, only accounts inactive for 30 or more days can be removed.");
-                info.show();
-            });
-        }
 
         Button inspectBtn = new Button("Inspect Profile ->");
         inspectBtn.setStyle("-fx-background-color:#272727;-fx-background-radius:8px;-fx-text-fill:#ffd54f;-fx-border-color:" + GOLD + ";-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
         inspectBtn.setOnAction(e -> openWorkerDetailsModal(w));
 
+        Button dustbinBtn = DormantManager.createDustbinButton("Move Worker to Dormant / Remove", () -> confirmAndDeleteWorker(w));
+
         Region btmSpacer = new Region();
         HBox.setHgrow(btmSpacer, Priority.ALWAYS);
-        HBox btmRow = new HBox(8, tagsRow, btmSpacer, actionBtn, inspectBtn);
-        btmRow.setAlignment(Pos.CENTER_LEFT);
+        HBox btmRow = new HBox(8, btmSpacer, inspectBtn, dustbinBtn);
+        btmRow.setAlignment(Pos.CENTER_RIGHT);
         btmRow.setPadding(new Insets(6, 0, 0, 0));
         btmRow.setStyle("-fx-border-color:" + BORDER + "60;-fx-border-width:1px 0 0 0;");
 
@@ -490,7 +469,7 @@ public class AdminWorkersPage {
         card.setOnMouseEntered(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + GOLD + ";-fx-border-width:2px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.30),16,0,0,5px);-fx-cursor:hand;"));
         card.setOnMouseExited(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),10,0,0,3px);"));
         card.setOnMouseClicked(e -> {
-            if (e.getTarget() != actionBtn && e.getTarget() != inspectBtn) {
+            if (e.getTarget() != dustbinBtn && e.getTarget() != inspectBtn) {
                 openWorkerDetailsModal(w);
             }
         });
@@ -537,30 +516,19 @@ public class AdminWorkersPage {
         topBadges.setAlignment(Pos.CENTER_LEFT);
 
         Label titleLbl = label(w.fullName(), "-fx-font-family:Georgia;-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
+        titleLbl.setWrapText(true);
+        titleLbl.setTextOverrun(OverrunStyle.CLIP);
         Label subLbl = label("Primary Trade: " + w.trade() + "   |   Location: " + w.location() + "   |   Rating: ★ " + w.rating() + " (" + w.completedJobs() + " Site Jobs)", "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
+        subLbl.setWrapText(true);
+        subLbl.setTextOverrun(OverrunStyle.CLIP);
         VBox titleBox = new VBox(6, topBadges, titleLbl, subLbl);
 
-        Button deleteBtn;
-        if (w.isInactive()) {
-            deleteBtn = new Button("Remove Inactive Worker");
-            deleteBtn.setStyle("-fx-background-color:#ba1a1a;-fx-background-radius:10px;-fx-text-fill:#ffffff;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:9px 20px;-fx-cursor:hand;");
-            deleteBtn.setOnAction(e -> {
-                closeModal();
-                confirmAndDeleteWorker(w);
-            });
-        } else {
-            deleteBtn = new Button("Active (<30d) - Protected");
-            deleteBtn.setStyle("-fx-background-color:#ece7df;-fx-background-radius:10px;-fx-text-fill:#8c7b6d;-fx-font-size:12px;-fx-font-weight:700;-fx-padding:9px 20px;-fx-cursor:hand;");
-            deleteBtn.setOnAction(e -> {
-                Alert info = new Alert(Alert.AlertType.INFORMATION);
-                info.setTitle("Active Account Protected");
-                info.setHeaderText("Account Protected from Removal");
-                info.setContentText(w.fullName() + " was active " + (w.daysInactive() == 0 ? "today" : w.daysInactive() + " days ago") +
-                        " (" + com.dihadi.util.UserActivityUtil.formatDisplayDate(w.lastLogin()) + ").\n\n" +
-                        "Administrative removal is restricted to users who have been inactive for 30 or more days.");
-                info.show();
-            });
-        }
+        Button deleteBtn = new Button("Move to Dormant");
+        deleteBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:10px;-fx-text-fill:#ba1a1a;-fx-border-color:#ffcdd2;-fx-border-radius:10px;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:9px 18px;-fx-cursor:hand;");
+        deleteBtn.setOnAction(e -> {
+            closeModal();
+            confirmAndDeleteWorker(w);
+        });
 
         Button closeBtn = new Button("Close");
         closeBtn.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-text-fill:#1A1A1A;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:8px 16px;-fx-cursor:hand;-fx-border-color:#d0c5af;-fx-border-radius:10px;");
@@ -582,16 +550,17 @@ public class AdminWorkersPage {
             metricsGrid.getColumnConstraints().add(col);
         }
 
-        metricsGrid.add(modalHighlightCard("DAILY WAGE RATE", w.wage(), "Standard Escrow Rate", GOLD), 0, 0);
-        metricsGrid.add(modalHighlightCard("EXPERIENCE", w.experience(), "Field Verified", "#1A1A1A"), 1, 0);
-        metricsGrid.add(modalHighlightCard("TOTAL COMPLETED JOBS", String.valueOf(w.completedJobs()), "100% On-Time Completion", "#1565c0"), 2, 0);
-        metricsGrid.add(modalHighlightCard("KYC & SAFETY STATUS", "100% Certified", "Aadhaar & Bank Linked", "#2e7d32"), 3, 0);
+        metricsGrid.add(modalHighlightCard("DAILY WAGE", w.wage(), "Standard Shift Rate", GOLD), 0, 0);
+        metricsGrid.add(modalHighlightCard("FIELD EXPERIENCE", w.experience(), "Verified Work History", "#1A1A1A"), 1, 0);
+        metricsGrid.add(modalHighlightCard("RATING SCORE", "★ " + w.rating(), w.completedJobs() + " Completed Jobs", "#ba1a1a"), 2, 0);
+        metricsGrid.add(modalHighlightCard("ACTIVITY METRIC", w.daysInactive() == 0 ? "Active Today" : w.daysInactive() + "d Inactive", "Last: " + com.dihadi.util.UserActivityUtil.formatDisplayDate(w.lastLogin()), w.isInactive() ? "#ba1a1a" : "#2e7d32"), 3, 0);
 
         VBox leftCol = new VBox(14);
         leftCol.setPrefWidth(455);
+        HBox.setHgrow(leftCol, Priority.ALWAYS);
 
         VBox personalCard = new VBox(10,
-                modalCardHeading("Personal & Demographic Details"),
+                modalCardHeading("Worker Identity & Verification"),
                 modalDetailRow("Full Legal Name", w.fullName()),
                 modalDetailRow("Gender / Age", w.gender() + " (DOB: " + w.dob() + ")"),
                 modalDetailRow("Education Level", w.education()),
@@ -608,9 +577,10 @@ public class AdminWorkersPage {
 
         VBox rightCol = new VBox(14);
         rightCol.setPrefWidth(455);
+        HBox.setHgrow(rightCol, Priority.ALWAYS);
 
-        VBox professionalCard = new VBox(10,
-                modalCardHeading("Trade Competencies & Site Verification"),
+        VBox tradeCard = new VBox(10,
+                modalCardHeading("Trade Competency & Deployment"),
                 modalDetailRow("Primary Trade", w.trade()),
                 modalDetailRow("Specialized Sub-skill", w.subSkill()),
                 modalDetailRow("Base Location", w.location()),
@@ -618,10 +588,10 @@ public class AdminWorkersPage {
                 modalDetailRow("KYC Documentation", "Aadhaar e-KYC Verified, Bank IFSC Validated"),
                 modalDetailRow("Safety Gear Training", "Certified for High-Altitude & Heavy Equipment")
         );
-        professionalCard.setPadding(new Insets(16));
-        professionalCard.setStyle("-fx-background-color:#faf5eb;-fx-background-radius:14px;-fx-border-color:#ebdccb;-fx-border-radius:14px;");
+        tradeCard.setPadding(new Insets(16));
+        tradeCard.setStyle("-fx-background-color:#faf5eb;-fx-background-radius:14px;-fx-border-color:#ebdccb;-fx-border-radius:14px;");
 
-        rightCol.getChildren().add(professionalCard);
+        rightCol.getChildren().add(tradeCard);
 
         HBox bodyRow = new HBox(22, leftCol, rightCol);
         bodyRow.setAlignment(Pos.TOP_LEFT);
@@ -634,26 +604,26 @@ public class AdminWorkersPage {
 
         modalCard.setOnMouseClicked(e -> e.consume());
 
-        StackPane modalWrapper = new StackPane(backdrop, modalCard);
-        modalWrapper.setAlignment(Pos.CENTER);
-
-        modalContainer.getChildren().add(modalWrapper);
-
-        FadeTransition ft = new FadeTransition(Duration.millis(200), modalWrapper);
+        FadeTransition ft = new FadeTransition(Duration.millis(200), modalCard);
         ft.setFromValue(0.0);
         ft.setToValue(1.0);
         ft.play();
+
+        modalContainer.getChildren().addAll(backdrop, modalCard);
     }
 
-    private VBox modalHighlightCard(String title, String value, String subtext, String color) {
-        Label t = label(title, "-fx-font-size:10px;-fx-font-weight:800;-fx-letter-spacing:0.8px;-fx-text-fill:#685c52;");
-        Label v = label(value, "-fx-font-family:Georgia;-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:" + color + ";");
+    private VBox modalHighlightCard(String title, String mainValue, String subValue, String accentColor) {
+        Label t = label(title, "-fx-font-size:10px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-text-fill:#685c52;");
+        Label v = label(mainValue, "-fx-font-family:Georgia;-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:" + accentColor + ";");
         v.setWrapText(true);
-        Label s = label(subtext, "-fx-font-size:10px;-fx-font-weight:700;-fx-text-fill:#8c7b6d;");
+        v.setTextOverrun(OverrunStyle.CLIP);
+        Label s = label(subValue, "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#1A1A1A;");
+        s.setWrapText(true);
+        s.setTextOverrun(OverrunStyle.CLIP);
 
         VBox box = new VBox(4, t, v, s);
         box.setPadding(new Insets(12, 14, 12, 14));
-        box.setStyle("-fx-background-color:#ffffff;-fx-background-radius:12px;-fx-border-color:#ebdccb;-fx-border-radius:12px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.04),6,0,0,2px);");
+        box.setStyle("-fx-background-color:#faf5eb;-fx-background-radius:10px;-fx-border-color:#ebdccb;-fx-border-radius:10px;");
         return box;
     }
 
@@ -663,25 +633,29 @@ public class AdminWorkersPage {
 
     private HBox modalDetailRow(String labelText, String valText) {
         Label l = label(labelText + ":", "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#685c52;");
-        l.setPrefWidth(130);
+        l.setMinWidth(140);
+        l.setPrefWidth(140);
         Label v = label(valText, "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#1A1A1A;");
         v.setWrapText(true);
-        v.setMaxWidth(280);
-        HBox box = new HBox(6, l, v);
-        box.setAlignment(Pos.CENTER_LEFT);
+        v.setTextOverrun(OverrunStyle.CLIP);
+        HBox.setHgrow(v, Priority.ALWAYS);
+        HBox box = new HBox(8, l, v);
+        box.setAlignment(Pos.TOP_LEFT);
         return box;
     }
 
     private void confirmAndDeleteWorker(AdminWorkerData w) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirm Inactive Worker Removal");
-        confirm.setHeaderText("Remove Inactive Worker: " + w.fullName() + "?");
-        confirm.setContentText("Worker has been inactive for " + w.daysInactive() + " days.\n" +
-                "Last recorded activity: " + com.dihadi.util.UserActivityUtil.formatDisplayDate(w.lastLogin()) + "\n\n" +
-                "Under the 30-day inactivity policy, this user is eligible for administrative removal. Are you sure you want to permanently delete their account and records from the database?");
+        confirm.setTitle("Move Worker to Dormant");
+        confirm.setHeaderText("Remove Worker: " + w.fullName() + "?");
+        confirm.setContentText("Worker: " + w.fullName() + " (" + w.trade() + ")\n" +
+                "Mobile: " + w.mobileNumber() + " | Inactivity: " + w.daysInactive() + " days.\n\n" +
+                "Are you sure you want to remove this worker card? It will be archived and viewable under the Dormant category.");
 
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
+                DormantManager.getInstance().addDormantWorker(w);
+
                 new Thread(() -> {
                     try {
                         if (!w.isBenchmark()) {
@@ -695,11 +669,7 @@ public class AdminWorkersPage {
                         allWorkersList.removeIf(item -> item.mobileNumber().equals(w.mobileNumber()));
                         updateKpis();
                         applyFilters();
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Success");
-                        alert.setHeaderText(null);
-                        alert.setContentText(w.fullName() + " has been successfully removed.");
-                        alert.show();
+                        NotificationToast.show("Moved to Dormant", w.fullName() + " moved to Dormant archives.", NotificationToast.ToastType.SUCCESS);
                     });
                 }).start();
             }
@@ -767,6 +737,7 @@ public class AdminWorkersPage {
     private Label label(String value, String style) {
         Label label = new Label(value);
         label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
+        label.setTextOverrun(OverrunStyle.CLIP);
         return label;
     }
 

@@ -254,7 +254,7 @@ public class HomePage extends Application {
         identity.setPrefWidth(360);
         VBox explore = footerColumn("Explore", "Home", this::showHome, "Find Work", this::showWorker, "About Us",
                 this::showAbout);
-        VBox contact = footerColumn("Contact", "9561789599", this::showContact, "info@meridihadi.com",
+        VBox contact = footerColumn("Contact", "+91 95617 89599", this::showContact, "info@meridihadi.com",
                 this::showContact, "Pune, Maharashtra", this::showContact);
         HBox top = new HBox(64, identity, explore, contact);
         top.setAlignment(Pos.TOP_LEFT);

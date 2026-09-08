@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -151,9 +152,9 @@ public class AdminVerificationPage {
         GridPane grid = grid(4);
         grid.setHgap(20);
 
-        pendingKpiLbl = label("...", "-fx-font-size:24px;-fx-font-weight:900;-fx-text-fill:#d97706;");
-        verifiedKpiLbl = label("...", "-fx-font-size:24px;-fx-font-weight:900;-fx-text-fill:#107c41;");
-        totalKpiLbl = label("...", "-fx-font-size:24px;-fx-font-weight:900;-fx-text-fill:" + GOLD + ";");
+        pendingKpiLbl = label("0", "-fx-font-size:24px;-fx-font-weight:900;-fx-text-fill:#d97706;");
+        verifiedKpiLbl = label("0", "-fx-font-size:24px;-fx-font-weight:900;-fx-text-fill:#107c41;");
+        totalKpiLbl = label("0", "-fx-font-size:24px;-fx-font-weight:900;-fx-text-fill:" + GOLD + ";");
         turnaroundKpiLbl = label("2.4 Hours", "-fx-font-size:24px;-fx-font-weight:900;-fx-text-fill:#2563eb;");
 
         grid.add(buildKpiBox(pendingKpiLbl, "Pending Review", "Worker profiles awaiting identity approval"), 0, 0);
@@ -177,7 +178,7 @@ public class AdminVerificationPage {
 
     private HBox filterSearchBar() {
         searchField = new TextField();
-        searchField.setPromptText("Search worker name, mobile, trade, or city...");
+        searchField.setPromptText("Search worker name, mobile, trade, or city");
         searchField.setPrefWidth(320);
         searchField.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-padding:9px 14px;-fx-font-size:13px;");
         searchField.textProperty().addListener((obs, oldV, newV) -> applyFilters());
@@ -330,7 +331,11 @@ public class AdminVerificationPage {
         topRow.setAlignment(Pos.CENTER_LEFT);
 
         Label nameLbl = label(item.name(), "-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
+        nameLbl.setWrapText(true);
+        nameLbl.setTextOverrun(OverrunStyle.CLIP);
         Label tradeLbl = label(item.trade() + " • " + item.location() + " • Mobile: " + item.mobile(), "-fx-font-size:13px;-fx-text-fill:#574e44;");
+        tradeLbl.setWrapText(true);
+        tradeLbl.setTextOverrun(OverrunStyle.CLIP);
 
         Region sp2 = new Region();
         HBox.setHgrow(sp2, Priority.ALWAYS);
@@ -401,6 +406,7 @@ public class AdminVerificationPage {
 
     private Label label(String text, String style) {
         Label l = new Label(text);
+        l.setTextOverrun(OverrunStyle.CLIP);
         l.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
         return l;
     }

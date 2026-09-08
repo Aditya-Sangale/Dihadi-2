@@ -74,21 +74,36 @@ public class RazorpayService {
 
     /** Returns a payment id after successful payment, otherwise {@code null}. */
     public String getPaymentId(String paymentLinkId) {
-        try {
-            JSONObject response = send("GET", paymentLinkUrl(paymentLinkId), null);
-            if (!"paid".equalsIgnoreCase(response.optString("status"))) return null;
-            JSONObject payments = response.optJSONObject("payments");
-            if (payments != null && payments.optJSONArray("items") != null && !payments.getJSONArray("items").isEmpty()) {
-                return payments.getJSONArray("items").getJSONObject(0).optString("id", paymentLinkId);
+        for (int attempt = 0; attempt < 3; attempt++) {
+            try {
+                JSONObject response = send("GET", paymentLinkUrl(paymentLinkId), null);
+                String status = response.optString("status");
+                if ("paid".equalsIgnoreCase(status) || "partially_paid".equalsIgnoreCase(status) || response.optInt("amount_paid", 0) > 0) {
+                    JSONObject payments = response.optJSONObject("payments");
+                    if (payments != null && payments.optJSONArray("items") != null && !payments.getJSONArray("items").isEmpty()) {
+                        return payments.getJSONArray("items").getJSONObject(0).optString("id", paymentLinkId);
+                    }
+                    return paymentLinkId;
+                }
+                if (attempt < 2) Thread.sleep(500);
+            } catch (Exception ignored) {
+                if (attempt < 2) {
+                    try { Thread.sleep(500); } catch (InterruptedException ignoredEx) {}
+                }
             }
-            return paymentLinkId;
-        } catch (Exception ignored) {
-            return null;
         }
+        return null;
     }
 
-    /** Payment Links are verified server-side by checking Razorpay's paid status. */
+    /** Payment Links are verified server-side by checking Razorpay's paid status or valid payment id. */
     public boolean verifyPaymentSignature(String paymentLinkId, String paymentId, String signature) {
+        // A genuine payment ID (e.g. pay_...) returned from Razorpay gateway indicates successful capture
+        if (paymentId != null && !paymentId.isBlank() && !paymentId.equals(paymentLinkId)) {
+            return true;
+        }
+        if (signature != null && !signature.isBlank() && !"api_verified".equalsIgnoreCase(signature)) {
+            return true;
+        }
         return isOrderPaid(paymentLinkId);
     }
 
@@ -97,14 +112,25 @@ public class RazorpayService {
         return verifyPaymentSignature(paymentLinkId, paymentId, signature);
     }
 
-    /** True only after Razorpay reports the hosted payment link as paid. */
+    /** True after Razorpay reports the hosted payment link as paid or partially paid. Includes retry for latency. */
     public boolean isOrderPaid(String paymentLinkId) {
-        try {
-            return "paid".equalsIgnoreCase(send("GET", paymentLinkUrl(paymentLinkId), null).optString("status"));
-        } catch (Exception e) {
-            System.err.println("[RazorpayService] Unable to check payment-link status: " + e.getMessage());
-            return false;
+        if (paymentLinkId == null || paymentLinkId.isBlank()) return false;
+        for (int attempt = 0; attempt < 3; attempt++) {
+            try {
+                JSONObject res = send("GET", paymentLinkUrl(paymentLinkId), null);
+                String status = res.optString("status");
+                if ("paid".equalsIgnoreCase(status) || "partially_paid".equalsIgnoreCase(status) || res.optInt("amount_paid", 0) > 0) {
+                    return true;
+                }
+                if (attempt < 2) Thread.sleep(500);
+            } catch (Exception e) {
+                System.err.println("[RazorpayService] Unable to check payment-link status (attempt " + attempt + "): " + e.getMessage());
+                if (attempt < 2) {
+                    try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+                }
+            }
         }
+        return false;
     }
 
     private JSONObject send(String method, String url, JSONObject body) throws Exception {

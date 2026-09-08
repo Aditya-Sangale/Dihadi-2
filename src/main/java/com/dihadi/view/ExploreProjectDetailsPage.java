@@ -106,7 +106,7 @@ public class ExploreProjectDetailsPage {
         this.recruiterPhone = recruiterPhone;
         this.requirementId = requirementId;
         this.imagePath = imagePath;
-        this.initialImageUrls = (imageUrls != null && !imageUrls.isEmpty()) ? imageUrls : List.of(val(imagePath, "/assets/images/explore/explore_slide_1.jpg"));
+        this.initialImageUrls = (imageUrls != null && !imageUrls.isEmpty()) ? imageUrls : List.of(val(imagePath, "/assets/images/projects/project_highrise_tower.jpg"));
         this.hasWater = hasWater;
         this.hasPower = hasPower;
         this.hasStay = hasStay;
@@ -151,7 +151,7 @@ public class ExploreProjectDetailsPage {
                 navButton("Contact Us", false, () -> navigateTo("Contact Us")));
         navigation.setAlignment(Pos.CENTER);
 
-        Button admin = AppNavigator.createHeaderAdminButton();
+        Button admin = AppNavigator.createHeaderActionButton();
         BorderPane header = new BorderPane();
         header.setLeft(brand);
         header.setCenter(navigation);
@@ -320,7 +320,7 @@ public class ExploreProjectDetailsPage {
         amenitiesBox.setStyle("-fx-background-color:#ffffff;-fx-background-radius:18px;-fx-border-color:#d0c5af;-fx-border-width:1.5px;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.08),14,0,0,4px);");
 
         // High-Quality Project Site Visual Card loading the REAL project image
-        siteImageView = new ImageView(load(val(imagePath, "/assets/images/explore/explore_slide_1.jpg")));
+        siteImageView = new ImageView(load(val(imagePath, "/assets/images/projects/project_highrise_tower.jpg")));
         siteImageView.setFitWidth(524);
         siteImageView.setFitHeight(270);
         siteImageView.setPreserveRatio(false);
@@ -484,7 +484,7 @@ public class ExploreProjectDetailsPage {
         identity.setPrefWidth(360);
         VBox explore = footerColumn("Explore", "Home", () -> navigateTo("Home"), "Find Work", () -> navigateTo("Worker"), "About Us",
                 () -> navigateTo("About Us"));
-        VBox contact = footerColumn("Contact", "9561789599", () -> navigateTo("Contact Us"), "info@meridihadi.com",
+        VBox contact = footerColumn("Contact", "+91 95617 89599", () -> navigateTo("Contact Us"), "info@meridihadi.com",
                 () -> navigateTo("Contact Us"), "Pune, Maharashtra", () -> navigateTo("Contact Us"));
         HBox top = new HBox(64, identity, explore, contact);
         top.setAlignment(Pos.TOP_LEFT);
@@ -538,13 +538,14 @@ public class ExploreProjectDetailsPage {
     private Label label(String t, String s) {
         Label l = new Label(t);
         l.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + s);
+        l.setTextOverrun(javafx.scene.control.OverrunStyle.CLIP);
         return l;
     }
 
     private Image load(String path) {
         try {
             if (path == null || path.isBlank()) {
-                return loadResource("/assets/images/explore/explore_slide_1.jpg");
+                return loadResource("/assets/images/projects/project_highrise_tower.jpg");
             }
             String clean = path.trim();
             if (clean.startsWith("http://") || clean.startsWith("https://")) {
@@ -564,7 +565,7 @@ public class ExploreProjectDetailsPage {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return loadResource("/assets/images/explore/explore_slide_1.jpg");
+        return loadResource("/assets/images/projects/project_highrise_tower.jpg");
     }
 
     private Image loadResource(String path) {

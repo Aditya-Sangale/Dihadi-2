@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -472,6 +473,7 @@ public class AdminHomePage {
 
     private Label label(String text, String style) {
         Label label = new Label(text);
+        label.setTextOverrun(OverrunStyle.CLIP);
         label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
         return label;
     }
