@@ -130,11 +130,18 @@ public class RecruiterDao {
     }
 
     public void updateWalletBalance(String mobileNumber, double newBalance) {
+        if (mobileNumber == null || mobileNumber.isBlank()) return;
         try {
+            java.util.Map<String, Object> updates = new java.util.HashMap<>();
+            updates.put("walletBalance", newBalance);
+            updates.put("updatedAt", com.google.cloud.firestore.FieldValue.serverTimestamp());
             db.collection("Recruiters")
                     .document(mobileNumber)
-                    .update("walletBalance", newBalance);
-            System.out.println("Wallet balance updated for " + mobileNumber);
+                    .set(updates, com.google.cloud.firestore.SetOptions.merge());
+            db.collection("recruiters")
+                    .document(mobileNumber)
+                    .set(updates, com.google.cloud.firestore.SetOptions.merge());
+            System.out.println("Wallet balance updated for " + mobileNumber + " -> " + newBalance);
         } catch (Exception e) {
             e.printStackTrace();
         }

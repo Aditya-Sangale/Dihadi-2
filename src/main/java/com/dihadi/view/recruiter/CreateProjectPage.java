@@ -88,9 +88,12 @@ public class CreateProjectPage {
     }
 
     private VBox projectCard(Runnable closeAction) {
-        Button back = new Button("←  Back");
-        back.setStyle(
-                "-fx-background-color:rgba(212,175,55,.16);-fx-background-radius:12px;-fx-border-color:rgba(212,175,55,.58);-fx-border-radius:12px;-fx-border-width:1.2px;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:9px 16px;-fx-cursor:hand;");
+        Button back = new Button("← Back to Dashboard");
+        String backIdle = "-fx-background-color:transparent;-fx-text-fill:#4c4637;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-background-radius:10px;";
+        String backHover = "-fx-background-color:#ffffff;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:#735c00;-fx-border-radius:10px;-fx-background-radius:10px;";
+        back.setStyle(backIdle);
+        back.setOnMouseEntered(e -> back.setStyle(backHover));
+        back.setOnMouseExited(e -> back.setStyle(backIdle));
         back.setOnAction(e -> {
             if (closeAction != null)
                 closeAction.run();
@@ -242,9 +245,18 @@ public class CreateProjectPage {
             // Navigate immediately to AddWorkersPage (instant transition!)
             String firstImage = !projectImages.isEmpty() ? projectImages.get(0) : "";
             Stage stage = (Stage) save.getScene().getWindow();
+            Runnable returnToDashboard = () -> {
+                if (closeAction != null) {
+                    closeAction.run();
+                } else {
+                    com.dihadi.model.Recruiter r = com.dihadi.view.SessionManager.currentRecruiter;
+                    stage.setScene(new RecruiterDashboard(r)
+                            .getScene(() -> com.dihadi.view.AppNavigator.open(stage, "Home")));
+                }
+            };
             stage.setScene(
                     new AddWorkersPage(projectId, pName, cName, recruiterMobile, recruiterEmail, addr1, firstImage)
-                            .getAddWorkersScene(() -> stage.setScene(getCreateProjectScene(closeAction))));
+                            .getAddWorkersScene(returnToDashboard));
         });
         Button close = new Button("Close");
         close.setStyle(
@@ -481,6 +493,7 @@ public class CreateProjectPage {
     private Label text(String value, String style) {
         Label label = new Label(value);
         label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
+        label.setTextOverrun(javafx.scene.control.OverrunStyle.CLIP);
         return label;
     }
 

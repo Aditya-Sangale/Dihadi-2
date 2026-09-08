@@ -284,6 +284,63 @@ public class LocalCacheManager {
         return list;
     }
 
+    // ==================== ATTENDANCE CACHE ====================
+
+    public static synchronized void saveAttendances(Collection<com.dihadi.model.Attendance> attendances) {
+        if (attendances == null || attendances.isEmpty()) return;
+        try {
+            JSONArray arr = new JSONArray();
+            for (com.dihadi.model.Attendance a : attendances) {
+                if (a == null) continue;
+                JSONObject obj = new JSONObject();
+                obj.put("attendanceId", a.getAttendanceId() != null ? a.getAttendanceId() : "");
+                obj.put("projectId", a.getProjectId() != null ? a.getProjectId() : "");
+                obj.put("workerMobile", a.getWorkerMobile() != null ? a.getWorkerMobile() : "");
+                obj.put("workerId", a.getWorkerId() != null ? a.getWorkerId() : "");
+                obj.put("recruiterId", a.getRecruiterId() != null ? a.getRecruiterId() : "");
+                obj.put("date", a.getDate() != null ? a.getDate() : "");
+                obj.put("status", a.getStatus() != null ? a.getStatus() : "");
+                obj.put("paymentStatus", a.getPaymentStatus() != null ? a.getPaymentStatus() : "");
+                obj.put("transactionId", a.getTransactionId() != null ? a.getTransactionId() : "");
+                obj.put("paymentTransactionId", a.getPaymentTransactionId() != null ? a.getPaymentTransactionId() : "");
+                obj.put("paidAmount", a.getPaidAmount());
+                obj.put("timestamp", a.getTimestamp() != null ? a.getTimestamp().getTime() : System.currentTimeMillis());
+                arr.put(obj);
+            }
+            writeFile("attendances.json", arr.toString(2));
+        } catch (Exception ignored) {}
+    }
+
+    public static synchronized List<com.dihadi.model.Attendance> loadAttendances() {
+        List<com.dihadi.model.Attendance> list = new ArrayList<>();
+        try {
+            String content = readFile("attendances.json");
+            if (content == null || content.isBlank()) return list;
+            JSONArray arr = new JSONArray(content);
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject o = arr.getJSONObject(i);
+                com.dihadi.model.Attendance a = new com.dihadi.model.Attendance();
+                a.setAttendanceId(o.optString("attendanceId", ""));
+                a.setProjectId(o.optString("projectId", ""));
+                a.setWorkerMobile(o.optString("workerMobile", ""));
+                a.setWorkerId(o.optString("workerId", ""));
+                a.setRecruiterId(o.optString("recruiterId", ""));
+                a.setDate(o.optString("date", ""));
+                a.setStatus(o.optString("status", ""));
+                a.setPaymentStatus(o.optString("paymentStatus", ""));
+                a.setTransactionId(o.optString("transactionId", ""));
+                a.setPaymentTransactionId(o.optString("paymentTransactionId", ""));
+                a.setPaidAmount(o.optDouble("paidAmount", 0.0));
+                long ts = o.optLong("timestamp", System.currentTimeMillis());
+                a.setTimestamp(new Date(ts));
+                if (!a.getAttendanceId().isBlank()) {
+                    list.add(a);
+                }
+            }
+        } catch (Exception ignored) {}
+        return list;
+    }
+
     // ==================== FILE UTILS ====================
 
     private static void writeFile(String filename, String content) {

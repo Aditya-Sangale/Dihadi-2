@@ -1,0 +1,34 @@
+[
+  {
+    "pincode": "422605",
+    "city": "Nanded",
+    "contactName": "Sunil Kumar",
+    "mobile": "9585754525",
+    "alternateMobile": "",
+    "imageUrls": ["https://res.cloudinary.com/khkrdkxe/image/upload/v1788818894/wmxfzdzk8b9jjdcndyyd.jpg"],
+    "addressLine1": "Shiv mandir nanded",
+    "addressLine2": "",
+    "state": "MH",
+    "projectName": "suncity phase 5",
+    "landmark": "Nanded bus stop",
+    "projectId": "1788818916357188",
+    "email": "ram@gmail.com",
+    "status": "Active"
+  },
+  {
+    "pincode": "422211",
+    "city": "Pune",
+    "contactName": "Anil Navle",
+    "mobile": "9585754525",
+    "alternateMobile": "",
+    "imageUrls": ["https://res.cloudinary.com/khkrdkxe/image/upload/v1788813112/hdjdixcqtxjntwbfgusc.jpg"],
+    "addressLine1": "Near navale bridge narhe",
+    "addressLine2": "",
+    "state": "Maharashtra",
+    "projectName": "L&T phase 3",
+    "landmark": "Navle Bridge",
+    "projectId": "1788813151759633",
+    "email": "ram@gmail.com",
+    "status": "Completed"
+  }
+]

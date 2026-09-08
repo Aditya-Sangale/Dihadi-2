@@ -66,12 +66,7 @@ public class ExploreProjectsPage {
             "/assets/images/explore/explore_slide_2.jpg",
             "/assets/images/explore/explore_slide_3.jpg",
             "/assets/images/explore/explore_slide_4.jpg",
-            "/assets/images/explore/explore_slide_5.jpg",
-            "/assets/images/recruiter/slide-01.jpeg",
-            "/assets/images/recruiter/slide-02.jpeg",
-            "/assets/images/recruiter/slide-03.jpeg",
-            "/assets/images/recruiter/slide-04.jpeg",
-            "/assets/images/recruiter/slide-05.jpeg"
+            "/assets/images/explore/explore_slide_5.jpg"
     };
 
     private final Runnable showHome;
@@ -128,7 +123,7 @@ public class ExploreProjectsPage {
                 navButton("Contact Us", false, () -> navigateTo("Contact Us")));
         navigation.setAlignment(Pos.CENTER);
 
-        Button admin = AppNavigator.createHeaderAdminButton();
+        Button admin = AppNavigator.createHeaderActionButton();
         BorderPane header = new BorderPane();
         header.setLeft(brand);
         header.setCenter(navigation);
@@ -160,9 +155,12 @@ public class ExploreProjectsPage {
 
     /** Compact return control positioned above the Explore Projects hero. */
     private Button homeBackButton() {
-        Button back = new Button("←  Back to Dashboard");
-        back.setStyle(
-                "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;");
+        Button back = new Button("← Back to Dashboard");
+        String backIdle = "-fx-background-color:transparent;-fx-text-fill:#4c4637;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-background-radius:10px;";
+        String backHover = "-fx-background-color:#ffffff;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:#735c00;-fx-border-radius:10px;-fx-background-radius:10px;";
+        back.setStyle(backIdle);
+        back.setOnMouseEntered(e -> back.setStyle(backHover));
+        back.setOnMouseExited(e -> back.setStyle(backIdle));
         back.setOnAction(e -> {
             if (heroTimeline != null)
                 heroTimeline.stop();
@@ -546,10 +544,18 @@ public class ExploreProjectsPage {
                 ex.printStackTrace();
             }
 
-            // Only fallback to benchmark projects if zero real projects exist in the
-            // database
+            // Complement real projects with authentic benchmark projects so the catalog is always rich & matched to banners
+            List<ProjectCardModel> benchmarkProjects = getBenchmarkRealProjects();
             if (list.isEmpty()) {
-                list.addAll(getBenchmarkRealProjects());
+                list.addAll(benchmarkProjects);
+            } else {
+                for (ProjectCardModel bm : benchmarkProjects) {
+                    boolean alreadyExists = list.stream()
+                            .anyMatch(existing -> existing.projectName().equalsIgnoreCase(bm.projectName()));
+                    if (!alreadyExists) {
+                        list.add(bm);
+                    }
+                }
             }
 
             Platform.runLater(() -> {
@@ -563,61 +569,94 @@ public class ExploreProjectsPage {
 
     private List<ProjectCardModel> getBenchmarkRealProjects() {
         return List.of(
-                new ProjectCardModel("P-BENCH-01", "Hiranandani Business & Residential Towers", "Mumbai, Maharashtra",
-                        "Hiranandani Developers", "Technician / Supervisor", "₹1,200 / day", "85 Workers Needed",
-                        "Urgent Hiring", "Commercial & Residential", "9822012341", "R-01",
-                        "/assets/images/explore/explore_slide_1.jpg",
-                        List.of("/assets/images/explore/explore_slide_1.jpg"), true, true, true, true),
-                new ProjectCardModel("P-BENCH-02", "BHRAMHA Horizon Premium Residential Complex", "Pune, Maharashtra",
-                        "BHRAMHA Group", "Carpenter / Plumber", "₹950 / day", "110 Workers Needed", "Active Site",
-                        "Residential", "9822012342", "R-02", "/assets/images/explore/explore_slide_2.jpg",
-                        List.of("/assets/images/explore/explore_slide_2.jpg"), true, true, true, false),
-                new ProjectCardModel("P-BENCH-03", "LODHAA Grand Central Urban Expressway", "Mumbai, Maharashtra",
-                        "LODHAA Group", "Civil Engineer / Foreman", "₹1,450 / day", "60 Workers Needed",
-                        "Urgent Hiring", "Infrastructure", "9822012343", "R-03",
-                        "/assets/images/explore/explore_slide_3.jpg",
-                        List.of("/assets/images/explore/explore_slide_3.jpg"), true, true, false, true),
-                new ProjectCardModel("P-BENCH-04", "Ramoji Film City Mega Studio Infrastructure",
-                        "Hyderabad, Telangana", "Ramoji Film City", "Painter & Welder", "₹1,050 / day",
-                        "95 Workers Needed", "Active Site", "Commercial", "9822012344", "R-04",
-                        "/assets/images/explore/explore_slide_4.jpg",
-                        List.of("/assets/images/explore/explore_slide_4.jpg"), true, true, true, true),
-                new ProjectCardModel("P-BENCH-05", "BASIL Tech Habitat Smart Residential Park", "Bengaluru, Karnataka",
-                        "BASIL Group", "General Labour / Mason", "₹880 / day", "150 Workers Needed", "Active Site",
-                        "Residential", "9822012345", "R-05", "/assets/images/explore/explore_slide_5.jpg",
-                        List.of("/assets/images/explore/explore_slide_5.jpg"), true, true, true, true),
-                new ProjectCardModel("P-BENCH-06", "Pune Metro Rail Underground Depot - Phase 2", "Pune, Maharashtra",
-                        "L&T Heavy Infrastructure", "Mason", "₹950 / day", "140 Workers Needed", "Active Site",
-                        "Infrastructure", "9822012346", "R-06", "/assets/images/recruiter/slide-01.jpeg",
-                        List.of("/assets/images/recruiter/slide-01.jpeg"), true, true, true, true),
-                new ProjectCardModel("P-BENCH-07", "Mumbai Coastal Road Expressway & Sea Bridge", "Mumbai, Maharashtra",
-                        "Afcons Infrastructure", "Structural Fitter", "₹1,250 / day", "95 Workers Needed",
-                        "Urgent Hiring", "Infrastructure", "9822012347", "R-07",
-                        "/assets/images/recruiter/slide-03.jpeg", List.of("/assets/images/recruiter/slide-03.jpeg"),
+                new ProjectCardModel("P-BENCH-01", "Mumbai Trans Harbour Link (Atal Setu) - Marine Viaduct",
+                        "Navi Mumbai, Maharashtra", "Larsen & Toubro Heavy Civil", "Welder",
+                        "₹1,150 / day", "45 Workers Needed", "Urgent Hiring", "Infrastructure", "9820145621",
+                        "REQ-INFRA-01", "/assets/images/projects/project_bridge_flyover.jpg",
+                        List.of("/assets/images/projects/project_bridge_flyover.jpg", "/assets/images/welder.jpeg"),
+                        true, true, true, true),
+
+                new ProjectCardModel("P-BENCH-02", "Pune Metro Line 3 Elevated Viaduct (Hinjawadi - Shivajinagar)",
+                        "Pune, Maharashtra", "Tata Projects Limited", "Site Supervisor",
+                        "₹1,250 / day", "60 Workers Needed", "Active Site", "Infrastructure", "9822187654",
+                        "REQ-INFRA-02", "/assets/images/projects/project_metro_viaduct.jpg",
+                        List.of("/assets/images/projects/project_metro_viaduct.jpg", "/assets/images/sitesuperviser.jpeg"),
                         true, true, false, true),
-                new ProjectCardModel("P-BENCH-08", "Prestige Tech Cloud IT Park - Phase 4 Towers",
-                        "Bangalore, Karnataka", "Prestige Group", "Electrician", "₹1,100 / day", "60 Workers Needed",
-                        "Active Site", "Commercial", "9822012348", "R-08", "/assets/images/recruiter/slide-05.jpeg",
-                        List.of("/assets/images/recruiter/slide-05.jpeg"), true, true, true, false));
+
+                new ProjectCardModel("P-BENCH-03", "Mumbai Coastal Road Marine Viaduct & Expressway",
+                        "Mumbai, Maharashtra", "L&T Heavy Civil Infrastructure", "Mason",
+                        "₹980 / day", "75 Workers Needed", "Urgent Hiring", "Infrastructure", "9819234567",
+                        "REQ-INFRA-03", "/assets/images/projects/project_coastal_road.jpg",
+                        List.of("/assets/images/projects/project_coastal_road.jpg", "/assets/images/mason.jpeg"),
+                        true, true, true, true),
+
+                new ProjectCardModel("P-BENCH-04", "Godrej Sky Greens Premium Residential Towers",
+                        "Pune, Maharashtra", "Godrej Properties Ltd", "General Labour",
+                        "₹880 / day", "120 Workers Needed", "Active Site", "Residential", "9860112233",
+                        "REQ-RES-01", "/assets/images/projects/project_highrise_tower.jpg",
+                        List.of("/assets/images/projects/project_highrise_tower.jpg", "/assets/images/generalLabour.jpeg"),
+                        true, true, true, false),
+
+                new ProjectCardModel("P-BENCH-05", "Prestige Tech Cloud Commercial IT Park - Phase 4",
+                        "Bengaluru, Karnataka", "Prestige Group", "Electrician",
+                        "₹1,100 / day", "50 Workers Needed", "Active Site", "Commercial", "9845012345",
+                        "REQ-COMM-01", "/assets/images/projects/project_commercial_itpark.jpg",
+                        List.of("/assets/images/projects/project_commercial_itpark.jpg", "/assets/images/electrician.jpeg"),
+                        true, true, false, true),
+
+                new ProjectCardModel("P-BENCH-06", "Shapoorji Pallonji Joyville Mega Township",
+                        "Pune, Maharashtra", "Shapoorji Pallonji Engineering", "Carpenter",
+                        "₹960 / day", "85 Workers Needed", "Active Site", "Residential", "9823456789",
+                        "REQ-RES-02", "/assets/images/projects/project_residential_township.jpg",
+                        List.of("/assets/images/projects/project_residential_township.jpg", "/assets/images/carpenter.jpeg"),
+                        true, true, true, true),
+
+                new ProjectCardModel("P-BENCH-07", "Tata Electronics Semiconductor & OSAT Mega Plant",
+                        "Dholera, Gujarat", "Tata Projects Industrial", "Plumber",
+                        "₹1,020 / day", "40 Workers Needed", "Urgent Hiring", "Industrial", "9879012345",
+                        "REQ-IND-01", "/assets/images/projects/project_industrial_plant.jpg",
+                        List.of("/assets/images/projects/project_industrial_plant.jpg", "/assets/images/plumber.jpeg"),
+                        true, true, true, true),
+
+                new ProjectCardModel("P-BENCH-08", "Delhi Metro Underground Phase 4 Tunnel Extension",
+                        "Delhi, Delhi", "Afcons Infrastructure", "General Labour",
+                        "₹920 / day", "110 Workers Needed", "Active Site", "Infrastructure", "9811098765",
+                        "REQ-INFRA-04", "/assets/images/projects/project_tunnel_excavation.jpg",
+                        List.of("/assets/images/projects/project_tunnel_excavation.jpg", "/assets/images/generalLabour.jpeg"),
+                        true, true, true, true));
     }
 
     private String getFallbackImageForTrade(String trade) {
         if (trade == null)
-            return "/assets/images/explore/explore_slide_1.jpg";
+            return "/assets/images/projects/project_highrise_tower.jpg";
         String t = trade.toLowerCase();
         if (t.contains("carpenter"))
-            return "/assets/images/explore/explore_slide_2.jpg";
+            return "/assets/images/carpenter.jpeg";
         if (t.contains("plumber"))
-            return "/assets/images/explore/explore_slide_2.jpg";
-        if (t.contains("engineer") || t.contains("foreman") || t.contains("supervisor"))
-            return "/assets/images/recruiter/slide-04.jpeg";
-        if (t.contains("paint") || t.contains("weld"))
-            return "/assets/images/explore/explore_slide_4.jpg";
-        if (t.contains("labour") || t.contains("mason") || t.contains("helper"))
-            return "/assets/images/explore/explore_slide_5.jpg";
+            return "/assets/images/plumber.jpeg";
         if (t.contains("electric"))
-            return "/assets/images/recruiter/slide-03.jpeg";
-        return "/assets/images/explore/explore_slide_1.jpg";
+            return "/assets/images/electrician.jpeg";
+        if (t.contains("paint"))
+            return "/assets/images/painter.jpeg";
+        if (t.contains("weld"))
+            return "/assets/images/welder.jpeg";
+        if (t.contains("engineer") || t.contains("foreman") || t.contains("supervisor"))
+            return "/assets/images/sitesuperviser.jpeg";
+        if (t.contains("mason"))
+            return "/assets/images/mason.jpeg";
+        if (t.contains("labour") || t.contains("helper") || t.contains("worker"))
+            return "/assets/images/generalLabour.jpeg";
+        if (t.contains("metro") || t.contains("viaduct") || t.contains("rail"))
+            return "/assets/images/projects/project_metro_viaduct.jpg";
+        if (t.contains("bridge") || t.contains("flyover") || t.contains("coastal"))
+            return "/assets/images/projects/project_coastal_road.jpg";
+        if (t.contains("commercial") || t.contains("it park") || t.contains("tower"))
+            return "/assets/images/projects/project_commercial_itpark.jpg";
+        if (t.contains("industrial") || t.contains("plant") || t.contains("factory"))
+            return "/assets/images/projects/project_industrial_plant.jpg";
+        if (t.contains("township") || t.contains("residential"))
+            return "/assets/images/projects/project_residential_township.jpg";
+        return "/assets/images/projects/project_highrise_tower.jpg";
     }
 
     private void applyFilters() {
@@ -862,7 +901,7 @@ public class ExploreProjectsPage {
         VBox explore = footerColumn("Explore", "Home", () -> navigateTo("Home"), "Find Work",
                 () -> navigateTo("Worker"), "About Us",
                 () -> navigateTo("About Us"));
-        VBox contact = footerColumn("Contact", "9561789599", () -> navigateTo("Contact Us"), "info@meridihadi.com",
+        VBox contact = footerColumn("Contact", "+91 95617 89599", () -> navigateTo("Contact Us"), "info@meridihadi.com",
                 () -> navigateTo("Contact Us"), "Pune, Maharashtra", () -> navigateTo("Contact Us"));
         HBox top = new HBox(64, identity, explore, contact);
         top.setAlignment(Pos.TOP_LEFT);
@@ -922,19 +961,21 @@ public class ExploreProjectsPage {
     private Label text(String value, String style) {
         Label label = new Label(value);
         label.setStyle(style);
+        label.setTextOverrun(javafx.scene.control.OverrunStyle.CLIP);
         return label;
     }
 
     private Label label(String t, String s) {
         Label l = new Label(t);
         l.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + s);
+        l.setTextOverrun(javafx.scene.control.OverrunStyle.CLIP);
         return l;
     }
 
     private Image load(String path) {
         try {
             if (path == null || path.isBlank()) {
-                return loadResource("/assets/images/explore/explore_slide_1.jpg");
+                return loadResource("/assets/images/projects/project_highrise_tower.jpg");
             }
             String clean = path.trim();
             if (clean.startsWith("http://") || clean.startsWith("https://")) {
@@ -955,7 +996,7 @@ public class ExploreProjectsPage {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return loadResource("/assets/images/explore/explore_slide_1.jpg");
+        return loadResource("/assets/images/projects/project_highrise_tower.jpg");
     }
 
     private Image loadResource(String path) {

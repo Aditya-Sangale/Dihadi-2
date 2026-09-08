@@ -83,18 +83,17 @@ public class HireSuitableSkilledWorkersPage {
 
         /** Returns to the already-open recruiter page without resetting the login session. */
         private Button recruiterBackButton(Runnable returnToRecruiter) {
-                Button back = new Button("←  Back");
-                back.setStyle(
-                                "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;");
+                Button back = new Button("← Back to Dashboard");
+                String backIdle = "-fx-background-color:transparent;-fx-text-fill:#4c4637;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-background-radius:10px;";
+                String backHover = "-fx-background-color:#ffffff;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:#735c00;-fx-border-radius:10px;-fx-background-radius:10px;";
+                back.setStyle(backIdle);
+                back.setOnMouseEntered(e -> back.setStyle(backHover));
+                back.setOnMouseExited(e -> back.setStyle(backIdle));
                 back.setOnAction(e -> {
                         if (returnToRecruiter != null) {
                                 returnToRecruiter.run();
                         }
                 });
-                back.setOnMouseEntered(e -> back.setStyle(
-                                "-fx-background-color:transparent;-fx-text-fill:#4c4637;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;"));
-                back.setOnMouseExited(e -> back.setStyle(
-                                "-fx-background-color:transparent;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-font-family:'Segoe UI';-fx-padding:10px 4px;-fx-cursor:hand;"));
                 return back;
         }
 

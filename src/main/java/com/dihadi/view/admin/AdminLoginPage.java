@@ -11,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -141,7 +142,7 @@ public class AdminLoginPage {
         }
 
         login.setDisable(true);
-        login.setText("VERIFYING...");
+        login.setText("VERIFYING");
 
         new Thread(() -> {
             try {
@@ -208,6 +209,7 @@ public class AdminLoginPage {
 
     private Label label(String text, String style) {
         Label label = new Label(text);
+        label.setTextOverrun(OverrunStyle.CLIP);
         label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
         return label;
     }

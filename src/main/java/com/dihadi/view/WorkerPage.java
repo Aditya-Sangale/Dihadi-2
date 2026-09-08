@@ -276,7 +276,7 @@ public class WorkerPage extends Application {
         identity.setPrefWidth(360);
         VBox explore = footerColumn("Explore", "Home", () -> navigate("Home"), "Find Work", () -> navigate("Worker"), "About Us",
                 () -> navigate("About Us"));
-        VBox contact = footerColumn("Contact", "9561789599", () -> navigate("Contact Us"), "info@meridihadi.com",
+        VBox contact = footerColumn("Contact", "+91 95617 89599", () -> navigate("Contact Us"), "info@meridihadi.com",
                 () -> navigate("Contact Us"), "Pune, Maharashtra", () -> navigate("Contact Us"));
         HBox top = new HBox(64, identity, explore, contact);
         top.setAlignment(Pos.TOP_LEFT);

@@ -256,7 +256,7 @@ public class BusinessPage {
                 }, "Find Work", () -> {
                         if (workerAction != null) workerAction.run();
                 }, "About Us", () -> navigateTo("About Us"));
-                VBox contact = footerColumn("Contact", "9561789599", () -> navigateTo("Contact Us"), "info@meridihadi.com",
+                VBox contact = footerColumn("Contact", "+91 95617 89599", () -> navigateTo("Contact Us"), "info@meridihadi.com",
                                 () -> navigateTo("Contact Us"), "Pune, Maharashtra", () -> navigateTo("Contact Us"));
                 HBox top = new HBox(64, identity, explore, contact);
                 top.setAlignment(Pos.TOP_LEFT);

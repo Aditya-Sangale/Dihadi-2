@@ -474,6 +474,7 @@ public class SiteDetailsCardPage {
     private Label label(String s, String style) {
         Label l = new Label(s);
         l.setWrapText(true);
+        l.setTextOverrun(javafx.scene.control.OverrunStyle.CLIP);
         l.setStyle("-fx-font-family:'Segoe UI';" + style);
         return l;
     }

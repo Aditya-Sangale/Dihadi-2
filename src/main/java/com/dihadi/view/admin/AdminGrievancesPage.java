@@ -6,6 +6,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dihadi.view.NotificationToast;
+
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -18,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -177,7 +180,7 @@ public class AdminGrievancesPage {
 
     private HBox filterSearchBar() {
         searchField = new TextField();
-        searchField.setPromptText("Search case ID, complainant, project, or issue keywords...");
+        searchField.setPromptText("Search case ID, complainant, project, or issue keywords");
         searchField.setPrefWidth(340);
         searchField.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-padding:9px 14px;-fx-font-size:13px;");
         searchField.textProperty().addListener((obs, oldV, newV) -> applyFilters());
@@ -359,6 +362,7 @@ public class AdminGrievancesPage {
 
         Label titleLabel = label(g.subject(), "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
         titleLabel.setWrapText(true);
+        titleLabel.setTextOverrun(OverrunStyle.CLIP);
 
         Label compLabel = label("Complainant: " + g.complainant(), "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
         Label projLabel = label("Site: " + g.project(), "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#735c00;");
@@ -371,11 +375,6 @@ public class AdminGrievancesPage {
         HBox dataStrip = new HBox(10, block1, block2, block3);
         dataStrip.setAlignment(Pos.CENTER_LEFT);
 
-        HBox tagsRow = new HBox(6);
-        tagsRow.setAlignment(Pos.CENTER_LEFT);
-        tagsRow.getChildren().add(adminTag("Escrow Hold Active"));
-        tagsRow.getChildren().add(adminTag("Audit Assigned"));
-
         Button resolveBtn = new Button("Resolve");
         resolveBtn.setStyle("-fx-background-color:#e8f5e9;-fx-background-radius:8px;-fx-text-fill:#1b5e20;-fx-border-color:#c8e6c9;-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
         resolveBtn.setOnAction(e -> confirmResolveGrievance(g));
@@ -384,10 +383,12 @@ public class AdminGrievancesPage {
         inspectBtn.setStyle("-fx-background-color:#272727;-fx-background-radius:8px;-fx-text-fill:#ffd54f;-fx-border-color:" + GOLD + ";-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
         inspectBtn.setOnAction(e -> openGrievanceDetailsModal(g));
 
+        Button dustbinBtn = DormantManager.createDustbinButton("Move Grievance to Dormant / Dismiss", () -> confirmAndDeleteGrievance(g));
+
         Region btmSpacer = new Region();
         HBox.setHgrow(btmSpacer, Priority.ALWAYS);
-        HBox btmRow = new HBox(8, tagsRow, btmSpacer, resolveBtn, inspectBtn);
-        btmRow.setAlignment(Pos.CENTER_LEFT);
+        HBox btmRow = new HBox(8, btmSpacer, resolveBtn, inspectBtn, dustbinBtn);
+        btmRow.setAlignment(Pos.CENTER_RIGHT);
         btmRow.setPadding(new Insets(6, 0, 0, 0));
         btmRow.setStyle("-fx-border-color:" + BORDER + "60;-fx-border-width:1px 0 0 0;");
 
@@ -399,7 +400,7 @@ public class AdminGrievancesPage {
         card.setOnMouseEntered(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + GOLD + ";-fx-border-width:2px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.30),16,0,0,5px);-fx-cursor:hand;"));
         card.setOnMouseExited(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),10,0,0,3px);"));
         card.setOnMouseClicked(e -> {
-            if (e.getTarget() != resolveBtn && e.getTarget() != inspectBtn) {
+            if (e.getTarget() != resolveBtn && e.getTarget() != inspectBtn && e.getTarget() != dustbinBtn) {
                 openGrievanceDetailsModal(g);
             }
         });
@@ -443,7 +444,11 @@ public class AdminGrievancesPage {
         topBadges.setAlignment(Pos.CENTER_LEFT);
 
         Label titleLbl = label(g.subject(), "-fx-font-family:Georgia;-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
+        titleLbl.setWrapText(true);
+        titleLbl.setTextOverrun(OverrunStyle.CLIP);
         Label subLbl = label("Case ID: #" + g.caseId() + "   |   Complainant: " + g.complainant() + "   |   Project: " + g.project(), "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
+        subLbl.setWrapText(true);
+        subLbl.setTextOverrun(OverrunStyle.CLIP);
         VBox titleBox = new VBox(6, topBadges, titleLbl, subLbl);
 
         Button resolveBtn = new Button("Resolve Dispute");
@@ -453,13 +458,20 @@ public class AdminGrievancesPage {
             confirmResolveGrievance(g);
         });
 
+        Button dormantBtn = new Button("Move to Dormant");
+        dormantBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:10px;-fx-text-fill:#ba1a1a;-fx-border-color:#ffcdd2;-fx-border-radius:10px;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:9px 18px;-fx-cursor:hand;");
+        dormantBtn.setOnAction(e -> {
+            closeModal();
+            confirmAndDeleteGrievance(g);
+        });
+
         Button closeBtn = new Button("Close");
         closeBtn.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-text-fill:#1A1A1A;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:8px 16px;-fx-cursor:hand;-fx-border-color:#d0c5af;-fx-border-radius:10px;");
         closeBtn.setOnAction(e -> closeModal());
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox topBar = new HBox(14, titleBox, spacer, resolveBtn, closeBtn);
+        HBox topBar = new HBox(14, titleBox, spacer, resolveBtn, dormantBtn, closeBtn);
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.setPadding(new Insets(0, 0, 16, 0));
         topBar.setStyle("-fx-border-color:" + BORDER + ";-fx-border-width:0 0 1.5px 0;");
@@ -553,7 +565,8 @@ public class AdminGrievancesPage {
         l.setPrefWidth(130);
         Label v = label(valText, "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#1A1A1A;");
         v.setWrapText(true);
-        v.setMaxWidth(280);
+        v.setTextOverrun(OverrunStyle.CLIP);
+        HBox.setHgrow(v, Priority.ALWAYS);
         HBox box = new HBox(6, l, v);
         box.setAlignment(Pos.CENTER_LEFT);
         return box;
@@ -582,6 +595,25 @@ public class AdminGrievancesPage {
                 alert.setHeaderText(null);
                 alert.setContentText("Case #" + g.caseId() + " has been successfully marked as Resolved.");
                 alert.show();
+            }
+        });
+    }
+
+    private void confirmAndDeleteGrievance(AdminGrievanceData g) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Move Grievance to Dormant");
+        confirm.setHeaderText("Remove Grievance: Case #" + g.caseId() + "?");
+        confirm.setContentText("Subject: " + g.subject() + "\n" +
+                "Complainant: " + g.complainant() + " | Dispute Value: " + g.disputeAmount() + "\n\n" +
+                "Are you sure you want to remove this grievance card? It will be archived and viewable under the Dormant category.");
+
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                DormantManager.getInstance().addDormantGrievance(g);
+                allGrievancesList.removeIf(item -> item.caseId().equals(g.caseId()));
+                updateKpis();
+                applyFilters();
+                NotificationToast.show("Moved to Dormant", "Case #" + g.caseId() + " moved to Dormant archives.", NotificationToast.ToastType.SUCCESS);
             }
         });
     }
@@ -650,6 +682,7 @@ public class AdminGrievancesPage {
 
     private Label label(String value, String style) {
         Label label = new Label(value);
+        label.setTextOverrun(OverrunStyle.CLIP);
         label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
         return label;
     }

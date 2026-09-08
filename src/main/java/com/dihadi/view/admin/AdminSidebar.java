@@ -28,7 +28,8 @@ public class AdminSidebar {
         PROJECTS("Projects"),
         FINANCIALS("Financials"),
         VERIFICATION("Verification"),
-        GRIEVANCES("Grievances");
+        GRIEVANCES("Grievances"),
+        DORMANT("Dormant");
 
         private final String title;
 
@@ -133,6 +134,11 @@ public class AdminSidebar {
                 break;
             case GRIEVANCES:
                 stage.setScene(new AdminGrievancesPage().getGrievancesScene(
+                        () -> stage.setScene(new AdminDashboard().getDashboardScene(logout)),
+                        logout));
+                break;
+            case DORMANT:
+                stage.setScene(new AdminDormantPage().getDormantScene(
                         () -> stage.setScene(new AdminDashboard().getDashboardScene(logout)),
                         logout));
                 break;

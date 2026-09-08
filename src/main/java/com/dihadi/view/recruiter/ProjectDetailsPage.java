@@ -128,10 +128,21 @@ public class ProjectDetailsPage {
         workforce.setPadding(new Insets(20));
         workforce.setStyle(box());
 
-        Button exitButton = new Button("EXIT TO DASHBOARD");
-        exitButton.setStyle("-fx-background-color:#d4af37;-fx-background-radius:999px;-fx-text-fill:#ffffff;-fx-font-weight:700;-fx-font-size:15px;-fx-padding:12px 32px;-fx-cursor:hand;");
+        Button exitButton = new Button("← Back to Dashboard");
+        String backIdle = "-fx-background-color:transparent;-fx-text-fill:#4c4637;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-background-radius:10px;";
+        String backHover = "-fx-background-color:#ffffff;-fx-text-fill:#735c00;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:#735c00;-fx-border-radius:10px;-fx-background-radius:10px;";
+        exitButton.setStyle(backIdle);
+        exitButton.setOnMouseEntered(e -> exitButton.setStyle(backHover));
+        exitButton.setOnMouseExited(e -> exitButton.setStyle(backIdle));
         exitButton.setOnAction(e -> {
-            if (exit != null) exit.run();
+            if (exit != null) {
+                exit.run();
+            } else {
+                Stage stage = (Stage) exitButton.getScene().getWindow();
+                com.dihadi.model.Recruiter r = com.dihadi.view.SessionManager.currentRecruiter;
+                stage.setScene(new RecruiterDashboard(r)
+                        .getScene(() -> com.dihadi.view.AppNavigator.open(stage, "Home")));
+            }
         });
 
         Button addAnotherBtn = new Button("+ ADD ANOTHER WORKFORCE");
@@ -190,6 +201,7 @@ public class ProjectDetailsPage {
     private Label label(String s, String st) {
         Label l = new Label(s);
         l.setWrapText(true);
+        l.setTextOverrun(javafx.scene.control.OverrunStyle.CLIP);
         l.setStyle("-fx-font-family:'Segoe UI';" + st);
         return l;
     }

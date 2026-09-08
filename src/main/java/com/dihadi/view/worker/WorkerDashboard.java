@@ -32,6 +32,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -338,6 +339,17 @@ public class WorkerDashboard {
                         workerMob = SessionManager.currentWorker.getMobileNumber();
                     }
                 }
+
+                // Sync with in-memory SessionManager or latest Worker state if updated
+                if (SessionManager.currentWorker != null) {
+                    if (SessionManager.currentWorker.getTotalDaysWorked() > worker.getTotalDaysWorked()) {
+                        worker.setTotalDaysWorked(SessionManager.currentWorker.getTotalDaysWorked());
+                    }
+                    if (SessionManager.currentWorker.getWalletBalance() > worker.getWalletBalance()) {
+                        worker.setWalletBalance(SessionManager.currentWorker.getWalletBalance());
+                    }
+                }
+
                 String workerFullName = ((worker.getFirstName() != null ? worker.getFirstName() : "") + " " +
                                         (worker.getLastName() != null ? worker.getLastName() : "")).trim();
 
@@ -371,20 +383,51 @@ public class WorkerDashboard {
 
                 if (attendances != null) {
                     for (Attendance att : attendances) {
-                        if ("Present".equalsIgnoreCase(att.getStatus())) {
+                        boolean isPresent = "Present".equalsIgnoreCase(att.getStatus()) || "PRESENT".equalsIgnoreCase(att.getStatus()) || "PAID".equalsIgnoreCase(att.getPaymentStatus());
+                        boolean isAbsent = "Absent".equalsIgnoreCase(att.getStatus()) || "ABSENT".equalsIgnoreCase(att.getStatus());
+
+                        if (isPresent) {
                             daysPresent++;
-                        } else if ("Absent".equalsIgnoreCase(att.getStatus())) {
+                        } else if (isAbsent) {
                             daysAbsent++;
                         }
-                        if (todayStr.equals(att.getDate())) {
-                            todayStatus = att.getStatus();
+
+                        // Check if this attendance is for TODAY
+                        boolean isToday = false;
+                        if (todayStr.equalsIgnoreCase(att.getDate())) {
+                            isToday = true;
+                        } else if (att.getDate() != null && (att.getDate().contains(todayStr) || todayStr.contains(att.getDate()))) {
+                            isToday = true;
+                        } else if (att.getAttendanceId() != null && att.getAttendanceId().contains(todayStr)) {
+                            isToday = true;
+                        } else if (att.getTimestamp() != null) {
+                            try {
+                                String attDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(att.getTimestamp());
+                                if (todayStr.equals(attDate)) {
+                                    isToday = true;
+                                }
+                            } catch (Exception ignored) {}
+                        }
+
+                        if (isToday) {
+                            if (isPresent) {
+                                todayStatus = "Present";
+                            } else if (isAbsent) {
+                                todayStatus = "Absent";
+                            }
                         }
                     }
                 }
 
                 // Check live wallet balance and verified days worked from Worker model / controller
-                double liveBalance = worker.getWalletBalance() > 0 ? worker.getWalletBalance() : (daysPresent * effectiveDailyWage);
-                int liveDaysWorked = worker.getTotalDaysWorked() > 0 ? worker.getTotalDaysWorked() : daysPresent;
+                int liveDaysWorked = Math.max(worker.getTotalDaysWorked(), daysPresent);
+                if (SessionManager.currentWorker != null) {
+                    liveDaysWorked = Math.max(liveDaysWorked, SessionManager.currentWorker.getTotalDaysWorked());
+                }
+                double liveBalance = worker.getWalletBalance() > 0 ? worker.getWalletBalance() : (liveDaysWorked * effectiveDailyWage);
+                if (SessionManager.currentWorker != null && SessionManager.currentWorker.getWalletBalance() > 0) {
+                    liveBalance = Math.max(liveBalance, SessionManager.currentWorker.getWalletBalance());
+                }
 
                 final int finalDaysPresent = liveDaysWorked;
                 final double finalTotalEarned = liveBalance;
@@ -457,8 +500,8 @@ public class WorkerDashboard {
                             int count = 0;
                             for (Attendance att : attendances) {
                                 if (count++ >= 6) break;
-                                boolean isPresent = "Present".equalsIgnoreCase(att.getStatus());
-                                Label dateLabel = label(formatDate(att.getDate()), "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
+                                boolean isPresent = "Present".equalsIgnoreCase(att.getStatus()) || "PRESENT".equalsIgnoreCase(att.getStatus()) || "PAID".equalsIgnoreCase(att.getPaymentStatus());
+                                Label dateLabel = label(formatDate(att), "-fx-font-size:13px;-fx-font-weight:800;-fx-text-fill:#1e1b15;");
 
                                 Label statusBadge = new Label(isPresent ? "PRESENT" : "ABSENT");
                                 statusBadge.setStyle(isPresent
@@ -608,8 +651,14 @@ public class WorkerDashboard {
                                                 currentApp.setJobTitle(cleanProjectName);
                                                 new JobApplicationController().saveApplication(currentApp);
 
+                                                boolean isFulfilled = false;
+                                                int targetCount = 0;
+                                                int acceptedCount = 0;
                                                 if (currentApp.getProjectId() != null && !currentApp.getProjectId().isBlank()) {
-                                                    new com.dihadi.controller.ProjectController().updateProjectStatus(currentApp.getProjectId(), "Requirement Fulfilled");
+                                                    com.dihadi.controller.ProjectController pc = new com.dihadi.controller.ProjectController();
+                                                    targetCount = pc.getTargetWorkforceCount(currentApp.getProjectId());
+                                                    acceptedCount = pc.getAcceptedWorkerCount(currentApp.getProjectId());
+                                                    isFulfilled = pc.checkAndUpdateProjectFulfilledStatus(currentApp.getProjectId());
                                                 }
 
                                                 String acceptedWorkerName = ((worker.getFirstName() != null ? worker.getFirstName() : "") + " " +
@@ -620,8 +669,17 @@ public class WorkerDashboard {
                                                         acceptedWorkerName,
                                                         worker.getMobileNumber()
                                                 );
+                                                final boolean finalIsFulfilled = isFulfilled;
+                                                final int finalAccepted = acceptedCount;
+                                                final int finalTarget = targetCount;
                                                 Platform.runLater(() -> {
-                                                    NotificationToast.show("Offer Accepted", "You accepted the hiring offer for " + cleanProjectName + ". Project status is now set to Requirement Fulfilled.", NotificationToast.ToastType.SUCCESS);
+                                                    String msg = "You accepted the hiring offer for " + cleanProjectName + ".";
+                                                    if (finalIsFulfilled) {
+                                                        msg += " Target requirement of " + finalTarget + " workers is now completely fulfilled!";
+                                                    } else if (finalTarget > 0) {
+                                                        msg += " (" + finalAccepted + "/" + finalTarget + " positions filled).";
+                                                    }
+                                                    NotificationToast.show("Offer Accepted", msg, NotificationToast.ToastType.SUCCESS);
                                                     refreshWorkerData(heroContainer);
                                                 });
                                             }).start();
@@ -835,6 +893,7 @@ public class WorkerDashboard {
     private Label label(String text, String style) {
         Label l = new Label(text);
         l.setStyle(style);
+        l.setTextOverrun(OverrunStyle.CLIP);
         return l;
     }
 
@@ -860,6 +919,27 @@ public class WorkerDashboard {
 
     private String value(String s, String fallback) {
         return (s == null || s.trim().isEmpty()) ? fallback : s.trim();
+    }
+
+    private String formatDate(Attendance att) {
+        if (att == null) return "Today";
+        String dateStr = att.getDate();
+        if (dateStr == null || dateStr.isBlank()) {
+            if (att.getAttendanceId() != null && att.getAttendanceId().startsWith("ATT_")) {
+                String[] parts = att.getAttendanceId().split("_");
+                if (parts.length >= 4) {
+                    dateStr = parts[parts.length - 1];
+                }
+            }
+        }
+        if (dateStr == null || dateStr.isBlank()) {
+            if (att.getTimestamp() != null) {
+                try {
+                    dateStr = new java.text.SimpleDateFormat("yyyy-MM-dd").format(att.getTimestamp());
+                } catch (Exception ignored) {}
+            }
+        }
+        return formatDate(dateStr);
     }
 
     private String formatDate(String dateStr) {

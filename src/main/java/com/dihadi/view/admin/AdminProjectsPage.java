@@ -12,6 +12,7 @@ import com.dihadi.controller.ProjectController;
 import com.dihadi.controller.WorkforceRequirementController;
 import com.dihadi.model.Project;
 import com.dihadi.model.WorkforceRequirement;
+import com.dihadi.view.NotificationToast;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -26,6 +27,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -160,10 +162,10 @@ public class AdminProjectsPage {
         GridPane grid = grid(4);
         grid.setHgap(20);
 
-        totalSitesKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
-        totalWorkersKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
-        totalWageVolumeKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
-        urgentCountKpi = label("Loading...", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#ba1a1a;");
+        totalSitesKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
+        totalWorkersKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
+        totalWageVolumeKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
+        urgentCountKpi = label("Loading", "-fx-font-family:Georgia;-fx-font-size:30px;-fx-font-weight:800;-fx-text-fill:#ba1a1a;");
 
         grid.add(kpiCard("ACTIVE PROJECT SITES", totalSitesKpi, "Verified in Ecosystem", "#2e7d32"), 0, 0);
         grid.add(kpiCard("WORKFORCE DEMAND", totalWorkersKpi, "Active Openings", "#1565c0"), 1, 0);
@@ -185,7 +187,7 @@ public class AdminProjectsPage {
 
     private HBox filterSearchBar() {
         searchField = new TextField();
-        searchField.setPromptText("Search project name, location, developer, or trade...");
+        searchField.setPromptText("Search project name, location, developer, or trade");
         searchField.setPrefWidth(300);
         searchField.setStyle("-fx-background-color:#faf3e8;-fx-background-radius:10px;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-padding:9px 14px;-fx-font-size:13px;");
         searchField.textProperty().addListener((obs, oldV, newV) -> applyFilters());
@@ -240,7 +242,7 @@ public class AdminProjectsPage {
         if (isLoading) {
             ProgressIndicator pi = new ProgressIndicator();
             pi.setPrefSize(42, 42);
-            VBox box = new VBox(12, pi, label("Loading projects...", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
+            VBox box = new VBox(12, pi, label("Loading projects", "-fx-font-size:14px;-fx-text-fill:#685c52;"));
             box.setAlignment(Pos.CENTER);
             box.setPadding(new Insets(50));
             projectCardsPane.add(box, 0, 0, 2, 1);
@@ -291,7 +293,7 @@ public class AdminProjectsPage {
 
                         String loc = (val(p.getCity(), "Pune") + ", " + val(p.getState(), "Maharashtra")).replaceAll("^, |, $", "");
                         List<String> images = (p.getImageUrls() != null && !p.getImageUrls().isEmpty()) ? p.getImageUrls() : new ArrayList<>();
-                        String firstImg = !images.isEmpty() ? images.get(0) : "/assets/images/explore/explore_slide_1.jpg";
+                        String firstImg = !images.isEmpty() ? images.get(0) : "/assets/images/projects/project_highrise_tower.jpg";
 
                         String rawStatus = val(p.getStatus(), "Active");
                         String lifecycle = resolveLifecycle(rawStatus);
@@ -348,14 +350,14 @@ public class AdminProjectsPage {
 
     private List<AdminProjectData> getBenchmarkAdminProjects() {
         return List.of(
-                new AdminProjectData("PRJ-101", "Hiranandani Business & Residential Towers", "Mumbai, Maharashtra", "Hiranandani Developers", "Technician / Supervisor", "₹1,200 / day", "85 Openings", 85, 1200, "Urgent Hiring", "Currently Ongoing", "Commercial & Residential", "9822012341", "R-01", "/assets/images/explore/explore_slide_1.jpg", List.of("/assets/images/explore/explore_slide_1.jpg"), "Hiranandani Gardens, Powai", "Central Avenue", "Opposite Powai Lake", "Vikram Hiranandani", true, true, true, true, true),
-                new AdminProjectData("PRJ-102", "BHRAMHA Horizon Premium Residential Complex", "Pune, Maharashtra", "BHRAMHA Group", "Carpenter / Plumber", "₹950 / day", "110 Openings", 110, 950, "Active", "Currently Ongoing", "Residential", "9822012342", "R-02", "/assets/images/explore/explore_slide_2.jpg", List.of("/assets/images/explore/explore_slide_2.jpg"), "Kalyani Nagar Main Road", "Sector 4", "Near Gold Adlabs", "Anil Bhramha", true, true, true, false, true),
-                new AdminProjectData("PRJ-103", "LODHAA Grand Central Urban Expressway", "Mumbai, Maharashtra", "LODHAA Group", "Civil Engineer / Foreman", "₹1,450 / day", "60 Openings", 60, 1450, "Urgent Hiring", "Currently Ongoing", "Infrastructure", "9822012343", "R-03", "/assets/images/explore/explore_slide_3.jpg", List.of("/assets/images/explore/explore_slide_3.jpg"), "Thane-Belapur Expressway Junction", "Sector 11", "Near Airoli Bridge", "Rajesh Lodha", true, true, false, true, true),
-                new AdminProjectData("PRJ-104", "Ramoji Film City Mega Studio Infrastructure", "Hyderabad, Telangana", "Ramoji Film City", "Painter & Welder", "₹1,050 / day", "95 Openings", 95, 1050, "Upcoming", "Upcoming Project", "Commercial", "9822012344", "R-04", "/assets/images/explore/explore_slide_4.jpg", List.of("/assets/images/explore/explore_slide_4.jpg"), "Ramoji Film City Campus", "Studio Complex 3", "Hayathnagar Mandal", "K. Rao", true, true, true, true, true),
-                new AdminProjectData("PRJ-105", "BASIL Tech Habitat Smart Residential Park", "Bengaluru, Karnataka", "BASIL Group", "General Labour / Mason", "₹880 / day", "150 Openings", 150, 880, "Active", "Currently Ongoing", "Residential", "9822012345", "R-05", "/assets/images/explore/explore_slide_5.jpg", List.of("/assets/images/explore/explore_slide_5.jpg"), "Whitefield Main Road", "EPIP Zone", "Near ITPL Metro Station", "Girish Basil", true, true, true, true, true),
-                new AdminProjectData("PRJ-106", "Pune Metro Rail Underground Depot - Phase 2", "Pune, Maharashtra", "L&T Heavy Infrastructure", "Mason", "₹950 / day", "140 Openings", 140, 950, "Active", "Currently Ongoing", "Infrastructure", "9822012346", "R-06", "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_crane_operator_inside_a_high_tech_cabin_overlooking_a_large_bridge/screen.png", List.of("/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_crane_operator_inside_a_high_tech_cabin_overlooking_a_large_bridge/screen.png"), "Range Hills Depot Site", "Shivajinagar Corridor", "Near Agricultural College", "Sanjay Deshmukh", true, true, true, true, true),
-                new AdminProjectData("PRJ-107", "Mumbai Coastal Road Expressway & Sea Bridge", "Mumbai, Maharashtra", "Afcons Infrastructure", "Structural Fitter", "₹1,250 / day", "95 Openings", 95, 1250, "Urgent Hiring", "Currently Ongoing", "Infrastructure", "9822012347", "R-07", "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_site_supervisor_in_a_reflective_jacket_and_helmet_with_dihadi/screen.png", List.of("/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_site_supervisor_in_a_reflective_jacket_and_helmet_with_dihadi/screen.png"), "Worli Sea Face Interchange", "South Section", "Worli Point", "Dinesh Kulkarni", true, true, false, true, true),
-                new AdminProjectData("PRJ-108", "Prestige Tech Cloud IT Park - Phase 4 Towers", "Bangalore, Karnataka", "Prestige Group", "Electrician", "₹1,100 / day", "60 Openings", 60, 1100, "Completed", "Completed Project", "Commercial", "9822012348", "R-08", "/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_electrician_repairing_a_complex_electrical_panel_in_a_corporate/screen.png", List.of("/assets/images/homepage-slider/stitch_dihadi_workforce_ecosystem/an_indian_electrician_repairing_a_complex_electrical_panel_in_a_corporate/screen.png"), "International Airport Road", "Devenahalli Corridor", "Opposite Airport Toll", "Ramesh Rao", true, true, true, false, true)
+                new AdminProjectData("PRJ-101", "Mumbai Trans Harbour Link (Atal Setu) - Marine Viaduct", "Navi Mumbai, Maharashtra", "Larsen & Toubro Heavy Civil", "Welder", "₹1,150 / day", "45 Openings", 45, 1150, "Urgent Hiring", "Currently Ongoing", "Infrastructure", "9820145621", "REQ-INFRA-01", "/assets/images/projects/project_bridge_flyover.jpg", List.of("/assets/images/projects/project_bridge_flyover.jpg"), "Nhava Sheva Sea Link Junction", "Package 2", "Near Chirle Toll Plaza", "Vikram Rathore", true, true, true, true, true),
+                new AdminProjectData("PRJ-102", "Pune Metro Line 3 Elevated Viaduct (Hinjawadi - Shivajinagar)", "Pune, Maharashtra", "Tata Projects Limited", "Site Supervisor", "₹1,250 / day", "60 Openings", 60, 1250, "Active", "Currently Ongoing", "Infrastructure", "9822187654", "REQ-INFRA-02", "/assets/images/projects/project_metro_viaduct.jpg", List.of("/assets/images/projects/project_metro_viaduct.jpg"), "Hinjawadi Phase 1 Metro Corridor", "Pillar 142-180", "Near Rajiv Gandhi Infotech Park", "Sanjay Deshmukh", true, true, false, true, true),
+                new AdminProjectData("PRJ-103", "Mumbai Coastal Road Marine Viaduct & Expressway", "Mumbai, Maharashtra", "L&T Heavy Civil Infrastructure", "Mason", "₹980 / day", "75 Openings", 75, 980, "Urgent Hiring", "Currently Ongoing", "Infrastructure", "9819234567", "REQ-INFRA-03", "/assets/images/projects/project_coastal_road.jpg", List.of("/assets/images/projects/project_coastal_road.jpg"), "Worli Sea Face Interchange", "Package 1", "Near Worli Point Promenade", "Rajesh Lodha", true, true, true, true, true),
+                new AdminProjectData("PRJ-104", "Godrej Sky Greens Premium Residential Towers", "Pune, Maharashtra", "Godrej Properties Ltd", "General Labour", "₹880 / day", "120 Openings", 120, 880, "Active", "Currently Ongoing", "Residential", "9860112233", "REQ-RES-01", "/assets/images/projects/project_highrise_tower.jpg", List.of("/assets/images/projects/project_highrise_tower.jpg"), "Manjari Khurd Road", "Tower C & D Site", "Near Kharadi Bypass", "Anand Godrej", true, true, true, false, true),
+                new AdminProjectData("PRJ-105", "Prestige Tech Cloud Commercial IT Park - Phase 4", "Bengaluru, Karnataka", "Prestige Group", "Electrician", "₹1,100 / day", "50 Openings", 50, 1100, "Active", "Currently Ongoing", "Commercial", "9845012345", "REQ-COMM-01", "/assets/images/projects/project_commercial_itpark.jpg", List.of("/assets/images/projects/project_commercial_itpark.jpg"), "International Airport Road", "Tower 4 Core", "Near Devanahalli", "Ramesh Rao", true, true, false, true, true),
+                new AdminProjectData("PRJ-106", "Shapoorji Pallonji Joyville Mega Township", "Pune, Maharashtra", "Shapoorji Pallonji Engineering", "Carpenter", "₹960 / day", "85 Openings", 85, 960, "Active", "Currently Ongoing", "Residential", "9823456789", "REQ-RES-02", "/assets/images/projects/project_residential_township.jpg", List.of("/assets/images/projects/project_residential_township.jpg"), "Hinjawadi Phase 3 Extension", "Sector 7", "Opposite Megapolis", "Kiran Mistry", true, true, true, true, true),
+                new AdminProjectData("PRJ-107", "Tata Electronics Semiconductor & OSAT Mega Plant", "Dholera, Gujarat", "Tata Projects Industrial", "Plumber", "₹1,020 / day", "40 Openings", 40, 1020, "Urgent Hiring", "Currently Ongoing", "Industrial", "9879012345", "REQ-IND-01", "/assets/images/projects/project_industrial_plant.jpg", List.of("/assets/images/projects/project_industrial_plant.jpg"), "Dholera SIR Activation Zone", "Block A Plant 1", "Near Express Highway", "Dinesh Kulkarni", true, true, true, true, true),
+                new AdminProjectData("PRJ-108", "Delhi Metro Underground Phase 4 Tunnel Extension", "Delhi, Delhi", "Afcons Infrastructure", "General Labour", "₹920 / day", "110 Openings", 110, 920, "Active", "Currently Ongoing", "Infrastructure", "9811098765", "REQ-INFRA-04", "/assets/images/projects/project_tunnel_excavation.jpg", List.of("/assets/images/projects/project_tunnel_excavation.jpg"), "Aerocity to Tughlakabad Corridor", "Shaft 3", "Near Mahipalpur Bypass", "Surinder Singh", true, true, true, true, true)
         );
     }
 
@@ -454,6 +456,7 @@ public class AdminProjectsPage {
         // Project Title
         Label titleLabel = label(p.projectName(), "-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:17px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
         titleLabel.setWrapText(true);
+        titleLabel.setTextOverrun(OverrunStyle.CLIP);
 
         // Contractor / Developer Info with direct contact phone
         Label companyLabel = label("Developer: " + p.company() + "  |  " + p.sector(), "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
@@ -468,27 +471,16 @@ public class AdminProjectsPage {
         HBox dataStrip = new HBox(10, block1, block2, block3);
         dataStrip.setAlignment(Pos.CENTER_LEFT);
 
-        // Facilities check indicators
-        HBox facilitiesRow = new HBox(6);
-        facilitiesRow.setAlignment(Pos.CENTER_LEFT);
-        if (p.hasWater()) facilitiesRow.getChildren().add(adminTag("Water"));
-        if (p.hasPower()) facilitiesRow.getChildren().add(adminTag("Electricity"));
-        if (p.hasStay()) facilitiesRow.getChildren().add(adminTag("Accommodation"));
-        if (p.hasTransport()) facilitiesRow.getChildren().add(adminTag("Transport"));
-
-        // Admin Action Controls
-        Button deleteBtn = new Button("Delete");
-        deleteBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:8px;-fx-text-fill:#ba1a1a;-fx-border-color:#ffcdd2;-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
-        deleteBtn.setOnAction(e -> confirmAndDeleteProject(p));
-
         Button inspectBtn = new Button("Inspect Details ->");
         inspectBtn.setStyle("-fx-background-color:#272727;-fx-background-radius:8px;-fx-text-fill:#ffd54f;-fx-border-color:" + GOLD + ";-fx-border-radius:8px;-fx-font-size:11px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-cursor:hand;");
         inspectBtn.setOnAction(e -> openGlassmorphicDetailsModal(p));
 
+        Button dustbinBtn = DormantManager.createDustbinButton("Move Project to Dormant / Delete", () -> confirmAndDeleteProject(p));
+
         Region btmSpacer = new Region();
         HBox.setHgrow(btmSpacer, Priority.ALWAYS);
-        HBox btmRow = new HBox(8, facilitiesRow, btmSpacer, deleteBtn, inspectBtn);
-        btmRow.setAlignment(Pos.CENTER_LEFT);
+        HBox btmRow = new HBox(8, btmSpacer, inspectBtn, dustbinBtn);
+        btmRow.setAlignment(Pos.CENTER_RIGHT);
         btmRow.setPadding(new Insets(6, 0, 0, 0));
         btmRow.setStyle("-fx-border-color:" + BORDER + "60;-fx-border-width:1px 0 0 0;");
 
@@ -500,7 +492,7 @@ public class AdminProjectsPage {
         card.setOnMouseEntered(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + GOLD + ";-fx-border-width:2px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.30),16,0,0,5px);-fx-cursor:hand;"));
         card.setOnMouseExited(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.06),10,0,0,3px);"));
         card.setOnMouseClicked(e -> {
-            if (e.getTarget() != deleteBtn && e.getTarget() != inspectBtn) {
+            if (e.getTarget() != dustbinBtn && e.getTarget() != inspectBtn) {
                 openGlassmorphicDetailsModal(p);
             }
         });
@@ -550,13 +542,15 @@ public class AdminProjectsPage {
 
         Label titleLbl = label(p.projectName(), "-fx-font-family:Georgia;-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:#1A1A1A;");
         titleLbl.setWrapText(true);
-        titleLbl.setMaxWidth(620);
+        titleLbl.setTextOverrun(OverrunStyle.CLIP);
 
         Label subLbl = label("Location: " + p.location() + "   |   Developer: " + p.company() + "   |   Sector: " + p.sector(), "-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#5d5045;");
+        subLbl.setWrapText(true);
+        subLbl.setTextOverrun(OverrunStyle.CLIP);
         VBox titleBox = new VBox(6, topBadges, titleLbl, subLbl);
 
-        Button deleteBtn = new Button("Delete Project");
-        deleteBtn.setStyle("-fx-background-color:#ba1a1a;-fx-background-radius:10px;-fx-text-fill:#ffffff;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:9px 20px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(186,26,26,.35),8,0,0,2px);");
+        Button deleteBtn = new Button("Move to Dormant");
+        deleteBtn.setStyle("-fx-background-color:#ffebee;-fx-background-radius:10px;-fx-text-fill:#ba1a1a;-fx-border-color:#ffcdd2;-fx-border-radius:10px;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:9px 18px;-fx-cursor:hand;");
         deleteBtn.setOnAction(e -> {
             closeModal();
             confirmAndDeleteProject(p);
@@ -678,12 +672,14 @@ public class AdminProjectsPage {
 
     private HBox modalDetailRow(String labelText, String valText) {
         Label l = label(labelText + ":", "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#685c52;");
-        l.setPrefWidth(120);
+        l.setMinWidth(140);
+        l.setPrefWidth(140);
         Label v = label(valText, "-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#1A1A1A;");
         v.setWrapText(true);
-        v.setMaxWidth(290);
-        HBox box = new HBox(6, l, v);
-        box.setAlignment(Pos.CENTER_LEFT);
+        v.setTextOverrun(OverrunStyle.CLIP);
+        HBox.setHgrow(v, Priority.ALWAYS);
+        HBox box = new HBox(8, l, v);
+        box.setAlignment(Pos.TOP_LEFT);
         return box;
     }
 
@@ -713,12 +709,16 @@ public class AdminProjectsPage {
      */
     private void confirmAndDeleteProject(AdminProjectData p) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirm Project Deletion");
-        confirm.setHeaderText("Delete " + p.projectName() + "?");
-        confirm.setContentText("Are you sure you want to delete this project? This will permanently remove it from the database.");
+        confirm.setTitle("Move Project to Dormant");
+        confirm.setHeaderText("Remove Project: " + p.projectName() + "?");
+        confirm.setContentText("Project: " + p.projectName() + " [#" + p.projectId() + "]\n" +
+                "Developer: " + p.company() + " | Location: " + p.location() + "\n\n" +
+                "Are you sure you want to remove this project card? It will be archived and viewable under the Dormant category.");
 
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
+                DormantManager.getInstance().addDormantProject(p);
+
                 new Thread(() -> {
                     try {
                         if (!p.isBenchmark()) {
@@ -732,7 +732,7 @@ public class AdminProjectsPage {
                         allProjectsList.removeIf(item -> item.projectId().equals(p.projectId()));
                         updateKpis();
                         applyFilters();
-                        showSuccessToast(p.projectName() + " has been successfully removed.");
+                        NotificationToast.show("Moved to Dormant", p.projectName() + " moved to Dormant archives.", NotificationToast.ToastType.SUCCESS);
                     });
                 }).start();
             }
@@ -810,7 +810,7 @@ public class AdminProjectsPage {
     private Image load(String path) {
         try {
             if (path == null || path.isBlank()) {
-                var r = getClass().getResource("/assets/images/explore/explore_slide_1.jpg");
+                var r = getClass().getResource("/assets/images/projects/project_highrise_tower.jpg");
                 return r == null ? null : new Image(r.toExternalForm());
             }
             if (path.startsWith("http://") || path.startsWith("https://")) {
@@ -828,6 +828,7 @@ public class AdminProjectsPage {
 
     private Label label(String value, String style) {
         Label label = new Label(value);
+        label.setTextOverrun(OverrunStyle.CLIP);
         label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
         return label;
     }

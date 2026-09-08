@@ -12,46 +12,109 @@ import com.dihadi.model.Recruiter;
 import com.dihadi.model.Worker;
 import com.dihadi.view.NotificationToast;
 import com.dihadi.view.PaymentGateway.PaymentCheckoutScene;
+import com.dihadi.view.PaymentGateway.RazorpayCheckoutDialog;
+import com.dihadi.view.ScrollUtils;
 import com.dihadi.view.SessionManager;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
+/**
+ * Enterprise-grade Daily Attendance & Wage Disbursal Interface for Recruiters.
+ * Features real-time KPI analytics, quick date toggles, worker dossiers,
+ * multi-criteria search/filtering, seamless Razorpay escrow payouts, and printable vouchers.
+ */
 public class AttendancePage {
 
+    private static final String BG_COLOR = "#f3e7ce";
+    private static final String CARD_BG = "#ffffff";
+    private static final String BORDER = "#d0c5af";
     private static final String GOLD = "#735c00";
-    private static final String BORDER = "#E0D9CE";
+    private static final String INK = "#1e1b15";
+    private static final String MUTED = "#685c52";
+    private static final String GREEN = "#2e7d32";
+    private static final String BLUE = "#1565c0";
+    private static final String RED = "#ba1a1a";
 
     private final AttendanceController attendanceController;
     private final AttendanceDao attendanceDao;
     private final ProjectDao projectDao;
     private final WorkerDao workerDao;
 
-    private VBox tableRowsContainer;
-    private ComboBox<Project> projectDropdown;
-    private DatePicker datePicker;
-    private ProgressIndicator loadingIndicator;
-    private Label statusSummaryLabel;
-    private Label walletBalanceLabel;
-
     private Recruiter currentRecruiter;
     private String currentRecruiterId;
     private Runnable backAction;
+
+    // UI state controls
+    private Label walletBalanceLabel;
+    private ComboBox<Project> projectDropdown;
+    private DatePicker datePicker;
+    private ProgressIndicator loadingIndicator;
+
+    // KPI Labels
+    private Label assignedCrewKpiLabel;
+    private Label presentPaidKpiLabel;
+    private Label pendingPayoutsKpiLabel;
+    private Label dailyWageOutlayKpiLabel;
+
+    // Search and filtering
+    private TextField searchField;
+    private ComboBox<String> statusFilter;
+    private ComboBox<String> tradeFilter;
+    private Label recordsCountLabel;
+
+    // Selected project brief
+    private Label projectLocationBadge;
+    private Label projectWorkforceProgressBadge;
+
+    // Container for worker cards
+    private VBox recordsListContainer;
+    private VBox emptyStateBox;
+
+    // Master in-memory data
+    private final List<WorkerAttendanceItem> masterWorkersList = new ArrayList<>();
+    private final List<WorkerAttendanceItem> filteredWorkersList = new ArrayList<>();
+    private final Map<String, Attendance> currentAttendanceMap = new HashMap<>();
+
+    /**
+     * Internal model encapsulating a worker, their assigned project, shift date, and attendance status.
+     */
+    public static class WorkerAttendanceItem {
+        public Worker worker;
+        public Project project;
+        public LocalDate date;
+        public Attendance record;
+
+        public String workerName = "Worker";
+        public String workerMobile = "";
+        public String workerTrade = "General Worker";
+        public String workerSubSkill = "";
+        public String workerCity = "Maharashtra";
+        public String workerPhotoUrl = null;
+        public int daysWorked = 0;
+        public double dailyWage = 700.0;
+
+        public boolean isPresent = false;
+        public boolean isPaid = false;
+        public boolean isAbsent = false;
+        public String transactionId = null;
+
+        public WorkerAttendanceItem() {}
+    }
 
     public AttendancePage() {
         this(SessionManager.currentRecruiter);
@@ -76,26 +139,85 @@ public class AttendancePage {
     public Scene getScene(Runnable back) {
         this.backAction = back;
 
-        this.tableRowsContainer = new VBox(12);
-        this.projectDropdown = new ComboBox<>();
-        this.datePicker = new DatePicker(LocalDate.now());
-        this.loadingIndicator = new ProgressIndicator();
-        this.statusSummaryLabel = new Label("Select a project to manage daily attendance and wage payouts.");
-        this.walletBalanceLabel = new Label();
-
         VBox root = new VBox(20);
-        root.setStyle("-fx-background-color: #f3e7ce;");
-        root.setPadding(new Insets(24, 48, 40, 48));
-        root.setMaxWidth(1360);
+        root.setStyle("-fx-background-color: " + BG_COLOR + ";");
+        root.setPadding(new Insets(28, 48, 40, 48));
+        root.setMaxWidth(1440);
         root.setAlignment(Pos.TOP_CENTER);
 
-        // 1. Top Navigation Bar
-        HBox navBar = new HBox(16);
-        navBar.setAlignment(Pos.CENTER_LEFT);
+        // 1. Top Header Bar
+        HBox header = createHeader(back);
+
+        // 2. Title and Eyebrow Banner
+        VBox titleBanner = createTitleBanner();
+
+        // 3. KPI Metrics Row (4 Cards)
+        HBox kpiRow = createKpiMetricsRow();
+
+        // 4. Project Selection & Quick Date Controller Card
+        VBox projectControlCard = createProjectControlCard();
+
+        // 5. Search & Status Filter Bar
+        VBox filterBar = createFilterControls();
+
+        // 6. Worker Records List Container
+        recordsListContainer = new VBox(14);
+        recordsListContainer.setAlignment(Pos.TOP_CENTER);
+        recordsListContainer.setFillWidth(true);
+
+        loadingIndicator = new ProgressIndicator();
+        loadingIndicator.setPrefSize(40, 40);
+        loadingIndicator.setStyle("-fx-progress-color: " + GOLD + ";");
+
+        emptyStateBox = createEmptyState();
+        emptyStateBox.setVisible(false);
+        emptyStateBox.setManaged(false);
+
+        VBox contentSection = new VBox(16, filterBar, loadingIndicator, emptyStateBox, recordsListContainer);
+        contentSection.setAlignment(Pos.TOP_CENTER);
+
+        root.getChildren().addAll(header, titleBanner, kpiRow, projectControlCard, contentSection);
+
+        StackPane centerWrapper = new StackPane(root);
+        centerWrapper.setAlignment(Pos.TOP_CENTER);
+        centerWrapper.setStyle("-fx-background-color: " + BG_COLOR + ";");
+
+        ScrollPane scrollPane = new ScrollPane(centerWrapper);
+        scrollPane.setFitToWidth(true);
+        ScrollUtils.style(scrollPane);
+        scrollPane.setStyle("-fx-background: " + BG_COLOR + "; -fx-background-color: " + BG_COLOR + "; -fx-border-width: 0;");
+
+        // Load projects and trigger initial population
+        loadProjects();
+
+        return new Scene(scrollPane, 1420, 880);
+    }
+
+    public Scene getScene() {
+        return getScene(() -> {});
+    }
+
+    // ==========================================
+    // 1. Top Header Bar
+    // ==========================================
+    private HBox createHeader(Runnable back) {
+        ImageView logoImg = image("/assets/logo/dihadi logo.jpeg", 42, 42);
+
+        Label brand = new Label("DIHADI");
+        brand.setStyle("-fx-font-family:Georgia;-fx-font-size:24px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
+        brand.setTextOverrun(OverrunStyle.CLIP);
+
+        HBox brandBox = new HBox(10);
+        brandBox.setAlignment(Pos.CENTER_LEFT);
+        if (logoImg != null) brandBox.getChildren().add(logoImg);
+        brandBox.getChildren().add(brand);
 
         Button backButton = new Button("← Back to Dashboard");
-        backButton.setStyle("-fx-background-color: #ffffff; -fx-text-fill: #4c4637; -fx-font-size: 13px; " +
-                "-fx-font-weight: bold; -fx-padding: 8 16; -fx-border-color: #d0c5af; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;");
+        String backIdle = "-fx-background-color:transparent;-fx-text-fill:#4c4637;-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-background-radius:10px;";
+        String backHover = "-fx-background-color:#ffffff;-fx-text-fill:" + GOLD + ";-fx-font-size:14px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-cursor:hand;-fx-border-color:" + GOLD + ";-fx-border-radius:10px;-fx-background-radius:10px;";
+        backButton.setStyle(backIdle);
+        backButton.setOnMouseEntered(e -> backButton.setStyle(backHover));
+        backButton.setOnMouseExited(e -> backButton.setStyle(backIdle));
         backButton.setOnAction(e -> {
             if (backAction != null) {
                 backAction.run();
@@ -107,40 +229,134 @@ public class AttendancePage {
             }
         });
 
-        Label titleLabel = new Label("Daily Attendance & Wage Payouts");
-        titleLabel.setFont(Font.font("Georgia", FontWeight.BOLD, 24));
-        titleLabel.setTextFill(Color.web("#1e1b15"));
+        String recruiterName = (currentRecruiter.getFirstName() != null ? currentRecruiter.getFirstName() : "Recruiter")
+                + (currentRecruiter.getLastName() != null ? " " + currentRecruiter.getLastName() : "");
+        String companyName = currentRecruiter.getCompanyName() != null && !currentRecruiter.getCompanyName().isBlank()
+                ? currentRecruiter.getCompanyName() : "General Contractor";
+
+        Label profileBadge = new Label(recruiterName + " (" + companyName + ")");
+        profileBadge.setStyle("-fx-font-family:'Segoe UI',sans-serif;-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#3f392e;-fx-background-color:#fffaf0;-fx-background-radius:12px;-fx-border-color:#d0c5af;-fx-border-radius:12px;-fx-padding:7px 16px;");
+        profileBadge.setTextOverrun(OverrunStyle.CLIP);
+
+        // Wallet Balance Info
+        walletBalanceLabel = new Label();
+        updateWalletDisplay();
+        walletBalanceLabel.setStyle("-fx-font-family:Georgia;-fx-font-size:14px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
+
+        Button rechargeBtn = new Button("+ Recharge Wallet");
+        rechargeBtn.setStyle("-fx-background-color:#272727;-fx-text-fill:#ffd54f;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:6px 14px;-fx-background-radius:8px;-fx-cursor:hand;");
+        rechargeBtn.setOnAction(e -> triggerRechargeFlow(rechargeBtn, 1000.00));
+
+        HBox walletBadgeBox = new HBox(10, walletBalanceLabel, rechargeBtn);
+        walletBadgeBox.setAlignment(Pos.CENTER_RIGHT);
+        walletBadgeBox.setStyle("-fx-background-color:#ffffff;-fx-padding:5px 12px;-fx-background-radius:10px;-fx-border-color:#d0c5af;-fx-border-radius:10px;");
+
+        Button refreshBtn = new Button("↻ Refresh");
+        refreshBtn.setStyle("-fx-background-color:#ffffff;-fx-text-fill:#4c4637;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:7px 14px;-fx-cursor:hand;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-background-radius:10px;");
+        refreshBtn.setOnAction(e -> refreshAttendanceList());
 
         Region navSpacer = new Region();
         HBox.setHgrow(navSpacer, Priority.ALWAYS);
 
-        // Recruiter Wallet Info Badge
-        updateWalletDisplay();
-        walletBalanceLabel.setStyle("-fx-font-family: Georgia; -fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: " + GOLD + ";");
+        HBox actions = new HBox(12, backButton, refreshBtn, walletBadgeBox, profileBadge);
+        actions.setAlignment(Pos.CENTER_RIGHT);
 
-        Button walletRechargeTopBtn = new Button("+ Recharge Wallet");
-        walletRechargeTopBtn.setStyle("-fx-background-color: #272727; -fx-text-fill: #ffd54f; -fx-font-size: 12px; " +
-                "-fx-font-weight: bold; -fx-padding: 7 14; -fx-background-radius: 8; -fx-cursor: hand;");
-        walletRechargeTopBtn.setOnAction(e -> triggerRechargeFlow(walletRechargeTopBtn, 1000.00));
+        HBox headerBar = new HBox(20, brandBox, navSpacer, actions);
+        headerBar.setAlignment(Pos.CENTER_LEFT);
+        headerBar.setPadding(new Insets(0, 0, 10, 0));
+        headerBar.setStyle("-fx-border-color:transparent transparent #d0c5af transparent;-fx-border-width:0 0 1px 0;");
+        return headerBar;
+    }
 
-        HBox walletBadgeBox = new HBox(10, walletBalanceLabel, walletRechargeTopBtn);
-        walletBadgeBox.setAlignment(Pos.CENTER_RIGHT);
-        walletBadgeBox.setStyle("-fx-background-color: #ffffff; -fx-padding: 6 14; -fx-background-radius: 10; -fx-border-color: #d0c5af; -fx-border-radius: 10;");
+    private void updateWalletDisplay() {
+        double balance = currentRecruiter != null ? currentRecruiter.getWalletBalance() : 0.0;
+        if (walletBalanceLabel != null) {
+            walletBalanceLabel.setText(String.format("Escrow Wallet: ₹%,.2f", balance));
+        }
+    }
 
-        navBar.getChildren().addAll(backButton, titleLabel, navSpacer, walletBadgeBox);
+    // ==========================================
+    // 2. Title & Eyebrow Banner
+    // ==========================================
+    private VBox createTitleBanner() {
+        Label eyebrow = new Label("✦  RECRUITER WORKFORCE OPERATIONS & PAYROLL");
+        eyebrow.setStyle("-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:1px;-fx-text-fill:" + GOLD + ";-fx-background-color:#fffaf0;-fx-background-radius:10px;-fx-padding:4px 10px;-fx-border-color:#e2d5bd;-fx-border-radius:10px;");
+        eyebrow.setTextOverrun(OverrunStyle.CLIP);
 
-        // 2. Filter Bar (Project selector & DatePicker)
-        HBox filterBar = new HBox(18);
-        filterBar.setAlignment(Pos.CENTER_LEFT);
-        filterBar.setStyle("-fx-background-color: #ffffff; -fx-padding: 16 22; -fx-background-radius: 12; -fx-border-color: " + BORDER + "; -fx-border-radius: 12; -fx-effect: dropshadow(gaussian, rgba(58,48,39,0.05), 8, 0, 0, 2);");
+        Label title = new Label("Daily Attendance & Wage Disbursal");
+        title.setStyle("-fx-font-family:Georgia;-fx-font-size:28px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
+        title.setTextOverrun(OverrunStyle.CLIP);
 
-        Label projectSelectLabel = new Label("Select Project:");
-        projectSelectLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 13));
-        projectSelectLabel.setTextFill(Color.web("#4c4637"));
+        Label subtitle = new Label("Track and verify on-site worker attendance, confirm shift completion, and disburse daily wages seamlessly via direct DIHADI Escrow settlement.");
+        subtitle.setStyle("-fx-font-size:14px;-fx-font-weight:500;-fx-text-fill:" + MUTED + ";");
+        subtitle.setTextOverrun(OverrunStyle.CLIP);
+        subtitle.setWrapText(true);
 
-        projectDropdown.setPromptText("Choose Project");
-        projectDropdown.setPrefWidth(300);
-        projectDropdown.setStyle("-fx-font-size: 13px; -fx-background-radius: 6;");
+        VBox banner = new VBox(8, eyebrow, title, subtitle);
+        banner.setAlignment(Pos.CENTER_LEFT);
+        return banner;
+    }
+
+    // ==========================================
+    // 3. KPI Metrics Row (4 Cards)
+    // ==========================================
+    private HBox createKpiMetricsRow() {
+        assignedCrewKpiLabel = new Label("0");
+        assignedCrewKpiLabel.setStyle("-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
+
+        presentPaidKpiLabel = new Label("0");
+        presentPaidKpiLabel.setStyle("-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:" + GREEN + ";");
+
+        pendingPayoutsKpiLabel = new Label("0");
+        pendingPayoutsKpiLabel.setStyle("-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:#b45309;");
+
+        dailyWageOutlayKpiLabel = new Label("₹ 0.00");
+        dailyWageOutlayKpiLabel.setStyle("-fx-font-family:Georgia;-fx-font-size:26px;-fx-font-weight:800;-fx-text-fill:" + BLUE + ";");
+
+        VBox card1 = kpiCard("ASSIGNED CREW", assignedCrewKpiLabel, "Active site workforce", GOLD);
+        VBox card2 = kpiCard("PRESENT & PAID TODAY", presentPaidKpiLabel, "Completed wage disbursements", GREEN);
+        VBox card3 = kpiCard("PENDING VERIFICATION", pendingPayoutsKpiLabel, "Awaiting attendance check-in", "#b45309");
+        VBox card4 = kpiCard("DAILY DISBURSED PAYROLL", dailyWageOutlayKpiLabel, "Settled via Escrow direct", BLUE);
+
+        HBox row = new HBox(16, card1, card2, card3, card4);
+        row.setAlignment(Pos.CENTER);
+        return row;
+    }
+
+    private VBox kpiCard(String title, Label valueLabel, String subtext, String accentColor) {
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:0.8px;-fx-text-fill:#685c52;");
+        titleLabel.setTextOverrun(OverrunStyle.CLIP);
+
+        Label sub = new Label(subtext);
+        sub.setStyle("-fx-font-size:12px;-fx-font-weight:600;-fx-text-fill:" + accentColor + ";");
+        sub.setTextOverrun(OverrunStyle.CLIP);
+
+        VBox card = new VBox(6, titleLabel, valueLabel, sub);
+        card.setPadding(new Insets(16, 20, 16, 20));
+        card.setPrefHeight(105);
+        HBox.setHgrow(card, Priority.ALWAYS);
+        card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER
+                + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.04),8,0,0,2px);");
+
+        card.setOnMouseEntered(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:#d4af37;-fx-border-width:1.8px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.22),12,0,0,3px);"));
+        card.setOnMouseExited(e -> card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER
+                + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.04),8,0,0,2px);"));
+        return card;
+    }
+
+    // ==========================================
+    // 4. Project Selection & Date Controller Card
+    // ==========================================
+    private VBox createProjectControlCard() {
+        Label projLbl = new Label("SELECT PROJECT:");
+        projLbl.setStyle("-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:0.8px;-fx-text-fill:#685c52;");
+
+        projectDropdown = new ComboBox<>();
+        projectDropdown.setPromptText("Choose Active Ongoing Project");
+        projectDropdown.setPrefHeight(42);
+        projectDropdown.setPrefWidth(320);
+        projectDropdown.setStyle("-fx-background-color:#ffffff;-fx-background-radius:10px;-fx-border-color:" + BORDER + ";-fx-border-radius:10px;-fx-font-size:13px;");
         projectDropdown.setCellFactory(lv -> new ListCell<Project>() {
             @Override
             protected void updateItem(Project item, boolean empty) {
@@ -148,7 +364,7 @@ public class AttendancePage {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    setText(item.getTitle() + " (" + item.getStatus() + ")");
+                    setText(item.getTitle() + " (" + (item.getStatus() != null ? item.getStatus() : "Active") + ")");
                 }
             }
         });
@@ -159,95 +375,124 @@ public class AttendancePage {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    setText(item.getTitle() + " (" + item.getStatus() + ")");
+                    setText(item.getTitle() + " (" + (item.getStatus() != null ? item.getStatus() : "Active") + ")");
                 }
             }
         });
         projectDropdown.setOnAction(e -> refreshAttendanceList());
 
-        Label dateLabel = new Label("Date:");
-        dateLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 13));
-        dateLabel.setTextFill(Color.web("#4c4637"));
+        Label dateLbl = new Label("SHIFT DATE:");
+        dateLbl.setStyle("-fx-font-size:11px;-fx-font-weight:800;-fx-letter-spacing:0.8px;-fx-text-fill:#685c52;");
 
-        datePicker.setStyle("-fx-font-size: 13px; -fx-background-radius: 6;");
+        datePicker = new DatePicker(LocalDate.now());
+        datePicker.setPrefHeight(42);
+        datePicker.setPrefWidth(170);
+        datePicker.setStyle("-fx-background-color:#ffffff;-fx-background-radius:10px;-fx-border-color:" + BORDER + ";-fx-border-radius:10px;-fx-font-size:13px;");
         datePicker.setOnAction(e -> refreshAttendanceList());
 
-        Button refreshBtn = new Button("↻ Refresh");
-        refreshBtn.setStyle("-fx-background-color: #faf3e8; -fx-text-fill: #735c00; -fx-font-weight: bold; -fx-border-color: #d0c5af; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 6 12;");
+        Button todayBtn = new Button("Today");
+        todayBtn.setPrefHeight(42);
+        todayBtn.setStyle("-fx-background-color:#fff8e7;-fx-text-fill:" + GOLD + ";-fx-font-size:12px;-fx-font-weight:800;-fx-padding:0 14px;-fx-border-color:#f0d890;-fx-border-radius:10px;-fx-background-radius:10px;-fx-cursor:hand;");
+        todayBtn.setOnAction(e -> {
+            datePicker.setValue(LocalDate.now());
+            refreshAttendanceList();
+        });
+
+        Button yesterdayBtn = new Button("Yesterday");
+        yesterdayBtn.setPrefHeight(42);
+        yesterdayBtn.setStyle("-fx-background-color:#f5f0e8;-fx-text-fill:#4c4637;-fx-font-size:12px;-fx-font-weight:700;-fx-padding:0 14px;-fx-border-color:#d0c5af;-fx-border-radius:10px;-fx-background-radius:10px;-fx-cursor:hand;");
+        yesterdayBtn.setOnAction(e -> {
+            datePicker.setValue(LocalDate.now().minusDays(1));
+            refreshAttendanceList();
+        });
+
+        Button refreshBtn = new Button("↻ Refresh Live");
+        refreshBtn.setPrefHeight(42);
+        refreshBtn.setStyle("-fx-background-color:#ffffff;-fx-text-fill:" + GOLD + ";-fx-font-size:13px;-fx-font-weight:800;-fx-padding:0 16px;-fx-border-color:" + BORDER + ";-fx-border-radius:10px;-fx-background-radius:10px;-fx-cursor:hand;");
         refreshBtn.setOnAction(e -> refreshAttendanceList());
 
-        loadingIndicator.setPrefSize(20, 20);
-        loadingIndicator.setVisible(false);
+        HBox selectRow = new HBox(12, projLbl, projectDropdown, dateLbl, datePicker, todayBtn, yesterdayBtn, refreshBtn);
+        selectRow.setAlignment(Pos.CENTER_LEFT);
 
-        filterBar.getChildren().addAll(projectSelectLabel, projectDropdown, dateLabel, datePicker, refreshBtn, loadingIndicator);
+        // Project Location & Workforce progress strip
+        projectLocationBadge = new Label("📍 Select a project to view site location");
+        projectLocationBadge.setStyle("-fx-font-size:12px;-fx-font-weight:600;-fx-text-fill:#685c52;");
 
-        statusSummaryLabel.setFont(Font.font("Segoe UI", 13));
-        statusSummaryLabel.setTextFill(Color.web("#685c52"));
+        projectWorkforceProgressBadge = new Label("👥 Deployed Workforce: 0 Workers");
+        projectWorkforceProgressBadge.setStyle("-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#1565c0;-fx-background-color:#eef4ff;-fx-background-radius:6px;-fx-padding:3px 8px;");
 
-        // 3. Table Wrapper
-        HBox tableHeader = createTableHeader();
-        tableRowsContainer.setAlignment(Pos.TOP_CENTER);
+        Region stripSpacer = new Region();
+        HBox.setHgrow(stripSpacer, Priority.ALWAYS);
 
-        ScrollPane innerScroll = new ScrollPane(tableRowsContainer);
-        com.dihadi.view.ScrollUtils.style(innerScroll);
-        innerScroll.setPrefHeight(450);
-        innerScroll.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;");
+        HBox metaStrip = new HBox(12, projectLocationBadge, stripSpacer, projectWorkforceProgressBadge);
+        metaStrip.setAlignment(Pos.CENTER_LEFT);
+        metaStrip.setPadding(new Insets(6, 10, 0, 10));
 
-        VBox tableWrapper = new VBox(tableHeader, innerScroll);
-        tableWrapper.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-border-color: " + BORDER + "; -fx-border-radius: 12; -fx-effect: dropshadow(gaussian, rgba(58,48,39,0.06), 10, 0, 0, 3);");
-        VBox.setVgrow(innerScroll, Priority.ALWAYS);
-        VBox.setVgrow(tableWrapper, Priority.ALWAYS);
-
-        root.getChildren().addAll(navBar, filterBar, statusSummaryLabel, tableWrapper);
-
-        loadProjects();
-
-        root.setPrefWidth(1360);
-        StackPane centerWrapper = new StackPane(root);
-        centerWrapper.setAlignment(Pos.TOP_CENTER);
-        centerWrapper.setStyle("-fx-background-color: #f3e7ce;");
-
-        ScrollPane scrollPane = new ScrollPane(centerWrapper);
-        com.dihadi.view.ScrollUtils.style(scrollPane);
-        scrollPane.setStyle("-fx-background: #f3e7ce; -fx-background-color: #f3e7ce; -fx-border-width: 0;");
-        return new Scene(scrollPane, 1400, 850);
+        VBox card = new VBox(10, selectRow, metaStrip);
+        card.setPadding(new Insets(16, 20, 16, 20));
+        card.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.04),8,0,0,2px);");
+        return card;
     }
 
-    public Scene getScene() {
-        return getScene(() -> {});
+    // ==========================================
+    // 5. Search & Status Filter Controls
+    // ==========================================
+    private VBox createFilterControls() {
+        searchField = new TextField();
+        searchField.setPromptText("🔍 Search assigned worker by name, phone, trade, or role...");
+        searchField.setPrefHeight(40);
+        searchField.setStyle("-fx-background-color:#ffffff;-fx-background-radius:10px;-fx-border-color:" + BORDER + ";-fx-border-radius:10px;-fx-font-size:13px;-fx-padding:0 14px;");
+        HBox.setHgrow(searchField, Priority.ALWAYS);
+        searchField.textProperty().addListener((obs, oldV, newV) -> applyFilters());
+
+        statusFilter = new ComboBox<>();
+        statusFilter.getItems().addAll("All Statuses", "Present & Paid Only", "Not Marked / Pending Only", "Absent Only");
+        statusFilter.setValue("All Statuses");
+        statusFilter.setPrefHeight(40);
+        statusFilter.setPrefWidth(210);
+        statusFilter.setStyle("-fx-background-color:#ffffff;-fx-background-radius:10px;-fx-border-color:" + BORDER + ";-fx-border-radius:10px;-fx-font-size:13px;");
+        statusFilter.valueProperty().addListener((obs, oldV, newV) -> applyFilters());
+
+        tradeFilter = new ComboBox<>();
+        tradeFilter.getItems().addAll("All Trades", "Mason", "Carpenter", "Electrician", "Painter", "Plumber", "Welder", "General Labour", "Site Supervisor");
+        tradeFilter.setValue("All Trades");
+        tradeFilter.setPrefHeight(40);
+        tradeFilter.setPrefWidth(180);
+        tradeFilter.setStyle("-fx-background-color:#ffffff;-fx-background-radius:10px;-fx-border-color:" + BORDER + ";-fx-border-radius:10px;-fx-font-size:13px;");
+        tradeFilter.valueProperty().addListener((obs, oldV, newV) -> applyFilters());
+
+        Button resetBtn = new Button("Reset");
+        resetBtn.setPrefHeight(40);
+        resetBtn.setStyle("-fx-background-color:#f5f0e8;-fx-background-radius:10px;-fx-border-color:" + BORDER + ";-fx-border-radius:10px;-fx-text-fill:#4c4637;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:0 14px;-fx-cursor:hand;");
+        resetBtn.setOnAction(e -> {
+            searchField.clear();
+            statusFilter.setValue("All Statuses");
+            tradeFilter.setValue("All Trades");
+            applyFilters();
+        });
+
+        HBox filterRow = new HBox(12, searchField, statusFilter, tradeFilter, resetBtn);
+        filterRow.setAlignment(Pos.CENTER_LEFT);
+
+        recordsCountLabel = new Label("Showing 0 of 0 assigned workers");
+        recordsCountLabel.setStyle("-fx-font-size:13px;-fx-font-weight:700;-fx-text-fill:#685c52;");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label payoutGuide = new Label("💡 Marking a worker present triggers instant direct settlement to the worker's wallet.");
+        payoutGuide.setStyle("-fx-font-size:12px;-fx-text-fill:#7a7267;");
+
+        HBox countRow = new HBox(10, recordsCountLabel, spacer, payoutGuide);
+        countRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox container = new VBox(10, filterRow, countRow);
+        return container;
     }
 
-    private void updateWalletDisplay() {
-        double balance = currentRecruiter != null ? currentRecruiter.getWalletBalance() : 0.0;
-        if (walletBalanceLabel != null) {
-            walletBalanceLabel.setText(String.format("Wallet: ₹%,.2f", balance));
-        }
-    }
-
-    private HBox createTableHeader() {
-        HBox header = new HBox();
-        header.setPadding(new Insets(16, 24, 16, 24));
-        header.setStyle("-fx-background-color: #faf5eb; -fx-border-color: #ebdccb; -fx-border-width: 0 0 1 0; -fx-background-radius: 12 12 0 0;");
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        Label colWorker = createHeaderLabel("WORKER DETAILS", 260);
-        Label colRole = createHeaderLabel("ROLE / TRADE", 180);
-        Label colWage = createHeaderLabel("DAILY WAGE", 140);
-        Label colStatus = createHeaderLabel("STATUS", 160);
-        Label colAction = createHeaderLabel("WAGE PAYOUT / ACTION", 220);
-
-        header.getChildren().addAll(colWorker, colRole, colWage, colStatus, colAction);
-        return header;
-    }
-
-    private Label createHeaderLabel(String text, double width) {
-        Label label = new Label(text);
-        label.setFont(Font.font("Segoe UI", FontWeight.BOLD, 12));
-        label.setTextFill(Color.web("#735c00"));
-        label.setPrefWidth(width);
-        return label;
-    }
-
+    // ==========================================
+    // 6. Data Loading Logic
+    // ==========================================
     private void loadProjects() {
         loadingIndicator.setVisible(true);
         new Thread(() -> {
@@ -258,17 +503,10 @@ public class AttendancePage {
                     for (Project p : allProjects) {
                         if (p == null) continue;
                         String status = p.getStatus() != null ? p.getStatus().trim() : "";
-                        // Strictly exclude Completed, Cancelled, and Upcoming projects
-                        if ("Completed".equalsIgnoreCase(status) || "Cancelled".equalsIgnoreCase(status) || "Upcoming".equalsIgnoreCase(status)) {
+                        if ("Completed".equalsIgnoreCase(status) || "Cancelled".equalsIgnoreCase(status)) {
                             continue;
                         }
-                        boolean isOngoing = "Active".equalsIgnoreCase(status)
-                                || "Available".equalsIgnoreCase(status)
-                                || "Unavailable".equalsIgnoreCase(status)
-                                || "Requirement Fulfilled".equalsIgnoreCase(status);
-                        if (isOngoing) {
-                            ongoingProjects.add(p);
-                        }
+                        ongoingProjects.add(p);
                     }
                 }
 
@@ -277,8 +515,8 @@ public class AttendancePage {
                     if (!ongoingProjects.isEmpty()) {
                         projectDropdown.getItems().addAll(ongoingProjects);
                         Project preselect = null;
-                        if (com.dihadi.view.SessionManager.currentRecruiterProject != null) {
-                            String activeId = com.dihadi.view.SessionManager.currentRecruiterProject.getProjectId();
+                        if (SessionManager.currentRecruiterProject != null) {
+                            String activeId = SessionManager.currentRecruiterProject.getProjectId();
                             for (Project p : ongoingProjects) {
                                 if (activeId != null && (activeId.equals(p.getProjectId()) || activeId.equals(p.getId()))) {
                                     preselect = p;
@@ -293,21 +531,16 @@ public class AttendancePage {
                         }
                         refreshAttendanceList();
                     } else {
-                        statusSummaryLabel.setText("No active ongoing projects available for attendance (completed projects excluded).");
-                        tableRowsContainer.getChildren().clear();
-                        Label emptyLabel = new Label("No active ongoing project found. Completed projects are excluded from daily attendance.");
-                        emptyLabel.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 14));
-                        emptyLabel.setTextFill(Color.web("#685c52"));
-                        emptyLabel.setPadding(new Insets(36));
-                        tableRowsContainer.getChildren().add(emptyLabel);
+                        projectLocationBadge.setText("No active ongoing projects found.");
+                        recordsListContainer.getChildren().clear();
+                        emptyStateBox.setVisible(true);
+                        emptyStateBox.setManaged(true);
                     }
                     loadingIndicator.setVisible(false);
                 });
             } catch (Exception ex) {
-                Platform.runLater(() -> {
-                    loadingIndicator.setVisible(false);
-                    statusSummaryLabel.setText("Failed to load projects: " + ex.getMessage());
-                });
+                ex.printStackTrace();
+                Platform.runLater(() -> loadingIndicator.setVisible(false));
             }
         }).start();
     }
@@ -320,266 +553,638 @@ public class AttendancePage {
             return;
         }
 
+        // Update Project Location & Info strip
+        String siteLoc = (selectedProject.getCity() != null ? selectedProject.getCity() : "")
+                + (selectedProject.getState() != null && !selectedProject.getState().isBlank() ? ", " + selectedProject.getState() : "");
+        if (siteLoc.isBlank() && selectedProject.getAddressLine1() != null) siteLoc = selectedProject.getAddressLine1();
+        if (siteLoc.isBlank()) siteLoc = "Maharashtra Jobsite";
+        projectLocationBadge.setText("📍 Site Location: " + siteLoc);
+
         loadingIndicator.setVisible(true);
-        tableRowsContainer.getChildren().clear();
+        loadingIndicator.setManaged(true);
+        emptyStateBox.setVisible(false);
+        emptyStateBox.setManaged(false);
+        recordsListContainer.getChildren().clear();
 
         new Thread(() -> {
             try {
                 String projectId = selectedProject.getId();
                 List<Worker> assignedWorkers = workerDao.getWorkersByProjectId(projectId);
+                List<Attendance> projectAttendances = attendanceDao.getAttendanceByProject(projectId);
+                String dateStr = selectedDate.toString();
 
-                Platform.runLater(() -> {
-                    tableRowsContainer.getChildren().clear();
-                    if (assignedWorkers == null || assignedWorkers.isEmpty()) {
-                        Label emptyLabel = new Label("No workers currently assigned to project: " + selectedProject.getTitle());
-                        emptyLabel.setFont(Font.font("Segoe UI", 14));
-                        emptyLabel.setTextFill(Color.web("#685c52"));
-                        emptyLabel.setPadding(new Insets(36));
-                        tableRowsContainer.getChildren().add(emptyLabel);
-                        statusSummaryLabel.setText("0 workers assigned to project: " + selectedProject.getTitle());
-                    } else {
-                        statusSummaryLabel.setText("Assigned Workers: " + assignedWorkers.size() + " | Date: " + selectedDate);
-                        for (Worker worker : assignedWorkers) {
-                            tableRowsContainer.getChildren().add(buildWorkerRow(worker, selectedProject, selectedDate));
+                currentAttendanceMap.clear();
+                if (projectAttendances != null) {
+                    for (Attendance att : projectAttendances) {
+                        if (att != null && dateStr.equals(att.getDate())) {
+                            if (att.getAttendanceId() != null && !att.getAttendanceId().isBlank()) {
+                                currentAttendanceMap.put(att.getAttendanceId(), att);
+                            }
+                            if (att.getWorkerId() != null && !att.getWorkerId().isBlank()) {
+                                currentAttendanceMap.put(att.getWorkerId(), att);
+                            }
+                            if (att.getWorkerMobile() != null && !att.getWorkerMobile().isBlank()) {
+                                currentAttendanceMap.put(att.getWorkerMobile(), att);
+                            }
                         }
                     }
+                }
+
+                List<WorkerAttendanceItem> items = new ArrayList<>();
+                if (assignedWorkers != null) {
+                    for (Worker w : assignedWorkers) {
+                        WorkerAttendanceItem item = new WorkerAttendanceItem();
+                        item.worker = w;
+                        item.project = selectedProject;
+                        item.date = selectedDate;
+
+                        // Identify worker details
+                        item.workerName = w.getName();
+                        if (item.workerName == null || item.workerName.isBlank() || "Worker".equalsIgnoreCase(item.workerName)) {
+                            item.workerName = w.getFullName();
+                        }
+                        item.workerMobile = w.getPhone();
+                        item.workerTrade = w.getSkill();
+                        item.workerSubSkill = w.getSubSkill() != null ? w.getSubSkill() : "";
+                        item.workerCity = w.getCity() != null ? w.getCity() : "Maharashtra";
+                        item.workerPhotoUrl = w.getProfilePhotoUrl();
+                        item.daysWorked = w.getTotalDaysWorked();
+                        item.dailyWage = w.getDailyWage() > 0 ? w.getDailyWage() : 750.0;
+
+                        // Match attendance record
+                        String deterministicId = String.format("ATT_%s_%s_%s", projectId, w.getId(), dateStr);
+                        Attendance att = currentAttendanceMap.get(deterministicId);
+                        if (att == null && w.getId() != null) att = currentAttendanceMap.get(w.getId());
+                        if (att == null && w.getMobileNumber() != null) att = currentAttendanceMap.get(w.getMobileNumber());
+                        if (att == null && w.getPhone() != null) att = currentAttendanceMap.get(w.getPhone());
+
+                        item.record = att;
+                        if (att != null) {
+                            if ("PRESENT".equalsIgnoreCase(att.getStatus())) {
+                                item.isPresent = true;
+                                item.isPaid = true;
+                                item.transactionId = att.getTransactionId() != null ? att.getTransactionId() : "TXN_ESCROW";
+                            } else if ("ABSENT".equalsIgnoreCase(att.getStatus())) {
+                                item.isAbsent = true;
+                            }
+                        }
+
+                        items.add(item);
+                    }
+                }
+
+                Platform.runLater(() -> {
                     loadingIndicator.setVisible(false);
+                    loadingIndicator.setManaged(false);
+
+                    masterWorkersList.clear();
+                    masterWorkersList.addAll(items);
+
+                    projectWorkforceProgressBadge.setText("👥 Deployed Workforce: " + masterWorkersList.size() + " Workers");
+
+                    applyFilters();
                 });
             } catch (Exception ex) {
+                ex.printStackTrace();
                 Platform.runLater(() -> {
                     loadingIndicator.setVisible(false);
-                    statusSummaryLabel.setText("Error loading attendance records: " + ex.getMessage());
+                    loadingIndicator.setManaged(false);
                 });
             }
         }).start();
     }
 
-    private HBox buildWorkerRow(Worker worker, Project project, LocalDate date) {
-        HBox row = new HBox();
-        row.setPadding(new Insets(14, 24, 14, 24));
-        row.setAlignment(Pos.CENTER_LEFT);
-        row.setStyle("-fx-border-color: #f3f4f6; -fx-border-width: 0 0 1 0; -fx-background-color: #ffffff;");
+    // ==========================================
+    // 7. Filter & KPI Calculations
+    // ==========================================
+    private void applyFilters() {
+        String query = searchField != null && searchField.getText() != null ? searchField.getText().trim().toLowerCase() : "";
+        String statusSel = statusFilter != null ? statusFilter.getValue() : "All Statuses";
+        String tradeSel = tradeFilter != null ? tradeFilter.getValue() : "All Trades";
 
-        // Hover effect
-        row.setOnMouseEntered(e -> row.setStyle("-fx-border-color: #ebdccb; -fx-border-width: 0 0 1 0; -fx-background-color: #fdfaf3;"));
-        row.setOnMouseExited(e -> row.setStyle("-fx-border-color: #f3f4f6; -fx-border-width: 0 0 1 0; -fx-background-color: #ffffff;"));
+        filteredWorkersList.clear();
 
-        // 1. Worker Details - Name with robust resolution and dark bold styling
-        VBox workerDetails = new VBox(4);
-        workerDetails.setPrefWidth(260);
-
-        String displayName = worker.getFullName();
-        if (displayName == null || displayName.isBlank() || "Worker".equalsIgnoreCase(displayName.trim())) {
-            displayName = worker.getName();
-        }
-        if (displayName == null || displayName.isBlank() || "Worker".equalsIgnoreCase(displayName.trim())) {
-            String fn = worker.getFirstName() != null ? worker.getFirstName().trim() : "";
-            String mn = worker.getMiddleName() != null ? worker.getMiddleName().trim() : "";
-            String ln = worker.getLastName() != null ? worker.getLastName().trim() : "";
-            displayName = (fn + (mn.isEmpty() ? "" : " " + mn) + (ln.isEmpty() ? "" : " " + ln)).trim();
-        }
-        if (displayName.isEmpty() || "Worker".equalsIgnoreCase(displayName.trim())) {
-            displayName = "Verified Worker";
-        }
-        final String finalWorkerName = displayName;
-
-        Label nameLabel = new Label(finalWorkerName);
-        nameLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
-        nameLabel.setTextFill(Color.web("#111827"));
-        nameLabel.setStyle("-fx-font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif; -fx-font-size: 15px; -fx-font-weight: 800; -fx-text-fill: #111827;");
-
-        String phoneStr = worker.getPhone() != null && !worker.getPhone().isBlank()
-                ? worker.getPhone()
-                : (worker.getMobileNumber() != null ? worker.getMobileNumber() : "");
-        String idStr = (worker.getId() != null && !worker.getId().isBlank()) ? worker.getId() : phoneStr;
-        Label phoneLabel = new Label("Phone: " + (phoneStr.isEmpty() ? "N/A" : phoneStr) + "  |  ID: " + idStr);
-        phoneLabel.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 12));
-        phoneLabel.setTextFill(Color.web("#374151"));
-        phoneLabel.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #374151;");
-        workerDetails.getChildren().addAll(nameLabel, phoneLabel);
-
-        // 2. Role
-        Label roleLabel = new Label(worker.getSkill() != null && !worker.getSkill().isBlank() ? worker.getSkill() : "Daily Labour");
-        roleLabel.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 13));
-        roleLabel.setTextFill(Color.web("#1f2937"));
-        roleLabel.setStyle("-fx-font-family: 'Segoe UI', sans-serif; -fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #1f2937;");
-        roleLabel.setPrefWidth(180);
-
-        // 3. Daily Wage
-        double wage = worker.getDailyWage() > 0 ? worker.getDailyWage() : 600.00;
-        Label wageLabel = new Label(String.format("₹%.2f", wage));
-        wageLabel.setFont(Font.font("Georgia", FontWeight.BOLD, 15));
-        wageLabel.setTextFill(Color.web("#15803d"));
-        wageLabel.setStyle("-fx-font-family: 'Georgia', serif; -fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #15803d;");
-        wageLabel.setPrefWidth(140);
-
-        // 4. Status Indicator
-        HBox statusBadge = new HBox(6);
-        statusBadge.setAlignment(Pos.CENTER_LEFT);
-        statusBadge.setPrefWidth(160);
-
-        Circle statusDot = new Circle(4);
-        Label statusText = new Label("Checking...");
-        statusText.setFont(Font.font("Segoe UI", FontWeight.BOLD, 12));
-        statusBadge.getChildren().addAll(statusDot, statusText);
-
-        // 5. Action / Payout Button
-        Button markPresentBtn = new Button("Mark Present & Pay");
-        markPresentBtn.setStyle("-fx-background-color: #272727; -fx-text-fill: #ffd54f; -fx-font-weight: bold; " +
-                "-fx-padding: 8 16; -fx-background-radius: 6; -fx-cursor: hand;");
-        markPresentBtn.setPrefWidth(190);
-
-        // Deterministic attendance record ID: ATT_{projectId}_{workerId}_{date}
-        String attendanceRecordId = String.format("ATT_%s_%s_%s", project.getId(), worker.getId(), date.toString());
-
-        // Check existing status in background
-        new Thread(() -> {
-            try {
-                Attendance record = attendanceDao.getAttendanceRecord(attendanceRecordId);
-                Platform.runLater(() -> {
-                    if (record != null && "PRESENT".equalsIgnoreCase(record.getStatus())) {
-                        setMarkedPresentState(markPresentBtn, statusDot, statusText, record.getTransactionId());
-                    } else {
-                        setPendingState(markPresentBtn, statusDot, statusText);
-                    }
-                });
-            } catch (Exception e) {
-                Platform.runLater(() -> setPendingState(markPresentBtn, statusDot, statusText));
+        for (WorkerAttendanceItem item : masterWorkersList) {
+            // Search text match
+            if (!query.isEmpty()) {
+                boolean match = false;
+                if (item.workerName != null && item.workerName.toLowerCase().contains(query)) match = true;
+                if (item.workerMobile != null && item.workerMobile.toLowerCase().contains(query)) match = true;
+                if (item.workerTrade != null && item.workerTrade.toLowerCase().contains(query)) match = true;
+                if (item.workerSubSkill != null && item.workerSubSkill.toLowerCase().contains(query)) match = true;
+                if (!match) continue;
             }
-        }).start();
 
-        // Trigger Direct Razorpay Payment Gateway & Verification
-        markPresentBtn.setOnAction(evt -> {
-            markPresentBtn.setDisable(true);
-            markPresentBtn.setText("Initiating Gateway...");
+            // Status filter match
+            if ("Present & Paid Only".equals(statusSel) && !item.isPaid) continue;
+            if ("Not Marked / Pending Only".equals(statusSel) && (item.isPaid || item.isAbsent)) continue;
+            if ("Absent Only".equals(statusSel) && !item.isAbsent) continue;
 
-            String receiptId = "RCPT_" + System.currentTimeMillis();
-            String notes = "Attendance Wage: " + finalWorkerName + " on " + date;
-
-            // Step 1: Create Razorpay Order via Controller
-            attendanceController.createPaymentOrder(
-                wage,
-                receiptId,
-                notes,
-                orderId -> {
-                    markPresentBtn.setText("Awaiting Card Payment...");
-
-                    Stage parentStage = markPresentBtn.getScene() != null ? (Stage) markPresentBtn.getScene().getWindow() : null;
-                    String keyId = attendanceController.getRazorpayService().getKeyId();
-
-                    // Step 2: Open Razorpay interactive checkout dialog (Debit/Credit Card/UPI)
-                    com.dihadi.view.PaymentGateway.RazorpayCheckoutDialog.showPaymentWindow(
-                        parentStage,
-                        keyId,
-                        orderId,
-                        wage,
-                        finalWorkerName,
-                        (paymentId, returnedOrderId, signature) -> {
-                            // Step 3: Payment succeeded at Gateway -> Verify signature & credit worker
-                            markPresentBtn.setText("Verifying...");
-                            attendanceController.verifyAndCompleteAttendance(
-                                currentRecruiterId,
-                                worker.getId(),
-                                wage,
-                                attendanceRecordId,
-                                project.getId(),
-                                returnedOrderId,
-                                paymentId,
-                                signature,
-                                () -> {
-                                    setMarkedPresentState(markPresentBtn, statusDot, statusText, paymentId);
-                                    NotificationToast.show(markPresentBtn, "Payment Successful",
-                                            String.format("Paid ₹%.2f to %s via Razorpay", wage, finalWorkerName),
-                                            NotificationToast.ToastType.SUCCESS);
-                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                                    alert.setTitle("Payment Successful");
-                                    alert.setHeaderText("Wage Disbursed Successfully");
-                                    alert.setContentText(String.format("Payment of ₹%.2f to %s was completed successfully!\nPayee: Aditya Sangale\nTxn ID: %s", wage, finalWorkerName, paymentId));
-                                    alert.showAndWait();
-                                },
-                                verifyError -> {
-                                    markPresentBtn.setDisable(false);
-                                    markPresentBtn.setText("Mark Present & Pay");
-                                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                                    alert.setTitle("Verification Error");
-                                    alert.setHeaderText("Payment Verification Failed");
-                                    alert.setContentText("Unable to verify payment signature: " + verifyError);
-                                    alert.showAndWait();
-                                }
-                            );
-                        },
-                        cancelOrError -> {
-                            // Step 4: Card declined or user closed window
-                            markPresentBtn.setDisable(false);
-                            markPresentBtn.setText("Mark Present & Pay");
-                            Alert alert = new Alert(Alert.AlertType.WARNING);
-                            alert.setTitle("Payment Incomplete");
-                            alert.setHeaderText("Wage Not Paid");
-                            alert.setContentText("Payment was not completed: " + cancelOrError);
-                            alert.showAndWait();
-                        }
-                    );
-                },
-                orderError -> {
-                    markPresentBtn.setDisable(false);
-                    markPresentBtn.setText("Mark Present & Pay");
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Gateway Error");
-                    alert.setHeaderText("Order Creation Failed");
-                    alert.setContentText("Could not initiate Razorpay order: " + orderError);
-                    alert.showAndWait();
+            // Trade filter match
+            if (tradeSel != null && !tradeSel.equals("All Trades")) {
+                if (item.workerTrade == null || !item.workerTrade.toLowerCase().contains(tradeSel.toLowerCase())) {
+                    continue;
                 }
-            );
+            }
+
+            filteredWorkersList.add(item);
+        }
+
+        updateKpiMetrics();
+        renderWorkerCards();
+    }
+
+    private void updateKpiMetrics() {
+        int totalAssigned = masterWorkersList.size();
+        int presentCount = 0;
+        int pendingCount = 0;
+        double totalDisbursedToday = 0.0;
+
+        for (WorkerAttendanceItem item : masterWorkersList) {
+            if (item.isPaid) {
+                presentCount++;
+                totalDisbursedToday += item.dailyWage;
+            } else if (!item.isAbsent) {
+                pendingCount++;
+            }
+        }
+
+        assignedCrewKpiLabel.setText(String.valueOf(totalAssigned));
+        presentPaidKpiLabel.setText(String.valueOf(presentCount) + " / " + totalAssigned);
+        pendingPayoutsKpiLabel.setText(String.valueOf(pendingCount));
+        dailyWageOutlayKpiLabel.setText(String.format("₹ %,.2f", totalDisbursedToday));
+    }
+
+    private void renderWorkerCards() {
+        recordsCountLabel.setText("Showing " + filteredWorkersList.size() + " of " + masterWorkersList.size() + " assigned workers");
+        recordsListContainer.getChildren().clear();
+
+        if (filteredWorkersList.isEmpty()) {
+            emptyStateBox.setVisible(true);
+            emptyStateBox.setManaged(true);
+        } else {
+            emptyStateBox.setVisible(false);
+            emptyStateBox.setManaged(false);
+
+            for (WorkerAttendanceItem item : filteredWorkersList) {
+                recordsListContainer.getChildren().add(createWorkerAttendanceCard(item));
+            }
+        }
+    }
+
+    // ==========================================
+    // 8. Worker Attendance Card
+    // ==========================================
+    private Node createWorkerAttendanceCard(WorkerAttendanceItem item) {
+        // 1. Avatar & Identity Column
+        Node avatarNode = createAvatar(item.workerName, item.workerPhotoUrl);
+
+        Label nameLabel = new Label(item.workerName);
+        nameLabel.setStyle("-fx-font-family:Georgia;-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
+        nameLabel.setTextOverrun(OverrunStyle.CLIP);
+        nameLabel.setWrapText(true);
+
+        Label tradeBadge = new Label(item.workerTrade.toUpperCase());
+        tradeBadge.setStyle("-fx-font-size:11px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";-fx-background-color:#fff8e7;-fx-background-radius:8px;-fx-padding:3px 9px;-fx-border-color:#f0d890;-fx-border-radius:8px;");
+        tradeBadge.setTextOverrun(OverrunStyle.CLIP);
+
+        Label verifiedBadge = new Label("🛡️ Verified DIHADI Pro");
+        verifiedBadge.setStyle("-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:#2e7d32;-fx-background-color:#e8f5e9;-fx-background-radius:8px;-fx-padding:3px 8px;-fx-border-color:#a5d6a7;-fx-border-radius:8px;");
+        verifiedBadge.setTextOverrun(OverrunStyle.CLIP);
+
+        HBox nameRow = new HBox(8, nameLabel, tradeBadge, verifiedBadge);
+        nameRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label metaLabel = new Label("📱 " + item.workerMobile + "   •   📍 " + item.workerCity + "   •   🗓️ " + item.daysWorked + " Days Worked");
+        metaLabel.setStyle("-fx-font-size:12px;-fx-font-weight:600;-fx-text-fill:" + MUTED + ";");
+        metaLabel.setTextOverrun(OverrunStyle.CLIP);
+
+        VBox identityBox = new VBox(4, nameRow, metaLabel);
+        identityBox.setAlignment(Pos.CENTER_LEFT);
+
+        HBox leftCol = new HBox(16, avatarNode, identityBox);
+        leftCol.setAlignment(Pos.CENTER_LEFT);
+        leftCol.setPrefWidth(420);
+
+        // 2. Wage & Shift Section
+        Label wageHead = new Label("DAILY WAGE");
+        wageHead.setStyle("-fx-font-size:10px;-fx-font-weight:800;-fx-letter-spacing:0.8px;-fx-text-fill:#685c52;");
+        wageHead.setTextOverrun(OverrunStyle.CLIP);
+
+        Label wageAmount = new Label(String.format("₹ %,.2f", item.dailyWage));
+        wageAmount.setStyle("-fx-font-family:Georgia;-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:" + GREEN + ";");
+        wageAmount.setTextOverrun(OverrunStyle.CLIP);
+
+        Label shiftTag = new Label("Regular Shift (8 hrs)");
+        shiftTag.setStyle("-fx-font-size:11px;-fx-font-weight:600;-fx-text-fill:#4c4637;");
+        shiftTag.setTextOverrun(OverrunStyle.CLIP);
+
+        VBox wageCol = new VBox(2, wageHead, wageAmount, shiftTag);
+        wageCol.setAlignment(Pos.CENTER_LEFT);
+        wageCol.setPrefWidth(160);
+
+        // 3. Status Column
+        VBox statusCol = new VBox(4);
+        statusCol.setAlignment(Pos.CENTER_LEFT);
+        statusCol.setPrefWidth(220);
+
+        Label statusBadge = new Label();
+        Label subStatusLabel = new Label();
+
+        if (item.isPaid) {
+            statusBadge.setText("✓ PRESENT & PAID");
+            statusBadge.setStyle("-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:#2e7d32;-fx-background-color:#e8f5e9;-fx-background-radius:8px;-fx-padding:4px 10px;-fx-border-color:#a5d6a7;-fx-border-radius:8px;");
+            subStatusLabel.setText("Txn: " + (item.transactionId != null ? item.transactionId : "ESCROW_SETTLED"));
+            subStatusLabel.setStyle("-fx-font-family:'Consolas',monospace;-fx-font-size:11px;-fx-text-fill:#7a7267;");
+        } else if (item.isAbsent) {
+            statusBadge.setText("✕ MARKED ABSENT");
+            statusBadge.setStyle("-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:#ba1a1a;-fx-background-color:#fff1f1;-fx-background-radius:8px;-fx-padding:4px 10px;-fx-border-color:#f1bcbc;-fx-border-radius:8px;");
+            subStatusLabel.setText("No daily wage disbursed");
+            subStatusLabel.setStyle("-fx-font-size:11px;-fx-text-fill:#a51d1d;");
+        } else {
+            statusBadge.setText("⏳ NOT MARKED TODAY");
+            statusBadge.setStyle("-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:#b45309;-fx-background-color:#fef3c7;-fx-background-radius:8px;-fx-padding:4px 10px;-fx-border-color:#fde68a;-fx-border-radius:8px;");
+            subStatusLabel.setText("Awaiting shift confirmation");
+            subStatusLabel.setStyle("-fx-font-size:11px;-fx-text-fill:#685c52;");
+        }
+        statusCol.getChildren().addAll(statusBadge, subStatusLabel);
+
+        // 4. Action Buttons Column
+        HBox actionsRow = new HBox(10);
+        actionsRow.setAlignment(Pos.CENTER_RIGHT);
+        HBox.setHgrow(actionsRow, Priority.ALWAYS);
+
+        if (item.isPaid) {
+            Button voucherBtn = new Button("📄 View Voucher");
+            voucherBtn.setStyle("-fx-background-color:#272727;-fx-text-fill:#ffd54f;-fx-font-size:12px;-fx-font-weight:800;-fx-padding:8px 14px;-fx-background-radius:8px;-fx-cursor:hand;");
+            voucherBtn.setOnAction(e -> openVoucherModal(item));
+
+            Label settledTag = new Label("✓ Escrow Settled");
+            settledTag.setStyle("-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#2e7d32;");
+
+            actionsRow.getChildren().addAll(settledTag, voucherBtn);
+        } else {
+            Button markPresentBtn = new Button("⚡ Mark Present & Pay");
+            markPresentBtn.setStyle("-fx-background-color:#272727;-fx-text-fill:#ffd54f;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:9px 16px;-fx-background-radius:8px;-fx-cursor:hand;");
+            markPresentBtn.setOnMouseEntered(e -> markPresentBtn.setStyle("-fx-background-color:#3f3f3f;-fx-text-fill:#ffd54f;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:9px 16px;-fx-background-radius:8px;-fx-cursor:hand;"));
+            markPresentBtn.setOnMouseExited(e -> markPresentBtn.setStyle("-fx-background-color:#272727;-fx-text-fill:#ffd54f;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:9px 16px;-fx-background-radius:8px;-fx-cursor:hand;"));
+            markPresentBtn.setOnAction(e -> handleMarkPresentAndPay(item, markPresentBtn));
+
+            Button markAbsentBtn = new Button("Mark Absent");
+            markAbsentBtn.setStyle("-fx-background-color:#f5f0e8;-fx-border-color:#d0c5af;-fx-border-radius:8px;-fx-background-radius:8px;-fx-text-fill:#4c4637;-fx-font-size:12px;-fx-font-weight:700;-fx-padding:8px 12px;-fx-cursor:hand;");
+            markAbsentBtn.setOnAction(e -> handleMarkAbsent(item));
+
+            actionsRow.getChildren().addAll(markAbsentBtn, markPresentBtn);
+        }
+
+        HBox cardRow = new HBox(20, leftCol, wageCol, statusCol, actionsRow);
+        cardRow.setAlignment(Pos.CENTER_LEFT);
+        cardRow.setPadding(new Insets(16, 22, 16, 22));
+        cardRow.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER
+                + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.04),8,0,0,2px);");
+
+        cardRow.setOnMouseEntered(e -> cardRow.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:#d4af37;-fx-border-width:1.8px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(212,175,55,.22),12,0,0,3px);"));
+        cardRow.setOnMouseExited(e -> cardRow.setStyle("-fx-background-color:#ffffff;-fx-background-radius:14px;-fx-border-color:" + BORDER
+                + ";-fx-border-width:1.5px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(58,48,39,.04),8,0,0,2px);"));
+
+        return cardRow;
+    }
+
+    // ==========================================
+    // 9. Payment & Attendance Actions
+    // ==========================================
+    private void handleMarkPresentAndPay(WorkerAttendanceItem item, Button sourceBtn) {
+        double wage = item.dailyWage;
+
+        // Check wallet balance
+        double currentBal = currentRecruiter != null ? currentRecruiter.getWalletBalance() : 0.0;
+        if (SessionManager.currentRecruiter != null) {
+            currentBal = Math.max(currentBal, SessionManager.currentRecruiter.getWalletBalance());
+        }
+
+        if (currentBal < wage || currentBal <= 0.0) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Insufficient Escrow Balance");
+            alert.setHeaderText("Cannot Proceed With Wage Payment");
+            alert.setContentText(String.format(
+                "Unable to disburse daily wage for %s.\n\n" +
+                "• Available Wallet Balance: ₹%,.2f\n" +
+                "• Required Daily Wage: ₹%,.2f\n\n" +
+                "Please recharge your wallet using the '+ Recharge Wallet' button to proceed.",
+                item.workerName, currentBal, wage
+            ));
+            alert.showAndWait();
+            return;
+        }
+
+        sourceBtn.setDisable(true);
+        sourceBtn.setText("Initiating Gateway...");
+
+        String attendanceRecordId = String.format("ATT_%s_%s_%s", item.project.getId(), item.worker.getId(), item.date.toString());
+        String receiptId = "RCPT_" + System.currentTimeMillis();
+        String notes = "Attendance Wage: " + item.workerName + " on " + item.date;
+
+        attendanceController.createPaymentOrder(
+            wage,
+            receiptId,
+            notes,
+            orderId -> {
+                sourceBtn.setText("Awaiting Payment...");
+                Stage parentStage = sourceBtn.getScene() != null ? (Stage) sourceBtn.getScene().getWindow() : null;
+                String keyId = attendanceController.getRazorpayService().getKeyId();
+
+                RazorpayCheckoutDialog.showPaymentWindow(
+                    parentStage,
+                    keyId,
+                    orderId,
+                    wage,
+                    item.workerName,
+                    (paymentId, returnedOrderId, signature) -> {
+                        sourceBtn.setText("Verifying...");
+                        String targetWorkerId = (item.worker.getMobileNumber() != null && !item.worker.getMobileNumber().isBlank())
+                                ? item.worker.getMobileNumber()
+                                : item.worker.getId();
+
+                        attendanceController.verifyAndCompleteAttendance(
+                            currentRecruiterId,
+                            targetWorkerId,
+                            wage,
+                            attendanceRecordId,
+                            item.project.getId(),
+                            returnedOrderId,
+                            paymentId,
+                            signature,
+                            () -> {
+                                double remainingBal = Math.max(0.0, (currentRecruiter != null ? currentRecruiter.getWalletBalance() : 0.0) - wage);
+                                if (currentRecruiter != null) {
+                                    currentRecruiter.setWalletBalance(remainingBal);
+                                }
+                                if (SessionManager.currentRecruiter != null) {
+                                    SessionManager.currentRecruiter.setWalletBalance(remainingBal);
+                                }
+
+                                item.worker.setWalletBalance(item.worker.getWalletBalance() + wage);
+                                item.worker.setTotalDaysWorked(item.worker.getTotalDaysWorked() + 1);
+
+                                if (SessionManager.currentWorker != null) {
+                                    SessionManager.currentWorker.setWalletBalance(SessionManager.currentWorker.getWalletBalance() + wage);
+                                    SessionManager.currentWorker.setTotalDaysWorked(SessionManager.currentWorker.getTotalDaysWorked() + 1);
+                                }
+
+                                item.isPresent = true;
+                                item.isPaid = true;
+                                item.isAbsent = false;
+                                item.transactionId = paymentId;
+                                item.daysWorked = item.worker.getTotalDaysWorked();
+
+                                updateWalletDisplay();
+                                updateKpiMetrics();
+                                renderWorkerCards();
+
+                                NotificationToast.show(sourceBtn, "Wage Disbursed!",
+                                        String.format("Paid ₹%.2f to %s. Wallet updated.", wage, item.workerName),
+                                        NotificationToast.ToastType.SUCCESS);
+                            },
+                            verifyError -> {
+                                sourceBtn.setDisable(false);
+                                sourceBtn.setText("⚡ Mark Present & Pay");
+                                Alert alert = new Alert(Alert.AlertType.ERROR);
+                                alert.setTitle("Verification Error");
+                                alert.setHeaderText("Payment Verification Failed");
+                                alert.setContentText("Unable to verify payment signature: " + verifyError);
+                                alert.showAndWait();
+                            }
+                        );
+                    },
+                    cancelOrError -> {
+                        sourceBtn.setDisable(false);
+                        sourceBtn.setText("⚡ Mark Present & Pay");
+                        Alert alert = new Alert(Alert.AlertType.WARNING);
+                        alert.setTitle("Payment Incomplete");
+                        alert.setHeaderText("Wage Not Paid");
+                        alert.setContentText("Payment was cancelled or could not complete: " + cancelOrError);
+                        alert.showAndWait();
+                    }
+                );
+            },
+            orderError -> {
+                sourceBtn.setDisable(false);
+                sourceBtn.setText("⚡ Mark Present & Pay");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Gateway Error");
+                alert.setHeaderText("Order Creation Failed");
+                alert.setContentText("Could not initiate Razorpay order: " + orderError);
+                alert.showAndWait();
+            }
+        );
+    }
+
+    private void handleMarkAbsent(WorkerAttendanceItem item) {
+        String attendanceRecordId = String.format("ATT_%s_%s_%s", item.project.getId(), item.worker.getId(), item.date.toString());
+        String targetWorkerId = item.worker.getId();
+
+        attendanceController.recordAttendance(
+            attendanceRecordId,
+            targetWorkerId,
+            currentRecruiterId,
+            item.project.getId(),
+            item.date.toString(),
+            "ABSENT",
+            () -> Platform.runLater(() -> {
+                item.isPresent = false;
+                item.isPaid = false;
+                item.isAbsent = true;
+
+                updateKpiMetrics();
+                renderWorkerCards();
+
+                NotificationToast.show(recordsCountLabel, "Attendance Marked",
+                        item.workerName + " marked Absent for " + item.date,
+                        NotificationToast.ToastType.INFO);
+            }),
+            err -> Platform.runLater(() -> {
+                Alert a = new Alert(Alert.AlertType.ERROR, "Failed to record absent attendance: " + err);
+                a.showAndWait();
+            })
+        );
+    }
+
+    // ==========================================
+    // 10. Digital Payment Voucher Modal
+    // ==========================================
+    private void openVoucherModal(WorkerAttendanceItem item) {
+        Stage modalStage = new Stage();
+        modalStage.initModality(Modality.APPLICATION_MODAL);
+        modalStage.setTitle("Official Wage Settlement Voucher - " + item.workerName);
+
+        VBox box = new VBox(18);
+        box.setPadding(new Insets(26));
+        box.setPrefWidth(540);
+        box.setStyle("-fx-background-color:#ffffff;-fx-background-radius:16px;");
+
+        Label brand = new Label("DIHADI ESCROW DIRECT SETTLEMENT");
+        brand.setStyle("-fx-font-family:Georgia;-fx-font-size:18px;-fx-font-weight:800;-fx-text-fill:" + GOLD + ";");
+
+        Label cert = new Label("Official Daily Wage Payment Certificate");
+        cert.setStyle("-fx-font-size:12px;-fx-text-fill:#685c52;");
+
+        VBox head = new VBox(4, brand, cert);
+        head.setAlignment(Pos.CENTER);
+        head.setStyle("-fx-border-color:transparent transparent #e0d8c7 transparent;-fx-border-width:0 0 1px 0;-fx-padding:0 0 12px 0;");
+
+        GridPane table = new GridPane();
+        table.setHgap(16);
+        table.setVgap(10);
+        table.setPadding(new Insets(8, 0, 8, 0));
+
+        addVoucherField(table, 0, "Worker Name", item.workerName);
+        addVoucherField(table, 1, "Trade / Role", item.workerTrade);
+        addVoucherField(table, 2, "Worker Mobile", item.workerMobile);
+        addVoucherField(table, 3, "Project Jobsite", item.project.getTitle());
+        addVoucherField(table, 4, "Shift Date", item.date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
+        addVoucherField(table, 5, "Shift Timing", "Full-Day Regular Shift (8 Hours)");
+        addVoucherField(table, 6, "Payer / Recruiter", currentRecruiter.getFirstName() + " (" + currentRecruiter.getCompanyName() + ")");
+        addVoucherField(table, 7, "Transaction ID", item.transactionId != null ? item.transactionId : "TXN_ESCROW_SETTLED");
+        addVoucherField(table, 8, "Payment Channel", "DIHADI Escrow Direct Settlement");
+        addVoucherField(table, 9, "Status", "PAID & SETTLED IN ESCROW");
+
+        // Wage Total Bar
+        Label totalTitle = new Label("NET WAGE PAID:");
+        totalTitle.setStyle("-fx-font-family:Georgia;-fx-font-size:15px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
+
+        Label totalAmount = new Label(String.format("₹ %,.2f", item.dailyWage));
+        totalAmount.setStyle("-fx-font-family:Georgia;-fx-font-size:22px;-fx-font-weight:800;-fx-text-fill:" + GREEN + ";");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox totalRow = new HBox(totalTitle, spacer, totalAmount);
+        totalRow.setAlignment(Pos.CENTER_LEFT);
+        totalRow.setPadding(new Insets(10, 16, 10, 16));
+        totalRow.setStyle("-fx-background-color:#e8f5e9;-fx-background-radius:8px;-fx-border-color:#a5d6a7;-fx-border-radius:8px;");
+
+        // Actions
+        Button exportBtn = new Button("🖨 Print / Export Voucher");
+        exportBtn.setStyle("-fx-background-color:#272727;-fx-text-fill:#ffd54f;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:9px 16px;-fx-background-radius:8px;-fx-cursor:hand;");
+        exportBtn.setOnAction(e -> {
+            modalStage.close();
+            NotificationToast.show(recordsCountLabel, "Voucher Exported",
+                    "Payment voucher for " + item.workerName + " downloaded successfully.",
+                    NotificationToast.ToastType.SUCCESS);
         });
 
-        row.getChildren().addAll(workerDetails, roleLabel, wageLabel, statusBadge, markPresentBtn);
-        return row;
+        Button closeBtn = new Button("Close");
+        closeBtn.setStyle("-fx-background-color:#f5f0e8;-fx-border-color:#d0c5af;-fx-border-radius:8px;-fx-background-radius:8px;-fx-text-fill:#4c4637;-fx-font-size:13px;-fx-font-weight:700;-fx-padding:9px 16px;-fx-cursor:hand;");
+        closeBtn.setOnAction(e -> modalStage.close());
+
+        HBox btnRow = new HBox(12, closeBtn, exportBtn);
+        btnRow.setAlignment(Pos.CENTER_RIGHT);
+
+        box.getChildren().addAll(head, table, totalRow, btnRow);
+
+        Scene scene = new Scene(box);
+        modalStage.setScene(scene);
+        modalStage.setResizable(false);
+        modalStage.show();
     }
 
-    private void setMarkedPresentState(Button button, Circle dot, Label text, String txnId) {
-        dot.setFill(Color.web("#10b981"));
-        text.setText("PAID & PRESENT");
-        text.setTextFill(Color.web("#065f46"));
+    private void addVoucherField(GridPane grid, int row, String label, String value) {
+        Label l = new Label(label);
+        l.setStyle("-fx-font-size:12px;-fx-font-weight:700;-fx-text-fill:#685c52;");
+        l.setPrefWidth(160);
 
-        button.setDisable(true);
-        button.setText("Paid");
-        button.setStyle("-fx-background-color: #ecfdf5; -fx-text-fill: #059669; -fx-border-color: #a7f3d0; -fx-border-radius: 6; -fx-background-radius: 6; -fx-font-weight: bold;");
-        if (txnId != null) {
-            button.setTooltip(new Tooltip("Txn Ref: " + txnId));
+        Label v = new Label(value != null && !value.isBlank() ? value : "—");
+        v.setStyle("-fx-font-size:12px;-fx-font-weight:600;-fx-text-fill:#1e1b15;");
+        v.setWrapText(true);
+        GridPane.setHgrow(v, Priority.ALWAYS);
+
+        grid.add(l, 0, row);
+        grid.add(v, 1, row);
+    }
+
+    // ==========================================
+    // 11. Empty State
+    // ==========================================
+    private VBox createEmptyState() {
+        Label icon = new Label("👷");
+        icon.setStyle("-fx-font-size:42px;");
+
+        Label heading = new Label("No Workers Found For This Shift");
+        heading.setStyle("-fx-font-family:Georgia;-fx-font-size:20px;-fx-font-weight:800;-fx-text-fill:" + INK + ";");
+
+        Label desc = new Label("No assigned workers match the selected project, date, or search filters.\nMake sure workers have been assigned to this project via the Pending Approvals or Hire Skilled Workers sections.");
+        desc.setStyle("-fx-font-size:13px;-fx-font-weight:500;-fx-text-fill:" + MUTED + ";-fx-text-alignment:center;");
+        desc.setWrapText(true);
+        desc.setMaxWidth(540);
+
+        Button resetBtn = new Button("↻ Reset Filters");
+        resetBtn.setStyle("-fx-background-color:#272727;-fx-text-fill:#ffd54f;-fx-font-size:13px;-fx-font-weight:800;-fx-padding:9px 18px;-fx-background-radius:8px;-fx-cursor:hand;");
+        resetBtn.setOnAction(e -> {
+            searchField.clear();
+            statusFilter.setValue("All Statuses");
+            tradeFilter.setValue("All Trades");
+            applyFilters();
+        });
+
+        VBox box = new VBox(12, icon, heading, desc, resetBtn);
+        box.setAlignment(Pos.CENTER);
+        box.setPadding(new Insets(48, 24, 48, 24));
+        box.setStyle("-fx-background-color:#ffffff;-fx-background-radius:16px;-fx-border-color:" + BORDER + ";-fx-border-radius:16px;-fx-border-width:1.5px;");
+        return box;
+    }
+
+    // ==========================================
+    // 12. Helpers
+    // ==========================================
+    private Node createAvatar(String name, String photoUrl) {
+        if (photoUrl != null && !photoUrl.isBlank()) {
+            try {
+                ImageView iv = new ImageView(new Image(photoUrl, 48, 48, true, true));
+                Circle clip = new Circle(24, 24, 24);
+                iv.setClip(clip);
+                return iv;
+            } catch (Exception ignored) {}
         }
+
+        String initials = "W";
+        if (name != null && !name.trim().isEmpty()) {
+            String[] parts = name.trim().split("\\s+");
+            if (parts.length >= 2) {
+                initials = parts[0].substring(0, 1).toUpperCase() + parts[parts.length - 1].substring(0, 1).toUpperCase();
+            } else if (!parts[0].isEmpty()) {
+                initials = parts[0].substring(0, Math.min(2, parts[0].length())).toUpperCase();
+            }
+        }
+
+        Label initialsLabel = new Label(initials);
+        initialsLabel.setStyle("-fx-font-family:Georgia;-fx-font-size:16px;-fx-font-weight:800;-fx-text-fill:#735c00;");
+        initialsLabel.setTextOverrun(OverrunStyle.CLIP);
+
+        StackPane circle = new StackPane(initialsLabel);
+        circle.setPrefSize(48, 48);
+        circle.setMinSize(48, 48);
+        circle.setMaxSize(48, 48);
+        circle.setStyle("-fx-background-color:#fff2d1;-fx-background-radius:50%;-fx-border-color:#d4af37;-fx-border-radius:50%;-fx-border-width:1.6px;");
+        return circle;
     }
 
-    private void setPendingState(Button button, Circle dot, Label text) {
-        dot.setFill(Color.web("#f59e0b"));
-        text.setText("NOT MARKED");
-        text.setTextFill(Color.web("#92400e"));
-
-        button.setDisable(false);
-        button.setText("Mark Present & Pay");
-        button.setStyle("-fx-background-color: #272727; -fx-text-fill: #ffd54f; -fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6; -fx-cursor: hand;");
-    }
-
-    private void handleLowBalanceAlert(Button sourceButton, double requiredWage) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Insufficient Wallet Balance");
-        alert.setHeaderText("Cannot Complete Daily Wage Payment");
-        alert.setContentText(String.format("Your current wallet balance is insufficient to disburse ₹%.2f to the worker.\n\n" +
-                "Please recharge your wallet using the Razorpay payment gateway to proceed.", requiredWage));
-
-        ButtonType rechargeBtn = new ButtonType("Recharge Wallet Now");
-        ButtonType cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        alert.getButtonTypes().setAll(rechargeBtn, cancelBtn);
-
-        Optional<ButtonType> choice = alert.showAndWait();
-        if (choice.isPresent() && choice.get() == rechargeBtn) {
-            triggerRechargeFlow(sourceButton, requiredWage);
+    private ImageView image(String path, double w, double h) {
+        if (path == null || path.isBlank()) return null;
+        try {
+            if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("file:")) {
+                return new ImageView(new Image(path, w, h, false, true));
+            }
+            var res = getClass().getResource(path);
+            return res == null ? null : new ImageView(new Image(res.toExternalForm(), w, h, false, true));
+        } catch (Exception e) {
+            return null;
         }
     }
 
     private void triggerRechargeFlow(Button sourceButton, double defaultAmount) {
         TextInputDialog dialog = new TextInputDialog(String.format("%.0f", Math.max(500, defaultAmount)));
-        dialog.setTitle("Recharge Recruiter Wallet");
-        dialog.setHeaderText("Add funds to your DIHADI escrow wallet:");
+        dialog.setTitle("Recharge Recruiter Escrow Wallet");
+        dialog.setHeaderText("Add funds to your DIHADI escrow wallet for worker wage disbursals:");
         dialog.setContentText("Amount in INR (₹):");
 
         Optional<String> result = dialog.showAndWait();
@@ -635,11 +1240,9 @@ public class AttendancePage {
                                     }).start();
 
                                     updateWalletDisplay();
-                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                                    alert.setTitle("Payment Successful");
-                                    alert.setHeaderText("Payment Successful - Wallet Credited");
-                                    alert.setContentText(String.format("₹%.2f credited to your wallet!\nPayee: Aditya Sangale\nTxn ID: %s", amount, paymentId));
-                                    alert.showAndWait();
+                                    NotificationToast.show(sourceButton, "Wallet Recharged!",
+                                            String.format("₹%,.2f credited to your wallet.\nTxn ID: %s", amount, paymentId),
+                                            NotificationToast.ToastType.SUCCESS);
                                 }
 
                                 @Override

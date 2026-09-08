@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -167,7 +168,7 @@ public class AdminSignUpPage {
         }
 
         submitBtn.setDisable(true);
-        submitBtn.setText("CREATING ACCOUNT...");
+        submitBtn.setText("CREATING ACCOUNT");
 
         new Thread(() -> {
             boolean success = new com.dihadi.controller.AdminController().registerAdmin(
@@ -245,6 +246,7 @@ public class AdminSignUpPage {
 
     private static Label text(String value, String style) {
         Label label = new Label(value);
+        label.setTextOverrun(OverrunStyle.CLIP);
         label.setStyle("-fx-font-family:'Segoe UI',sans-serif;" + style);
         return label;
     }

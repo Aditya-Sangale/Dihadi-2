@@ -389,12 +389,12 @@ public class ContactUs {
                 VBox explore = footerColumn("Explore", "Home", () -> navigateTo("Home"), "Find Work",
                                 () -> navigateTo("Worker"), "About Us",
                                 () -> navigateTo("About Us"));
-                VBox contact = footerColumn("Contact", "9561789599", () -> navigateTo("Contact Us"),
+                VBox contact = footerColumn("Contact", "+91 95617 89599", () -> navigateTo("Contact Us"),
                                 "info@meridihadi.com",
                                 () -> navigateTo("Contact Us"), "Pune, Maharashtra", () -> navigateTo("Contact Us"));
                 HBox top = new HBox(64, identity, explore, contact);
                 top.setAlignment(Pos.TOP_LEFT);
-                VBox out = new VBox(22, top, label("© 2026 DIHADI. All rights reserved.",
+                VBox out = new VBox(22, top, label("© 2026 DIHADI  •  Meri Dihadi ~ Mera Haq. All rights reserved.",
                                 "-fx-font-size:12px;-fx-text-fill:#f8f0e2;-fx-opacity:.65;"));
                 out.setPadding(new Insets(32, 42, 24, 42));
                 out.setMaxWidth(1180);
